@@ -237,6 +237,7 @@ PDF extraction needs poppler outside macOS, where it uses PDFKit instead.
 | `make check` | Validate packs and records, run the test suite |
 | `make validate` | Structural check on every live pack |
 | `make records` | Validate evaluation, screen, and role-profile records |
+| `make excerpts` | Check every recorded excerpt against the source it cites: the source-to-atom hop |
 | `make test` | The regression suite on its own |
 | `make fit` | Score your evidence against every role profile |
 | `make coverage` | Timeline, gaps, undated atoms, stale skills |
