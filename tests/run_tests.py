@@ -37,12 +37,116 @@ def check(name, condition, detail=""):
 
 
 def run(script, *args, workspace=None):
+    """Run a script against a workspace. Never the live one.
+
+    CAREER_WORKSPACE is always set, to the caller's workspace or the shared
+    fixture, so no test can reach the owner's data/, outputs/ or reviews/ by
+    forgetting a parameter. Sixteen tests used to do exactly that: they read the
+    owner's pack, referenced personal evidence ids, and one wrote to the live
+    verdict log. A clean checkout's `make check` crashed as a result.
+    """
     env = dict(os.environ)
-    if workspace:
-        env["CAREER_WORKSPACE"] = str(workspace)
+    env["CAREER_WORKSPACE"] = str(workspace or fixture())
     proc = subprocess.run([sys.executable, str(SCRIPTS / script), *map(str, args)],
                           capture_output=True, text=True, env=env)
     return proc.returncode, proc.stdout, proc.stderr
+
+
+_FIXTURE = None
+PRIVATE_DIRS = ("data", "outputs", "reviews")
+
+
+def _snapshot():
+    """Every file under the owner's private directories, with size and mtime, so
+    the suite can prove afterwards that it touched none of them."""
+    seen = {}
+    for name in PRIVATE_DIRS:
+        base = ROOT / name
+        if base.is_dir():
+            for path in base.rglob("*"):
+                if path.is_file():
+                    stat = path.stat()
+                    seen[str(path)] = (stat.st_size, stat.st_mtime_ns)
+    return seen
+
+
+LIVE_BEFORE = _snapshot()
+
+
+def _run_in(root, script, *args):
+    env = dict(os.environ)
+    env["CAREER_WORKSPACE"] = str(root)
+    return subprocess.run([sys.executable, str(SCRIPTS / script), *map(str, args)],
+                          capture_output=True, text=True, env=env)
+
+
+def fixture():
+    """The workspace tests run against when they do not build their own.
+
+    Built once from the complex fictional pack: a promotion chain, withheld and
+    unresolved evidence, undated atoms, an independent source, education, a role
+    profile, two rendered drafts with an evaluation and a screen, and an empty
+    review log. Everything a script might reach for, none of it real.
+    """
+    global _FIXTURE
+    if _FIXTURE is not None:
+        return _FIXTURE
+    root = Path(tempfile.mkdtemp(prefix="career-json-fixture-"))
+    for sub in ("data/packs", "data/roles", "data/capture", "outputs", "reviews"):
+        (root / sub).mkdir(parents=True)
+    shutil.copytree(ROOT / "schemas", root / "schemas")
+    shutil.copytree(ROOT / "examples", root / "examples")
+    # manifest.py hashes the skills under the workspace, so the fixture carries
+    # them; they are public and the pin must name every one.
+    shutil.copytree(ROOT / ".claude", root / ".claude")
+    shutil.copy(COMPLEX, root / "data" / "packs" / "pack.json")
+    (root / "data" / "roles" / "head-of-detection.json").write_text(json.dumps({
+        "role_id": "head-of-detection", "title": "Head of Detection",
+        "central_requirement": "Has run detection engineering as a function.",
+        "requirements": [
+            {"weight": "essential", "text": "Runs detection engineering",
+             "evidenced_by": ["E_CX_DETECTION_PROGRAMME"]},
+            {"weight": "essential", "text": "Owns risk governance tooling",
+             "evidenced_by": ["E_CX_INTERNAL_TOOL"]},
+            {"weight": "important", "text": "Reduces fraud loss",
+             "evidenced_by": ["E_CX_FRAUD_LOSS"]}],
+        "ats_keywords": ["detection engineering", "fraud"],
+        "negative_signals": [], "length": "two A4 pages", "audience": "named_recipient"}))
+
+    head = ("# Morgan Vale\n\nLondon, United Kingdom · morgan.vale@example.invalid · "
+            "+44 20 7946 0123\n\n## Experience\n\n"
+            "### Northwind Systems | Director of Platform Security | 2022 to present\n\n")
+    drafts = {
+        "head-of-detection-draft.md": head
+            + "- Cut quarterly fraud write-offs by roughly a third with the false-positive rate "
+              "unchanged. <!-- Evidence: E_CX_FRAUD_LOSS -->\n"
+            + "- Made detection a reviewed, tested practice with 70+ detections under review. "
+              "<!-- Evidence: E_CX_DETECTION_PROGRAMME -->\n",
+        "generalist-draft.md": head
+            + "- Survived a regional outage with zero customer-visible downtime. "
+              "<!-- Evidence: E_CX_PLATFORM_MIGRATION -->\n"
+            + "- Rebuilt a nine-person on-call rotation. <!-- Evidence: E_CX_ONCALL -->\n",
+    }
+    for name, text in drafts.items():
+        (root / "outputs" / name).write_text(text)
+        _run_in(root, "render.py", root / "outputs" / name)
+
+    manifest = json.loads(_run_in(root, "manifest.py", "Head of Detection").stdout)
+    walkthrough = ROOT / "examples" / "walkthrough"
+    evaluation = json.loads((walkthrough / "head-of-platform-engineering-evaluation.json").read_text())
+    evaluation.update({"artifacts": ["outputs/head-of-detection-draft.md"],
+                       "target_role": "Head of Detection", "run": manifest})
+    (root / "outputs" / "head-of-detection-evaluation.json").write_text(json.dumps(evaluation))
+    screen = json.loads((walkthrough / "head-of-platform-engineering-screen.json").read_text())
+    screen.update({"artifact": "outputs/head-of-detection-draft.md",
+                   "target_role": "Head of Detection", "run": manifest})
+    (root / "outputs" / "head-of-detection-draft-screen.json").write_text(json.dumps(screen))
+    _FIXTURE = root
+    return root
+
+
+def fixture_pack():
+    return json.loads((fixture() / "data" / "packs" / "pack.json").read_text())
 
 
 def sandbox():
@@ -182,28 +286,28 @@ def render_twice(path):
 # --- artefact validation --------------------------------------------------
 def test_artifact_validation():
     tmp = Path(tempfile.mkdtemp()) / "a.md"
-    tmp.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+    tmp.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
     run("render.py", tmp)
     code, out, _ = run("validate_artifact.py", tmp)
     check("clean artefact passes", code == 0, out)
 
     tmp2 = Path(tempfile.mkdtemp()) / "b.md"
-    tmp2.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_SPLUNK_BOTS_REVENUE -->\n")
+    tmp2.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_REVENUE_CLAIM -->\n")
     run("render.py", tmp2)
     code, out, _ = run("validate_artifact.py", tmp2)
     check("citing an ineligible atom fails", code == 1 and "external_safe" in out)
 
     tmp3 = Path(tempfile.mkdtemp()) / "c.md"
-    tmp3.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_JPMC_SCALE -->\n\n"
+    tmp3.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n\n"
                     "**Draft status:** not publishable.\n")
     run("render.py", tmp3)
     code, out, _ = run("validate_artifact.py", tmp3)
     check("status banner in the artefact fails", code == 1 and "internal vocabulary" in out)
 
     tmp4 = Path(tempfile.mkdtemp()) / "d.md"
-    tmp4.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+    tmp4.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
     run("render.py", tmp4)
-    tmp4.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_JPMC_TURNAROUND -->\n")
+    tmp4.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_PLATFORM_MIGRATION -->\n")
     code, out, _ = run("validate_artifact.py", tmp4)
     check("markdown/html drift fails", code == 1 and "different evidence sets" in out)
 
@@ -214,7 +318,7 @@ def test_private_brief():
     and validate_artifact.py called that an error. The two contracts contradicted."""
     tmp = Path(tempfile.mkdtemp()) / "role-interview-brief.md"
     tmp.write_text("# Brief\n\nPrivate.\n\n## Do not discuss\n\n"
-                   "- Governance. <!-- Evidence: E_JPMC_AI_GOVERNANCE -->\n")
+                   "- Governance. <!-- Evidence: E_CX_INTERNAL_TOOL -->\n")
     run("render.py", tmp)
     code, out, _ = run("validate_artifact.py", "--private", tmp)
     check("private brief may cite ineligible evidence", code == 0, out)
@@ -230,10 +334,10 @@ def test_private_brief():
     real = Path(tempfile.mkdtemp()) / "role-interview-brief.md"
     real.write_text("# Brief\n\n**Private. Do not send.** This brief is not publishable.\n\n"
                     "## Do not discuss\n\n"
-                    "- `E_JPMC_AI_GOVERNANCE` is marked `external_safe: false`. "
-                    "<!-- Evidence: E_JPMC_AI_GOVERNANCE -->\n"
+                    "- `E_CX_INTERNAL_TOOL` is marked `external_safe: false`. "
+                    "<!-- Evidence: E_CX_INTERNAL_TOOL -->\n"
                     "- The revenue claim is `unresolved`. "
-                    "<!-- Evidence: E_SPLUNK_BOTS_REVENUE -->\n")
+                    "<!-- Evidence: E_CX_REVENUE_CLAIM -->\n")
     run("render.py", real)
     code, out, _ = run("validate_artifact.py", "--private", real)
     check("a brief may name the statuses it exists to warn about", code == 0, out)
@@ -246,9 +350,9 @@ def test_private_brief():
     # real brief, which is the check nobody reads.
     uncited = Path(tempfile.mkdtemp()) / "role-interview-brief.md"
     uncited.write_text("# Brief\n\n| Figure | Source |\n| --- | --- |\n"
-                       "| 67% throughput | `E_JPMC_THREAT_MODELING` |\n"
-                       "| 200+ engagements | `E_JPMC_SCALE` |\n\n"
-                       "- A cited claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+                       "| ~33% write-offs | `E_CX_FRAUD_LOSS` |\n"
+                       "| 70+ detections | `E_CX_DETECTION_PROGRAMME` |\n\n"
+                       "- A cited claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
     code, out, _ = run("quantities.py", uncited)
     check("a block citing nothing raises no magnitude warning",
           code == 0 and "does not carry" not in out, out)
@@ -259,9 +363,8 @@ def test_pack_pinning():
     import shutil
     tmp = Path(tempfile.mkdtemp())
     md = tmp / "role-draft.md"
-    md.write_text("# X\n\nLondon\n\n## Role\n\n- A claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+    md.write_text("# X\n\nLondon\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
     run("render.py", md)
-    pack = resolve_pack()
     manifest = json.loads(run("manifest.py", "Role")[1])
     (tmp / "role-evaluation.json").write_text(json.dumps({"run": manifest}))
     code, out, _ = run("validate_artifact.py", md)
@@ -295,36 +398,33 @@ def test_records():
     code, out, _ = run("validate_records.py")
     check("existing records validate", code == 0, out)
 
-    import shutil
     tmp = Path(tempfile.mkdtemp())
-    src = ROOT / "outputs" / "head-of-ai-security-draft-screen.json"
-    if src.exists():
-        rec = json.loads(src.read_text())
-        bad = dict(rec, verdict="maybe")
-        (tmp / "x-screen.json").write_text(json.dumps(bad))
-        code, out, _ = run("validate_records.py", tmp / "x-screen.json")
-        check("invalid verdict rejected", code == 1 and "not in" in out, out)
+    # Unconditional: the records are seeded into the fixture, so a missing file
+    # is a failure rather than a silently skipped assertion.
+    rec = json.loads((fixture() / "outputs" / "head-of-detection-draft-screen.json").read_text())
+    bad = dict(rec, verdict="maybe")
+    (tmp / "x-screen.json").write_text(json.dumps(bad))
+    code, out, _ = run("validate_records.py", tmp / "x-screen.json")
+    check("invalid verdict rejected", code == 1 and "not in" in out, out)
 
-        bad2 = dict(rec)
-        bad2.pop("top_changes")
-        (tmp / "y-screen.json").write_text(json.dumps(bad2))
-        code, out, _ = run("validate_records.py", tmp / "y-screen.json")
-        check("missing required field rejected", code == 1 and "top_changes" in out, out)
+    bad2 = dict(rec)
+    bad2.pop("top_changes")
+    (tmp / "y-screen.json").write_text(json.dumps(bad2))
+    code, out, _ = run("validate_records.py", tmp / "y-screen.json")
+    check("missing required field rejected", code == 1 and "top_changes" in out, out)
 
     # Construct the blocker rather than borrowing one from a live artefact. This
     # test used to take the real evaluation record and flip publishable to true,
     # which silently stopped testing anything the day that artefact was
     # regenerated without a blocker in it.
-    ev = ROOT / "outputs" / "head-of-ai-security-evaluation.json"
-    if ev.exists():
-        rec = json.loads(ev.read_text())
-        bad3 = dict(rec, publishable=True, findings=[{
-            "severity": "blocker", "category": "target_fit",
-            "message": "Synthetic blocker for the publishable check.",
-            "affected": "whole document", "remediation": "n/a"}])
-        (tmp / "z-evaluation.json").write_text(json.dumps(bad3))
-        code, out, _ = run("validate_records.py", tmp / "z-evaluation.json")
-        check("publishable with a blocker is rejected", code == 1 and "blocker" in out, out)
+    rec = json.loads((fixture() / "outputs" / "head-of-detection-evaluation.json").read_text())
+    bad3 = dict(rec, publishable=True, findings=[{
+        "severity": "blocker", "category": "target_fit",
+        "message": "Synthetic blocker for the publishable check.",
+        "affected": "whole document", "remediation": "n/a"}])
+    (tmp / "z-evaluation.json").write_text(json.dumps(bad3))
+    code, out, _ = run("validate_records.py", tmp / "z-evaluation.json")
+    check("publishable with a blocker is rejected", code == 1 and "blocker" in out, out)
 
 
 def test_corroboration_plan():
@@ -354,15 +454,13 @@ def test_corroboration_plan():
 
 def test_index_and_diff():
     code, out, _ = run("artifact_index.py", "--json")
-    check("index runs", code == 0)
-    if code == 0:
-        rows = json.loads(out)
-        check("index finds artefacts", len(rows) > 0)
-        check("index reports staleness", all("stale" in r for r in rows))
-    drafts = sorted((ROOT / "outputs").glob("*-draft.md"))
-    if len(drafts) >= 2:
-        code, out, _ = run("diff_artifact.py", drafts[0], drafts[1])
-        check("semantic diff runs", code == 0 and "outcome mix" in out)
+    check("index runs", code == 0, out)
+    rows = json.loads(out) if code == 0 else []
+    check("index finds artefacts", len(rows) == 2, str(rows))
+    check("index reports staleness", all("stale" in r for r in rows))
+    drafts = sorted((fixture() / "outputs").glob("*-draft.md"))
+    code, out, _ = run("diff_artifact.py", drafts[0], drafts[1])
+    check("semantic diff runs", code == 0 and "outcome mix" in out, out)
 
 
 def test_employment():
@@ -395,15 +493,15 @@ def test_employment():
     tmp = Path(tempfile.mkdtemp()) / "e-draft.md"
     tmp.write_text("# X\n\nLondon\n\n## Role\n\n"
                    "### Nowhere Ltd | Some Title | 1987 - 1990\n\n"
-                   "- A claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+                   "- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
     run("render.py", tmp)
     code, out, _ = run("validate_artifact.py", "--current", tmp)
     check("unsourced employer fails", code == 1 and "no employment record" in out, out)
     check("unsourced year fails", "matches no employment record" in out, out)
 
     tmp2 = Path(tempfile.mkdtemp()) / "f-draft.md"
-    tmp2.write_text("# X\n\nLondon\n\n## Role\n\nTwelve years across things.\n\n"
-                    "- A claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+    tmp2.write_text("# X\n\nLondon\n\n## Role\n\nForty years across things.\n\n"
+                    "- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
     run("render.py", tmp2)
     code, out, _ = run("validate_artifact.py", "--current", tmp2)
     check("a wrong career-span claim fails", code == 1 and "years of experience" in out, out)
@@ -837,10 +935,15 @@ def test_withheld_evidence_is_visible():
     sys.path.insert(0, str(SCRIPTS))
     import role_fit  # noqa: E402
 
-    atoms = {a["id"]: a for a in json.loads(EXAMPLE.read_text())["evidence_atoms"]}
-    withheld = "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL"
-    check("the example pack carries a withheld atom to test with",
-          withheld in atoms and not atoms[withheld].get("external_safe"))
+    # The complex fixture's withheld atom is a described, self-asserted
+    # achievement that happens to be confidential. The small example's only
+    # ineligible atom is *declined*, and using that here had this test asserting
+    # that a refusal to discuss something counts as capability.
+    atoms = {a["id"]: a for a in json.loads(COMPLEX.read_text())["evidence_atoms"]}
+    withheld = "E_CX_INTERNAL_TOOL"
+    check("the fixture carries a withheld but asserted atom to test with",
+          withheld in atoms and not atoms[withheld].get("external_safe")
+          and atoms[withheld]["evidence_status"] == "self_asserted")
 
     profile = {"role_id": "r", "title": "R", "central_requirement": "c",
                "requirements": [{"weight": "essential", "text": "needs the withheld one",
@@ -955,21 +1058,6 @@ def test_capture():
     shutil.rmtree(root, ignore_errors=True)
 
 
-def resolve_pack():
-    from pathlib import Path as P
-    packs = sorted((ROOT / "data" / "packs").glob("*.json"))
-    superseded = set()
-    for p in packs:
-        try:
-            meta = json.loads(p.read_text()).get("metadata") or {}
-        except json.JSONDecodeError:
-            continue
-        if meta.get("supersedes"):
-            superseded.add((ROOT / meta["supersedes"]).resolve())
-    live = [p for p in packs if p.resolve() not in superseded]
-    return live[0] if live else None
-
-
 def test_no_hardcoded_year():
     """A frozen current year silently drifts the career span and its artefact check."""
     for name in ("find.py", "select_evidence.py", "validate_artifact.py"):
@@ -980,9 +1068,10 @@ def test_no_hardcoded_year():
               next((l for l in body.splitlines() if re.search(r"\b20[2-9][0-9]\b", l)), ""))
     view = json.loads(run("select_evidence.py")[1])
     from datetime import date
+    earliest = min(int(r["start"][:4]) for r in fixture_pack()["employment"])
     check("career span is computed from today", view["career_span_years"] is not None)
     check("span tracks the real year",
-          view["career_span_years"] == date.today().year - 1999)
+          view["career_span_years"] == date.today().year - earliest)
 
 
 def test_view_carries_time_and_tags():
@@ -1008,7 +1097,7 @@ def test_view_carries_time_and_tags():
 def test_role_aware_selection():
     """Sending the whole pack and asking a model to curate does not survive scale."""
     full = json.loads(run("select_evidence.py")[1])
-    code, out, _ = run("select_evidence.py", "--role", "head-of-ai-security", "--limit", "5")
+    code, out, _ = run("select_evidence.py", "--role", "head-of-detection", "--limit", "5")
     check("role selection runs", code == 0, out)
     if code != 0:
         return
@@ -1081,9 +1170,9 @@ def test_resume_json_export():
     check("a current role has no endDate",
           any("endDate" not in w for w in resume["work"]))
     check("promotions collapse into their parent role",
-          len(resume["work"]) < len(json.loads(resolve_pack().read_text())["employment"]))
+          len(resume["work"]) < len(fixture_pack()["employment"]))
 
-    pack = json.loads(resolve_pack().read_text())
+    pack = fixture_pack()
     banned = {a["id"] for a in pack["evidence_atoms"]
               if not a["external_safe"] or a["evidence_status"] in ("unresolved", "declined")}
     blob = json.dumps(resume)
@@ -1097,18 +1186,20 @@ def test_resume_json_export():
     check("public export drops email", "email" not in public["basics"])
     check("public export drops phone", "phone" not in public["basics"])
 
-    code, out, _ = run("export_resume_json.py", "--role", "head-of-ai-security", "--limit", "5")
+    code, out, _ = run("export_resume_json.py", "--role", "head-of-detection", "--limit", "5")
     scoped = json.loads(out)
-    check("role export records the role", scoped["meta"]["role"] == "head-of-ai-security")
+    check("role export records the role", scoped["meta"]["role"] == "head-of-detection")
     total = sum(len(w.get("highlights", [])) for w in scoped["work"])
     check("role export shortlists highlights", total <= 5, str(total))
 
 
 def test_find():
     code, out, _ = run("find.py", "--skill", "threat modeling")
-    check("alias spelling finds the canonical skill", code == 0 and "THREAT_MODELING" in out, out)
-    code, out, _ = run("find.py", "--employer", "Splunk")
-    check("employer search works", code == 0 and "SPLUNK" in out, out)
+    check("alias spelling finds the canonical skill",
+          code == 0 and "E_CX_DETECTION_PROGRAMME" in out, out)
+    code, out, _ = run("find.py", "--employer", "Northwind Systems", "--json")
+    found = {a["id"] for a in json.loads(out)} if code == 0 else set()
+    check("employer search works", "E_CX_FRAUD_LOSS" in found, out[:200])
     code, out, _ = run("find.py", "--outcome", "business_outcome", "--json")
     check("outcome filter runs", code == 0)
     code, out, _ = run("find.py", "--since", "2024", "--json")
@@ -1123,8 +1214,10 @@ def test_find():
 
 def test_dedupe():
     code, out, _ = run("dedupe.py", "--text",
-                       "Cleared a cross-team controls backlog stalled eight months, in two weeks")
-    check("a reworded existing claim is flagged", code == 0 and "E_JPMC_TURNAROUND" in out, out)
+                       "Rebuilt the fraud scoring pipeline with velocity features and a shadow "
+                       "deployment; quarterly fraud write-offs fell by roughly a third with the "
+                       "false-positive rate unchanged")
+    check("a reworded existing claim is flagged", code == 0 and "E_CX_FRAUD_LOSS" in out, out)
     code, out, _ = run("dedupe.py", "--text", "Trained a pet hamster to play the trumpet")
     check("an unrelated claim is not flagged", code == 0 and "looks new" in out, out)
     code, out, _ = run("dedupe.py", "--json")
@@ -1268,7 +1361,7 @@ def test_quantities():
 
 
 def test_occurred():
-    pack = json.loads(resolve_pack().read_text())
+    pack = fixture_pack()
     atoms = pack["evidence_atoms"]
     check("every atom has an occurred field", all("occurred" in a for a in atoms))
     dated = [a for a in atoms if a.get("occurred")]
@@ -1429,6 +1522,18 @@ def test_docs_match_reality():
               f"doc says {match.group(1)!r}, workspace has {found} skills")
 
 
+def check_live_tree_untouched():
+    """The claim in architecture.md is that tests never touch live data. Assert it
+    rather than trust it: every file under data/, outputs/ and reviews/ must have
+    the size and mtime it had when the suite started. On a clean checkout those
+    directories are empty or absent and this passes trivially."""
+    after = _snapshot()
+    changed = sorted(set(LIVE_BEFORE) ^ set(after)) + \
+        sorted(p for p in LIVE_BEFORE if p in after and LIVE_BEFORE[p] != after[p])
+    check("the suite left the owner's data/, outputs/ and reviews/ untouched",
+          not changed, "\n".join(changed[:5]))
+
+
 def check_documented_assertion_count():
     """Last check to run: the documented total against the real one.
 
@@ -1436,7 +1541,7 @@ def check_documented_assertion_count():
     """
     arch = (ROOT / "docs" / "architecture.md").read_text()
     stated = {int(n) for n in re.findall(r"(\d+) assertions", arch)}
-    total = len(RESULTS) + 1
+    total = len(RESULTS) + 1  # this check counts itself
     check("architecture.md documents the real assertion count",
           stated == {total},
           f"doc states {sorted(stated) or 'nothing'}, suite has {total}")
@@ -1460,6 +1565,7 @@ def main():
                  test_skill_contracts, test_docs_match_reality,
                  test_walkthrough, test_fun_packs):
         test()
+    check_live_tree_untouched()
     check_documented_assertion_count()
     failed = [r for r in RESULTS if not r[1]]
     for name, ok, detail in RESULTS:
