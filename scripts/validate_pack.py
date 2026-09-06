@@ -42,6 +42,17 @@ def check(path, schema, strict=False):
     if pack.get("schema_version") != e["version"]:
         errors.append(f"schema_version is {pack.get('schema_version')!r}, expected {e['version']!r}")
 
+    # The supersedes chain is how "which pack is current" gets exactly one answer.
+    # A link to a file that does not exist, or to itself, was never checked, so a
+    # typo here silently changed which pack every script resolved.
+    supersedes = (pack.get("metadata") or {}).get("supersedes")
+    if supersedes:
+        target = (ROOT / supersedes)
+        if target.resolve() == path.resolve():
+            errors.append("metadata.supersedes points at this pack itself")
+        elif not target.exists():
+            errors.append(f"metadata.supersedes points at {supersedes}, which does not exist")
+
     source_ids = set()
     for i, rec in enumerate(pack.get("source_records", [])):
         where = f"source_records[{i}]"
@@ -69,6 +80,11 @@ def check(path, schema, strict=False):
                 errors.append(f"{where}: file sources need an integer character_count")
         if "independent" not in rec:
             warnings.append(f"{where}: no independent flag; assumed not independent")
+        elif not isinstance(rec.get("independent"), bool):
+            # external_safe is type-checked in three places and this never was, so
+            # the string "false" was truthy and could authorise externally_verified.
+            # A typo must not upgrade the strength of the record.
+            errors.append(f"{where}: independent must be boolean, got {rec.get('independent')!r}")
 
     # Employment: the facts a background check actually verifies.
     employment_ids = set()
@@ -190,7 +206,8 @@ def check(path, schema, strict=False):
 
         # Status must be earned by the sources, not asserted.
         if status == "externally_verified":
-            independent = {r["source_id"] for r in pack.get("source_records", []) if r.get("independent")}
+            independent = {r["source_id"] for r in pack.get("source_records", [])
+                           if r.get("independent") is True}
             if not {r.get("source_id") for r in atom.get("source_refs", [])} & independent:
                 errors.append(f"{where}: externally_verified requires a source_ref to an independent source record")
         occurred = atom.get("occurred")

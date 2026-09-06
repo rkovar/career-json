@@ -201,6 +201,28 @@ def test_pack_validation():
     code, out, _ = run("validate_pack.py", broken("p.json", fake_verified))
     check("externally_verified needs an independent source", code == 1 and "independent" in out)
 
+    # A string "false" was truthy, so a typo could authorise externally_verified.
+    def string_false(d):
+        d["source_records"][0]["independent"] = "false"
+        d["evidence_atoms"][0]["evidence_status"] = "externally_verified"
+    code, out, _ = run("validate_pack.py", broken("p.json", string_false))
+    check("a non-boolean independent flag is an error", code == 1 and "must be boolean" in out, out)
+    check("and a string false cannot support external verification",
+          "requires a source_ref to an independent source" in out, out)
+
+    # The supersedes chain decides which pack every script resolves.
+    for mutate, why in ((lambda d: d.setdefault("metadata", {}).update({"supersedes": "data/packs/nope.json"}),
+                         "does not exist"),
+                        (lambda d: d.setdefault("metadata", {}).update({"supersedes": "p.json"}),
+                         "itself")):
+        root = sandbox()  # the validator loads its schema from the workspace
+        data = json.loads(EXAMPLE.read_text())
+        mutate(data)
+        (root / "p.json").write_text(json.dumps(data))
+        code, out, _ = run("validate_pack.py", root / "p.json", workspace=root)
+        check(f"supersedes pointing at a pack that {why} is an error", code == 1 and why in out, out)
+        shutil.rmtree(root, ignore_errors=True)
+
 
 # --- selection view -------------------------------------------------------
 def test_selection_view():
@@ -425,6 +447,18 @@ def test_records():
     (tmp / "z-evaluation.json").write_text(json.dumps(bad3))
     code, out, _ = run("validate_records.py", tmp / "z-evaluation.json")
     check("publishable with a blocker is rejected", code == 1 and "blocker" in out, out)
+
+    # `make resume-json` writes outputs/resume.json, and discovery then failed
+    # `make records` on it as an unknown record type. Discovery now takes only
+    # recognised records; an explicit path is still judged whatever it is called.
+    workspace = Path(tempfile.mkdtemp())
+    shutil.copytree(fixture(), workspace, dirs_exist_ok=True)
+    (workspace / "outputs" / "resume.json").write_text(json.dumps({"basics": {"name": "x"}}))
+    code, out, _ = run("validate_records.py", workspace=workspace)
+    check("a resume.json export does not break record discovery", code == 0, out)
+    code, out, _ = run("validate_records.py", workspace / "outputs" / "resume.json", workspace=workspace)
+    check("an explicit unrecognised file still fails", code == 1 and "not a recognised" in out, out)
+    shutil.rmtree(workspace, ignore_errors=True)
 
 
 def test_corroboration_plan():
@@ -828,6 +862,20 @@ def test_open_questions():
               and q["score"] > plain.get(q["question"], 0)]
     check("a question about a claim that reaches artefacts is ranked higher", bool(raised))
 
+    # A declined atom is a recorded decision. The example pack's declined atom
+    # says "do not re-ask" in its own notes and used to receive three questions.
+    declined_pack = json.loads(EXAMPLE.read_text())
+    dq = open_questions.collect(declined_pack, [], cited=set())
+    check("a declined atom receives no questions at all",
+          not any(q["subject"] == "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL" for q in dq),
+          str([q["kind"] for q in dq if q["subject"] == "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL"]))
+    # An unresolved atom's recorded questions are the real ones; asking whether
+    # it can be published before they are answered is noise.
+    kinds_for_unresolved = {q["kind"] for q in qs if q["subject"] == "E_CX_REVENUE_CLAIM"}
+    check("an unresolved atom keeps its recorded questions", "recorded" in kinds_for_unresolved,
+          str(kinds_for_unresolved))
+    check("but is not asked whether it can be published", "withheld" not in kinds_for_unresolved)
+
     # The guardrail: movement that cites nothing must be visible.
     d = open_questions.delta(pack, COMPLEX)
     check("the delta reports a verdict", "verdict" in d, str(d))
@@ -1015,12 +1063,29 @@ def test_outcome_warning_altitude():
 
 
 def test_verdict_log():
-    code, _, _ = run("verdict_log.py")
-    check("verdict log runs", code == 0)
-    code, out, _ = run("verdict_log.py")
+    # A private copy: recording appends to reviews/, and the shared fixture must
+    # not accumulate state between tests.
+    workspace = Path(tempfile.mkdtemp())
+    shutil.copytree(fixture(), workspace, dirs_exist_ok=True)
+    code, out, _ = run("verdict_log.py", workspace=workspace)
+    check("verdict log runs", code == 0 and "recorded 1" in out, out)
+    code, out, _ = run("verdict_log.py", workspace=workspace)
     check("recording twice adds nothing", code == 0 and "no new verdicts" in out, out)
-    code, out, _ = run("verdict_log.py", "--trend")
+
+    # Same artefact, same day, same pack, different verdict: this is the change
+    # the trend exists to show, and it used to be deduplicated away.
+    screen_path = workspace / "outputs" / "head-of-detection-draft-screen.json"
+    screen = json.loads(screen_path.read_text())
+    screen["verdict"] = "advance" if screen["verdict"] != "advance" else "reject"
+    screen_path.write_text(json.dumps(screen))
+    code, out, _ = run("verdict_log.py", workspace=workspace)
+    check("a changed verdict on the same day is recorded", code == 0 and "recorded 1" in out, out)
+    code, out, _ = run("verdict_log.py", workspace=workspace)
+    check("an identical re-run after the change still adds nothing", "no new verdicts" in out, out)
+
+    code, out, _ = run("verdict_log.py", "--trend", workspace=workspace)
     check("trend renders", code == 0)
+    shutil.rmtree(workspace, ignore_errors=True)
 
 
 def test_capture():

@@ -133,8 +133,15 @@ def check(path):
 
 
 def main(argv):
-    targets = ([Path(a) for a in argv[1:]]
-               or sorted(ROOT.glob("outputs/*.json")) + sorted(ROOT.glob("data/roles/*.json")))
+    if argv[1:]:
+        targets = [Path(a) for a in argv[1:]]
+    else:
+        # Discovery only takes files this validator recognises. It used to take
+        # every JSON file in outputs/, so the documented `make resume-json` left
+        # a resume.json there that then failed `make records` as an unknown
+        # record type. An explicit path is still checked whatever it is called.
+        found = sorted(ROOT.glob("outputs/*.json")) + sorted(ROOT.glob("data/roles/*.json"))
+        targets = [p for p in found if kind_of(p)[0] is not None]
     if not targets:
         print("no records found")
         return 0

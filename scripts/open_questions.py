@@ -98,7 +98,10 @@ def collect(pack, profiles, cited):
     # Withheld evidence looks identical to missing evidence in every score.
     for atom in atoms.values():
         ok, why = eligible(atom)
-        if ok:
+        # declined is a recorded decision, not a gap; asking again overrides it.
+        # unresolved carries its own recorded questions, which are the real ones,
+        # and "can it be published" is premature until they are answered.
+        if ok or atom.get("evidence_status") in ("declined", "unresolved"):
             continue
         add("withheld",
             f"Can any part of \"{atom['title']}\" be said in public? It is withheld "
@@ -109,6 +112,10 @@ def collect(pack, profiles, cited):
 
     for atom in atoms.values():
         aid = atom["id"]
+        # A declined atom produces no questions at all. The fixture that says
+        # "do not re-ask" received three, which is the queue overruling the owner.
+        if atom.get("evidence_status") == "declined":
+            continue
 
         # Questions someone deliberately wrote down.
         for q in atom.get("open_questions") or []:

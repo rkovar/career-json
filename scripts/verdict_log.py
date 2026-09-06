@@ -28,7 +28,12 @@ def existing():
 
 
 def record():
-    seen = {(e["artifact"], e["screened"], e.get("pack_sha256")) for e in existing()}
+    # The verdict is part of the identity. Keyed on artefact, date and pack alone,
+    # a screen re-run the same day that changed its verdict added nothing, so the
+    # trend lost exactly the changes it exists to show. Identical re-runs still
+    # dedupe.
+    seen = {(e["artifact"], e["screened"], e.get("pack_sha256"), e.get("verdict"))
+            for e in existing()}
     added = []
     for path in sorted((ROOT / "outputs").glob("*-screen.json")):
         data = json.loads(path.read_text())
@@ -42,7 +47,7 @@ def record():
             "needs_new_evidence": len(data.get("needs_new_evidence", [])),
             "fix_in_document": len(data.get("fix_in_document", [])),
         }
-        key = (entry["artifact"], entry["screened"], entry["pack_sha256"])
+        key = (entry["artifact"], entry["screened"], entry["pack_sha256"], entry["verdict"])
         if key in seen:
             continue
         added.append(entry)
