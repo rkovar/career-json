@@ -23,10 +23,10 @@ than any instruction.
 ## Layout
 
 ```
-.claude/skills/     judgement: the seven skills
+.claude/skills/     judgement: the nine skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              220 assertions plus a skill-invariant lint
+tests/              241 assertions plus a skill-invariant lint
 data/               your material. Git ignored, never leaves the machine
   sources/            raw input
   packs/career.json   the current record
@@ -76,7 +76,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 220 assertions: real tests over the scripts, plus a lint
+`make check` runs 241 assertions: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.

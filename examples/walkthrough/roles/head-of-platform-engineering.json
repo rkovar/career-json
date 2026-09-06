@@ -1,0 +1,60 @@
+{
+  "role_id": "head-of-platform-engineering",
+  "title": "Head of Platform Engineering",
+  "employer": "Fictional Corp",
+  "seniority": "head_of",
+  "source": "Fictional job description written for this walkthrough.",
+  "extracted": "2026-09-06",
+  "central_requirement": "Ownership of a platform team: its roadmap, its budget, and its headcount.",
+  "requirements": [
+    {
+      "text": "Own the platform roadmap and budget",
+      "weight": "essential",
+      "kind": "lead",
+      "evidenced_by": []
+    },
+    {
+      "text": "Line-manage and grow a platform team",
+      "weight": "essential",
+      "kind": "lead",
+      "evidenced_by": []
+    },
+    {
+      "text": "Reduce infrastructure cost without degrading delivery",
+      "weight": "important",
+      "kind": "build",
+      "evidenced_by": [
+        "E_EXAMPLE_PLATFORM_COST"
+      ]
+    },
+    {
+      "text": "Improve operational health and on-call sustainability",
+      "weight": "important",
+      "kind": "govern",
+      "evidenced_by": [
+        "E_EXAMPLE_ONCALL_REDESIGN"
+      ]
+    },
+    {
+      "text": "Represent the engineering organisation externally",
+      "weight": "nice_to_have",
+      "kind": "communicate",
+      "evidenced_by": [
+        "E_EXAMPLE_CONFERENCE_TALK"
+      ]
+    }
+  ],
+  "ats_keywords": [
+    "platform engineering",
+    "CI/CD",
+    "cost optimisation",
+    "on-call",
+    "Terraform"
+  ],
+  "negative_signals": [
+    "no line management",
+    "individual contributor only"
+  ],
+  "length": "2 pages",
+  "audience": "named_recipient"
+}

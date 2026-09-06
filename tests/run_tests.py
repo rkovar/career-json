@@ -13,6 +13,7 @@ Behavioural evals need a model in the loop and live in tests/scenarios.md.
 
     python3 tests/run_tests.py
 """
+import hashlib
 import json
 import os
 import re
@@ -662,6 +663,76 @@ def test_skill_contracts():
             check(f"{path.parent.name} free of stale term {term!r}", flat(term) not in text)
 
 
+WALKTHROUGH = ROOT / "examples" / "walkthrough"
+
+
+def test_walkthrough():
+    """The committed end-to-end example must stay true, or it teaches a lie.
+
+    A README that links to a walkthrough is making a claim about the pipeline.
+    These assertions are what keep that claim honest when the pack, the schemas,
+    or the renderer move underneath it.
+    """
+    records = [WALKTHROUGH / "head-of-platform-engineering-evaluation.json",
+               WALKTHROUGH / "head-of-platform-engineering-screen.json",
+               WALKTHROUGH / "roles" / "head-of-platform-engineering.json"]
+    code, out, err = run("validate_records.py", *records)
+    check("walkthrough records validate", code == 0, out + err)
+
+    evaluation = json.loads(records[0].read_text())
+    pack_sha = hashlib.sha256(EXAMPLE.read_bytes()).hexdigest()
+    check("walkthrough evaluation pins the example pack",
+          evaluation["run"]["pack_sha256"] == pack_sha,
+          "regenerate the walkthrough: the example pack has changed")
+
+    resume = WALKTHROUGH / "resume.md"
+    for atom in ("E_EXAMPLE_REVENUE_CLAIM", "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL"):
+        check(f"walkthrough resume omits ineligible {atom}", atom not in resume.read_text())
+
+    workspace = sandbox()
+    shutil.copy(resume, workspace / "outputs" / "resume.md")
+    code, out, err = run("render.py", workspace / "outputs" / "resume.md", workspace=workspace)
+    check("walkthrough resume renders", code == 0, out + err)
+    code, out, err = run("validate_artifact.py", workspace / "outputs" / "resume.md",
+                         "--html", workspace / "outputs" / "resume.html", workspace=workspace)
+    check("walkthrough resume validates against the example pack", code == 0, out + err)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
+NUMBER_WORDS = {7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
+
+
+def test_docs_match_reality():
+    """Counts stated in prose drift silently, and this project cannot afford it.
+
+    architecture.md claimed seven skills when there were nine, and 220 assertions
+    when there were 232. In a workspace whose whole pitch is that unverified
+    claims are the problem, a reader who checks two numbers and finds both wrong
+    stops trusting the rest.
+    """
+    arch = (ROOT / "docs" / "architecture.md").read_text()
+    found = len(list(SKILLS.glob("*/SKILL.md")))
+    match = re.search(r"judgement: the (\w+) skills", arch)
+    check("architecture.md states a skill count", match is not None)
+    if match:
+        check("architecture.md skill count is current",
+              match.group(1) == NUMBER_WORDS.get(found),
+              f"doc says {match.group(1)!r}, workspace has {found} skills")
+
+
+def check_documented_assertion_count():
+    """Last check to run: the documented total against the real one.
+
+    It counts itself, so the number in the doc is the number the suite prints.
+    """
+    arch = (ROOT / "docs" / "architecture.md").read_text()
+    stated = {int(n) for n in re.findall(r"(\d+) assertions", arch)}
+    total = len(RESULTS) + 1
+    check("architecture.md documents the real assertion count",
+          stated == {total},
+          f"doc states {sorted(stated) or 'nothing'}, suite has {total}")
+
+
 def main():
     for test in (test_pack_validation, test_selection_view, test_renderer,
                  test_artifact_validation, test_private_brief, test_pack_pinning, test_manifest,
@@ -671,8 +742,10 @@ def main():
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
-                 test_skill_contracts):
+                 test_skill_contracts, test_docs_match_reality,
+                 test_walkthrough):
         test()
+    check_documented_assertion_count()
     failed = [r for r in RESULTS if not r[1]]
     for name, ok, detail in RESULTS:
         if not ok:

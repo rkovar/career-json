@@ -1,0 +1,40 @@
+{
+  "artifact": "examples/walkthrough/resume.md",
+  "target_role": "Head of Platform Engineering",
+  "screened": "2026-09-06",
+  "verdict": "borderline",
+  "reason": "Credible senior delivery evidence, but nothing that shows ownership of a team, a roadmap or a budget, which is the thing the role is hiring for.",
+  "better_fit_roles": [
+    "Staff Platform Engineer",
+    "Principal Engineer, Developer Platform"
+  ],
+  "passes": {
+    "screen": "advance",
+    "screen_notes": [
+      "Cost consolidation with build times held flat is a real result and reads as ownership of a system.",
+      "Four years at the prior employer show no achievements at all, which a screener will notice."
+    ],
+    "hiring_manager": "unconvinced",
+    "central_requirement_evidenced": false,
+    "interview_attacks": [
+      "Who reported to you, and what was the budget you controlled?",
+      "The CI consolidation crossed three teams. Did you own that decision or influence it?",
+      "What happened at Acme Retail Group for four years?"
+    ],
+    "background_check_risks": []
+  },
+  "fix_in_document": [
+    "Lead with the cost outcome rather than the on-call work; it is the only business outcome in the document.",
+    "State the scope of the CI consolidation explicitly: three teams, shared fleet, per-team quotas."
+  ],
+  "needs_new_evidence": [
+    "Any evidence of line management, headcount, or budget ownership.",
+    "An outcome, not an output, from the on-call redesign.",
+    "Anything usable from the four years at Acme Retail Group."
+  ],
+  "top_changes": [
+    "Capture evidence of team, budget or roadmap ownership. Without it this role is a reach whatever the document says.",
+    "Convert the on-call redesign from an output into a business outcome by recording what it saved.",
+    "Fill the Acme Retail Group gap, or expect to be asked about it."
+  ]
+}

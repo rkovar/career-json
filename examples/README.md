@@ -8,6 +8,9 @@ fictional pack showing the shape of every field and one atom in each
 `evidence_status`. Alex Rivera does not exist. Use it as a format reference, never
 as evidence.
 
+[walkthrough/](walkthrough/) is one complete run over that pack: the role
+profile, the draft it produced, the evaluation record, and the recruiter screen.
+
 Your own material lives in the ignored working directories:
 
 - `data/sources/`: raw source material.

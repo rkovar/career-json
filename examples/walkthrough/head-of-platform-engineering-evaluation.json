@@ -1,0 +1,59 @@
+{
+  "artifacts": [
+    "examples/walkthrough/resume.md"
+  ],
+  "target_role": "Head of Platform Engineering",
+  "audience": "named_recipient",
+  "publishable": true,
+  "evaluation_date": "2026-09-06",
+  "datapack": "examples/career.example.json",
+  "generated_by": "generate-resume",
+  "run": {
+    "generated": "2026-09-06",
+    "target_role": "Head of Platform Engineering",
+    "pack": "examples/career.example.json",
+    "pack_sha256": "eac8469f34d18b7a53af8303f9ba8287201525a418c31d981c4bf9b7404e1cba",
+    "schema_version": "1.3",
+    "skill_versions": {
+      "build-career-pack": "9866ff68d0ed",
+      "capture-work": "1e6d3fc247c3",
+      "evaluate-output": "d0aa717207b6",
+      "generate-resume": "6fd8009c97a3",
+      "ingest-career-materials": "8f82568fe9bc",
+      "make-interview-brief": "9b6721e45b87",
+      "make-resume": "26ae00537342",
+      "recruiter-screen": "a4fd47993c60",
+      "review-evidence": "225363b56f8f"
+    }
+  },
+  "findings": [
+    {
+      "severity": "warning",
+      "category": "coverage",
+      "message": "The Acme Retail Group role carries dates and a title but no achievements. Both atoms from that period are ineligible for external use, so the four years read as blank to a reader.",
+      "affected": "EMP_EXAMPLE_PRIOR",
+      "remediation": "Answer the open question on the checkout rewrite, or capture new evidence from that period."
+    },
+    {
+      "severity": "info",
+      "category": "outcome-mix",
+      "message": "Two of the three cited achievements are outputs rather than business outcomes. Hiring managers discount outputs.",
+      "affected": "E_EXAMPLE_ONCALL_REDESIGN, E_EXAMPLE_CONFERENCE_TALK",
+      "remediation": "Record the cost or retention effect of the on-call redesign if it can be supported."
+    },
+    {
+      "severity": "info",
+      "category": "privacy",
+      "message": "Full contact block included because the audience is a named recipient. A public version would carry name and location only.",
+      "affected": "private_profile",
+      "remediation": "None. Regenerate with the public audience if the document will be posted."
+    }
+  ],
+  "passed_checks": [
+    "every achievement traces to an evidence atom in the pack",
+    "every employer, title and date traces to an employment record",
+    "no ineligible atom appears in the document",
+    "no career-span claim beyond what the employment records support",
+    "contact block matches the publication policy for a named recipient"
+  ]
+}

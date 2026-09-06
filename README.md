@@ -37,12 +37,35 @@ Two properties make it trustworthy enough to build on:
   gaps in the timeline, and evidence that would read badly for a given role are
   all recorded rather than smoothed over.
 
+## What this is not
+
+- **Not a recruiter.** `recruiter-screen` is a model performing a cold read. It
+  catches obvious rejections cheaply. It is not calibrated against real hiring
+  outcomes, so treat a verdict as a well-argued opinion, not a prediction.
+- **Not an extraction guarantee.** Ingestion reads what the PDF gives it, and a
+  two-column layout or a scan will lose things. That is why every claim records
+  where it came from and why `make coverage` exists to show you the holes.
+- **Not a tracker, job board, or autofill.** It produces documents. Applying is
+  still yours.
+- **Not a way to make a thin record look thick.** Where evidence is missing the
+  document says less, which occasionally means telling you something you did not
+  want to hear.
+
 ## Quick start
 
+You need [Claude Code](https://claude.com/claude-code) and a Claude plan that
+covers it, Python 3.9 or later, `make`, and macOS or Linux. Runs consume tokens
+like any other Claude session; a first pack build over a long resume is the
+expensive one, and everything after it is small.
+
 ```sh
-git clone <this repo> && cd career.json
+git clone https://github.com/rkovar/career-json.git
+cd career-json
+make check                      # confirm the workspace is sound
 make hooks                      # optional: validate on commit
 ```
+
+Outside macOS, PDF sources also need poppler (`apt install poppler-utils`).
 
 Put your material in `data/sources/` — a resume, a LinkedIn export, an
 end-of-year write-up. Then, in Claude Code:
@@ -55,16 +78,35 @@ It ingests, reviews the evidence, and ends with one batch of questions plus a
 readiness statement. Then:
 
 ```
-Use make-resume for Head of AI Security
+Use make-resume for Head of Platform Engineering
 ```
 
 You get a draft, an integrity evaluation, and a recruiter's verdict on whether it
-would actually be shortlisted.
+would actually be shortlisted:
+
+```
+verdict  borderline
+
+reason                Credible senior delivery evidence, but nothing showing
+                      ownership of a team, a roadmap or a budget, which is the
+                      thing the role hires for.
+fixable by rewrite    2 of 5 weaknesses
+needs new evidence    3 of 5
+first change          Capture evidence of team, budget or roadmap ownership.
+                      Without it this role is a reach whatever the document says.
+```
+
+An unflattering first verdict is the system working. See
+[examples/walkthrough](examples/walkthrough/) for the complete fictional run:
+the pack, the draft, the evaluation record, and the full screen.
 
 ## The loop
 
 ```
-    capture-work ──────────┐
+    existing resume ───────┐
+    (first run, once)      │
+                           │
+    capture-work ──────────┤
     (seconds, any time)    │
                            ▼
     annual write-up ──▶ build-career-pack ──▶  datapack  ──▶ make-resume ──▶ draft
@@ -72,6 +114,11 @@ would actually be shortlisted.
                                                                   ▼            ▼
                                                           make-interview-brief  recruiter-screen
 ```
+
+**Start from the resume you already have.** The first run bootstraps the pack
+from whatever exists today — a resume, a LinkedIn export, an old CV in a drawer.
+It is the one step that turns a decade of unwritten work into something you can
+query, and it is a one-off: you never do it again.
 
 **Capture continuously.** `capture-work` records a one-line note in seconds and
 never touches the pack, because a note that costs a pack version is a note nobody
@@ -88,7 +135,33 @@ grows past what anyone would read.
 
 ## Skills
 
-Invoke these by name in Claude Code. The first four are what you use day to day.
+Invoke these by name in Claude Code. The first three carry the normal workflow;
+the last two run when you need them.
+
+### `build-career-pack`
+
+Where you start. The first run builds the pack from scratch out of whatever you
+already have, which for most people is a resume and nothing else. Point it at that
+and let it work backwards: it extracts the claims, records where each one came
+from, and tells you which are thin.
+
+```
+Use build-career-pack on my resume
+```
+```
+Use build-career-pack on everything in data/sources/
+```
+
+After that it is a top-up, run whenever new material arrives. It ingests and
+reviews in one pass, then asks everything at once and tells you how ready the pack
+is.
+
+```
+Use build-career-pack on my 2026 end-of-year review
+```
+```
+I've added my LinkedIn export, update the pack
+```
 
 ### `capture-work`
 
@@ -104,18 +177,6 @@ capture that I shipped the MCP delegation pattern, tag it ai-security
 ```
 ```
 What notes do I have waiting?
-```
-
-### `build-career-pack`
-
-Setup, run whenever you have new material. Ingests and reviews in one pass, then
-asks everything at once and tells you how ready the pack is.
-
-```
-Use build-career-pack on my 2026 end-of-year review
-```
-```
-I've added my LinkedIn export, update the pack
 ```
 
 ### `make-resume`
@@ -168,11 +229,15 @@ only to run one stage deliberately.
 
 ## Command line
 
-Everything is standard library Python or shell. There are no dependencies.
+Everything is standard library Python or shell. There are no Python dependencies.
+PDF extraction needs poppler outside macOS, where it uses PDFKit instead.
 
 | Command | Does |
 | --- | --- |
 | `make check` | Validate packs and records, run the test suite |
+| `make validate` | Structural check on every live pack |
+| `make records` | Validate evaluation, screen, and role-profile records |
+| `make test` | The regression suite on its own |
 | `make fit` | Score your evidence against every role profile |
 | `make coverage` | Timeline, gaps, undated atoms, stale skills |
 | `make notes` | Capture notes awaiting promotion |
@@ -180,6 +245,10 @@ Everything is standard library Python or shell. There are no dependencies.
 | `make index` | Regenerate `outputs/INDEX.md` |
 | `make verdicts` | Record screen verdicts and show the trend |
 | `make hooks` | Install the pre-commit hook |
+
+`make help` lists every target, including `render`, `artifacts`, `corroboration`,
+and `resume-json`. The pre-commit hook names `validate`, `records`, and `test` when
+it refuses a commit.
 
 ```sh
 scripts/capture.py "what you did"                      # 30-second note
@@ -227,6 +296,10 @@ says where it came from. What you get back is every JSON Resume theme for free.
 - [Extraction](docs/extraction.md) — PDFs and provenance
 - [LinkedIn](docs/linkedin.md) — why there is no connector, and what to do instead
 - [Architecture](docs/architecture.md) — what is code, what is a skill, and why
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).
 
 ## Design notes
 
