@@ -977,6 +977,15 @@ def test_open_questions():
     check("a declined atom receives no questions at all",
           not any(q["subject"] == "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL" for q in dq),
           str([q["kind"] for q in dq if q["subject"] == "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL"]))
+    # "Can it be published?" answered no is a decision, recorded as a constraint.
+    decided = json.loads(COMPLEX.read_text())
+    for a in decided["evidence_atoms"]:
+        if a["id"] == "E_CX_INTERNAL_TOOL":
+            a["constraints"] = ["Do not publish: employer-internal, decided by the subject."]
+    dq2 = open_questions.collect(decided, [], cited=set())
+    check("a recorded do-not-publish decision stops the withheld question",
+          not any(q["kind"] == "withheld" and q["subject"] == "E_CX_INTERNAL_TOOL" for q in dq2))
+
     # An unresolved atom's recorded questions are the real ones; asking whether
     # it can be published before they are answered is noise.
     kinds_for_unresolved = {q["kind"] for q in qs if q["subject"] == "E_CX_REVENUE_CLAIM"}

@@ -114,11 +114,15 @@ answering unlocks rather than by pack order, so work from the top.
 5. **Challenge an answer that does not match the evidence.** Where a repository
    names three authors, "I led it" is a claim about the artefact that the artefact
    does not support. Say so, and record what the source shows.
-6. **Close an unanswerable question rather than leaving it open.** A prize with no
+6. **Record a publication decision as a constraint.** When the answer to "can
+   any of this be said in public?" is no, write `Do not publish: <reason>` into
+   the atom's `constraints`. `open_questions.py` treats that as decided and stops
+   asking; without it the same question returns every run.
+7. **Close an unanswerable question rather than leaving it open.** A prize with no
    public record can never reach `externally_verified`. Record why, and remove it
    from `open_questions`: a question nothing can ever resolve is noise that teaches
    the subject to skim the list.
-7. **Stop whenever asked.** Everything answered is already recorded and the queue
+8. **Stop whenever asked.** Everything answered is already recorded and the queue
    lives in the pack, so a session is resumable by construction. Say so, so that
    stopping does not feel like abandoning.
 

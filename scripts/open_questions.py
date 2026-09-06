@@ -103,6 +103,10 @@ def collect(pack, profiles, cited):
         # and "can it be published" is premature until they are answered.
         if ok or atom.get("evidence_status") in ("declined", "unresolved"):
             continue
+        # A constraint beginning "Do not publish" is a recorded decision that the
+        # answer is no. Without it the queue asked the same question every run.
+        if any(c.lower().startswith("do not publish") for c in atom.get("constraints") or []):
+            continue
         add("withheld",
             f"Can any part of \"{atom['title']}\" be said in public? It is withheld "
             f"({why}), so no artefact can cite it however strong it is.",
