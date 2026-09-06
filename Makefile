@@ -1,5 +1,5 @@
 # Dependency-free: everything here is stdlib Python or shell.
-.PHONY: help check validate records test render artifacts quantities corroboration questions index pack-html excerpts hooks clean
+.PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts hooks clean
 
 help:
 	@echo "make check     - validate packs and run the test suite"
@@ -10,6 +10,8 @@ help:
 	@echo "make records   - validate evaluation and screen records"
 	@echo "make excerpts  - check every recorded excerpt against the source it cites"
 	@echo "make quantities - magnitudes a draft claims that its evidence does not carry"
+	@echo "make entailment - a cold model judges whether each bullet says more than its evidence (spends tokens)"
+	@echo "make evals     - behavioural scenarios: run a skill for real and assert on what it did (spends tokens)"
 	@echo "make corroboration - ranked list of evidence worth corroborating"
 	@echo "make index     - regenerate outputs/INDEX.md"
 	@echo "make fit       - score the pack against every role profile"
@@ -89,6 +91,15 @@ quantities:
 	@for f in $(ARTEFACTS); do \
 		python3 scripts/quantities.py "$$f" || true; \
 	done
+
+# Both spend tokens through the Claude Code CLI and are never part of `make check`.
+entailment:
+	@for f in $(ARTEFACTS); do \
+		python3 scripts/entailment.py "$$f" || true; \
+	done
+
+evals:
+	@python3 tests/run_scenarios.py
 
 artifacts:
 	@for f in $(ARTEFACTS); do \

@@ -4,8 +4,14 @@
 claims that need one, so they are run by invoking the skill and checking the
 result against the expectation. Run them after any material skill edit.
 
-Record outcomes in this file, with the date and the skill hashes from
-`python3 scripts/manifest.py`.
+`python3 tests/run_scenarios.py` (or `make evals`) runs the scenarios marked
+with a runner below through the Claude Code CLI against a throwaway fixture
+workspace and asserts on the result with the deterministic scripts. It spends
+tokens and is never part of `make check`. Paste its summary line into the log at
+the end of this file, with the skill hashes from `python3 scripts/manifest.py`.
+Scenarios without a runner are still checked by hand.
+
+Runner coverage: #1, #2, #13, #17.
 
 ## make-resume
 
@@ -55,3 +61,8 @@ Record outcomes in this file, with the date and the skill hashes from
 | --- | --- | --- |
 | 15 | Any generated artefact | `scripts/validate_artifact.py` passes. |
 | 16 | Any evaluation record | Carries a `run` block pinning the pack hash. |
+
+## Run log
+
+| Date | Result |
+| --- | --- |

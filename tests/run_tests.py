@@ -1499,6 +1499,49 @@ def test_selection_contract():
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
 
 
+def test_entailment_plumbing():
+    """The judge is a model and the suite never spends tokens, so the CLI is
+    replaced by tests/fixtures/fake_judge.py and only the plumbing is tested:
+    prompt content, verdict parsing, employment context, reporting."""
+    import entailment
+    pack = json.loads(COMPLEX.read_text())
+    atoms = {a["id"]: a for a in pack["evidence_atoms"]}
+    text = entailment.prompt([atoms["E_CX_FRAUD_LOSS"]], "Halved fraud losses.", pack)
+    check("the judge sees the atom's STAR and metrics", "Result:" in text and "Metrics:" in text, text[:300])
+    check("and the employment context a bullet may draw on", "EMPLOYMENT CONTEXT" in text and "Career span" in text)
+    check("but nothing else from the pack", "E_CX_INTERNAL_TOOL" not in text and "external_safe" not in text)
+    old = os.environ.get("CLAUDE_CMD")
+    os.environ["CLAUDE_CMD"] = f"{sys.executable} {ROOT / 'tests' / 'fixtures' / 'fake_judge.py'}"
+    try:
+        md = ("# X\n\n## R\n\n- Halved fraud losses. <!-- Evidence: E_CX_FRAUD_LOSS -->\n"
+              "- Grew revenue by a lot. <!-- Evidence: E_CX_FRAUD_LOSS -->\n"
+              "- Cut fraud write-offs by roughly a third. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+        rows = entailment.check(md, pack)
+        verdicts = [r["verdict"] for r in rows]
+        check("each cited block gets a verdict", verdicts == ["overstated", "unsupported", "supported"], str(verdicts))
+        check("the overreaching clause is carried", rows[0].get("overreach") == "halved", str(rows[0]))
+        root = sandbox()
+        (root / "data" / "packs" / "pack.json").write_text(COMPLEX.read_text())
+        draft = root / "outputs" / "d.md"
+        draft.write_text(md)
+        env_cmd = os.environ["CLAUDE_CMD"]
+        code, out, err = run("entailment.py", draft, workspace=root)
+        check("reporting mode never fails the run", code == 0 and "FLAG" in out, out + err[:200])
+        code, _, _ = run("entailment.py", draft, "--strict", workspace=root)
+        check("--strict fails on an overstated bullet", code == 1)
+        shutil.rmtree(root, ignore_errors=True)
+    finally:
+        if old is None:
+            del os.environ["CLAUDE_CMD"]
+        else:
+            os.environ["CLAUDE_CMD"] = old
+    # The scenario runner is importable and its scenarios well-formed; running
+    # them costs tokens and is make evals.
+    import run_scenarios
+    check("every scenario names a skill, a request and at least one check",
+          all(s.get("skill") and s.get("request") and s.get("checks") for s in run_scenarios.SCENARIOS.values()))
+
+
 def test_answer_records_verbatim():
     """An answer is written where the atom can cite it, at the moment it is given,
     in the subject's words, and verify_excerpts can then find it there."""
@@ -2220,7 +2263,7 @@ def main():
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_selection_contract, test_verify_excerpts,
-                 test_review_findings_2026_09_06, test_answer_records_verbatim,
+                 test_review_findings_2026_09_06, test_answer_records_verbatim, test_entailment_plumbing,
                  test_screen_context_is_reported,
                  test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,
