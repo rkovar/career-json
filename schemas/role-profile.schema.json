@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "role-profile.schema.json",
+  "title": "Role Profile",
+  "description": "Structured requirements for a target role. Makes selection and screening comparable across roles instead of re-derived from prose each time.",
+  "type": "object",
+  "required": ["role_id", "title", "requirements", "central_requirement"],
+  "properties": {
+    "role_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "employer": { "type": ["string", "null"] },
+    "seniority": { "type": ["string", "null"], "enum": ["ic", "staff_plus", "manager", "head_of", "director", "executive", null] },
+    "source": { "type": ["string", "null"], "description": "Path to the job description, if one was supplied." },
+    "extracted": { "type": ["string", "null"] },
+    "central_requirement": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The one thing this role is actually hiring for. If the pack cannot evidence it, that is a rejection, not a warning."
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["text", "weight"],
+        "properties": {
+          "text": { "type": "string", "minLength": 1 },
+          "weight": { "type": "string", "enum": ["essential", "important", "nice_to_have"] },
+          "kind": { "type": "string", "enum": ["build", "lead", "domain", "communicate", "govern", "other"] },
+          "evidenced_by": { "type": "array", "items": { "type": "string" }, "description": "Evidence IDs that answer this requirement. Empty is a finding." }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ats_keywords": { "type": "array", "items": { "type": "string" } },
+    "negative_signals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Evidence that reads badly for this role even though it is impressive. Pairs with role_fit_notes on atoms."
+    },
+    "length": { "type": ["string", "null"] },
+    "audience": { "type": "string", "enum": ["named_recipient", "public"] }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,358 @@
+{
+  "$schema": "../schemas/career.schema.json",
+  "schema_version": "1.3",
+  "name": "Example datapack (fictional)",
+  "purpose": "A small, entirely fictional pack showing the shape of every field and one atom in each evidence_status. Nothing here describes a real person. Use it as a format reference; never as evidence.",
+  "source_records": [
+    {
+      "source_id": "SRC_EXAMPLE_RESUME",
+      "source_type": "pdf",
+      "path": "data/sources/example_resume.pdf",
+      "sha256": "7e261f3a39f689e8e8fc7372849d305f759113bf7ea6ddc358fb5206c73dcf92",
+      "character_count": 8400,
+      "byte_size": 142000,
+      "extraction_method": "macOS PDFKit text extraction",
+      "independent": false,
+      "notes": "Written by the subject. Never independent, however many claims it repeats."
+    },
+    {
+      "source_id": "SRC_EXAMPLE_CONFERENCE_PAGE",
+      "source_type": "url",
+      "path": "https://example.org/conference/2026/programme",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Third-party page naming the subject as a speaker. Independent, so atoms citing it may reach externally_verified."
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "id": "E_EXAMPLE_PLATFORM_COST",
+      "title": "Cut build-pipeline cost by consolidating duplicate runners",
+      "star": {
+        "situation": "Three teams ran overlapping CI fleets with no shared capacity.",
+        "task": "Reduce spend without slowing any team's build times.",
+        "action": "Measured utilisation, consolidated the fleets onto shared autoscaling runners, and set per-team quotas.",
+        "result": "Monthly CI spend fell by roughly a third; median build time was unchanged."
+      },
+      "metrics": [
+        "~33% CI spend reduction",
+        "median build time unchanged"
+      ],
+      "skills": [
+        "platform engineering",
+        "cost optimisation",
+        "capacity planning"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_EXAMPLE_RESUME",
+          "locator": "page 1, current role"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [
+        {
+          "kind": "former_manager",
+          "reference": "Director of Platform Engineering at the time",
+          "reachable": true,
+          "notes": "Approved the consolidation and saw the invoices."
+        }
+      ],
+      "role_fit_notes": null,
+      "employment_id": "EMP_EXAMPLE_CURRENT",
+      "occurred": {
+        "start": "2023-04",
+        "end": "2023-09",
+        "inferred": false
+      },
+      "capture": {
+        "method": "annual_review",
+        "captured": "2026-01-15",
+        "review_period": "FY2025",
+        "note_id": null
+      },
+      "tags": [
+        "cost-reduction"
+      ]
+    },
+    {
+      "id": "E_EXAMPLE_ONCALL_REDESIGN",
+      "title": "Redesigned the on-call rotation",
+      "star": {
+        "situation": "A six-person rotation was absorbing most of one engineer's week.",
+        "task": "Reduce interrupt load without reducing coverage.",
+        "action": "Triaged a quarter of alerts, deleted or merged the noisiest, and introduced a follow-the-sun handover.",
+        "result": "Paging volume dropped substantially; the team reported the rotation as sustainable."
+      },
+      "metrics": [
+        "paging volume reduced",
+        "coverage unchanged"
+      ],
+      "skills": [
+        "operations",
+        "incident management",
+        "team process"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_EXAMPLE_RESUME",
+          "locator": "page 2"
+        }
+      ],
+      "evidence_status": "corroborated",
+      "external_safe": true,
+      "outcome_type": "output",
+      "corroborators": [
+        {
+          "kind": "peer",
+          "reference": "Two engineers who shared the rotation",
+          "reachable": true,
+          "notes": "Corroborated in conversation. No document captured, so this cannot be externally_verified yet."
+        }
+      ],
+      "role_fit_notes": null,
+      "employment_id": "EMP_EXAMPLE_CURRENT",
+      "occurred": {
+        "start": "2024-01",
+        "end": "2024-06",
+        "inferred": false
+      },
+      "capture": {
+        "method": "annual_review",
+        "captured": "2026-01-15",
+        "review_period": "FY2025",
+        "note_id": null
+      },
+      "tags": [
+        "team-health"
+      ]
+    },
+    {
+      "id": "E_EXAMPLE_CONFERENCE_TALK",
+      "title": "Spoke on build reproducibility at a public conference",
+      "star": {
+        "situation": "The reproducibility work had no public write-up.",
+        "task": "Present the approach to practitioners outside the company.",
+        "action": "Submitted and delivered a conference talk on the toolchain and its limits.",
+        "result": "Talk accepted and delivered; listed on the public programme."
+      },
+      "metrics": [],
+      "skills": [
+        "public speaking",
+        "build systems"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_EXAMPLE_CONFERENCE_PAGE",
+          "locator": "2026 programme, session listing"
+        },
+        {
+          "source_id": "SRC_EXAMPLE_RESUME",
+          "locator": "page 2, speaking"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "output",
+      "corroborators": [
+        {
+          "kind": "public_artefact",
+          "reference": "Conference programme page",
+          "reachable": true,
+          "notes": "Independent source recorded, so this atom earns externally_verified."
+        }
+      ],
+      "role_fit_notes": "Speaking evidence supports advocacy and staff-plus roles. It adds little to a delivery-focused role and competes for space with shipping evidence.",
+      "employment_id": "EMP_EXAMPLE_CURRENT",
+      "occurred": {
+        "start": "2026-05",
+        "end": "2026-05",
+        "inferred": false
+      },
+      "capture": {
+        "method": "annual_review",
+        "captured": "2026-01-15",
+        "review_period": "FY2025",
+        "note_id": null
+      },
+      "tags": [
+        "external-profile"
+      ]
+    },
+    {
+      "id": "E_EXAMPLE_REVENUE_CLAIM",
+      "title": "Claimed revenue impact of the checkout rewrite (unresolved)",
+      "star": {
+        "situation": "The checkout rewrite shipped in the same quarter as a pricing change.",
+        "task": "Establish whether the rewrite can be credited with the revenue movement, and on what basis.",
+        "action": "Claim recorded from the subject's own resume; no analysis obtained.",
+        "result": null
+      },
+      "metrics": [
+        "reported revenue uplift"
+      ],
+      "skills": [
+        "checkout",
+        "performance"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_EXAMPLE_RESUME",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": null,
+      "corroborators": [],
+      "open_questions": [
+        "What separates the rewrite's effect from the pricing change shipped the same quarter?",
+        "Who produced the revenue figure, and from which system?",
+        "Is the claim uplift, retained revenue, or total checkout revenue?"
+      ],
+      "notes": "Held so the value is preserved rather than discarded. external_safe is false, so it reaches no artefact until answered.",
+      "employment_id": "EMP_EXAMPLE_PRIOR",
+      "occurred": {
+        "start": "2021-03",
+        "end": "2021-06",
+        "inferred": false
+      },
+      "capture": {
+        "method": "annual_review",
+        "captured": "2026-01-15",
+        "review_period": "FY2025",
+        "note_id": null
+      },
+      "tags": []
+    },
+    {
+      "id": "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL",
+      "title": "Internal incident detail from a prior employer (declined)",
+      "star": {
+        "situation": "The subject led response to an unpublicised internal incident.",
+        "task": "Decide whether any of it can be used externally.",
+        "action": "Subject declined to describe it, citing a confidentiality obligation.",
+        "result": null
+      },
+      "metrics": [],
+      "skills": [
+        "incident response"
+      ],
+      "source_refs": [],
+      "evidence_status": "declined",
+      "external_safe": false,
+      "outcome_type": null,
+      "corroborators": [],
+      "notes": "Declined is a recorded decision, not a gap to revisit. Do not re-ask.",
+      "employment_id": "EMP_EXAMPLE_PRIOR",
+      "occurred": {
+        "start": "2020-01",
+        "end": "2020-02",
+        "inferred": false
+      },
+      "capture": {
+        "method": "annual_review",
+        "captured": "2026-01-15",
+        "review_period": "FY2025",
+        "note_id": null
+      },
+      "tags": []
+    }
+  ],
+  "private_profile": {
+    "name": "Alex Rivera",
+    "location": "Manchester, United Kingdom",
+    "email": "alex.rivera@example.com",
+    "phone": "+44 20 7946 0000",
+    "linkedin": "https://www.linkedin.com/in/example-alex-rivera",
+    "personal_website": null,
+    "address": null,
+    "photo_reference": null,
+    "source_refs": [
+      {
+        "source_id": "SRC_EXAMPLE_RESUME",
+        "locator": "page 1, header"
+      }
+    ],
+    "publication_policy": "Private by default. Full block on a document sent to a named recipient; name and location only on anything public."
+  },
+  "skills": {
+    "domain": [
+      "platform engineering",
+      "build systems",
+      "incident management"
+    ],
+    "leadership": [
+      "team process",
+      "mentoring"
+    ],
+    "technical": [
+      "Python",
+      "Go",
+      "CI/CD",
+      "Terraform"
+    ]
+  },
+  "metadata": {
+    "created": "2026-09-06",
+    "status": "example_only",
+    "warning": "Entirely fictional. Alex Rivera does not exist. Never cite these atoms in a real artefact."
+  },
+  "employment": [
+    {
+      "employment_id": "EMP_EXAMPLE_CURRENT",
+      "employer": "Northwind Systems",
+      "employer_of_record": null,
+      "title": "Staff Platform Engineer",
+      "start": "2022-03",
+      "end": "present",
+      "location": "Manchester, UK",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_EXAMPLE_RESUME",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_EXAMPLE_PRIOR",
+      "employer": "Acme Retail Group",
+      "employer_of_record": "Contoso Contracting Ltd",
+      "title": "Senior Software Engineer",
+      "start": "2018-06",
+      "end": "2022-02",
+      "location": "Leeds, UK",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_EXAMPLE_RESUME",
+          "locator": "page 2"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "corroborators": [],
+      "notes": "Worked on Acme's platform while employed by a contractor. A background check compares against the employer_of_record, not the client."
+    }
+  ],
+  "skill_vocabulary": {
+    "platform engineering": [
+      "platform",
+      "infrastructure engineering"
+    ],
+    "incident management": [
+      "on-call",
+      "operations"
+    ],
+    "build systems": [
+      "CI/CD",
+      "continuous integration"
+    ]
+  }
+}

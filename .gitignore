@@ -1,0 +1,24 @@
+# macOS noise. Directory metadata leaks private filenames, so ignore it everywhere.
+.DS_Store
+
+# Personal source material and generated career artefacts stay local by default.
+data/sources/*
+!data/sources/.gitkeep
+data/packs/*
+!data/packs/.gitkeep
+data/private/*
+!data/private/.gitkeep
+reviews/*
+!reviews/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# Job descriptions and derived role profiles are employer material; keep them local.
+data/roles/*
+!data/roles/.gitkeep
+
+# Capture notes are raw personal material.
+data/capture/*
+!data/capture/.gitkeep
+
+data/capture/.seq
