@@ -18,6 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, sha256, this_year, ROOT  # noqa: E402
 import quantities  # noqa: E402
+from quantities import CITATION  # noqa: E402
 
 EVIDENCE_ID = re.compile(r"E_[A-Z0-9_]+")
 # Internal vocabulary that must never reach a reader.
@@ -154,14 +155,27 @@ def check(md_path, html_path, pack, private=False, strict=False):
     # Employment: dates, titles, and employers are what a background check tests,
     # and they carry no evidence ID, so nothing else here can see them.
     if not private:
-        records = pack.get("employment", [])
-        employers = {r["employer"] for r in records}
-        titles = {r["title"] for r in records}
-        years = set()
-        for rec in records:
-            for value in (rec.get("start"), rec.get("end")):
-                if value and value != "present":
-                    years.add(value[:4])
+        all_records = pack.get("employment", [])
+        # Withheld employment is as ineligible as a withheld atom, and it used to
+        # feed the employer, title and year sets like any other record.
+        records = [r for r in all_records if r.get("external_safe")
+                   and r.get("evidence_status") not in ("unresolved", "declined")]
+        withheld_employers = {r["employer"] for r in all_records} - {r["employer"] for r in records}
+
+        def chain_of(rec):
+            """A record plus the promotion chain it belongs to. Generation collapses
+            a progression into its parent's heading, so the parent's title may
+            legitimately carry the whole chain's years."""
+            head = rec.get("parent_employment_id") or rec["employment_id"]
+            return [r for r in records
+                    if r["employment_id"] == head or r.get("parent_employment_id") == head]
+
+        def year_span(recs):
+            starts = [int(r["start"][:4]) for r in recs]
+            ends = [this_year() if r.get("end") == "present" else int((r.get("end") or r["start"])[:4])
+                    for r in recs]
+            return min(starts), max(ends)
+
         # A role heading with no bullets under it. Only a finding when the pack
         # HELD eligible evidence for that role and the document did not use it:
         # a heading with nothing under it is a normal convention for early career,
@@ -189,21 +203,60 @@ def check(md_path, html_path, pack, private=False, strict=False):
                         f"role heading {parts[0]!r} has no claims under it, but the pack holds "
                         f"eligible evidence for it: {', '.join(sorted(unused))}")
 
-        # Role headings are written as "### Employer | Title | Dates".
+        # Role headings are written as "### Employer | Title | Dates". The three
+        # parts are validated as one combination against one record, not as three
+        # independent sets: with separate sets, one employer joined to another
+        # employer's title and dates passed with no warning at all.
+        global_span = year_span(records) if records else None
         for heading in re.findall(r"^###\s+(.+)$", md, re.M):
             parts = [p.strip() for p in heading.split("|")]
             if len(parts) < 3:
                 continue
             employer, title, dates = parts[0], parts[1], parts[2]
-            if employer not in employers:
-                errors.append(f"employer {employer!r} appears in a role heading but in no employment record")
-            if title not in titles:
-                warnings.append(f"title {title!r} does not match any employment record verbatim")
-            for year in re.findall(r"(19|20)\d{2}", dates):
-                pass
+            same_employer = [r for r in records if r["employer"] == employer]
+            if not same_employer:
+                if employer in withheld_employers:
+                    errors.append(f"employer {employer!r} is withheld (external_safe false, "
+                                  f"unresolved or declined) and may not appear in a role heading")
+                else:
+                    errors.append(f"employer {employer!r} appears in a role heading but in no employment record")
+                # Still say whether the dates are possible at all, against the
+                # whole record: an unknown employer with impossible years is two
+                # facts, and the second is worth having.
+                if global_span:
+                    for year in re.findall(r"(?:19|20)\d{2}", dates):
+                        if not global_span[0] <= int(year) <= global_span[1]:
+                            errors.append(f"year {year} in {employer!r} dates matches no employment record")
+                continue
+            matched = [r for r in same_employer if r["title"] == title]
+            if not matched:
+                errors.append(f"title {title!r} does not match any employment record verbatim "
+                              f"for {employer!r}; it belongs to no record of that employer")
+                continue
+            low, high = year_span([r for rec in matched for r in chain_of(rec)])
             for year in re.findall(r"(?:19|20)\d{2}", dates):
-                if year not in years:
-                    errors.append(f"year {year} in {employer!r} dates matches no employment record")
+                if not low <= int(year) <= high:
+                    errors.append(f"year {year} in {employer!r} dates matches no employment record "
+                                  f"for that role ({low} to {high})")
+
+        # Every bullet must cite. The document-wide check that some evidence id
+        # exists let an invented bullet ride on a neighbour's citation.
+        current = []
+        def flush():
+            if current and not CITATION.search(" ".join(current)):
+                errors.append(f"bullet cites no evidence: {current[0][:70]!r}")
+            current.clear()
+        for line in md.splitlines():
+            stripped = line.strip()
+            if re.match(r"^[-*]\s", stripped):
+                flush()
+                current.append(stripped[2:])
+            elif current and (not stripped or stripped.startswith("#")):
+                flush()
+            elif current:
+                current.append(stripped)
+        flush()
+
         if records:
             spans = []
             for rec in records:

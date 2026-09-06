@@ -540,6 +540,45 @@ def test_employment():
     code, out, _ = run("validate_artifact.py", "--current", tmp2)
     check("a wrong career-span claim fails", code == 1 and "years of experience" in out, out)
 
+    # The three parts of a heading are one claim. Separate sets of employers,
+    # titles and years let one employer wear another's title and dates.
+    def artefact(heading, bullet="- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n", workspace=None):
+        path = Path(tempfile.mkdtemp()) / "h-draft.md"
+        path.write_text("# X\n\nLondon · x@example.invalid\n\n## Experience\n\n"
+                        f"### {heading}\n\n{bullet}")
+        run("render.py", path, workspace=workspace)
+        return run("validate_artifact.py", "--current", path, workspace=workspace)
+    code, out, _ = artefact("Northwind Systems | Senior Systems Engineer | 2013 to 2016")
+    check("another employer's title on a heading fails", code == 1 and "belongs to no record" in out, out)
+    code, out, _ = artefact("Northwind Systems | Director of Platform Security | 2011 to present")
+    check("a year outside the role's span fails", code == 1 and "matches no employment record" in out, out)
+    code, out, _ = artefact("Northwind Systems | Director of Platform Security | 2017 to present")
+    check("a parent title may carry its promotion chain's years", code == 0, out)
+
+    hidden = sandbox()
+    shutil.copy(COMPLEX, hidden / "data" / "packs" / "pack.json")
+    pack = json.loads((hidden / "data" / "packs" / "pack.json").read_text())
+    for rec in pack["employment"]:
+        if rec["employment_id"] == "EMP_CX_CONTOSO":
+            rec["external_safe"] = False
+    (hidden / "data" / "packs" / "pack.json").write_text(json.dumps(pack))
+    code, out, _ = artefact("Contoso Retail | Senior Systems Engineer | 2013 to 2016", workspace=hidden)
+    check("withheld employment may not head a role block", code == 1 and "withheld" in out, out)
+    shutil.rmtree(hidden, ignore_errors=True)
+
+    # One real citation used to cover the whole document.
+    code, out, _ = artefact("Northwind Systems | Director of Platform Security | 2022 to present",
+                            bullet="- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n"
+                                   "- Personally invented a worldwide computing standard.\n")
+    check("an uncited bullet fails even beside a cited one",
+          code == 1 and "cites no evidence" in out, out)
+    brief = Path(tempfile.mkdtemp()) / "x-interview-brief.md"
+    brief.write_text("# Brief\n\n## Attacks\n\n- A question, cited nowhere.\n\n"
+                     "- Cited. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", brief)
+    code, out, _ = run("validate_artifact.py", "--private", brief)
+    check("a private brief may carry uncited bullets", "cites no evidence" not in out, out)
+
 
 def test_role_fit():
     code, out, _ = run("role_fit.py")
