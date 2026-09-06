@@ -1499,6 +1499,67 @@ def test_selection_contract():
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
 
 
+def test_review_findings_2026_09_06():
+    """Bugs confirmed in the senior review of 2026-09-06, each reproduced."""
+    # 1. An evidence id in visible prose passed as a citation.
+    root = sandbox()
+    (root / "data" / "packs" / "pack.json").write_text(COMPLEX.read_text())
+    md = root / "outputs" / "leak.md"
+    md.write_text("# X\n\nLondon\n\n## Role\n\n- Cut fraud losses (see E_CX_FRAUD_LOSS for detail). "
+                  "<!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", md, workspace=root)
+    code, out, _ = run("validate_artifact.py", md, workspace=root)
+    check("an evidence id visible to a reader is an error", code == 1 and "visible to a reader" in out, out)
+
+    # 9. A reformatted phone number counted as no contact.
+    md2 = root / "outputs" / "phone.md"
+    pack = json.loads(COMPLEX.read_text())
+    phone = pack["private_profile"]["phone"]
+    spaced = re.sub(r"\D", "", phone)
+    spaced = "+" + " ".join([spaced[:2], spaced[2:5], spaced[5:]])
+    md2.write_text(f"# X\n\nLondon · {spaced}\n\n## Role\n\n- A claim. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", md2, workspace=root)
+    code, out, _ = run("validate_artifact.py", md2, workspace=root)
+    check("a phone number in another format still counts as contact",
+          code == 0 and "no email or phone" not in out, out)
+
+    # 2. A role profile citing an atom that is not in the pack was never reported.
+    (root / "data" / "roles").mkdir(exist_ok=True)
+    role = root / "data" / "roles" / "typo.json"
+    role.write_text(json.dumps({
+        "role_id": "typo", "title": "Typo", "central_requirement": "x",
+        "requirements": [{"weight": "essential", "text": "Runs detection",
+                          "evidenced_by": ["E_CX_DETECTION_PROGRAME"]}],
+        "ats_keywords": [], "negative_signals": [], "length": "one page", "audience": "named_recipient"}))
+    code, out, _ = run("validate_records.py", role, workspace=root)
+    check("a dangling evidenced_by id fails the role profile",
+          code == 1 and "E_CX_DETECTION_PROGRAME" in out, out)
+
+    # 3. Unknown binaries were read as text.
+    junk = root / "deck.pptx"
+    junk.write_bytes(b"PK\x03\x04junk")
+    proc = subprocess.run([str(SCRIPTS / "extract_text.sh"), str(junk)], capture_output=True, text=True)
+    check("the extractor refuses an unsupported binary", proc.returncode == 1 and "unsupported" in proc.stderr,
+          proc.stderr)
+
+    # 5. The page title skipped only one hardcoded personal heading.
+    import render
+    html = render.render("# N\n\nLondon\n\n## Teaching, research and standing\n\n- x\n\n## Awards and honours\n")
+    check("a section heading is recognised by its first word", "<title>N</title>" in html, html[:300])
+
+    # 6. Short keywords matched inside unrelated words.
+    import select_evidence
+    check("keyword matching is whole-word", not select_evidence.contains_term("maintained the plan", "ai")
+          and select_evidence.contains_term("secured the AI pipeline", "ai"))
+
+    # 7. Excerpt verification depended on the extractor's layout.
+    import verify_excerpts
+    ok, _ = verify_excerpts.contains(verify_excerpts.normalise("hands-on red-\nteaming of “live” apps"),
+                                     "hands-on red-teaming of \"live\" apps")
+    check("an excerpt verifies across hyphenation and quote differences", ok)
+    shutil.rmtree(root, ignore_errors=True)
+
+
 def test_verify_excerpts():
     """The source-to-atom hop. Nothing read an excerpt back until now, so a
     claim rewritten under its old citation stayed green. Planted text source,
@@ -2105,6 +2166,7 @@ def main():
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_selection_contract, test_verify_excerpts,
+                 test_review_findings_2026_09_06,
                  test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,
                  test_resume_json_export,

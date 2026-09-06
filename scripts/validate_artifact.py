@@ -126,16 +126,27 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
         for leak in LEAKS:
             if leak.lower() in seen.lower():
                 errors.append(f"internal vocabulary visible to a reader: {leak!r}")
+        # evaluate-output calls an evidence id in visible prose a blocker, and
+        # nothing checked it: the id set was read from the whole file, comments
+        # included, so "(see E_X for detail)" in a bullet passed as a citation.
+        for aid in sorted(set(EVIDENCE_ID.findall(seen))):
+            errors.append(f"evidence id {aid} is visible to a reader; ids belong in citation comments only")
 
-    for field in ("email", "phone"):
-        if profile.get(field) and profile[field] in seen:
-            has_contact = True
-            break
-    else:
-        has_contact = False
+    def present(field):
+        value = profile.get(field)
+        if not value:
+            return False
+        if field == "phone":
+            # Compared on digits: "+1 469 298 8782" and "+1.469.298.8782" are one
+            # number, and an exact match reported a reformatted one as missing.
+            digits = re.sub(r"\D", "", value)
+            return len(digits) >= 7 and digits in re.sub(r"\D", "", seen)
+        return value in seen
+
+    has_contact = any(present(field) for field in ("email", "phone"))
     if audience == "public" and not private:
         for field in ("email", "phone", "personal_website"):
-            if profile.get(field) and profile[field] in seen:
+            if present(field):
                 errors.append(f"{field} appears in a public artefact; a public document carries "
                               "name and location only")
     elif not has_contact and not private:

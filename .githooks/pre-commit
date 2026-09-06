@@ -1,9 +1,10 @@
 #!/bin/sh
 # Blocks a commit that breaks the contracts. Install with `make hooks`.
 set -e
-echo "pre-commit: validating packs, records, and running tests"
+echo "pre-commit: validating packs, records, excerpts, and running tests"
 python3 scripts/validate_pack.py >/dev/null || { echo "pack validation failed: run make validate"; exit 1; }
 python3 scripts/validate_records.py >/dev/null || { echo "record validation failed: run make records"; exit 1; }
+python3 scripts/verify_excerpts.py --quiet >/dev/null || { echo "an excerpt is not in its source: run make excerpts"; exit 1; }
 python3 tests/run_tests.py >/dev/null || { echo "tests failed: run make test"; exit 1; }
 # Nothing private should ever be staged.
 if git diff --cached --name-only | grep -Eq '^(data/|outputs/|reviews/)' ; then

@@ -83,7 +83,7 @@ to write around.
    meaning. Never add an outcome, metric, date, or scope the evidence lacks.
    Obey every entry in the atom's `constraints`: "prototype only" means the
    bullet says so, "do not imply sole ownership" means it does not.
-4. Carry claim-to-evidence IDs as `<!-- Evidence: E_X -->` comments. The renderer
+5. Carry claim-to-evidence IDs as `<!-- Evidence: E_X -->` comments. The renderer
    turns them into hidden spans so both formats stay in step. Put the comment
    **at the end of the claim's own line**, or on the line directly after it. Both
    placements are supported and nothing else is: a comment separated from its

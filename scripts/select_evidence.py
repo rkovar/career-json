@@ -15,6 +15,7 @@ hundred atoms rather than twenty.
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -59,13 +60,12 @@ def role_score(atom, profile, canon):
 
     have = {canon.get(s.lower(), s.lower()) for s in atom.get("skills", [])}
     wanted = {canon.get(k.lower(), k.lower()) for k in profile.get("ats_keywords", [])}
-    overlap = {w for w in wanted for h in have if w == h or w in h or h in w}
+    overlap = {w for w in wanted for h in have if w == h or contains_term(h, w) or contains_term(w, h)}
     if overlap:
         score += min(len(overlap), 3) * 0.75
         reasons.append("matches role keywords: " + ", ".join(sorted(overlap)[:3]))
 
-    blob = json.dumps(atom).lower()
-    hits = [k for k in profile.get("ats_keywords", []) if k.lower() in blob]
+    hits = [k for k in profile.get("ats_keywords", []) if contains_term(atom_prose(atom), k)]
     if hits and not overlap:
         score += min(len(hits), 3) * 0.4
         reasons.append("mentions " + ", ".join(hits[:3]))
@@ -93,6 +93,20 @@ def role_score(atom, profile, canon):
         reasons.append("carries role_fit_notes; read them before citing")
 
     return round(score, 2), reasons
+
+
+def contains_term(text, term):
+    """Whole-word containment. Substring matching let a short keyword ("AI",
+    "LLM") score an atom for a word that merely contained those letters."""
+    return re.search(r"(?<![a-z0-9])" + re.escape(term.lower()) + r"(?![a-z0-9])", text.lower()) is not None
+
+
+def atom_prose(atom):
+    """The text an atom asserts, for keyword matching. json.dumps(atom) matched
+    field names and ids as well as prose."""
+    star = atom.get("star") or {}
+    return " ".join([atom.get("title", "")] + [star.get(k) or "" for k in star]
+                    + [metric_text(m) for m in atom.get("metrics", [])] + list(atom.get("skills", [])))
 
 
 def load_role(role_id):

@@ -60,14 +60,21 @@ PY
 case "${FILE##*.}" in
   pdf|PDF) METHOD="pdftotext or macOS PDFKit"; TEXT="$(extract_pdf "$FILE")" ;;
   docx|DOCX) METHOD="$(command -v pandoc >/dev/null 2>&1 && echo 'pandoc -t plain' || echo 'python zipfile, word/document.xml')"; TEXT="$(extract_docx "$FILE")" ;;
-  *)       METHOD="direct UTF-8 read";        TEXT="$(cat "$FILE")" ;;
+  txt|text|md|markdown|json|csv|tsv|html|htm|xml|yaml|yml|rtf|TXT|TEXT|MD|JSON|CSV|HTML|XML)
+           METHOD="direct UTF-8 read";        TEXT="$(cat "$FILE")" ;;
+  *)
+    # The default branch used to cat anything, so a .pptx, .doc or image
+    # "extracted" as zip noise and became provenance for nothing, the docx
+    # failure over again for every other binary. Unknown types are refused.
+    echo "unsupported file type .${FILE##*.}: convert it to PDF, DOCX or text first" >&2
+    exit 1 ;;
 esac
 
 if [ "$RECORD" -eq 1 ]; then
   CHARS=$(printf '%s' "$TEXT" | wc -m | tr -d ' ')
   BYTES=$(wc -c < "$FILE" | tr -d ' ')
   SHA=$(shasum -a 256 "$FILE" | cut -d' ' -f1)
-  case "${FILE##*.}" in pdf|PDF) STYPE=pdf ;; docx|DOCX) STYPE=other ;; *) STYPE=text ;; esac
+  case "${FILE##*.}" in pdf|PDF) STYPE=pdf ;; docx|DOCX) STYPE=other ;; md|markdown|MD) STYPE=markdown ;; json|JSON) STYPE=json ;; *) STYPE=text ;; esac
   printf '  "source_type": "%s",\n' "$STYPE"
   printf '  "path": "%s",\n  "sha256": "%s",\n  "character_count": %s,\n  "byte_size": %s,\n' "$FILE" "$SHA" "$CHARS" "$BYTES"
   printf '  "extraction_method": "%s",\n  "independent": false\n' "$METHOD"

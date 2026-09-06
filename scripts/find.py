@@ -15,6 +15,7 @@ Skill matching goes through skill_vocabulary, so "threat modelling" also finds
 """
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -56,7 +57,9 @@ def matches(atom, args, canon, employment):
         # Exact canonical match, or one name contained in the other: a pack will
         # always hold "AI threat modelling" alongside "threat modelling", and a
         # search that misses the first is a search nobody trusts.
-        if not (wanted & have or any(w in h or h in w for w in wanted for h in have)):
+        def within(a, b):
+            return re.search(r"(?<![a-z0-9])" + re.escape(a) + r"(?![a-z0-9])", b) is not None
+        if not (wanted & have or any(within(w, h) or within(h, w) for w in wanted for h in have)):
             return False
     if args.tag and not set(args.tag) & set(atom.get("tags", [])):
         return False

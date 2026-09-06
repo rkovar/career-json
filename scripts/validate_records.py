@@ -19,6 +19,8 @@ from pathlib import Path
 
 ROOT = Path(os.environ.get("CAREER_WORKSPACE", Path(__file__).resolve().parent.parent))
 SCHEMAS = ROOT / "schemas"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from current_pack import resolve  # noqa: E402
 KINDS = {
     "evaluation": (re.compile(r"-evaluation\.json$"), "evaluation-record.schema.json"),
     "screen": (re.compile(r"-screen\.json$"), "screen-record.schema.json"),
@@ -123,6 +125,20 @@ def check(path):
         essential = [r for r in record.get("requirements", []) if r.get("weight") == "essential"]
         if not essential:
             errors.append("no essential requirement: a profile that weights nothing cannot rank evidence")
+        # role_fit scores whatever evidenced_by names. A typo here silently turned
+        # an evidenced essential into "not supported", and no validator read the
+        # list. Checked against the current pack for profiles that live in this
+        # workspace's data/roles; a walkthrough or example profile belongs to
+        # another pack and is not held to this one.
+        pack_path = resolve()
+        in_workspace = (ROOT / "data" / "roles").resolve() in path.resolve().parents
+        if pack_path is not None and in_workspace:
+            ids = {a["id"] for a in json.loads(pack_path.read_text()).get("evidence_atoms", [])}
+            for req in record.get("requirements", []):
+                for aid in req.get("evidenced_by", []):
+                    if aid not in ids:
+                        errors.append(f"requirement {req.get('text', '')[:50]!r} cites {aid}, "
+                                      f"which is not in {pack_path.name}")
     if kind == "screen":
         artefact = record.get("artifact")
         if artefact and not (ROOT / artefact).exists():

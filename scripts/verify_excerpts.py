@@ -7,7 +7,7 @@ a claim could be rewritten with its old citation intact and every check stayed
 green, because the checks compared atoms to the pack, never atoms to the source.
 
 This is the source-to-atom hop. It re-extracts each cited file through
-extract_text.sh, normalises both sides (case, whitespace, curly quotes, dashes)
+extract_text.sh, compares letters and digits only (so layout, quotes, dashes and hyphenation cannot differ)
 and reports every excerpt that is not a substring of its source. An ellipsis
 (... or …) in an excerpt elides text: each fragment must appear, in order. It
 also checks the file still matches the sha256 the source record captured, so a
@@ -34,28 +34,26 @@ from current_pack import resolve, sha256, ROOT  # noqa: E402
 
 EXTRACT = Path(__file__).resolve().parent / "extract_text.sh"
 FILE_TYPES = ("pdf", "text", "markdown", "json", "other")
-QUOTES = {"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-",
-          " ": " ", "•": " "}
-
-
 def normalise(text):
+    """Letters and digits only. Extractors disagree about everything else: pdftotext
+    and PDFKit lay out whitespace differently, a hyphen at a line end may or may
+    not be a real hyphen, and quotes come curly or straight. Comparing on the
+    characters that carry meaning makes a verified pack stay verified on another
+    machine, at the cost of not noticing punctuation-only edits, which is the
+    right trade."""
     text = unicodedata.normalize("NFKC", text)
-    for odd, plain in QUOTES.items():
-        text = text.replace(odd, plain)
-    # A hyphen at a line end in a PDF is nearly always a real hyphen split by
-    # layout ("red-\nteaming"), so join the halves and keep it.
-    text = re.sub(r"-\n\s*", "-", text)
-    return re.sub(r"\s+", " ", text).strip().lower()
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
 
 
 def fragments(excerpt):
-    return [f.strip() for f in re.split(r"\.\.\.|…", excerpt) if f.strip()]
+    """Split on the ellipsis before normalising, since normalising removes it."""
+    return [normalise(f) for f in re.split(r"\.\.\.|…", excerpt) if normalise(f)]
 
 
 def contains(source_text, excerpt):
     """Every fragment of the excerpt, in order, somewhere in the source."""
     position = 0
-    for fragment in fragments(normalise(excerpt)):
+    for fragment in fragments(excerpt):
         found = source_text.find(fragment, position)
         if found < 0:
             return False, fragment

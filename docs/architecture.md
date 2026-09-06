@@ -26,7 +26,7 @@ than any instruction.
 .claude/skills/     judgement: the nine skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              499 assertions plus a skill-invariant lint
+tests/              506 assertions plus a skill-invariant lint
 data/               your material. Git ignored, never leaves the machine
   sources/            raw input
   packs/career.json   the current record
@@ -80,7 +80,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 499 assertions: real tests over the scripts, plus a lint
+`make check` runs 506 assertions: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.
@@ -92,7 +92,7 @@ atoms, and an independent source. Everything used to run against the small one
 only, and three defects shipped behind that gap — a leak scan that failed the
 private brief on the words it exists to state, a magnitude check that emitted
 eighty warnings on one document, and a fit score with no eligibility filter. None
-were visible to three hundred passing499 assertions; all three appeared within one
+were visible to three hundred passing506 assertions; all three appeared within one
 run against real data.
 
 Behavioural claims that need a model in the loop are listed in

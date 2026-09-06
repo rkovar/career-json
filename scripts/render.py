@@ -58,9 +58,17 @@ LINK = re.compile(r"\[(.+?)\]\((.+?)\)")
 SAFE_SCHEMES = ("http://", "https://", "mailto:")
 # Section headings that name a part of the document rather than the role it
 # targets. The first H2 that is not one of these names the page title.
-SECTIONS = {"experience", "education", "skills", "summary", "profile", "certifications",
-            "publications", "teaching", "research", "awards", "projects", "languages",
-            "interests", "references", "teaching, research and standing"}
+SECTIONS = {"experience", "employment", "education", "skills", "summary", "profile",
+            "certifications", "publications", "teaching", "research", "awards", "projects",
+            "languages", "interests", "references", "speaking", "recognition", "volunteering"}
+
+
+def is_section(heading):
+    """A heading whose first word names a part of a resume ("Teaching, research
+    and standing") rather than a role. Judged on the first word so the list stays
+    generic instead of enumerating one person's headings."""
+    words = re.findall(r"[a-z]+", heading.lower())
+    return bool(words) and words[0] in SECTIONS
 
 
 def link(match):
@@ -146,7 +154,7 @@ def render(markdown):
             out.append(f"    <h3>{inline(text)}</h3>")
         elif kind == "h2":
             heading = EVIDENCE.sub("", text).strip()
-            if role is None and heading.lower() not in SECTIONS:
+            if role is None and not is_section(heading):
                 role = heading
             out.append(f"    <h2>{inline(text)}</h2>")
         elif kind == "h1":
