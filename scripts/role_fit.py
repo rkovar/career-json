@@ -5,9 +5,14 @@ The workflow makes you name a role, generate, and then discover at the screen th
 the evidence never supported it. This asks the question in the other order: given
 what is actually in the pack, which of these roles can it carry?
 
-Scoring is transparent on purpose. Essential requirements dominate, an unevidenced
-essential is close to fatal, and corroborated evidence counts for more than the
-subject's own word.
+Scoring is transparent on purpose. Essential requirements dominate and an
+unevidenced essential is close to fatal. Coverage drives the verdict: self-asserted
+evidence is the normal resting state of a career record and earns full credit, and
+how much of the coverage is corroborated is reported beside the score rather than
+gating it. A declined atom is a decision and earns nothing. An unresolved atom is
+an open question: it earns reduced credit on an important or nice-to-have
+requirement and can never by itself clear an essential one, because "we do not
+know" must not become "supported" on the thing the role hires for.
 
     python3 scripts/role_fit.py                 # all profiles, ranked
     python3 scripts/role_fit.py --markdown
@@ -23,8 +28,21 @@ from select_evidence import eligible  # noqa: E402
 
 ROLES = ROOT / "data" / "roles"
 WEIGHT = {"essential": 3.0, "important": 1.5, "nice_to_have": 0.5}
-STATUS_CREDIT = {"externally_verified": 1.0, "corroborated": 0.85, "self_asserted": 0.6}
 OUTCOME_CREDIT = {"business_outcome": 1.0, "output": 0.8, "activity": 0.6, None: 0.5}
+# An open question earns half credit where it is allowed to earn any.
+UNRESOLVED_CREDIT = 0.5
+CORROBORATED = ("corroborated", "externally_verified")
+
+
+def usable(atom, deliverable):
+    """Whether an atom may count at all. Declined never does: it is a recorded
+    decision, not evidence. In deliverable mode only what an artefact may cite
+    counts, which also excludes unresolved and withheld atoms."""
+    if atom.get("evidence_status") == "declined":
+        return False
+    if deliverable and not eligible(atom)[0]:
+        return False
+    return True
 
 
 def score(profile, atoms, deliverable=False):
@@ -38,20 +56,29 @@ def score(profile, atoms, deliverable=False):
     gap between the two is what a publication constraint costs.
     """
     total = earned = 0.0
-    gaps, thin = [], []
+    gaps, thin, unresolved_essentials, unresolved_credited = [], [], [], []
+    evidenced = corroborated = 0
     for req in profile["requirements"]:
         weight = WEIGHT[req["weight"]]
         total += weight
-        ids = [i for i in req.get("evidenced_by", []) if i in atoms]
-        if deliverable:
-            ids = [i for i in ids if eligible(atoms[i])[0]]
-        if not ids:
+        linked = [atoms[i] for i in req.get("evidenced_by", []) if i in atoms]
+        linked = [a for a in linked if usable(a, deliverable)]
+        firm = [a for a in linked if a.get("evidence_status") != "unresolved"]
+        open_ = [a for a in linked if a.get("evidence_status") == "unresolved"]
+        if firm:
+            best = max(OUTCOME_CREDIT.get(a.get("outcome_type")) for a in firm)
+        elif open_ and req["weight"] != "essential":
+            best = max(OUTCOME_CREDIT.get(a.get("outcome_type")) for a in open_) * UNRESOLVED_CREDIT
+            unresolved_credited.append(req)
+        else:
             gaps.append(req)
+            if open_:
+                unresolved_essentials.append(req)
             continue
-        best = max(STATUS_CREDIT.get(atoms[i]["evidence_status"], 0.5)
-                   * OUTCOME_CREDIT.get(atoms[i].get("outcome_type"))
-                   for i in ids)
         earned += weight * best
+        evidenced += 1
+        if any(a.get("evidence_status") in CORROBORATED for a in firm):
+            corroborated += 1
         if best < 0.55:
             thin.append(req)
     pct = round(100 * earned / total) if total else 0
@@ -74,7 +101,27 @@ def score(profile, atoms, deliverable=False):
         "essential_gaps": [g["text"] for g in essential_gaps],
         "other_gaps": [g["text"] for g in gaps if g["weight"] != "essential"],
         "thin_evidence": [t["text"] for t in thin],
+        # Reported beside the score, never gating it: corroboration is optional.
+        "corroborated_share": round(100 * corroborated / evidenced) if evidenced else 0,
+        # Open questions that touched the score, and the essentials they could not clear.
+        "unresolved_credited": [r["text"] for r in unresolved_credited],
+        "unresolved_essentials": [r["text"] for r in unresolved_essentials],
     }
+
+
+def unresolved_linked(profiles, atoms):
+    """Unresolved atoms linked to any requirement. Listed beside the verdict for
+    the same reason withheld atoms are: in the score they look like weak evidence
+    or a gap, and they are neither. They are questions."""
+    rows = []
+    for profile in profiles:
+        for req in profile.get("requirements", []):
+            for i in req.get("evidenced_by", []):
+                atom = atoms.get(i)
+                if atom and atom.get("evidence_status") == "unresolved":
+                    rows.append({"id": i, "title": atom["title"], "role_id": profile["role_id"],
+                                 "requirement": req["text"], "weight": req["weight"]})
+    return rows
 
 
 def withheld(atoms):
@@ -120,21 +167,33 @@ def main(argv):
         results.append(row)
     results.sort(key=lambda r: -r["score"])
     unpublishable = withheld(atoms)
+    open_questions = unresolved_linked(profiles, atoms)
     if not args.markdown:
         print(json.dumps({"pack": str(pack_path.relative_to(ROOT)),
                           "withheld_from_every_artefact": unpublishable,
+                          "unresolved_linked_to_requirements": open_questions,
                           "roles": results}, indent=2))
         return 0
 
     out = ["# Role Fit", "", f"Pack: `{pack_path.relative_to(ROOT)}`", "",
            "An unevidenced essential requirement makes a role unsupported however high",
            "the rest scores. That is the honest reading: it is the thing they are hiring for.", "",
-           "| Role | Score | Verdict | Unevidenced essentials |", "| --- | --- | --- | --- |"]
+           "Coverage drives the verdict; corroboration is reported beside it and gates nothing.", "",
+           "| Role | Coverage | Verdict | Corroborated | Unevidenced essentials |",
+           "| --- | --- | --- | --- | --- |"]
     for r in results:
         gaps = "; ".join(r["essential_gaps"]) or "none"
         shown = ("" if r["deliverable_score"] == r["score"]
                  else f" (deliverable {r['deliverable_score']}%)")
-        out.append(f"| {r['title']} | {r['score']}%{shown} | {r['verdict']} | {gaps} |")
+        out.append(f"| {r['title']} | {r['score']}%{shown} | {r['verdict']} | "
+                   f"{r['corroborated_share']}% | {gaps} |")
+    if open_questions:
+        out += ["", "## Unresolved evidence linked to requirements", "",
+                "An open question, not weak evidence. It earns half credit on an important or",
+                "nice-to-have requirement and can never clear an essential one on its own.", ""]
+        for row in open_questions:
+            out.append(f"- `{row['id']}` {row['title']} — {row['weight']} requirement "
+                       f"\"{row['requirement']}\" ({row['role_id']})")
     if unpublishable:
         out += ["", "## Withheld from every artefact", "",
                 "These cannot appear in any document. Check whether any of them answers",

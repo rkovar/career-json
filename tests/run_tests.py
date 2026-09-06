@@ -1088,6 +1088,68 @@ def test_metric_measurement_basis():
     shutil.rmtree(workspace, ignore_errors=True)
 
 
+def test_fit_policy():
+    """Coverage drives the verdict. The old scoring multiplied every requirement
+    by 0.6 for self-asserted evidence, so a pack whose every requirement was
+    covered by a self-asserted business outcome could not pass 60%, below "well
+    supported", which contradicted the documented rule that corroboration is
+    optional. It also gave declined and unresolved atoms half credit by default,
+    so a refusal to discuss something closed an essential gap.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    import role_fit  # noqa: E402
+
+    atoms = {a["id"]: a for a in json.loads(COMPLEX.read_text())["evidence_atoms"]}
+    def profile(*reqs):
+        return {"role_id": "r", "title": "R", "central_requirement": "c",
+                "requirements": [{"weight": w, "text": t, "evidenced_by": ids} for w, t, ids in reqs]}
+
+    # Every essential covered by self-asserted evidence: full coverage.
+    covered = role_fit.score(profile(
+        ("essential", "resilience", ["E_CX_PLATFORM_MIGRATION"]),
+        ("essential", "detection practice", ["E_CX_DETECTION_PROGRAMME"]),
+        ("essential", "growth", ["E_CX_TEAM_GROWTH"])), atoms)
+    check("an entirely self-asserted pack can be well supported",
+          covered["verdict"] == "well supported" and covered["score"] >= 70, str(covered))
+    check("corroboration is reported beside the score, not applied to it",
+          covered["corroborated_share"] == 0, str(covered))
+    with_corr = role_fit.score(profile(("essential", "fraud", ["E_CX_FRAUD_LOSS"])), atoms)
+    check("a corroborated requirement shows in the corroborated share",
+          with_corr["corroborated_share"] == 100 and with_corr["score"] == 100, str(with_corr))
+
+    # Declined earns nothing, anywhere.
+    small = {a["id"]: a for a in json.loads(EXAMPLE.read_text())["evidence_atoms"]}
+    declined = role_fit.score(profile(("essential", "x", ["E_EXAMPLE_PRIOR_EMPLOYER_DETAIL"])), small)
+    check("a declined atom does not clear an essential gap",
+          declined["score"] == 0 and declined["essential_gaps"], str(declined))
+
+    # Unresolved: a question, not evidence. Never clears an essential.
+    open_essential = role_fit.score(profile(("essential", "revenue", ["E_CX_REVENUE_CLAIM"])), atoms)
+    check("an unresolved atom cannot clear an essential requirement",
+          open_essential["verdict"] == "not supported" and open_essential["essential_gaps"], str(open_essential))
+    check("and the essential it failed to clear is named",
+          open_essential["unresolved_essentials"] == ["revenue"], str(open_essential))
+
+    # On a non-essential it earns reduced credit and is named as such.
+    base = role_fit.score(profile(("essential", "fraud", ["E_CX_FRAUD_LOSS"]),
+                                  ("important", "revenue", [])), atoms)
+    partial = role_fit.score(profile(("essential", "fraud", ["E_CX_FRAUD_LOSS"]),
+                                     ("important", "revenue", ["E_CX_REVENUE_CLAIM"])), atoms)
+    full = role_fit.score(profile(("essential", "fraud", ["E_CX_FRAUD_LOSS"]),
+                                  ("important", "revenue", ["E_CX_PLATFORM_MIGRATION"])), atoms)
+    check("an unresolved atom earns reduced credit on an important requirement",
+          base["score"] < partial["score"] < full["score"], f"{base['score']} {partial['score']} {full['score']}")
+    check("and that credit is named", partial["unresolved_credited"] == ["revenue"], str(partial))
+    delivered = role_fit.score(profile(("essential", "fraud", ["E_CX_FRAUD_LOSS"]),
+                                       ("important", "revenue", ["E_CX_REVENUE_CLAIM"])), atoms, deliverable=True)
+    check("deliverable fit never credits an unresolved atom",
+          delivered["score"] == base["score"], f"{delivered['score']} vs {base['score']}")
+
+    listed = role_fit.unresolved_linked([profile(("important", "revenue", ["E_CX_REVENUE_CLAIM"]))], atoms)
+    check("unresolved atoms linked to requirements are listed beside the verdict",
+          [r["id"] for r in listed] == ["E_CX_REVENUE_CLAIM"], str(listed))
+
+
 def test_withheld_evidence_is_visible():
     """Found by a full run against a real pack, not by this suite.
 
@@ -1652,6 +1714,8 @@ INVARIANTS = {
                         # The iterative review mode. Every one of these is a rule
                         # that stops the method becoming an inflation engine.
                         "Ask one question. Wait.", "genuine null option",
+                        "cannot clear an essential", "earns nothing",
+                        "Coverage drives the verdict",
                         "written into `star.result`", "An answer is a source",
                         "Close an unanswerable question", "open_questions.py",
                         "indistinguishable from a coaching one"],
@@ -1843,7 +1907,7 @@ def main():
                  test_metric_measurement_basis, test_open_questions,
                  test_conversation_is_a_source, test_complex_pack_shape, test_pack_html,
                  test_education,
-                 test_withheld_evidence_is_visible,
+                 test_fit_policy, test_withheld_evidence_is_visible,
                  test_outcome_warning_altitude, test_empty_role_heading,
                  test_verdict_log,
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,

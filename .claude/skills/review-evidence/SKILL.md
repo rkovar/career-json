@@ -66,6 +66,23 @@ Assign against what the sources actually are, not how confident the subject is.
 - `unresolved`: an open question. Record the question.
 - `declined`: the subject chose not to pursue it. Record that they declined.
 
+## Fit credit
+
+`role_fit.py` scores coverage, and the review must not try to game it. The rule,
+decided 2026-09-06:
+
+- Coverage drives the verdict. Self-asserted evidence earns full credit; it is the
+  normal resting state and most of the record will only ever be that. How much of
+  the coverage is corroborated is reported beside the score and gates nothing.
+- A `declined` atom earns nothing. It is a recorded decision, not evidence.
+- An `unresolved` atom is an open question. It earns reduced credit on an
+  important or nice-to-have requirement, is listed beside the verdict, and
+  **cannot clear an essential** requirement on its own. "We do not know" must not
+  read as "supported" on the thing the role hires for. Answer the question or
+  retire the claim; do not link it and hope.
+- A withheld but asserted atom counts for capability and not for deliverability.
+  That gap is the cost of a publication constraint, and it is reported as one.
+
 ## Rules
 
 - Do not turn a vague assertion into a precise metric.

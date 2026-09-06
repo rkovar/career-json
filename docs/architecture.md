@@ -26,7 +26,7 @@ than any instruction.
 .claude/skills/     judgement: the nine skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              456 assertions plus a skill-invariant lint
+tests/              469 assertions plus a skill-invariant lint
 data/               your material. Git ignored, never leaves the machine
   sources/            raw input
   packs/career.json   the current record
@@ -54,7 +54,7 @@ reviews/            review records and decisions. Git ignored
 | `find.py` | Recall by term, skill, tag, employer, date, outcome, status |
 | `dedupe.py` | Is this claim already in the pack? |
 | `coverage.py` | Timeline, gaps, undated atoms, stale skills |
-| `role_fit.py` | Score the pack against every role profile, and name what no artefact may cite |
+| `role_fit.py` | Coverage against every role profile; corroboration beside it, never gating; names withheld and unresolved evidence |
 | `pack_html.py` | Browsable private view of the whole pack, withheld atoms included. Never sendable |
 | `open_questions.py` | Every outstanding question, ranked by what answering unlocks. `--delta` reports movement resting on no source |
 | `corroboration_plan.py` | Optional: what is worth corroborating |
@@ -79,7 +79,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 456 assertions: real tests over the scripts, plus a lint
+`make check` runs 469 assertions: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.
@@ -91,7 +91,7 @@ atoms, and an independent source. Everything used to run against the small one
 only, and three defects shipped behind that gap — a leak scan that failed the
 private brief on the words it exists to state, a magnitude check that emitted
 eighty warnings on one document, and a fit score with no eligibility filter. None
-were visible to three hundred passing assertions; all three appeared within one
+were visible to three hundred passing469 assertions; all three appeared within one
 run against real data.
 
 Behavioural claims that need a model in the loop are listed in
