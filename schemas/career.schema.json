@@ -209,6 +209,20 @@
         "independent": {
           "type": "boolean",
           "description": "True when the source is not authored or controlled by the subject. A resume and a LinkedIn profile are both self-authored and neither is independent."
+        },
+        "saved_copy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "For a url source: workspace-relative path of a saved copy of the page, so excerpts can be verified offline. The URL stays in path."
+        },
+        "saved_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
         }
       },
       "additionalProperties": true,

@@ -10,7 +10,7 @@ links are remembered so they are never proposed again.
 
     scripts/link_evidence.py --status                       # confirmed and proposed, per role
     scripts/link_evidence.py --propose [--role R] [--apply] # candidates; --apply writes them as proposed
-    scripts/link_evidence.py --confirm R "<requirement text prefix>" E_X
+    scripts/link_evidence.py --confirm R "<requirement text prefix>" E_X [--note "..."]
     scripts/link_evidence.py --reject  R "<requirement text prefix>" E_X --why "..."
     scripts/link_evidence.py --migrate                      # bare ids -> proposed links, once
 """
@@ -84,7 +84,8 @@ def main(argv):
     parser.add_argument("--apply", action="store_true", help="with --propose: write candidates as proposed links")
     parser.add_argument("--confirm", nargs=3, metavar=("ROLE", "REQUIREMENT", "ATOM"))
     parser.add_argument("--reject", nargs=3, metavar=("ROLE", "REQUIREMENT", "ATOM"))
-    parser.add_argument("--why")
+    parser.add_argument("--why", help="with --reject: the subject's reason, in their words")
+    parser.add_argument("--note", help="with --confirm: why it evidences the requirement, in the subject's words")
     parser.add_argument("--migrate", action="store_true")
     parser.add_argument("--role")
     parser.add_argument("--json", action="store_true")
@@ -103,7 +104,10 @@ def main(argv):
         existing = [l for l in req.get("evidenced_by") or []]
         existing = [l for l in existing if (l if isinstance(l, str) else l.get("id")) != aid]
         if args.confirm:
-            existing.append({"id": aid, "linked_by": "subject", "on": today})
+            link = {"id": aid, "linked_by": "subject", "on": today}
+            if args.note:
+                link["note"] = args.note
+            existing.append(link)
             req["evidenced_by"] = existing
             print(f"confirmed {aid} -> {profile['role_id']} / {req['text'][:50]!r}")
         else:

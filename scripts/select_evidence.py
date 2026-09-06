@@ -40,7 +40,7 @@ def links(req):
             out.append({"id": item, "linked_by": "proposed", "on": None})
         else:
             out.append({"id": item.get("id"), "linked_by": item.get("linked_by", "proposed"),
-                        "on": item.get("on")})
+                        "on": item.get("on"), "note": item.get("note")})
     return out
 
 

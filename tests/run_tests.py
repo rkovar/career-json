@@ -1559,6 +1559,14 @@ def test_link_provenance():
     code, out, _ = run("validate_records.py", role, workspace=root)
     check("a confirmed link sharing no word with its requirement is warned about",
           "shares no word" in out, out)
+    # A note is the subject's stated reason and answers that warning.
+    run("link_evidence.py", "--confirm", "fraud-lead", "Reduces", "E_CX_ONCALL",
+        "--note", "the on-call rebuild is what stopped the fraud losses recurring", workspace=root)
+    code, out, _ = run("validate_records.py", role, workspace=root)
+    saved = json.loads(role.read_text())["requirements"][0]
+    check("--note is stored on the link",
+          any(l.get("note") for l in saved["evidenced_by"] if isinstance(l, dict) and l["id"] == "E_CX_ONCALL"))
+    check("and silences the no-shared-word warning", "shares no word" not in out, out)
     shutil.rmtree(root, ignore_errors=True)
 
 

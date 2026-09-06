@@ -11,7 +11,7 @@ tokens and is never part of `make check`. Paste its summary line into the log at
 the end of this file, with the skill hashes from `python3 scripts/manifest.py`.
 Scenarios without a runner are still checked by hand.
 
-Runner coverage: #1, #2, #13, #17.
+Runner coverage: #1 (with #6, #15, #16), #2, #3, #4, #7 (with #9, #10), #8 (with #11), #13 (with #14), #17 (with #18). Scenarios #5, #12 and #19 to #24 need a multi-turn conversation or a judgement the scripts cannot make, and are checked by hand.
 
 ## make-resume
 

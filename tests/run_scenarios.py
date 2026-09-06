@@ -17,6 +17,7 @@ it after any material skill edit and paste the summary into tests/scenarios.md.
     python3 tests/run_scenarios.py --budget 2.00   # per-scenario USD cap
 """
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -137,12 +138,101 @@ def one_question_no_list(root, text):
     return len(asks) == 1 and not numbered_questions, f"{len(asks)} question(s), {len(numbered_questions)} numbered question(s)"
 
 
+def gap_is_reported(root, text):
+    """The essential evidenced only by a withheld atom is named as a gap in the report."""
+    return "risk governance" in text.lower() and ("gap" in text.lower() or "withheld" in text.lower()
+                                                 or "blocker" in text.lower()), text[:300]
+
+
+def unsendable_is_said(root, text):
+    return bool(drafts(root)) and ("unsendable" in text.lower() or "contact" in text.lower()), text[:300]
+
+
+def evaluation_pins_the_pack(root, text):
+    evals = sorted((root / "outputs").glob("*-evaluation.json"))
+    pins = [(json.loads(e.read_text()).get("run") or {}).get("pack_sha256") for e in evals]
+    return bool(pins) and all(pins), f"pins: {pins}"
+
+
+def work_lists_are_split(root, text):
+    sidecars = sorted((root / "outputs").glob("*-screen.json"))
+    if not sidecars:
+        return False, "no sidecar"
+    rec = json.loads(sidecars[0].read_text())
+    return bool(rec.get("fix_in_document")) and bool(rec.get("needs_new_evidence")), \
+        f"fix {len(rec.get('fix_in_document', []))}, evidence {len(rec.get('needs_new_evidence', []))}"
+
+
+NULL_OPTIONS = ("not measured", "cannot recall", "can't recall", "don't know", "do not know",
+                "not sure", "unknown", "narrow", "never measured", "no idea", "leave it")
+
+
+def question_has_a_null_option(root, text):
+    return any(n in text.lower() for n in NULL_OPTIONS), text[:400]
+
+
+def packs(root):
+    return sorted((root / "data" / "packs").glob("*.json"))
+
+
+def pack_written_and_valid(root, text):
+    if not packs(root):
+        return False, "no pack written"
+    proc = script(root, "validate_pack.py", packs(root)[-1])
+    return proc.returncode == 0, proc.stdout[:300]
+
+
+def everything_self_asserted(root, text):
+    """A claim in both the CV and the LinkedIn text is still self_asserted."""
+    if not packs(root):
+        return False, "no pack"
+    pack = json.loads(packs(root)[-1].read_text())
+    statuses = {a["evidence_status"] for a in pack.get("evidence_atoms", [])}
+    return statuses <= {"self_asserted", "unresolved", "declined"}, f"statuses: {statuses}"
+
+
+def sources_hashed(root, text):
+    if not packs(root):
+        return False, "no pack"
+    pack = json.loads(packs(root)[-1].read_text())
+    ok = []
+    for s in pack.get("source_records", []):
+        p = root / s.get("path", "")
+        ok.append(p.exists() and s.get("sha256") == hashlib.sha256(p.read_bytes()).hexdigest())
+    return bool(ok) and all(ok), f"sources: {[s.get('source_id') for s in pack.get('source_records', [])]}"
+
+
+def contact_was_asked_or_found(root, text):
+    if not packs(root):
+        return False, "no pack"
+    profile = json.loads(packs(root)[-1].read_text()).get("private_profile") or {}
+    return bool(profile.get("email") or profile.get("phone")) or "contact" in text.lower(), text[:200]
+
+
 # --- setups ---------------------------------------------------------------------
 def no_role_anywhere(root):
     shutil.rmtree(root / "data" / "roles")
     (root / "data" / "roles").mkdir()
     for p in (root / "data" / "sources").glob("*"):
         p.unlink()
+
+
+def no_contact_details(root):
+    pack_path = root / "data" / "packs" / "pack.json"
+    pack = json.loads(pack_path.read_text())
+    pack["private_profile"] = {"name": pack["private_profile"]["name"], "location": "London"}
+    pack_path.write_text(json.dumps(pack))
+
+
+def fresh_workspace_one_source(root):
+    """No pack, no roles, one fictional CV and one LinkedIn text making the same claim."""
+    for p in (root / "data" / "packs").glob("*.json"):
+        p.unlink()
+    shutil.rmtree(root / "data" / "roles")
+    (root / "data" / "roles").mkdir()
+    (root / "data" / "sources").mkdir(exist_ok=True)
+    for name in ("fictional-cv.txt", "fictional-linkedin.txt"):
+        shutil.copy(ROOT / "tests" / "fixtures" / name, root / "data" / "sources" / name)
 
 
 def weak_draft_without_contact(root):
@@ -157,18 +247,49 @@ SCENARIOS = {
     1: dict(skill="make-resume",
             request="Follow .claude/skills/make-resume/SKILL.md for the role head-of-detection (profile in data/roles/). Produce the document in outputs/.",
             checks=[produced_a_draft, draft_validates, cites_nothing_withheld, no_question_asked,
-                    quantities_clean, screen_is_fresh],
+                    quantities_clean, screen_is_fresh, evaluation_pins_the_pack],
             turns=80),
     2: dict(skill="make-resume",
             request="Follow .claude/skills/make-resume/SKILL.md. Make me a resume.",
             setup=no_role_anywhere, checks=[asks_for_the_role_only], turns=15),
     13: dict(skill="recruiter-screen",
              request="Follow .claude/skills/recruiter-screen/SKILL.md on outputs/weak-draft.md for the role Head of Detection (data/roles/head-of-detection.json). Write the screen and its sidecar.",
-             setup=weak_draft_without_contact, checks=[verdict_is_reject], turns=30),
+             setup=weak_draft_without_contact, checks=[verdict_is_reject, work_lists_are_split], turns=30),
     17: dict(skill="review-evidence",
              request="Follow .claude/skills/review-evidence/SKILL.md in iterative mode against the current pack. Start the session: ask me the first question and stop there.",
-             checks=[one_question_no_list], turns=15),
+             checks=[one_question_no_list, question_has_a_null_option], turns=15),
+    3: dict(skill="make-resume",
+            request="Follow .claude/skills/make-resume/SKILL.md for the role head-of-detection (profile in data/roles/). Produce the document in outputs/.",
+            checks=[produced_a_draft, cites_nothing_withheld, gap_is_reported], turns=80),
+    4: dict(skill="make-resume",
+            request="Follow .claude/skills/make-resume/SKILL.md for the role head-of-detection (profile in data/roles/). Produce the document in outputs/.",
+            setup=no_contact_details, checks=[produced_a_draft, unsendable_is_said], turns=80),
+    7: dict(skill="build-career-pack",
+            request="Follow .claude/skills/build-career-pack/SKILL.md: build the pack from everything in data/sources/. There is no existing pack. Finish the run and queue the questions; do not wait for answers.",
+            setup=fresh_workspace_one_source,
+            checks=[pack_written_and_valid, everything_self_asserted, sources_hashed, contact_was_asked_or_found],
+            turns=80, then=8),
+    8: dict(skill="build-career-pack",
+            request="Follow .claude/skills/build-career-pack/SKILL.md again on the same workspace: re-ingest everything in data/sources/ against the current pack.",
+            checks=[], turns=40, after=7),
 }
+
+
+def unchanged_source_skipped(root, text):
+    return "unchanged" in text.lower() or "skipped" in text.lower(), text[:300]
+
+
+def new_version_supersedes(root, text, before):
+    """Scenario 11: a new pack file, the previous untouched, supersedes set."""
+    now = packs(root)
+    newest = json.loads(now[-1].read_text()) if now else {}
+    prev_untouched = all(hashlib.sha256(p.read_bytes()).hexdigest() == h for p, h in before.items() if p.exists())
+    return (len(now) > len(before) and prev_untouched
+            and bool((newest.get("metadata") or {}).get("supersedes"))), \
+        f"packs before {len(before)}, after {len(now)}; previous untouched {prev_untouched}"
+
+
+SCENARIOS[8]["checks"] = [unchanged_source_skipped]
 
 
 def main(argv):
@@ -181,13 +302,26 @@ def main(argv):
     wanted = [int(x) for x in args.only.split(",")] if args.only else sorted(SCENARIOS)
 
     report = []
+    carried = {}
     for number in wanted:
         spec = SCENARIOS[number]
-        root = workspace()
-        if spec.get("setup"):
-            spec["setup"](root)
+        if spec.get("after"):
+            # Runs on the workspace its predecessor left, after a snapshot of the packs.
+            root = carried.get(spec["after"])
+            if root is None:
+                print(f"SKIP  #{number}: needs #{spec['after']} in the same run")
+                continue
+            before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in packs(root)}
+        else:
+            root = workspace()
+            if spec.get("setup"):
+                spec["setup"](root)
         text, payload = invoke(root, spec["request"], args.budget, args.model, spec.get("turns", 40))
         results = [(fn.__name__, *fn(root, text)) for fn in spec["checks"]]
+        if spec.get("after"):
+            results.append(("new_version_supersedes", *new_version_supersedes(root, text, before)))
+        if spec.get("then"):
+            carried[number] = root
         passed = all(ok for _, ok, _ in results)
         report.append({"scenario": number, "skill": spec["skill"], "passed": passed,
                        "checks": [{"check": n, "ok": ok, "detail": d} for n, ok, d in results],
@@ -202,7 +336,7 @@ def main(argv):
             print("      --- what the model said (first 600 chars) ---")
             for line in text[:600].splitlines():
                 print(f"      | {line}")
-        if not args.keep:
+        if not args.keep and number not in carried:
             shutil.rmtree(root, ignore_errors=True)
 
     out = ROOT / "outputs" / f"evals-{date.today().isoformat()}.json"

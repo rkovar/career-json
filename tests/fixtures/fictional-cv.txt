@@ -1,0 +1,15 @@
+Morgan Vale
+London, United Kingdom | morgan.vale@example.invalid | +44 20 7946 0123
+
+Director of Platform Security, Northwind Systems, March 2022 to present
+- Led the fraud detection programme across three regions; quarterly fraud write-offs fell by roughly a third with the false-positive rate unchanged.
+- Made detection engineering a reviewed, tested practice with 70+ detections under review.
+- Rebuilt a nine-person on-call rotation after a regional outage.
+
+Platform Security Lead, Northwind Systems, June 2019 to March 2022
+Security Engineer, Northwind Systems, January 2017 to June 2019
+
+Senior Engineer, Contoso Logistics, April 2013 to December 2016
+- Migrated the order platform to a new region with zero customer-visible downtime.
+
+MSc Computer Science, Fictional University, 2011 to 2013

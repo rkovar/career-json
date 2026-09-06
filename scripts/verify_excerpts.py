@@ -61,6 +61,15 @@ def contains(source_text, excerpt):
     return True, None
 
 
+def html_text(html):
+    """Visible text of a saved page: scripts, styles and tags removed."""
+    html = re.sub(r"(?is)<(script|style|noscript)[^>]*>.*?</\1>", " ", html)
+    html = re.sub(r"(?s)<!--.*?-->", " ", html)
+    text = re.sub(r"<[^>]+>", " ", html)
+    import html as htmllib
+    return htmllib.unescape(text)
+
+
 def extract(path):
     result = subprocess.run([str(EXTRACT), str(path)], capture_output=True, text=True)
     if result.returncode != 0:
@@ -78,7 +87,21 @@ def verify(pack, root=ROOT):
             return texts[sid]
         kind = source.get("source_type")
         path = root / source["path"] if source.get("path") else None
-        if kind == "url":
+        if kind == "url" and source.get("saved_copy"):
+            # A saved copy makes a url source checkable. HTML is reduced to its
+            # text so an excerpt from the rendered page matches.
+            copy = root / source["saved_copy"]
+            if not copy.exists():
+                texts[sid] = ("unverifiable", f"saved copy missing: {source['saved_copy']}")
+            elif source.get("saved_sha256") and sha256(copy) != source["saved_sha256"]:
+                texts[sid] = ("changed", "saved copy no longer matches saved_sha256")
+            else:
+                try:
+                    raw = extract(copy) if copy.suffix.lower() == ".pdf" else html_text(copy.read_text(errors="replace"))
+                    texts[sid] = ("ok", normalise(raw))
+                except RuntimeError as exc:
+                    texts[sid] = ("unverifiable", str(exc))
+        elif kind == "url":
             texts[sid] = ("unverifiable", "url source with no saved copy")
         elif path is None or not path.exists():
             texts[sid] = ("unverifiable", f"file not found: {source.get('path')}")

@@ -149,7 +149,9 @@ def check(path):
                     if aid not in atoms:
                         errors.append(f"requirement {req.get('text', '')[:50]!r} cites {aid}, "
                                       f"which is not in {pack_path.name}")
-                    elif link["linked_by"] == "subject":
+                    elif link["linked_by"] == "subject" and not link.get("note"):
+                        # A note is the subject's stated reason, which answers
+                        # the question this warning asks.
                         # Weak, deliberately: a confirmed link whose atom shares
                         # no word with the requirement or the role's keywords is
                         # worth a second look, not a rejection.
