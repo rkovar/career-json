@@ -28,10 +28,16 @@ else. Without it there is no work to do.
 python3 scripts/select_evidence.py --role <role_id>   # ranked shortlist for the role
 python3 scripts/select_evidence.py                 # everything eligible, unranked
 python3 scripts/select_evidence.py --excluded      # what was withheld, and why
-python3 scripts/render.py outputs/<name>.md        # HTML, never hand-written
-python3 scripts/validate_artifact.py outputs/<name>.md
-python3 scripts/manifest.py "<target role>" --artifact outputs/<name>.md   # provenance for the record
+python3 scripts/render.py outputs/<role_id>-draft.md        # HTML, never hand-written
+python3 scripts/validate_artifact.py outputs/<role_id>-draft.md
+python3 scripts/manifest.py "<target role>" --artifact outputs/<role_id>-draft.md   # provenance
 ```
+
+**Name the file `outputs/<role_id>-draft.md`** (a cover letter:
+`outputs/<role_id>-cover-letter.md`). The index, `make artifacts`, the question
+queue and the evaluation record all find artefacts by that suffix; a draft named
+anything else is invisible to every one of them. The first behavioural eval of
+this skill produced `head-of-detection-resume.md` and nothing could see it.
 
 Generate from the selection view, not from the raw pack. Pass `--role` whenever a
 profile exists in `data/roles/`: it ranks and shortlists against that role's

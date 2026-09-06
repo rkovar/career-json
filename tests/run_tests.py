@@ -2104,7 +2104,7 @@ INVARIANTS = {
                      "capture.py", "dedupe.py", "--edit", "--delete"],
     "make-interview-brief": ["inverts that rule", "Never publish this", "whole pack",
                             "external_safe: false", "Never invent"],
-    "make-resume": ["Ask no questions", "never appears inside the artefact",
+    "make-resume": ["Ask no questions", "never appears inside the artefact", "<role_id>-draft.md",
                     "fresh context, never in this one",
                     "at the end of the claim's own line",
                     "business_outcome", "role_fit_notes", "recruiter-screen",

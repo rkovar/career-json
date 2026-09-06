@@ -129,9 +129,12 @@ def verdict_is_reject(root, text):
 
 
 def one_question_no_list(root, text):
+    """One question. A numbered list of *answers* under it is the skill's own
+    style (every option with its consequence); a numbered list of *questions*
+    is the batch the skill forbids."""
     asks = [l for l in text.splitlines() if l.strip().endswith("?")]
-    numbered = re.findall(r"^\s*\d+[.)]\s", text, re.M)
-    return len(asks) == 1 and not numbered, f"{len(asks)} question(s), {len(numbered)} numbered line(s)"
+    numbered_questions = [l for l in asks if re.match(r"^\s*\d+[.)]\s", l)]
+    return len(asks) == 1 and not numbered_questions, f"{len(asks)} question(s), {len(numbered_questions)} numbered question(s)"
 
 
 # --- setups ---------------------------------------------------------------------
@@ -188,12 +191,17 @@ def main(argv):
         passed = all(ok for _, ok, _ in results)
         report.append({"scenario": number, "skill": spec["skill"], "passed": passed,
                        "checks": [{"check": n, "ok": ok, "detail": d} for n, ok, d in results],
+                       "result_text": text[:3000],
                        "cost_usd": payload.get("total_cost_usd"), "turns": payload.get("num_turns"),
                        "workspace": str(root) if args.keep else None})
         print(f"{'PASS' if passed else 'FAIL'}  #{number} {spec['skill']}  "
               f"(${payload.get('total_cost_usd') or 0:.2f}, {payload.get('num_turns')} turns)")
         for n, ok, d in results:
             print(f"      {'ok ' if ok else 'BAD'} {n}: {d[:160]}")
+        if not passed:
+            print("      --- what the model said (first 600 chars) ---")
+            for line in text[:600].splitlines():
+                print(f"      | {line}")
         if not args.keep:
             shutil.rmtree(root, ignore_errors=True)
 
