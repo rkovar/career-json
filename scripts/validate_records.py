@@ -21,6 +21,7 @@ ROOT = Path(os.environ.get("CAREER_WORKSPACE", Path(__file__).resolve().parent.p
 SCHEMAS = ROOT / "schemas"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve  # noqa: E402
+from select_evidence import links, atom_prose  # noqa: E402
 KINDS = {
     "evaluation": (re.compile(r"-evaluation\.json$"), "evaluation-record.schema.json"),
     "screen": (re.compile(r"-screen\.json$"), "screen-record.schema.json"),
@@ -133,13 +134,29 @@ def check(path):
         # another pack and is not held to this one.
         pack_path = resolve()
         in_workspace = (ROOT / "data" / "roles").resolve() in path.resolve().parents
+        proposed = sum(1 for req in record.get("requirements", [])
+                       for l in links(req) if l["linked_by"] != "subject")
+        if proposed:
+            warnings.append(f"{proposed} link(s) are proposed, not confirmed by the subject; role_fit "
+                            "counts none of them. Confirm or reject each with scripts/link_evidence.py")
         if pack_path is not None and in_workspace:
-            ids = {a["id"] for a in json.loads(pack_path.read_text()).get("evidence_atoms", [])}
+            atoms = {a["id"]: a for a in json.loads(pack_path.read_text()).get("evidence_atoms", [])}
             for req in record.get("requirements", []):
-                for aid in req.get("evidenced_by", []):
-                    if aid not in ids:
+                words = set(re.findall(r"[a-z]{4,}", (req.get("text", "") + " "
+                                                      + " ".join(record.get("ats_keywords", []))).lower()))
+                for link in links(req):
+                    aid = link["id"]
+                    if aid not in atoms:
                         errors.append(f"requirement {req.get('text', '')[:50]!r} cites {aid}, "
                                       f"which is not in {pack_path.name}")
+                    elif link["linked_by"] == "subject":
+                        # Weak, deliberately: a confirmed link whose atom shares
+                        # no word with the requirement or the role's keywords is
+                        # worth a second look, not a rejection.
+                        prose = set(re.findall(r"[a-z]{4,}", atom_prose(atoms[aid]).lower()))
+                        if words and not words & prose:
+                            warnings.append(f"confirmed link {aid} shares no word with requirement "
+                                            f"{req.get('text', '')[:40]!r}; check it evidences it")
     if kind == "screen":
         artefact = record.get("artifact")
         if artefact and not (ROOT / artefact).exists():

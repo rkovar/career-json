@@ -29,6 +29,25 @@ OUTCOME_RANK = {"business_outcome": 0, "output": 1, "activity": 2, None: 3}
 STATUS_RANK = {"externally_verified": 0, "corroborated": 1, "self_asserted": 2}
 
 
+def links(req):
+    """A requirement's links as records. A bare id is an unconfirmed link: the
+    profile was edited by whoever wrote it, and a model editing the list it is
+    scored on is the loop role_fit must not close. Only a link the subject
+    confirmed ("linked_by": "subject") counts towards a verdict."""
+    out = []
+    for item in req.get("evidenced_by") or []:
+        if isinstance(item, str):
+            out.append({"id": item, "linked_by": "proposed", "on": None})
+        else:
+            out.append({"id": item.get("id"), "linked_by": item.get("linked_by", "proposed"),
+                        "on": item.get("on")})
+    return out
+
+
+def linked_ids(req, confirmed_only=False):
+    return [l["id"] for l in links(req) if not confirmed_only or l["linked_by"] == "subject"]
+
+
 def eligible(atom):
     if not atom.get("external_safe"):
         return False, "external_safe is false"
@@ -53,7 +72,8 @@ def role_score(atom, profile, canon):
     score = 0.0
 
     for req in profile.get("requirements", []):
-        if atom["id"] in req.get("evidenced_by", []):
+        # Selection is curation, not a verdict, so a proposed link still ranks.
+        if atom["id"] in linked_ids(req):
             weight = {"essential": 5.0, "important": 2.5, "nice_to_have": 1.0}[req["weight"]]
             score += weight
             reasons.append(f"answers {req['weight']} requirement: {req['text'][:60]}")
@@ -191,7 +211,7 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
         for req in profile.get("requirements", []):
             if req.get("weight") != "essential":
                 continue
-            best = next((a for a in scored if a["id"] in req.get("evidenced_by", [])), None)
+            best = next((a for a in scored if a["id"] in linked_ids(req)), None)
             if best and best not in keep:
                 keep.append(best)
         for atom in scored:
@@ -210,7 +230,7 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
         eligible_ids = {a["id"] for a in scored}
         all_ids = {a["id"] for a in pack.get("evidence_atoms", [])}
         for req in profile.get("requirements", []):
-            linked = req.get("evidenced_by", [])
+            linked = linked_ids(req)
             if any(i in kept_ids for i in linked):
                 status = "covered"
             elif any(i in eligible_ids for i in linked):

@@ -153,6 +153,27 @@ answering unlocks rather than by pack order, so work from the top.
    lives in the pack, so a session is resumable by construction. Say so, so that
    stopping does not feel like abandoning.
 
+## Confirming role links
+
+`role_fit.py` counts only links the subject confirmed. A link written into a
+profile by a model, or left as a bare id, is *proposed*: it is listed beside the
+verdict, queued by `open_questions.py`, and earns nothing until confirmed.
+This is what stops the reviewer raising a score by editing the list it is
+scored on.
+
+Work the proposed links like any other question, one at a time:
+
+1. `python3 scripts/link_evidence.py --propose` lists candidates per requirement
+   with the words that matched. Show the subject the requirement and the atom's
+   Result, not the score.
+2. Ask: does this evidence that requirement? The null option is real and phrased
+   as neutrally as the rest: "no, it is related work but does not evidence it".
+3. Record the answer at once: `--confirm ROLE "<requirement prefix>" E_X`, or
+   `--reject ... --why "<their words>"`. A rejected link is never proposed again.
+4. Never confirm a link yourself. If the subject is not there to answer, leave it
+   proposed and say so; the "if proposed links confirmed" column in `role_fit.py
+   --markdown` shows what the pass would unlock.
+
 ## Corroboration backlog, on request only
 
 If the user asks for a corroboration pass, `python3 scripts/corroboration_plan.py`

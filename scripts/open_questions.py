@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, metric_basis, metric_text, ROOT  # noqa: E402
-from select_evidence import eligible  # noqa: E402
+from select_evidence import eligible, links, linked_ids  # noqa: E402
 from quantities import extract  # noqa: E402
 
 ROLES = ROOT / "data" / "roles"
@@ -45,6 +45,7 @@ UNLOCK = {
     "classification": 2.0,
     "recency": 1.5,
     "recorded_question": 2.5,
+    "link_confirmation": 4.0,
 }
 
 
@@ -85,7 +86,19 @@ def collect(pack, profiles, cited):
     # A requirement nothing evidences is the thing a role hires for.
     for profile in profiles:
         for req in profile.get("requirements", []):
-            live = [i for i in req.get("evidenced_by", []) if i in atoms]
+            # A proposed link is a question with a real null answer: does this
+            # atom evidence that requirement, or not? Until the subject says,
+            # role_fit counts nothing for it.
+            for link in links(req):
+                if link["linked_by"] != "subject" and link["id"] in atoms:
+                    add("proposed_link",
+                        f"Does \"{atoms[link['id']]['title']}\" evidence {profile['title']}'s "
+                        f"{req['weight']} requirement \"{req['text']}\"? The link is proposed, "
+                        f"not confirmed, so it earns nothing yet.",
+                        "link_confirmation", subject=link["id"],
+                        detail=f"scripts/link_evidence.py --confirm {profile['role_id']} "
+                               f"\"{req['text'][:40]}\" {link['id']}, or --reject with why.")
+            live = [i for i in linked_ids(req) if i in atoms]
             if live or req.get("weight") != "essential":
                 continue
             add("role_gap",

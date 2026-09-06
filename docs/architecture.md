@@ -26,7 +26,7 @@ than any instruction.
 .claude/skills/     judgement: the nine skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              529 assertions plus a skill-invariant lint
+tests/              542 assertions plus a skill-invariant lint
 data/               your material. Git ignored, never leaves the machine
   sources/            raw input
   packs/career.json   the current record
@@ -49,6 +49,7 @@ reviews/            review records and decisions. Git ignored
 | `select_evidence.py` | Emits only eligible evidence; `--role` ranks and shortlists against a profile |
 | `render.py` | Markdown to HTML through one template, so the two cannot drift |
 | `answer.py` | Records a review answer verbatim, at the moment it is given, where the atom can cite it |
+| `link_evidence.py` | Proposes, confirms, rejects and migrates requirement-to-evidence links; only subject-confirmed links count in role_fit |
 | `entailment.py` | A cold model judges each bullet against only its cited atom: supported, overstated, unsupported. Reporting only; spends tokens |
 | `verify_excerpts.py` | Re-extracts each cited source and fails on an excerpt it does not contain: the source-to-atom hop |
 | `validate_pack.py` | Structural check on a pack |
@@ -85,7 +86,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 529 assertions: real tests over the scripts, plus a lint
+`make check` runs 542 assertions: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.
@@ -97,7 +98,7 @@ atoms, and an independent source. Everything used to run against the small one
 only, and three defects shipped behind that gap — a leak scan that failed the
 private brief on the words it exists to state, a magnitude check that emitted
 eighty warnings on one document, and a fit score with no eligibility filter. None
-were visible to three hundred passing529 assertions; all three appeared within one
+were visible to three hundred passing542 assertions; all three appeared within one
 run against real data.
 
 Behavioural claims that need a model in the loop are listed in

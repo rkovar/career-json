@@ -24,7 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, ROOT  # noqa: E402
-from select_evidence import eligible  # noqa: E402
+from select_evidence import eligible, links, linked_ids  # noqa: E402
 
 ROLES = ROOT / "data" / "roles"
 WEIGHT = {"essential": 3.0, "important": 1.5, "nice_to_have": 0.5}
@@ -45,7 +45,7 @@ def usable(atom, deliverable):
     return True
 
 
-def score(profile, atoms, deliverable=False):
+def score(profile, atoms, deliverable=False, confirmed_only=True):
     """Fit against the pack. deliverable=True counts only evidence an artefact may
     cite, which is not the same question.
 
@@ -61,7 +61,10 @@ def score(profile, atoms, deliverable=False):
     for req in profile["requirements"]:
         weight = WEIGHT[req["weight"]]
         total += weight
-        linked = [atoms[i] for i in req.get("evidenced_by", []) if i in atoms]
+        # Only links the subject confirmed count. A bare id or a proposed link
+        # is a candidate: it is listed beside the verdict and earns nothing, so a
+        # model cannot raise a score by editing the list it is scored on.
+        linked = [atoms[i] for i in linked_ids(req, confirmed_only=confirmed_only) if i in atoms]
         linked = [a for a in linked if usable(a, deliverable)]
         firm = [a for a in linked if a.get("evidence_status") != "unresolved"]
         open_ = [a for a in linked if a.get("evidence_status") == "unresolved"]
@@ -109,6 +112,20 @@ def score(profile, atoms, deliverable=False):
     }
 
 
+def proposed_links(profiles, atoms):
+    """Links awaiting the subject's confirmation. They look like gaps in the
+    score and are not: they are questions for the confirmation pass."""
+    rows = []
+    for profile in profiles:
+        for req in profile.get("requirements", []):
+            for link in links(req):
+                if link["linked_by"] != "subject" and link["id"] in atoms:
+                    rows.append({"id": link["id"], "title": atoms[link["id"]]["title"],
+                                 "role_id": profile["role_id"], "requirement": req["text"],
+                                 "weight": req["weight"]})
+    return rows
+
+
 def unresolved_linked(profiles, atoms):
     """Unresolved atoms linked to any requirement. Listed beside the verdict for
     the same reason withheld atoms are: in the score they look like weak evidence
@@ -116,7 +133,7 @@ def unresolved_linked(profiles, atoms):
     rows = []
     for profile in profiles:
         for req in profile.get("requirements", []):
-            for i in req.get("evidenced_by", []):
+            for i in linked_ids(req):
                 atom = atoms.get(i)
                 if atom and atom.get("evidence_status") == "unresolved":
                     rows.append({"id": i, "title": atom["title"], "role_id": profile["role_id"],
@@ -164,29 +181,46 @@ def main(argv):
         row["deliverable_verdict"] = shown["verdict"]
         row["withheld_essentials"] = [g for g in shown["essential_gaps"]
                                       if g not in row["essential_gaps"]]
+        # What the verdict would be if every proposed link were confirmed: the
+        # payoff of the confirmation pass, shown so the pass gets done.
+        potential = score(profile, atoms, confirmed_only=False)
+        row["if_proposed_confirmed"] = {"score": potential["score"], "verdict": potential["verdict"]}
         results.append(row)
     results.sort(key=lambda r: -r["score"])
     unpublishable = withheld(atoms)
     open_questions = unresolved_linked(profiles, atoms)
+    awaiting = proposed_links(profiles, atoms)
     if not args.markdown:
         print(json.dumps({"pack": str(pack_path.relative_to(ROOT)),
                           "withheld_from_every_artefact": unpublishable,
                           "unresolved_linked_to_requirements": open_questions,
+                          "proposed_links_awaiting_confirmation": awaiting,
                           "roles": results}, indent=2))
         return 0
 
     out = ["# Role Fit", "", f"Pack: `{pack_path.relative_to(ROOT)}`", "",
            "An unevidenced essential requirement makes a role unsupported however high",
            "the rest scores. That is the honest reading: it is the thing they are hiring for.", "",
-           "Coverage drives the verdict; corroboration is reported beside it and gates nothing.", "",
-           "| Role | Coverage | Verdict | Corroborated | Unevidenced essentials |",
-           "| --- | --- | --- | --- | --- |"]
+           "Coverage drives the verdict; corroboration is reported beside it and gates nothing.",
+           "Only links the subject confirmed count; proposed links are listed below and earn nothing.", "",
+           "| Role | Coverage | Verdict | If proposed links confirmed | Corroborated | Unevidenced essentials |",
+           "| --- | --- | --- | --- | --- | --- |"]
     for r in results:
         gaps = "; ".join(r["essential_gaps"]) or "none"
         shown = ("" if r["deliverable_score"] == r["score"]
                  else f" (deliverable {r['deliverable_score']}%)")
-        out.append(f"| {r['title']} | {r['score']}%{shown} | {r['verdict']} | "
+        pot = r["if_proposed_confirmed"]
+        potential = ("same" if pot["score"] == r["score"] and pot["verdict"] == r["verdict"]
+                     else f"{pot['score']}% {pot['verdict']}")
+        out.append(f"| {r['title']} | {r['score']}%{shown} | {r['verdict']} | {potential} | "
                    f"{r['corroborated_share']}% | {gaps} |")
+    if awaiting:
+        out += ["", "## Proposed links awaiting confirmation", "",
+                "Candidates, not evidence. `scripts/link_evidence.py --confirm` or `--reject`",
+                "each one with the subject; until then it earns nothing.", ""]
+        for row in awaiting:
+            out.append(f"- `{row['id']}` {row['title']} — {row['weight']} requirement "
+                       f"\"{row['requirement']}\" ({row['role_id']})")
     if open_questions:
         out += ["", "## Unresolved evidence linked to requirements", "",
                 "An open question, not weak evidence. It earns half credit on an important or",

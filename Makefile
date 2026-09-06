@@ -1,5 +1,5 @@
 # Dependency-free: everything here is stdlib Python or shell.
-.PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts hooks clean
+.PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts links hooks clean
 
 help:
 	@echo "make check     - validate packs and run the test suite"
@@ -15,6 +15,7 @@ help:
 	@echo "make corroboration - ranked list of evidence worth corroborating"
 	@echo "make index     - regenerate outputs/INDEX.md"
 	@echo "make fit       - score the pack against every role profile"
+	@echo "make links     - confirmed and proposed requirement-to-evidence links per role"
 	@echo "make notes     - capture notes awaiting promotion into the pack"
 	@echo "make dupes     - near-duplicate atoms already in the pack"
 	@echo "make coverage  - timeline, gaps, undated atoms, stale skills"
@@ -53,6 +54,9 @@ index:
 
 fit:
 	@python3 scripts/role_fit.py --markdown
+
+links:
+	@python3 scripts/link_evidence.py --status
 
 notes:
 	@python3 scripts/capture.py --list

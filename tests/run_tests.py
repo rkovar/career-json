@@ -32,6 +32,12 @@ COMPLEX = ROOT / "examples" / "career.complex.example.json"
 RESULTS = []
 
 
+def L(ids):
+    """Links the subject confirmed. A bare id is a proposed link and earns
+    nothing in role_fit, so a test that means "this evidences that" says so."""
+    return [{"id": i, "linked_by": "subject", "on": "2026-09-06"} for i in ids]
+
+
 def check(name, condition, detail=""):
     RESULTS.append((name, bool(condition), detail))
 
@@ -105,11 +111,11 @@ def fixture():
         "central_requirement": "Has run detection engineering as a function.",
         "requirements": [
             {"weight": "essential", "text": "Runs detection engineering",
-             "evidenced_by": ["E_CX_DETECTION_PROGRAMME"]},
+             "evidenced_by": L(["E_CX_DETECTION_PROGRAMME"])},
             {"weight": "essential", "text": "Owns risk governance tooling",
-             "evidenced_by": ["E_CX_INTERNAL_TOOL"]},
+             "evidenced_by": L(["E_CX_INTERNAL_TOOL"])},
             {"weight": "important", "text": "Reduces fraud loss",
-             "evidenced_by": ["E_CX_FRAUD_LOSS"]}],
+             "evidenced_by": L(["E_CX_FRAUD_LOSS"])}],
         "ats_keywords": ["detection engineering", "fraud"],
         "negative_signals": [], "length": "two A4 pages", "audience": "named_recipient"}))
 
@@ -731,7 +737,7 @@ def test_shortlist_actually_curates():
     (workspace / "data" / "packs" / "pack.json").write_text(json.dumps(pack))
     (workspace / "data" / "roles" / "grown.json").write_text(json.dumps({
         "role_id": "grown", "title": "Grown", "central_requirement": "c",
-        "requirements": [{"weight": "essential", "text": "t", "evidenced_by": ["E_GROWN_00"]}],
+        "requirements": [{"weight": "essential", "text": "t", "evidenced_by": L(["E_GROWN_00"])}],
         "ats_keywords": ["platform engineering"]}))
 
     code, out, err = run("select_evidence.py", "--role", "grown", workspace=workspace)
@@ -822,9 +828,9 @@ def test_complex_pack_shape():
         "central_requirement": "Has run detection as a function.",
         "requirements": [
             {"weight": "essential", "text": "Runs detection engineering",
-             "evidenced_by": ["E_CX_DETECTION_PROGRAMME"]},
+             "evidenced_by": L(["E_CX_DETECTION_PROGRAMME"])},
             {"weight": "essential", "text": "Owns risk governance tooling",
-             "evidenced_by": ["E_CX_INTERNAL_TOOL"]}],
+             "evidenced_by": L(["E_CX_INTERNAL_TOOL"])}],
         "ats_keywords": ["detection engineering"]}))
     code, out, _ = run("role_fit.py", "--markdown", workspace=workspace)
     check("fit reports what no artefact may cite",
@@ -967,7 +973,7 @@ def test_open_questions():
     pack = json.loads(COMPLEX.read_text())
     profile = {"role_id": "r", "title": "R", "central_requirement": "c",
                "requirements": [{"weight": "essential", "text": "nothing evidences this",
-                                 "evidenced_by": []}]}
+                                 "evidenced_by": L([])}]}
     qs = open_questions.collect(pack, [profile], cited=set())
     kinds = {q["kind"] for q in qs}
 
@@ -1168,7 +1174,7 @@ def test_fit_policy():
     atoms = {a["id"]: a for a in json.loads(COMPLEX.read_text())["evidence_atoms"]}
     def profile(*reqs):
         return {"role_id": "r", "title": "R", "central_requirement": "c",
-                "requirements": [{"weight": w, "text": t, "evidenced_by": ids} for w, t, ids in reqs]}
+                "requirements": [{"weight": w, "text": t, "evidenced_by": L(ids)} for w, t, ids in reqs]}
 
     # Every essential covered by self-asserted evidence: full coverage.
     covered = role_fit.score(profile(
@@ -1240,7 +1246,7 @@ def test_withheld_evidence_is_visible():
 
     profile = {"role_id": "r", "title": "R", "central_requirement": "c",
                "requirements": [{"weight": "essential", "text": "needs the withheld one",
-                                 "evidenced_by": [withheld]}]}
+                                 "evidenced_by": L([withheld])}]}
     capability = role_fit.score(profile, atoms)
     deliverable = role_fit.score(profile, atoms, deliverable=True)
     check("capability fit counts evidence a document may not carry",
@@ -1460,7 +1466,7 @@ def test_selection_contract():
     # penalised 1.5 on head-of roles.
     profile = {"role_id": "r", "title": "R", "central_requirement": "c",
                "requirements": [{"weight": "essential", "text": "grow a function",
-                                 "evidenced_by": ["E_CX_TEAM_GROWTH"]}],
+                                 "evidenced_by": L(["E_CX_TEAM_GROWTH"])}],
                "ats_keywords": []}
     scored = sel.view(pack, profile=profile)["atoms"]
     growth = next(a for a in scored if a["id"] == "E_CX_TEAM_GROWTH")
@@ -1479,8 +1485,8 @@ def test_selection_contract():
     unique.update(id="E_UNIQUE", outcome_type="activity", occurred={"start": "2010", "inferred": False})
     grown["evidence_atoms"] = [strong, dup, unique]
     two = {"role_id": "two", "title": "Two", "central_requirement": "c", "ats_keywords": [],
-           "requirements": [{"text": "Build", "weight": "essential", "evidenced_by": ["E_STRONG_A", "E_STRONG_B"]},
-                            {"text": "Govern", "weight": "essential", "evidenced_by": ["E_UNIQUE"]}]}
+           "requirements": [{"text": "Build", "weight": "essential", "evidenced_by": L(["E_STRONG_A", "E_STRONG_B"])},
+                            {"text": "Govern", "weight": "essential", "evidenced_by": L(["E_UNIQUE"])}]}
     kept = {a["id"] for a in sel.view(grown, profile=two, limit=2)["atoms"]}
     check("a two-slot shortlist keeps the sole evidence for each essential",
           kept == {"E_STRONG_A", "E_UNIQUE"}, str(kept))
@@ -1488,15 +1494,72 @@ def test_selection_contract():
     # Per-requirement coverage tells withheld from missing from cut-by-limit.
     cov_profile = {"role_id": "c", "title": "C", "central_requirement": "c", "ats_keywords": [],
                    "requirements": [
-                       {"text": "fraud", "weight": "essential", "evidenced_by": ["E_CX_FRAUD_LOSS"]},
-                       {"text": "governance tooling", "weight": "essential", "evidenced_by": ["E_CX_INTERNAL_TOOL"]},
-                       {"text": "nothing", "weight": "important", "evidenced_by": []},
-                       {"text": "mentoring", "weight": "nice_to_have", "evidenced_by": ["E_CX_MENTORING"]}]}
+                       {"text": "fraud", "weight": "essential", "evidenced_by": L(["E_CX_FRAUD_LOSS"])},
+                       {"text": "governance tooling", "weight": "essential", "evidenced_by": L(["E_CX_INTERNAL_TOOL"])},
+                       {"text": "nothing", "weight": "important", "evidenced_by": L([])},
+                       {"text": "mentoring", "weight": "nice_to_have", "evidenced_by": L(["E_CX_MENTORING"])}]}
     cov = {c["text"]: c["status"] for c in sel.view(pack, profile=cov_profile, limit=1)["requirement_coverage"]}
     check("requirement coverage reports covered, withheld, missing and omitted",
           cov == {"fraud": "covered", "governance tooling": "withheld",
                   "nothing": "missing", "mentoring": "omitted"}, str(cov))
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
+
+
+def test_link_provenance():
+    """A link earns nothing until the subject confirms it. Bare ids are proposed;
+    link_evidence.py proposes, confirms, rejects and migrates; role_fit reports
+    what confirmation would unlock; validate_records warns on the unconfirmed."""
+    root = sandbox()
+    (root / "data" / "packs" / "pack.json").write_text(COMPLEX.read_text())
+    (root / "data" / "roles").mkdir(exist_ok=True)
+    role = root / "data" / "roles" / "fraud-lead.json"
+    role.write_text(json.dumps({
+        "role_id": "fraud-lead", "title": "Fraud Lead", "central_requirement": "Reduces fraud loss",
+        "requirements": [{"weight": "essential", "text": "Reduces fraud loss",
+                          "evidenced_by": ["E_CX_FRAUD_LOSS"]}],
+        "ats_keywords": ["fraud"], "negative_signals": [], "length": "one page",
+        "audience": "named_recipient"}))
+    code, out, _ = run("role_fit.py", workspace=root)
+    fit = json.loads(out)["roles"][0]
+    check("a bare id is a proposed link and earns nothing",
+          fit["verdict"] == "not supported" and fit["score"] == 0, str(fit)[:200])
+    check("the verdict if proposed links were confirmed is reported",
+          fit["if_proposed_confirmed"]["verdict"] == "well supported", str(fit["if_proposed_confirmed"]))
+    check("the proposed link is listed beside the verdict",
+          json.loads(out)["proposed_links_awaiting_confirmation"][0]["id"] == "E_CX_FRAUD_LOSS")
+    code, out, _ = run("validate_records.py", role, workspace=root)
+    check("validate_records warns on an unconfirmed link", code == 0 and "proposed, not confirmed" in out, out)
+    code, out, _ = run("open_questions.py", workspace=root)
+    kinds = [q["kind"] for q in json.loads(out)["questions"]]
+    check("confirming the link is a queued question", "proposed_link" in kinds, str(kinds))
+
+    code, out, _ = run("link_evidence.py", "--migrate", workspace=root)
+    migrated = json.loads(role.read_text())["requirements"][0]["evidenced_by"][0]
+    check("--migrate turns a bare id into a proposed link with provenance",
+          migrated.get("linked_by") == "proposed" and migrated.get("on"), str(migrated))
+    code, out, _ = run("link_evidence.py", "--confirm", "fraud-lead", "Reduces", "E_CX_FRAUD_LOSS", workspace=root)
+    code, out, _ = run("role_fit.py", workspace=root)
+    fit = json.loads(out)["roles"][0]
+    check("a confirmed link counts", fit["verdict"] == "well supported", str(fit)[:200])
+    code, out, _ = run("link_evidence.py", "--propose", "--json", workspace=root)
+    props = json.loads(out)[0]["candidates"]
+    check("--propose does not re-propose a link already made",
+          "E_CX_FRAUD_LOSS" not in [c["id"] for c in props], str(props)[:200])
+    code, out, _ = run("link_evidence.py", "--reject", "fraud-lead", "Reduces", "E_CX_ONCALL",
+                       "--why", "on-call is not fraud", workspace=root)
+    saved = json.loads(role.read_text())["requirements"][0]
+    check("a rejected link is recorded with its reason",
+          saved["rejected_links"][0]["id"] == "E_CX_ONCALL" and saved["rejected_links"][0]["why"])
+    code, out, _ = run("link_evidence.py", "--propose", "--json", workspace=root)
+    check("and never proposed again",
+          "E_CX_ONCALL" not in [c["id"] for c in json.loads(out)[0]["candidates"]])
+    # A confirmed link with no word in common with its requirement is worth a look.
+    saved["evidenced_by"].append({"id": "E_CX_ONCALL", "linked_by": "subject", "on": "2026-09-06"})
+    role.write_text(json.dumps({**json.loads(role.read_text()), "requirements": [saved]}))
+    code, out, _ = run("validate_records.py", role, workspace=root)
+    check("a confirmed link sharing no word with its requirement is warned about",
+          "shares no word" in out, out)
+    shutil.rmtree(root, ignore_errors=True)
 
 
 def test_entailment_plumbing():
@@ -2061,6 +2124,7 @@ INVARIANTS = {
                         # Answers are recorded as given, and the score is read
                         # once at the end, not steered towards between questions.
                         "answer.py", "Do not re-run `role_fit.py` between questions",
+                        "link_evidence.py", "earns nothing until",
                         "Coverage drives the verdict",
                         "written into `star.result`", "An answer is a source",
                         "Close an unanswerable question", "open_questions.py",
@@ -2264,6 +2328,7 @@ def main():
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_selection_contract, test_verify_excerpts,
                  test_review_findings_2026_09_06, test_answer_records_verbatim, test_entailment_plumbing,
+                 test_link_provenance,
                  test_screen_context_is_reported,
                  test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,
