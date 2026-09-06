@@ -50,6 +50,25 @@ mistake.
 
 Corroboration is **optional**. Its absence is not a defect and nothing chases it.
 
+**`metrics`** — a metric is a claim, so it may carry how it was measured:
+
+```json
+"metrics": [
+  {"value": "~33% CI spend reduction",
+   "basis": "monthly CI invoice, Q1 2023 against Q1 2024",
+   "measured": true},
+  "median build time unchanged"
+]
+```
+
+A plain string is still valid and no pack needs migrating. The object form exists
+because a figure whose baseline and denominator nobody recorded cannot be
+defended: "67% throughput increase" is a strong bullet and an unanswerable
+interview question. `basis: null` says the basis was not recorded, which is
+honest; `measured: false` marks an estimate or a recollection rather than
+something a system produced. `select_evidence.py` carries both through to
+generation, so an unmeasured figure is visible before it reaches a page.
+
 **`outcome_type`** — `activity` (work done: engagements, throughput), `output`
 (things produced: patterns, courses), `business_outcome` (what changed for the
 organisation). Generation prefers outcomes, because hiring managers discount
@@ -93,6 +112,27 @@ you.
 
 `parent_employment_id` links a promotion to the role it grew out of, so a
 progression can be collapsed to one line without losing the detail.
+
+## Education
+
+Qualifications, held to the same standard as employment and for the same reason:
+a degree is not a STAR achievement, it is a fact a background check verifies.
+
+```json
+{
+  "education_id": "EDU_MSC",
+  "institution": "Example University",
+  "qualification": "MSc",
+  "field": "Information Security",
+  "start": "2012-09", "end": "2013",
+  "grade": "Distinction"
+}
+```
+
+Absent from the schema until 2026-09-06, which meant a degree could not be
+recorded at all and `export_resume_json.py` could never fill JSON Resume's
+education section. `external_safe: false` withholds a qualification from every
+artefact exactly as it does an atom.
 
 ## Source records
 

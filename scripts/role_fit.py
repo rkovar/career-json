@@ -19,6 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, ROOT  # noqa: E402
+from select_evidence import eligible  # noqa: E402
 
 ROLES = ROOT / "data" / "roles"
 WEIGHT = {"essential": 3.0, "important": 1.5, "nice_to_have": 0.5}
@@ -26,13 +27,24 @@ STATUS_CREDIT = {"externally_verified": 1.0, "corroborated": 0.85, "self_asserte
 OUTCOME_CREDIT = {"business_outcome": 1.0, "output": 0.8, "activity": 0.6, None: 0.5}
 
 
-def score(profile, atoms):
+def score(profile, atoms, deliverable=False):
+    """Fit against the pack. deliverable=True counts only evidence an artefact may
+    cite, which is not the same question.
+
+    Without the distinction this scored ineligible evidence as if a resume could
+    show it, so a role could read "supported" on material no document may carry.
+    Left unlinked in the profile instead, the same atom made the role read "not
+    supported" when the capability exists. Neither number was the truth, and the
+    gap between the two is what a publication constraint costs.
+    """
     total = earned = 0.0
     gaps, thin = [], []
     for req in profile["requirements"]:
         weight = WEIGHT[req["weight"]]
         total += weight
         ids = [i for i in req.get("evidenced_by", []) if i in atoms]
+        if deliverable:
+            ids = [i for i in ids if eligible(atoms[i])[0]]
         if not ids:
             gaps.append(req)
             continue
@@ -65,6 +77,19 @@ def score(profile, atoms):
     }
 
 
+def withheld(atoms):
+    """Atoms no artefact may ever cite. Reported next to the verdict because an
+    unevidenced essential requirement and a withheld one look identical in the
+    score and are completely different problems. Finding this took reading a
+    whole pack by hand; it is decidable, so it belongs here."""
+    rows = []
+    for atom in atoms.values():
+        ok, why = eligible(atom)
+        if not ok:
+            rows.append({"id": atom["id"], "title": atom["title"], "withheld_because": why})
+    return rows
+
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--markdown", action="store_true")
@@ -84,9 +109,21 @@ def main(argv):
               file=sys.stderr)
         return 1
 
-    results = sorted((score(p, atoms) for p in profiles), key=lambda r: -r["score"])
+    results = []
+    for profile in profiles:
+        row = score(profile, atoms)
+        shown = score(profile, atoms, deliverable=True)
+        row["deliverable_score"] = shown["score"]
+        row["deliverable_verdict"] = shown["verdict"]
+        row["withheld_essentials"] = [g for g in shown["essential_gaps"]
+                                      if g not in row["essential_gaps"]]
+        results.append(row)
+    results.sort(key=lambda r: -r["score"])
+    unpublishable = withheld(atoms)
     if not args.markdown:
-        print(json.dumps({"pack": str(pack_path.relative_to(ROOT)), "roles": results}, indent=2))
+        print(json.dumps({"pack": str(pack_path.relative_to(ROOT)),
+                          "withheld_from_every_artefact": unpublishable,
+                          "roles": results}, indent=2))
         return 0
 
     out = ["# Role Fit", "", f"Pack: `{pack_path.relative_to(ROOT)}`", "",
@@ -95,7 +132,16 @@ def main(argv):
            "| Role | Score | Verdict | Unevidenced essentials |", "| --- | --- | --- | --- |"]
     for r in results:
         gaps = "; ".join(r["essential_gaps"]) or "none"
-        out.append(f"| {r['title']} | {r['score']}% | {r['verdict']} | {gaps} |")
+        shown = ("" if r["deliverable_score"] == r["score"]
+                 else f" (deliverable {r['deliverable_score']}%)")
+        out.append(f"| {r['title']} | {r['score']}%{shown} | {r['verdict']} | {gaps} |")
+    if unpublishable:
+        out += ["", "## Withheld from every artefact", "",
+                "These cannot appear in any document. Check whether any of them answers",
+                "a requirement listed above as a gap: the score cannot tell the two apart.",
+                ""]
+        for row in unpublishable:
+            out.append(f"- `{row['id']}` {row['title']} — {row['withheld_because']}")
     print("\n".join(out))
     return 0
 

@@ -106,6 +106,37 @@ def check(path, schema, strict=False):
     if not pack.get("employment"):
         errors.append("no employment records; every date and title in a generated artefact would be unsourced")
 
+    # Education: like employment, a fact a background check tests rather than a
+    # claim an atom argues. Held to the same standard.
+    edu_schema = schema["$defs"]["educationRecord"]
+    education_ids = set()
+    for i, rec in enumerate(pack.get("education", [])):
+        rid = rec.get("education_id") or f"<index {i}>"
+        where = f"education[{rid}]"
+        for field in edu_schema["required"]:
+            if rec.get(field) in (None, "") and field != "external_safe":
+                errors.append(f"{where}: missing {field}")
+        if rec.get("education_id") in education_ids:
+            errors.append(f"{where}: duplicate education_id")
+        education_ids.add(rec.get("education_id"))
+        for field in set(rec) - set(edu_schema["properties"]):
+            errors.append(f"{where}: unknown field {field!r}")
+        if rec.get("evidence_status") not in e["status"]:
+            errors.append(f"{where}: evidence_status {rec.get('evidence_status')!r} not in {sorted(e['status'])}")
+        if not isinstance(rec.get("external_safe"), bool):
+            errors.append(f"{where}: external_safe must be present and boolean")
+        for field in ("start", "end"):
+            value = rec.get(field)
+            if value in (None, "present"):
+                continue
+            if not re.match(r"^\d{4}(-\d{2})?$", str(value)):
+                errors.append(f"{where}: {field} {value!r} must be YYYY or YYYY-MM")
+        if not rec.get("source_refs"):
+            warnings.append(f"{where}: no source_refs; the qualification traces to nothing")
+        for ref in rec.get("source_refs", []):
+            if ref.get("source_id") not in source_ids:
+                errors.append(f"{where}: source_ref points at unknown source_id {ref.get('source_id')!r}")
+
     atoms = pack.get("evidence_atoms")
     if not atoms:
         errors.append("evidence_atoms is empty or missing")
@@ -172,6 +203,20 @@ def check(path, schema, strict=False):
             if method and method not in allowed:
                 errors.append(f"{where}: capture.method {method!r} not in {allowed}")
 
+        # A metric may be a plain string or an object carrying its measurement
+        # basis. An unknown key here would be silently ignored by every consumer,
+        # which is how a recorded basis quietly stops existing.
+        for j, metric in enumerate(atom.get("metrics") or []):
+            if isinstance(metric, str):
+                continue
+            if not isinstance(metric, dict):
+                errors.append(f"{where}: metrics[{j}] must be a string or an object")
+            elif not metric.get("value"):
+                errors.append(f"{where}: metrics[{j}] object form needs a value")
+            else:
+                for field in set(metric) - {"value", "basis", "measured"}:
+                    errors.append(f"{where}: metrics[{j}] unknown field {field!r}")
+
         if not isinstance(atom.get("star"), dict):
             errors.append(f"{where}: missing star object; flat situation/task/action/result is no longer part of the contract")
         if status == "unresolved" and not atom.get("open_questions"):
@@ -180,6 +225,15 @@ def check(path, schema, strict=False):
             warnings.append(f"{where}: no corroborator identified; rests on the subject's word alone")
         if outcome is None and status != "unresolved":
             warnings.append(f"{where}: no outcome_type set")
+
+    # Said once, at the altitude where it is true. Generation ranks business
+    # outcomes first and evaluate-output checks for them, so a pack with none
+    # leaves both inert and makes every artefact warn forever.
+    if atoms and not any(a.get("outcome_type") == "business_outcome" for a in atoms):
+        warnings.append(
+            f"no atom is typed business_outcome ({len(atoms)} atoms); selection ranking and "
+            "artefact evaluation both key on it, so every document from this pack will "
+            "describe work rather than consequence")
 
     profile = pack.get("private_profile")
     if profile is None:

@@ -68,7 +68,7 @@ make hooks                      # optional: validate on commit
 Outside macOS, PDF sources also need poppler (`apt install poppler-utils`).
 
 Put your material in `data/sources/` — a resume, a LinkedIn export, an
-end-of-year write-up. Then, in Claude Code:
+end-of-year write-up, whatever you have to start with. Then, in Claude Code:
 
 ```
 Use build-career-pack on everything in data/sources/

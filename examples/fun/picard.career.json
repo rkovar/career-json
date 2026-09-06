@@ -1,0 +1,326 @@
+{
+  "$schema": "../../schemas/career.schema.json",
+  "schema_version": "1.3",
+  "name": "Jean-Luc Picard (parody)",
+  "purpose": "A parody datapack for a fictional character, showing the format on a career too long for one resume.",
+  "source_records": [
+    {
+      "source_id": "SRC_SF_RECORD",
+      "source_type": "url",
+      "path": "https://example.org/starfleet/personnel/picard-jl",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Starfleet personnel record. Fictional, like everything else here."
+    },
+    {
+      "source_id": "SRC_FED_ARCHIVE",
+      "source_type": "url",
+      "path": "https://example.org/federation/archives/treaty-armens",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Federation diplomatic archive."
+    }
+  ],
+  "employment": [
+    {
+      "employment_id": "EMP_STARGAZER",
+      "employer": "Starfleet",
+      "employer_of_record": null,
+      "title": "Commanding Officer, USS Stargazer",
+      "start": "2333",
+      "end": "2355",
+      "location": "Deep space",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_SF_RECORD",
+          "locator": "service history"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_ENTERPRISE_D",
+      "employer": "Starfleet",
+      "employer_of_record": null,
+      "title": "Commanding Officer, USS Enterprise (NCC-1701-D)",
+      "start": "2364",
+      "end": "2371",
+      "location": "Deep space",
+      "parent_employment_id": "EMP_STARGAZER",
+      "source_refs": [
+        {
+          "source_id": "SRC_SF_RECORD",
+          "locator": "service history"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "id": "E_SHELIAK_TREATY",
+      "title": "Averted the destruction of a colony by treaty arbitration",
+      "star": {
+        "situation": "The Sheliak Corporate demanded the removal of 15,000 human colonists from Tau Cygna V within days, as was their right under the Treaty of Armens.",
+        "task": "Buy enough time to evacuate the colony without breaking the treaty.",
+        "action": "Read the treaty, found the third-party arbitration clause, and nominated a species then in hibernation, forcing a delay the Sheliak could not refuse.",
+        "result": "Arbitration delayed enforcement; the colony was evacuated in full."
+      },
+      "metrics": [
+        "15,000 colonists evacuated",
+        "zero casualties"
+      ],
+      "skills": [
+        "diplomacy",
+        "negotiation",
+        "contract interpretation"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_FED_ARCHIVE",
+          "locator": "arbitration filing"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [
+        {
+          "kind": "direct_report",
+          "reference": "First Officer at the time",
+          "reachable": true,
+          "notes": "Ran the evacuation."
+        }
+      ],
+      "role_fit_notes": null,
+      "employment_id": "EMP_ENTERPRISE_D",
+      "occurred": {
+        "start": "2365",
+        "end": "2365",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "diplomacy",
+        "crisis"
+      ]
+    },
+    {
+      "id": "E_ARBITER_SUCCESSION",
+      "title": "Served as Arbiter of Succession for the Klingon High Council",
+      "star": {
+        "situation": "The Klingon Chancellor died with a contested succession and a civil war forming.",
+        "task": "Adjudicate the succession as an outsider both factions would accept.",
+        "action": "Ran the rite of succession, investigated the challengers, and disqualified the candidate backed by a hostile foreign power.",
+        "result": "Succession resolved; the Federation kept its alliance with the Empire."
+      },
+      "metrics": [
+        "one succession resolved",
+        "alliance preserved"
+      ],
+      "skills": [
+        "diplomacy",
+        "governance",
+        "conflict resolution"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_FED_ARCHIVE",
+          "locator": "diplomatic record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [],
+      "role_fit_notes": null,
+      "employment_id": "EMP_ENTERPRISE_D",
+      "occurred": {
+        "start": "2367",
+        "end": "2368",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "diplomacy"
+      ]
+    },
+    {
+      "id": "E_PICARD_MANOEUVRE",
+      "title": "Devised a tactical manoeuvre now taught at the Academy",
+      "star": {
+        "situation": "Outgunned by a hostile vessel with no support and a failing ship.",
+        "task": "Win an engagement the Stargazer could not survive.",
+        "action": "Jumped briefly to warp so the enemy's sensors showed the ship in two places, and fired on the real one.",
+        "result": "Engagement won. The manoeuvre entered the Academy tactical syllabus."
+      },
+      "metrics": [
+        "taught at Starfleet Academy"
+      ],
+      "skills": [
+        "tactics",
+        "command"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SF_RECORD",
+          "locator": "commendations"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "output",
+      "corroborators": [],
+      "role_fit_notes": null,
+      "employment_id": "EMP_STARGAZER",
+      "occurred": {
+        "start": "2355",
+        "end": "2355",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "tactics"
+      ]
+    },
+    {
+      "id": "E_LOCUTUS",
+      "title": "Assimilated by the Borg and used against Starfleet at Wolf 359",
+      "star": {
+        "situation": "Captured and assimilated during the first major Borg incursion.",
+        "task": "None. Agency was removed.",
+        "action": "Starfleet tactical knowledge was extracted and used against the fleet.",
+        "result": "Thirty-nine ships lost. Recovered and returned to command after treatment."
+      },
+      "metrics": [
+        "Deated 39 ships at Wolf 359"
+      ],
+      "skills": [
+        "incident response"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SF_RECORD",
+          "locator": "board of inquiry"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "activity",
+      "corroborators": [],
+      "role_fit_notes": "Cleared of responsibility by a board of inquiry, and still the first thing anyone asks about. Include only where the role rewards candour about catastrophic events; omit from anything screened quickly.",
+      "employment_id": "EMP_ENTERPRISE_D",
+      "occurred": {
+        "start": "2366",
+        "end": "2367",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "incident"
+      ]
+    },
+    {
+      "id": "E_INNER_LIGHT",
+      "title": "Lived a full second life as a Kataan civilian (unresolved)",
+      "star": {
+        "situation": "A probe from a dead civilisation induced roughly forty years of memory in twenty-five minutes.",
+        "task": "Establish whether decades of experience gained this way count as experience.",
+        "action": "No framework exists. HR has not responded.",
+        "result": null
+      },
+      "metrics": [],
+      "skills": [
+        "ceramics",
+        "the flute"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SF_RECORD",
+          "locator": "medical log"
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": null,
+      "corroborators": [],
+      "role_fit_notes": "Unfalsifiable and impossible to reference. Kept out of every artefact.",
+      "employment_id": "EMP_ENTERPRISE_D",
+      "occurred": {
+        "start": "2368",
+        "end": "2368",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "strange"
+      ],
+      "open_questions": [
+        "Does subjective experience with no external record count as experience?",
+        "Who would confirm it?"
+      ]
+    }
+  ],
+  "private_profile": {
+    "name": "Jean-Luc Picard",
+    "location": "La Barre, France, Earth",
+    "email": "jl.picard@example.org",
+    "phone": null,
+    "linkedin": null,
+    "personal_website": null,
+    "address": null,
+    "photo_reference": null,
+    "source_refs": [],
+    "publication_policy": "Parody pack. Contact details are deliberately fake."
+  },
+  "skills": {
+    "domain": [
+      "diplomacy",
+      "command",
+      "exploration"
+    ],
+    "leadership": [
+      "governance",
+      "conflict resolution"
+    ],
+    "technical": [
+      "tactics",
+      "archaeology"
+    ]
+  },
+  "skill_vocabulary": {
+    "diplomacy": [
+      "negotiation",
+      "first contact"
+    ],
+    "command": [
+      "leadership",
+      "captaincy"
+    ]
+  },
+  "metadata": {
+    "created": "2026-09-06",
+    "status": "example_only",
+    "warning": "Parody. Jean-Luc Picard is a fictional character and this is not a real record. Never cite it in a real artefact."
+  }
+}

@@ -137,6 +137,13 @@
     },
     "metadata": {
       "type": "object"
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/educationRecord"
+      },
+      "description": "Qualifications. Absent from the schema until 2026-09-06, so a degree could not be recorded at all and JSON Resume's education section could never be filled."
     }
   },
   "additionalProperties": true,
@@ -309,8 +316,42 @@
         },
         "metrics": {
           "type": "array",
+          "description": "A metric is a claim, and a claim whose denominator nobody recorded cannot be defended. A plain string is still valid, so existing packs need no migration; the object form exists so the basis has somewhere to live rather than being reconstructed in an interview.",
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The metric as it would appear in a document."
+                  },
+                  "basis": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "How it was measured: the baseline, the denominator, the period, and who produced it. null means not recorded, which is honest; omitting the field says nothing."
+                  },
+                  "measured": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "False where the figure is an estimate or a recollection rather than something a system produced."
+                  }
+                }
+              }
+            ]
           }
         },
         "skills": {
@@ -590,6 +631,88 @@
         }
       },
       "additionalProperties": false
+    },
+    "educationRecord": {
+      "type": "object",
+      "description": "A qualification. Recorded separately from evidence atoms for the same reason employment is: a degree is not a STAR achievement, it is a fact a background check verifies, and it needs provenance rather than a narrative.",
+      "required": [
+        "education_id",
+        "institution",
+        "qualification",
+        "evidence_status",
+        "external_safe"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "education_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "institution": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name as it should appear on an artefact."
+        },
+        "qualification": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MSc, BSc, diploma, certification. The award, not the subject."
+        },
+        "field": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Subject studied."
+        },
+        "start": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}(-\\d{2})?$"
+        },
+        "end": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(\\d{4}(-\\d{2})?|present)$",
+          "description": "Year awarded. 'present' for study in progress."
+        },
+        "grade": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Distinction, honours class, GPA. Only where the subject supplied it."
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "self_asserted",
+            "corroborated",
+            "externally_verified",
+            "unresolved",
+            "declined"
+          ]
+        },
+        "external_safe": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

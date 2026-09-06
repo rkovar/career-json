@@ -1,0 +1,347 @@
+{
+  "$schema": "../../schemas/career.schema.json",
+  "schema_version": "1.3",
+  "name": "Steve Jobs (parody)",
+  "purpose": "A parody datapack built only from widely published public record, showing how the format handles a career with famous setbacks in it.",
+  "source_records": [
+    {
+      "source_id": "SRC_PUBLIC_RECORD",
+      "source_type": "url",
+      "path": "https://example.org/public-record/steve-jobs",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Placeholder for widely published public record. Not a real URL."
+    },
+    {
+      "source_id": "SRC_KEYNOTES",
+      "source_type": "url",
+      "path": "https://example.org/public-record/apple-keynotes",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Product launches, publicly recorded."
+    }
+  ],
+  "employment": [
+    {
+      "employment_id": "EMP_APPLE_1",
+      "employer": "Apple Computer",
+      "employer_of_record": null,
+      "title": "Co-founder",
+      "start": "1976",
+      "end": "1985",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_NEXT",
+      "employer": "NeXT",
+      "employer_of_record": null,
+      "title": "Founder and CEO",
+      "start": "1985",
+      "end": "1996",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_PIXAR",
+      "employer": "Pixar",
+      "employer_of_record": null,
+      "title": "Chairman and CEO",
+      "start": "1986",
+      "end": "2006",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_APPLE_2",
+      "employer": "Apple",
+      "employer_of_record": null,
+      "title": "CEO",
+      "start": "1997",
+      "end": "2011",
+      "location": null,
+      "parent_employment_id": "EMP_APPLE_1",
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "id": "E_MACINTOSH",
+      "title": "Launched the Macintosh",
+      "star": {
+        "situation": "Personal computing was a command line for hobbyists.",
+        "task": "Ship a mass-market computer with a graphical interface.",
+        "action": "Led the Macintosh team to launch in 1984.",
+        "result": "The graphical interface became the mainstream expectation for personal computers."
+      },
+      "metrics": [
+        "launched 1984"
+      ],
+      "skills": [
+        "product management",
+        "industrial design"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "1984"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "output",
+      "corroborators": [],
+      "role_fit_notes": null,
+      "employment_id": "EMP_APPLE_1",
+      "occurred": {
+        "start": "1984",
+        "end": "1984",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "product"
+      ]
+    },
+    {
+      "id": "E_FIRED",
+      "title": "Left Apple in 1985 after losing a board dispute",
+      "star": {
+        "situation": "A power struggle with the CEO went to the board.",
+        "task": "Retain control of the product organisation.",
+        "action": "Lost the board's support and resigned.",
+        "result": "Departed the company he co-founded, and founded NeXT the same year."
+      },
+      "metrics": [],
+      "skills": [
+        "resilience"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "1985"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "activity",
+      "corroborators": [],
+      "role_fit_notes": "Public and unavoidable. It reads as a governance failure to a board-level hiring committee and as conviction to everyone else. The pack records it either way.",
+      "employment_id": "EMP_APPLE_1",
+      "occurred": {
+        "start": "1985",
+        "end": "1985",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "setback"
+      ]
+    },
+    {
+      "id": "E_PIXAR_SALE",
+      "title": "Sold Pixar to Disney",
+      "star": {
+        "situation": "Pixar was an independent studio dependent on a distribution partner.",
+        "task": "Secure the studio's future.",
+        "action": "Negotiated an all-stock sale to Disney, completed in 2006.",
+        "result": "Sale valued at roughly $7.4bn; became Disney's largest individual shareholder."
+      },
+      "metrics": [
+        "~$7.4bn transaction"
+      ],
+      "skills": [
+        "negotiation",
+        "corporate development"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "2006"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [],
+      "role_fit_notes": null,
+      "employment_id": "EMP_PIXAR",
+      "occurred": {
+        "start": "2006",
+        "end": "2006",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "m&a"
+      ]
+    },
+    {
+      "id": "E_TURNAROUND",
+      "title": "Returned to Apple and reversed its decline",
+      "star": {
+        "situation": "Apple was months from insolvency with a sprawling product line.",
+        "task": "Return the company to viability.",
+        "action": "Cut the product line, took a settlement and investment from Microsoft, and shipped the iMac, iPod, and iPhone over the following decade.",
+        "result": "Apple moved from near-insolvency to among the most valuable companies in the world."
+      },
+      "metrics": [
+        "product line cut to four quadrants",
+        "iPhone launched 2007"
+      ],
+      "skills": [
+        "turnaround",
+        "product strategy"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_KEYNOTES",
+          "locator": "1998-2007"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [],
+      "role_fit_notes": null,
+      "employment_id": "EMP_APPLE_2",
+      "occurred": {
+        "start": "1997",
+        "end": "2011",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "turnaround"
+      ]
+    },
+    {
+      "id": "E_MANAGEMENT_STYLE",
+      "title": "Management style, as widely reported (unresolved)",
+      "star": {
+        "situation": "Contemporaneous accounts describe a demanding and often harsh manager.",
+        "task": "Decide how, or whether, this belongs in an artefact.",
+        "action": "No first-hand source obtained. Reports are second-hand and contested.",
+        "result": null
+      },
+      "metrics": [],
+      "skills": [
+        "leadership"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "biographies"
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": null,
+      "corroborators": [],
+      "role_fit_notes": "Kept out of every artefact. Second-hand characterisation is not evidence.",
+      "employment_id": "EMP_APPLE_2",
+      "occurred": {
+        "start": "1997",
+        "end": "2011",
+        "inferred": true
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "reputation"
+      ],
+      "open_questions": [
+        "Which accounts are first-hand?",
+        "Does any of it belong on a resume at all?"
+      ]
+    }
+  ],
+  "private_profile": {
+    "name": "Steve Jobs",
+    "location": "California, United States",
+    "email": "not.a.real.address@example.com",
+    "phone": null,
+    "linkedin": null,
+    "personal_website": null,
+    "address": null,
+    "photo_reference": null,
+    "source_refs": [],
+    "publication_policy": "Parody pack. Contact details are deliberately fake."
+  },
+  "skills": {
+    "domain": [
+      "product strategy",
+      "industrial design"
+    ],
+    "leadership": [
+      "turnaround",
+      "negotiation"
+    ],
+    "technical": [
+      "consumer hardware"
+    ]
+  },
+  "skill_vocabulary": {
+    "product strategy": [
+      "product management",
+      "product"
+    ],
+    "turnaround": [
+      "restructuring"
+    ]
+  },
+  "metadata": {
+    "created": "2026-09-06",
+    "status": "example_only",
+    "warning": "Parody, built from public record and not endorsed by or connected to anyone. Contact details are fake. Never cite these atoms in a real artefact."
+  }
+}

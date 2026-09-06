@@ -21,6 +21,20 @@ ROOT = Path(os.environ.get("CAREER_WORKSPACE", Path(__file__).resolve().parent.p
 PACKS = ROOT / "data" / "packs"
 
 
+def metric_text(metric):
+    """A metric is either a plain string or an object carrying its measurement
+    basis. Every consumer joins metrics into text, so each one needed this and
+    would otherwise have crashed on the object form."""
+    if isinstance(metric, dict):
+        return metric.get("value") or ""
+    return metric or ""
+
+
+def metric_basis(metric):
+    """How the figure was measured, or None when nobody recorded it."""
+    return metric.get("basis") if isinstance(metric, dict) else None
+
+
 def this_year():
     """A current role ends today, not in whatever year this was written."""
     return date.today().year

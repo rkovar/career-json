@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = ROOT / "scripts"
 SKILLS = ROOT / ".claude" / "skills"
 EXAMPLE = ROOT / "examples" / "career.example.json"
+COMPLEX = ROOT / "examples" / "career.complex.example.json"
 
 RESULTS = []
 
@@ -56,6 +57,9 @@ def sandbox():
     (root / "outputs").mkdir()
     shutil.copy(EXAMPLE,
                 root / "data" / "packs" / "pack.json")
+    # validate_pack.py resolves the schema under CAREER_WORKSPACE, so a sandbox
+    # without this cannot run it at all.
+    shutil.copytree(ROOT / "schemas", root / "schemas")
     return root
 
 
@@ -217,6 +221,38 @@ def test_private_brief():
     code, out, _ = run("validate_artifact.py", tmp)
     check("a sent artefact still may not", code == 1 and "external_safe" in out, out)
 
+    # Found by running the skill against the real pack. The fixture above dodges
+    # the defect by never using the vocabulary a brief exists to state: the skill
+    # requires naming which atoms are external_safe: false or unresolved so the
+    # candidate knows what not to discuss, and the leak scan failed a real brief
+    # on exactly those words. Eligibility was inverted for --private; the leak
+    # scan was not.
+    real = Path(tempfile.mkdtemp()) / "role-interview-brief.md"
+    real.write_text("# Brief\n\n**Private. Do not send.** This brief is not publishable.\n\n"
+                    "## Do not discuss\n\n"
+                    "- `E_JPMC_AI_GOVERNANCE` is marked `external_safe: false`. "
+                    "<!-- Evidence: E_JPMC_AI_GOVERNANCE -->\n"
+                    "- The revenue claim is `unresolved`. "
+                    "<!-- Evidence: E_SPLUNK_BOTS_REVENUE -->\n")
+    run("render.py", real)
+    code, out, _ = run("validate_artifact.py", "--private", real)
+    check("a brief may name the statuses it exists to warn about", code == 0, out)
+    code, out, _ = run("validate_artifact.py", real)
+    check("the same words still fail a sendable artefact",
+          code == 1 and "internal vocabulary" in out, out)
+
+    # A brief cites evidence in prose and tables, not citation comments. Without
+    # skipping uncited blocks the quantity check emitted eighty warnings on one
+    # real brief, which is the check nobody reads.
+    uncited = Path(tempfile.mkdtemp()) / "role-interview-brief.md"
+    uncited.write_text("# Brief\n\n| Figure | Source |\n| --- | --- |\n"
+                       "| 67% throughput | `E_JPMC_THREAT_MODELING` |\n"
+                       "| 200+ engagements | `E_JPMC_SCALE` |\n\n"
+                       "- A cited claim. <!-- Evidence: E_JPMC_SCALE -->\n")
+    code, out, _ = run("quantities.py", uncited)
+    check("a block citing nothing raises no magnitude warning",
+          code == 0 and "does not carry" not in out, out)
+
 
 def test_pack_pinning():
     """Regression: manifest.py pinned the pack and validate_artifact.py ignored it."""
@@ -275,10 +311,17 @@ def test_records():
         code, out, _ = run("validate_records.py", tmp / "y-screen.json")
         check("missing required field rejected", code == 1 and "top_changes" in out, out)
 
+    # Construct the blocker rather than borrowing one from a live artefact. This
+    # test used to take the real evaluation record and flip publishable to true,
+    # which silently stopped testing anything the day that artefact was
+    # regenerated without a blocker in it.
     ev = ROOT / "outputs" / "head-of-ai-security-evaluation.json"
     if ev.exists():
         rec = json.loads(ev.read_text())
-        bad3 = dict(rec, publishable=True)
+        bad3 = dict(rec, publishable=True, findings=[{
+            "severity": "blocker", "category": "target_fit",
+            "message": "Synthetic blocker for the publishable check.",
+            "affected": "whole document", "remediation": "n/a"}])
         (tmp / "z-evaluation.json").write_text(json.dumps(bad3))
         code, out, _ = run("validate_records.py", tmp / "z-evaluation.json")
         check("publishable with a blocker is rejected", code == 1 and "blocker" in out, out)
@@ -381,6 +424,366 @@ def test_role_fit():
     check("role fit renders markdown", code == 0 and "| Role |" in out)
 
 
+def test_shortlist_actually_curates():
+    """The README claims selection curates as a pack grows past what anyone reads.
+
+    Untested and untestable at fixture size: five atoms, and a real pack of twenty,
+    both sit under the default limit of thirty, so not_shortlisted was empty on
+    every run ever made. The claim was true prospectively and inert in practice.
+    """
+    workspace = sandbox()
+    (workspace / "data" / "roles").mkdir(parents=True)
+    pack = json.loads((workspace / "data" / "packs" / "pack.json").read_text())
+
+    template = dict(pack["evidence_atoms"][0])
+    grown = []
+    for i in range(40):
+        atom = json.loads(json.dumps(template))
+        atom["id"] = f"E_GROWN_{i:02d}"
+        atom["title"] = f"Grown atom {i}"
+        # Vary the score so the ranking has something to sort on.
+        atom["outcome_type"] = ("business_outcome", "output", "activity")[i % 3]
+        grown.append(atom)
+    pack["evidence_atoms"] = grown
+    (workspace / "data" / "packs" / "pack.json").write_text(json.dumps(pack))
+    (workspace / "data" / "roles" / "grown.json").write_text(json.dumps({
+        "role_id": "grown", "title": "Grown", "central_requirement": "c",
+        "requirements": [{"weight": "essential", "text": "t", "evidenced_by": ["E_GROWN_00"]}],
+        "ats_keywords": ["platform engineering"]}))
+
+    code, out, err = run("select_evidence.py", "--role", "grown", workspace=workspace)
+    check("selection runs against a pack larger than the shortlist", code == 0, err)
+    if code != 0:
+        shutil.rmtree(workspace, ignore_errors=True)
+        return
+    view = json.loads(out)
+    check("a pack larger than the limit is actually shortlisted",
+          len(view["atoms"]) == 30, f"kept {len(view['atoms'])}")
+    check("what was cut is reported rather than silently dropped",
+          len(view["not_shortlisted"]) == 10, str(len(view["not_shortlisted"])))
+    kept = min(a["role_score"] for a in view["atoms"])
+    cut = max(r["role_score"] for r in view["not_shortlisted"])
+    check("the shortlist keeps the higher-scoring atoms", kept >= cut, f"{kept} vs {cut}")
+
+    code, out, _ = run("select_evidence.py", "--role", "grown", "--limit", "5", workspace=workspace)
+    check("--limit narrows the shortlist", len(json.loads(out)["atoms"]) == 5, out[:120])
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_complex_pack_shape():
+    """The suite was fixture-shaped, and that is how three defects shipped.
+
+    Every assertion ran against a five-atom pack with one employer, no promotion
+    chain, no withheld evidence, no unresolved claim and no undated atoms. Those
+    are the shapes a real pack has, and running the scripts against one for the
+    first time found a leak-scan contradiction, eighty warnings of noise on one
+    document, and a fit score with no eligibility filter. This fixture has that
+    shape and is entirely fictional.
+    """
+    code, out, _ = run("validate_pack.py", COMPLEX)
+    check("the complex fixture validates", code == 0, out)
+    check("its undated atoms are warned about, not errors",
+          "cannot be placed in time" in out, out)
+
+    workspace = Path(tempfile.mkdtemp())
+    (workspace / "data" / "packs").mkdir(parents=True)
+    (workspace / "data" / "roles").mkdir(parents=True)
+    (workspace / "outputs").mkdir()
+    shutil.copytree(ROOT / "schemas", workspace / "schemas")
+    shutil.copy(COMPLEX, workspace / "data" / "packs" / "pack.json")
+    pack = json.loads(COMPLEX.read_text())
+    atoms = {a["id"]: a for a in pack["evidence_atoms"]}
+
+    # A pack that does hold business outcomes must not get the pack-level warning.
+    code, out, _ = run("validate_pack.py", COMPLEX)
+    check("a pack with business outcomes is not told it has none",
+          "no atom is typed business_outcome" not in out, out)
+
+    code, out, err = run("select_evidence.py", workspace=workspace)
+    check("selection runs against the complex pack", code == 0, err)
+    view = json.loads(out) if code == 0 else {"atoms": [], "employment": [], "contact": {}}
+    shown = {a["id"] for a in view["atoms"]}
+    for withheld in ("E_CX_INTERNAL_TOOL", "E_CX_REVENUE_CLAIM"):
+        check(f"{withheld} never reaches the selection view", withheld not in shown)
+    check("the unresolved atom is withheld for its status too",
+          atoms["E_CX_REVENUE_CLAIM"]["evidence_status"] == "unresolved")
+    check("address is stripped from the view", "address" not in view["contact"])
+    check("photo_reference is stripped from the view", "photo_reference" not in view["contact"])
+    check("the object-form metric reaches generation as text",
+          any("~33% reduction" in m for a in view["atoms"] for m in a.get("metrics", [])),
+          str([a.get("metrics") for a in view["atoms"]][:3]))
+
+    # A three-deep promotion chain: the shape that makes one employer look like
+    # four roles, and the one the small example has no version of.
+    chain = [r for r in pack["employment"] if r.get("parent_employment_id") == "EMP_CX_DIR"]
+    check("the fixture carries a promotion chain", len(chain) == 2, str(chain))
+    check("selection keeps every promotion record", len(view["employment"]) == 5,
+          str(len(view["employment"])))
+    check("career span spans the whole history", view["career_span_years"] >= 14,
+          str(view["career_span_years"]))
+
+    # externally_verified is unreachable without an independent source, and the
+    # small example has none, so the earning rule was never exercised end to end.
+    talk = atoms["E_CX_CONF_TALK"]
+    independent = {r["source_id"] for r in pack["source_records"] if r.get("independent")}
+    check("externally_verified is reachable in this fixture",
+          talk["evidence_status"] == "externally_verified"
+          and {r["source_id"] for r in talk["source_refs"]} & independent)
+
+    for script in ("coverage.py", "dedupe.py", "corroboration_plan.py", "export_resume_json.py"):
+        code, out, err = run(script, workspace=workspace)
+        check(f"{script} runs against a realistically shaped pack", code == 0, err[:200])
+
+    (workspace / "data" / "roles" / "head-of-detection.json").write_text(json.dumps({
+        "role_id": "head-of-detection", "title": "Head of Detection",
+        "central_requirement": "Has run detection as a function.",
+        "requirements": [
+            {"weight": "essential", "text": "Runs detection engineering",
+             "evidenced_by": ["E_CX_DETECTION_PROGRAMME"]},
+            {"weight": "essential", "text": "Owns risk governance tooling",
+             "evidenced_by": ["E_CX_INTERNAL_TOOL"]}],
+        "ats_keywords": ["detection engineering"]}))
+    code, out, _ = run("role_fit.py", "--markdown", workspace=workspace)
+    check("fit reports what no artefact may cite",
+          code == 0 and "E_CX_INTERNAL_TOOL" in out, out)
+    check("and shows the deliverable score diverging from capability",
+          "deliverable" in out, out)
+
+    md = workspace / "outputs" / "d-draft.md"
+    md.write_text("# Morgan Vale\n\nLondon · morgan.vale@example.invalid\n\n"
+                  "## Experience\n\n"
+                  "### Northwind Systems | Director of Platform Security | 2022 to present\n\n"
+                  "- Cut quarterly fraud write-offs by roughly a third with the "
+                  "false-positive rate unchanged. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", md, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("an artefact from the complex pack validates", code == 0, out)
+    check("a promotion-chain heading does not trip the employment check",
+          "matches no employment record" not in out, out)
+
+    inflated = workspace / "outputs" / "i-draft.md"
+    inflated.write_text("# Morgan Vale\n\nLondon · morgan.vale@example.invalid\n\n"
+                        "## Experience\n\n"
+                        "### Northwind Systems | Director of Platform Security | 2022 to present\n\n"
+                        "- Halved quarterly fraud write-offs. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", inflated, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", inflated, workspace=workspace)
+    check("a third inflated into a half warns on the complex pack too",
+          "50 pct" in out, out)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_pack_html():
+    """The pack browser is a private view: it shows withheld atoms on purpose and
+    must not carry contact details, because a file that never contains an email
+    cannot leak one."""
+    workspace = sandbox()
+    shutil.copy(COMPLEX, workspace / "data" / "packs" / "pack.json")
+    target = workspace / "outputs" / "pack.html"
+    code, out, err = run("pack_html.py", "-o", target, workspace=workspace)
+    check("pack_html runs", code == 0, err)
+    page = target.read_text() if target.exists() else ""
+
+    check("it is marked private", "Private working view" in page)
+    check("every atom is rendered", page.count('class="atom') == 12, str(page.count('class="atom')))
+    check("withheld atoms are shown and labelled",
+          "E_CX_INTERNAL_TOOL" in page and "withheld:" in page)
+    check("an unresolved atom's open questions are shown", "Open questions" in page)
+    check("a metric with no basis is flagged",
+          "no measurement basis recorded" in page)
+    check("a metric with a basis shows it", "measured: write-offs booked" in page)
+    check("a promotion chain is visible", "promotion under EMP_CX_DIR" in page)
+    check("an employer_of_record difference is visible", "paid by Fabrikam" in page)
+
+    profile = json.loads(COMPLEX.read_text())["private_profile"]
+    for field in ("email", "phone", "address", "photo_reference"):
+        check(f"{field} is never rendered", profile[field] not in page)
+
+    sys.path.insert(0, str(SCRIPTS))
+    from validate_artifact import Tags  # noqa: E402
+    parser = Tags()
+    parser.feed(page)
+    check("the page is well-formed html", not parser.stack and not parser.errors,
+          f"unclosed {parser.stack[:3]}, mismatched {parser.errors[:3]}")
+    check("nothing is hidden without javascript", " hidden " not in page)
+
+    code, _, err = run("pack_html.py", "-o", target, workspace=Path(tempfile.mkdtemp()))
+    check("it refuses when there is no pack", code == 1, err)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_education():
+    """Education was absent from the schema entirely, so a degree could not be
+    recorded and JSON Resume's education section could never be filled.
+
+    It is held to the employment standard rather than the atom standard: a
+    qualification is not a STAR achievement, it is a fact a background check
+    verifies, and the withheld rule applies to it identically.
+    """
+    code, out, _ = run("validate_pack.py", COMPLEX)
+    check("a pack with education validates", code == 0, out)
+
+    for mutate, why in (
+            (lambda d: d["education"][0].pop("qualification"), "missing qualification"),
+            (lambda d: d["education"][0].update({"instutition": "typo"}), "unknown field"),
+            (lambda d: d["education"][0].update({"end": "not-a-year"}), "must be YYYY"),
+            (lambda d: d["education"].append(dict(d["education"][0])), "duplicate education_id"),
+            (lambda d: d["education"][0].update({"source_refs": [{"source_id": "SRC_NOPE"}]}),
+             "unknown source_id")):
+        data = json.loads(COMPLEX.read_text())
+        mutate(data)
+        path = Path(tempfile.mkdtemp()) / "p.json"
+        path.write_text(json.dumps(data))
+        code, out, _ = run("validate_pack.py", path)
+        check(f"education {why} is an error", code == 1 and why.split()[-1] in out, out)
+
+    workspace = Path(tempfile.mkdtemp())
+    (workspace / "data" / "packs").mkdir(parents=True)
+    (workspace / "outputs").mkdir()
+    shutil.copytree(ROOT / "schemas", workspace / "schemas")
+    shutil.copy(COMPLEX, workspace / "data" / "packs" / "pack.json")
+
+    code, out, err = run("select_evidence.py", workspace=workspace)
+    view = json.loads(out) if code == 0 else {}
+    ids = {r["education_id"] for r in view.get("education", [])}
+    check("the selection view carries education", "EDU_CX_MSC" in ids, str(ids))
+    check("a withheld qualification never reaches generation", "EDU_CX_WITHHELD" not in ids, str(ids))
+    check("the view counts education records", view.get("summary", {}).get("education_records") == 1,
+          str(view.get("summary")))
+
+    out_json = workspace / "resume.json"
+    code, _, err = run("export_resume_json.py", "-o", out_json, workspace=workspace)
+    resume = json.loads(out_json.read_text()) if out_json.exists() else {}
+    edu = resume.get("education", [])
+    check("resume.json carries an education section", len(edu) == 1, str(edu))
+    if edu:
+        check("it projects into JSON Resume field names",
+              edu[0].get("studyType") == "MSc" and edu[0].get("score") == "Distinction"
+              and edu[0].get("institution") == "Fictional University", str(edu[0]))
+        check("the withheld qualification is not projected",
+              all("Academy" not in e.get("institution", "") for e in edu), str(edu))
+
+    page = workspace / "outputs" / "pack.html"
+    run("pack_html.py", "-o", page, workspace=workspace)
+    html = page.read_text() if page.exists() else ""
+    check("the pack browser shows education", "Distinction" in html and "MSc" in html)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_metric_measurement_basis():
+    """A metric is a claim, and a claim whose denominator nobody recorded cannot
+    be defended. The interview brief had to say "no baseline recorded" for the two
+    highest-risk figures in the document, because the pack had nowhere to put one.
+
+    The plain-string form stays valid so no pack needs migrating.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    from current_pack import metric_basis, metric_text  # noqa: E402
+
+    check("a plain string metric still reads", metric_text("67% throughput increase")
+          == "67% throughput increase")
+    check("a plain string metric has no recorded basis",
+          metric_basis("67% throughput increase") is None)
+    rich = {"value": "67% throughput increase",
+            "basis": "threat models completed per quarter, H1 2024 against H2 2024",
+            "measured": True}
+    check("an object metric reads its value", metric_text(rich) == "67% throughput increase")
+    check("an object metric carries its basis", "H1 2024" in metric_basis(rich))
+
+    def with_rich_metric(d):
+        d["evidence_atoms"][0]["metrics"] = [rich, "median build time unchanged"]
+    path = broken("p.json", with_rich_metric)
+    code, out, _ = run("validate_pack.py", path)
+    check("a pack mixing both metric forms validates", code == 0, out)
+
+    for bad, why in ((lambda d: d["evidence_atoms"][0].update({"metrics": [{"basis": "x"}]}),
+                      "object form needs a value"),
+                     (lambda d: d["evidence_atoms"][0].update(
+                         {"metrics": [{"value": "x", "bassis": "typo"}]}),
+                      "unknown field")):
+        code, out, _ = run("validate_pack.py", broken("p.json", bad))
+        check(f"metric {why} is an error", code == 1 and why in out, out)
+
+    # The basis has to reach generation, or it is provenance nothing consumes.
+    workspace = sandbox()
+    pack_path = workspace / "data" / "packs" / "pack.json"
+    pack = json.loads(pack_path.read_text())
+    pack["evidence_atoms"][0]["metrics"] = [rich,
+                                            {"value": "reported uplift", "measured": False}]
+    pack_path.write_text(json.dumps(pack))
+    code, out, err = run("select_evidence.py", workspace=workspace)
+    view = json.loads(out) if code == 0 else {"atoms": []}
+    atom = next((a for a in view["atoms"] if a["id"] == pack["evidence_atoms"][0]["id"]), {})
+    check("the selection view carries the metric text", "67% throughput increase"
+          in atom.get("metrics", []), str(atom.get("metrics")))
+    check("the selection view carries the measurement basis",
+          "H1 2024" in (atom.get("metric_basis", {}).get("67% throughput increase") or ""),
+          str(atom.get("metric_basis")))
+    check("an unmeasured metric is flagged before it reaches a page",
+          "reported uplift" in atom.get("unmeasured_metrics", []),
+          str(atom.get("unmeasured_metrics")))
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_withheld_evidence_is_visible():
+    """Found by a full run against a real pack, not by this suite.
+
+    role_fit.py applied no eligibility filter, so an atom that no artefact may
+    cite scored as if a resume could show it. Linked to a requirement it read
+    "supported" on unpublishable material; left unlinked, the same capability
+    read as an unevidenced gap. Neither number was true, and telling them apart
+    took reading a whole pack by hand.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    import role_fit  # noqa: E402
+
+    atoms = {a["id"]: a for a in json.loads(EXAMPLE.read_text())["evidence_atoms"]}
+    withheld = "E_EXAMPLE_PRIOR_EMPLOYER_DETAIL"
+    check("the example pack carries a withheld atom to test with",
+          withheld in atoms and not atoms[withheld].get("external_safe"))
+
+    profile = {"role_id": "r", "title": "R", "central_requirement": "c",
+               "requirements": [{"weight": "essential", "text": "needs the withheld one",
+                                 "evidenced_by": [withheld]}]}
+    capability = role_fit.score(profile, atoms)
+    deliverable = role_fit.score(profile, atoms, deliverable=True)
+    check("capability fit counts evidence a document may not carry",
+          capability["score"] > 0 and not capability["essential_gaps"], str(capability))
+    check("deliverable fit does not",
+          deliverable["score"] == 0 and deliverable["essential_gaps"], str(deliverable))
+
+    listed = {r["id"] for r in role_fit.withheld(atoms)}
+    check("withheld atoms are named next to the verdict", withheld in listed, str(listed))
+
+    code, out, _ = run("role_fit.py", "--markdown")
+    check("the fit report names what no artefact may cite",
+          code == 0 and "Withheld from every artefact" in out, out)
+
+
+def test_outcome_warning_altitude():
+    """A pack with no business_outcome made every artefact warn forever. That is a
+    pack property reported per-document, so it taught nothing and got skipped."""
+    workspace = sandbox()
+    pack_path = workspace / "data" / "packs" / "pack.json"
+    pack = json.loads(pack_path.read_text())
+    for atom in pack["evidence_atoms"]:
+        if atom.get("outcome_type") == "business_outcome":
+            atom["outcome_type"] = "activity"
+    pack_path.write_text(json.dumps(pack))
+
+    code, out, _ = run("validate_pack.py", pack_path, workspace=workspace)
+    check("a pack with no business outcome says so once, at pack level",
+          "no atom is typed business_outcome" in out, out)
+
+    md = workspace / "outputs" / "d-draft.md"
+    md.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_EXAMPLE_ONCALL_REDESIGN -->\n")
+    run("render.py", md, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("and the artefact does not repeat it",
+          "business_outcome" not in out, out)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
 def test_verdict_log():
     code, _, _ = run("verdict_log.py")
     check("verdict log runs", code == 0)
@@ -465,8 +868,13 @@ def test_view_carries_time_and_tags():
     check("outcomes still sort first",
           [rank[a["outcome_type"]] for a in atoms] == sorted(rank[a["outcome_type"]] for a in atoms))
     outputs = [a for a in atoms if a["outcome_type"] == "output"]
-    ends = [(a.get("occurred") or {}).get("end") or "0000" for a in outputs]
-    ends = ["9999" if e == "ongoing" else e for e in ends]
+    # Import the real sort key rather than restating it. The test used to keep its
+    # own copy, the two drifted, and the test then failed a correctly ordered view:
+    # it read only `occurred.end`, so a point-in-time atom with a start and no end
+    # sorted as though it were undated.
+    sys.path.insert(0, str(SCRIPTS))
+    from select_evidence import recency  # noqa: E402
+    ends = [recency(a) for a in outputs]
     check("within a tier, recent work sorts first", ends == sorted(ends, reverse=True), str(ends))
 
 
@@ -596,6 +1004,142 @@ def test_dedupe():
     check("dedupe emits json", code == 0)
 
 
+def test_quantities():
+    """Magnitude extraction, table-driven, because the risk is a word list.
+
+    Every rule in quantities.py is hand-maintained English, so the tables below
+    are the check on the check. Two classes matter equally and pull against each
+    other: noise that must stay silent, and magnitudes that must survive
+    suppression. An earlier extractor treated any word before a decimal as a
+    version number and silently deleted "33.5%", "1.5 seconds", and every other
+    decimal claim, which is a check that reports ok while seeing nothing.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    import quantities  # noqa: E402
+
+    # Nothing here is a claim about magnitude, so nothing may be extracted.
+    for text in ["Led SOC 2 Type II readiness across the estate.",
+                 "Remediated Log4j (CVE-2021-44228) in the estate.",
+                 "Aligned controls to ISO 27001 and PCI DSS 4.0.",
+                 "Migrated services to Python 3.11.2 and Terraform v1.5.",
+                 "Ran a 24/7 follow-the-sun rotation.",
+                 "Delivered the programme between 2019 and 2022.",
+                 "Owned the OWASP Top 10 remediation programme.",
+                 "Sold into a Fortune 500 client.",
+                 # A period, not a proportion. Found when a generated bullet said
+                 # "throughput increased 67% half-year on half-year" and the check
+                 # reported an unsupported 50%.
+                 "Throughput rose half-year on half-year.",
+                 "Reported quarter-hour response times.",
+                 "Ran a half-day workshop each quarter-year."]:
+        found = quantities.extract(text)
+        check(f"no magnitude read from {text[:34]!r}", not found, str(sorted(found)))
+
+    # Each of these asserts a magnitude, in the form the generator actually writes.
+    for text, expected in [
+            ("Cut CI spend by roughly a third.", (33.3, "pct")),
+            ("Halved monthly CI spend.", (50.0, "pct")),
+            ("Reduced spend by 33%.", (33.0, "pct")),
+            ("Reduced spend by 33.5%.", (33.5, "pct")),
+            ("Cut costs by 40 per cent.", (40.0, "pct")),
+            ("Doubled deployment frequency.", (100.0, "pct")),
+            ("A six-person on-call rotation.", (6.0, "count")),
+            ("Defeated 39 ships at Wolf 359.", (39.0, "count")),
+            ("Thirty-nine ships lost.", (39.0, "count")),
+            ("Grew the team to twenty-five engineers.", (25.0, "count")),
+            ("Evacuated 15,000 colonists.", (15000.0, "count")),
+            ("Sale valued at roughly $7.4bn.", (7.4e9, "money")),
+            ("Saved £250k a year.", (250000.0, "money"))]:
+        found = quantities.extract(text)
+        check(f"{expected[1]} magnitude read from {text[:34]!r}",
+              expected in found, str(sorted(found)))
+
+    # Word and digit forms are the same claim: the walkthrough's bullets spell
+    # every number out, so without this the check has no coverage on real output.
+    check("a third and 33% are the same magnitude",
+          quantities.supported((33.3, "pct"), {(33.0, "pct")}))
+    check("rounding does not flag", quantities.supported((7.4e9, "money"), {(7.35e9, "money")}))
+    check("six and seven stay distinct", not quantities.supported((6.0, "count"), {(7.0, "count")}))
+    check("a third is not a half", not quantities.supported((33.3, "pct"), {(50.0, "pct")}))
+    check("kinds are never compared across each other",
+          not quantities.supported((33.0, "pct"), {(33.0, "count")}))
+
+    # Lower bounds are everywhere in real resume metrics. Reading them as nothing
+    # made the report claim the evidence carried no magnitude when it carried two.
+    check("a lower bound is read as a bound",
+          (50.0, "count+") in quantities.extract("50+ personnel across the function."))
+    check("a bounded percentage is read as a bound",
+          (20.0, "pct+") in quantities.extract("Grew adoption by 20+ per cent."))
+    check("restating a bound is supported",
+          quantities.supported((50.0, "count"), {(50.0, "count+")}))
+    check("hardening a bound into a point estimate is not supported",
+          not quantities.supported((55.0, "count"), {(50.0, "count+")}))
+
+    # Both citation placements are in live use. Handling only the next-line form
+    # compared every bullet against an empty set, so every magnitude in a real
+    # draft reported as unsupported.
+    inline = quantities.cited_blocks("- Cut spend by a third. <!-- Evidence: E_X -->\n")
+    check("an inline citation binds to its bullet", inline == [("Cut spend by a third.", ["E_X"])],
+          str(inline))
+    following = quantities.cited_blocks("- Cut spend by a third.\n<!-- Evidence: E_X -->\n")
+    check("a next-line citation binds to its bullet",
+          following == [("Cut spend by a third.", ["E_X"])], str(following))
+    para = quantities.cited_blocks("## Summary\n\nLed a team of nine. <!-- Evidence: E_X -->\n")
+    check("a cited summary paragraph is a claim too",
+          para == [("Led a team of nine.", ["E_X"])], str(para))
+
+    # validate_artifact.py checks span claims against employment records. Two
+    # checks over one claim can disagree, so this one stays out of it.
+    check("a career-span claim is left to validate_artifact.py",
+          not quantities.extract("Twenty-four years across military and financial services."))
+
+    # Scope is the whole atom. Narrowing to metrics and star.result flags
+    # "six-person" and "a quarter", which live in situation and action.
+    pack = json.loads(EXAMPLE.read_text())
+    atoms = {a["id"]: a for a in pack["evidence_atoms"]}
+    carried = quantities.extract(quantities.atom_text(atoms["E_EXAMPLE_ONCALL_REDESIGN"]))
+    check("whole-atom scope carries a magnitude from star.situation",
+          (6.0, "count") in carried, str(sorted(carried)))
+
+    workspace = sandbox()
+    shutil.copy(WALKTHROUGH / "resume.md", workspace / "outputs" / "resume.md")
+    code, out, err = run("quantities.py", workspace / "outputs" / "resume.md", workspace=workspace)
+    check("the committed walkthrough asserts no unsupported magnitude",
+          code == 0 and out.startswith("ok"), out + err)
+
+    # The motivating case: the atom records ~33%, the bullet claims a half, and
+    # every existing check passes because the cited ID is real and eligible.
+    inflated = workspace / "outputs" / "inflated.md"
+    inflated.write_text("# X\n\n## Role\n\n- Halved monthly CI spend.\n"
+                        "<!-- Evidence: E_EXAMPLE_PLATFORM_COST -->\n")
+    code, out, _ = run("quantities.py", inflated, "--strict", workspace=workspace)
+    check("a bullet inflating a third into a half is flagged",
+          code == 1 and "50 pct" in out, out)
+    code, out, _ = run("quantities.py", inflated, workspace=workspace)
+    check("reporting mode does not fail the run", code == 0, out)
+
+    faithful = workspace / "outputs" / "faithful.md"
+    faithful.write_text("# X\n\n## Role\n\n- Cut monthly CI spend by roughly 33%.\n"
+                        "<!-- Evidence: E_EXAMPLE_PLATFORM_COST -->\n")
+    code, out, _ = run("quantities.py", faithful, "--strict", workspace=workspace)
+    check("a faithful restatement in digits is not flagged", code == 0, out)
+
+    # Wired into validate_artifact.py as a warning, never an error: an unsupported
+    # magnitude is worth a look, not worth blocking a document over.
+    run("render.py", inflated, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", inflated, workspace=workspace)
+    check("an unsupported magnitude warns rather than fails",
+          code == 0 and "warn" in out and "50 pct" in out, out)
+    run("render.py", faithful, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", faithful, workspace=workspace)
+    check("a faithful magnitude produces no warning from validate_artifact",
+          code == 0 and "does not carry" not in out, out)
+
+    code, out, _ = run("quantities.py", inflated, "--json", workspace=workspace)
+    check("quantities emits json", code == 0 and json.loads(out)["findings"], out)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
 def test_occurred():
     pack = json.loads(resolve_pack().read_text())
     atoms = pack["evidence_atoms"]
@@ -621,6 +1165,7 @@ INVARIANTS = {
     "make-interview-brief": ["inverts that rule", "Never publish this", "whole pack",
                             "external_safe: false", "Never invent"],
     "make-resume": ["Ask no questions", "never appears inside the artefact",
+                    "at the end of the claim's own line",
                     "business_outcome", "role_fit_notes", "recruiter-screen",
                     "Cover letter", "central_requirement", "employment", "career_span_years",
                     "--role"],
@@ -699,6 +1244,37 @@ def test_walkthrough():
     shutil.rmtree(workspace, ignore_errors=True)
 
 
+FUN = ROOT / "examples" / "fun"
+
+
+def test_fun_packs():
+    """The parody packs are committed, so they must validate and stay labelled.
+
+    Two of the three describe real people. The label is the thing that keeps a
+    committed file from reading as a genuine record, so it is asserted rather
+    than trusted.
+    """
+    packs = sorted(FUN.glob("*.career.json"))
+    check("parody packs present", len(packs) == 3, f"found {[p.name for p in packs]}")
+    for path in packs:
+        code, out, err = run("validate_pack.py", path)
+        check(f"{path.name} validates", code == 0, out + err)
+        pack = json.loads(path.read_text())
+        check(f"{path.name} marked example_only",
+              pack.get("metadata", {}).get("status") == "example_only")
+        check(f"{path.name} carries a warning",
+              bool(pack.get("metadata", {}).get("warning")))
+        check(f"{path.name} uses no real contact details",
+              all("example." in (pack["private_profile"].get(f) or "example.")
+                  for f in ("email",))
+              and not pack["private_profile"].get("phone")
+              and not pack["private_profile"].get("address"))
+        check(f"{path.name} keeps second-hand claims out of artefacts",
+              all(a.get("external_safe") is False
+                  for a in pack["evidence_atoms"]
+                  if a.get("evidence_status") == "unresolved"))
+
+
 NUMBER_WORDS = {7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
 
 
@@ -737,13 +1313,17 @@ def main():
     for test in (test_pack_validation, test_selection_view, test_renderer,
                  test_artifact_validation, test_private_brief, test_pack_pinning, test_manifest,
                  test_records, test_corroboration_plan, test_index_and_diff,
-                 test_employment, test_role_fit, test_verdict_log,
-                 test_capture, test_find, test_dedupe, test_occurred,
+                 test_employment, test_role_fit, test_shortlist_actually_curates,
+                 test_metric_measurement_basis, test_complex_pack_shape, test_pack_html,
+                 test_education,
+                 test_withheld_evidence_is_visible,
+                 test_outcome_warning_altitude, test_verdict_log,
+                 test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
                  test_skill_contracts, test_docs_match_reality,
-                 test_walkthrough):
+                 test_walkthrough, test_fun_packs):
         test()
     check_documented_assertion_count()
     failed = [r for r in RESULTS if not r[1]]

@@ -83,6 +83,17 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
             entry["location"] = rec["location"]
         work.append({k: v for k, v in entry.items() if v not in (None, [], "")})
 
+    # JSON Resume has carried an education section since v1; this pack could not
+    # fill it until education records existed.
+    education = []
+    for rec in sorted((r for r in pack.get("education", [])
+                       if r.get("external_safe") and r.get("evidence_status") not in ("unresolved", "declined")),
+                      key=lambda r: r.get("end") or r.get("start") or "", reverse=True):
+        entry = {"institution": rec["institution"], "studyType": rec["qualification"],
+                 "area": rec.get("field"), "score": rec.get("grade"),
+                 "startDate": iso(rec.get("start")), "endDate": iso(rec.get("end"), end=True)}
+        education.append({k: v for k, v in entry.items() if v not in (None, [], "")})
+
     vocab = pack.get("skill_vocabulary") or {}
     canon_names = list(vocab) or sorted({s for a in atoms for s in a.get("skills", [])})
     skills = []
@@ -95,7 +106,7 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
             skills.append({"name": name, "keywords": keywords})
 
     resume = {"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
-              "basics": basics, "work": work, "skills": skills,
+              "basics": basics, "work": work, "education": education, "skills": skills,
               "meta": {"canonical": "career.json",
                        "generated_from": {"pack": "career.json",
                                           "note": "Lossy projection. Evidence, provenance, confidence, "

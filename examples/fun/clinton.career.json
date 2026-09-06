@@ -1,0 +1,349 @@
+{
+  "$schema": "../../schemas/career.schema.json",
+  "schema_version": "1.3",
+  "name": "Bill Clinton (parody)",
+  "purpose": "A parody datapack built only from widely published public record, showing how the format handles achievements, shared credit, and a matter of record that cannot be omitted.",
+  "source_records": [
+    {
+      "source_id": "SRC_PUBLIC_RECORD",
+      "source_type": "url",
+      "path": "https://example.org/public-record/bill-clinton",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Placeholder for widely published public record. Not a real URL."
+    },
+    {
+      "source_id": "SRC_CBO",
+      "source_type": "url",
+      "path": "https://example.org/public-record/federal-budget-outturns",
+      "retrieved": "2026-09-06",
+      "independent": true,
+      "notes": "Published federal budget outturns."
+    }
+  ],
+  "employment": [
+    {
+      "employment_id": "EMP_AG",
+      "employer": "State of Arkansas",
+      "employer_of_record": null,
+      "title": "Attorney General",
+      "start": "1977",
+      "end": "1979",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_GOV",
+      "employer": "State of Arkansas",
+      "employer_of_record": null,
+      "title": "Governor",
+      "start": "1979",
+      "end": "1992",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_POTUS",
+      "employer": "United States Federal Government",
+      "employer_of_record": null,
+      "title": "President of the United States",
+      "start": "1993",
+      "end": "2001",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_FOUNDATION",
+      "employer": "Clinton Foundation",
+      "employer_of_record": null,
+      "title": "Founder",
+      "start": "2001",
+      "end": "present",
+      "location": null,
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "public record"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "corroborators": []
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "id": "E_BUDGET_SURPLUS",
+      "title": "Presided over four consecutive federal budget surpluses",
+      "star": {
+        "situation": "The federal budget had run a deficit every year since 1970.",
+        "task": "Return the budget to balance.",
+        "action": "Signed the 1993 deficit reduction package and later a balanced budget agreement with a Republican Congress.",
+        "result": "Surpluses recorded for fiscal years 1998 through 2001."
+      },
+      "metrics": [
+        "4 consecutive surpluses",
+        "first since 1969"
+      ],
+      "skills": [
+        "fiscal policy",
+        "negotiation"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_CBO",
+          "locator": "FY1998-FY2001"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [],
+      "role_fit_notes": null,
+      "employment_id": "EMP_POTUS",
+      "occurred": {
+        "start": "1998",
+        "end": "2001",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "economy"
+      ]
+    },
+    {
+      "id": "E_GOOD_FRIDAY",
+      "title": "Supported the Northern Ireland peace process",
+      "star": {
+        "situation": "Thirty years of conflict with repeated failed negotiations.",
+        "task": "Help create conditions for a settlement without being a party to it.",
+        "action": "Appointed a US special envoy, granted a contested visa, and applied sustained diplomatic pressure.",
+        "result": "The Good Friday Agreement was signed in 1998."
+      },
+      "metrics": [
+        "agreement signed 1998"
+      ],
+      "skills": [
+        "diplomacy",
+        "conflict resolution"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "1998"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "corroborators": [],
+      "role_fit_notes": "Shared credit with many parties. Any artefact must say supported, not delivered.",
+      "employment_id": "EMP_POTUS",
+      "occurred": {
+        "start": "1995",
+        "end": "1998",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "diplomacy"
+      ]
+    },
+    {
+      "id": "E_NAFTA",
+      "title": "Signed NAFTA into law",
+      "star": {
+        "situation": "A trade agreement negotiated by the previous administration awaited ratification.",
+        "task": "Secure congressional passage against opposition within his own party.",
+        "action": "Built a cross-party coalition and signed the implementing legislation in 1993.",
+        "result": "Agreement entered into force in 1994. Its effects on employment remain contested."
+      },
+      "metrics": [
+        "in force 1994"
+      ],
+      "skills": [
+        "trade policy",
+        "legislative strategy"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "1993"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "output",
+      "corroborators": [],
+      "role_fit_notes": "Reads as a strength or a liability depending entirely on the audience. Generation should check the role before citing it.",
+      "employment_id": "EMP_POTUS",
+      "occurred": {
+        "start": "1993",
+        "end": "1994",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "trade"
+      ]
+    },
+    {
+      "id": "E_IMPEACHMENT",
+      "title": "Impeached by the House in 1998 and acquitted by the Senate in 1999",
+      "star": {
+        "situation": "A House inquiry led to two articles of impeachment.",
+        "task": "Continue governing through the proceedings.",
+        "action": "Contested the charges; the Senate voted to acquit on both articles in February 1999.",
+        "result": "Acquitted and served the remainder of the term."
+      },
+      "metrics": [],
+      "skills": [
+        "governance"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "1998-1999"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "activity",
+      "corroborators": [],
+      "role_fit_notes": "A matter of public record that no document can omit its way around. Recorded here so an artefact never appears to be hiding it, and so an interview brief prepares for it.",
+      "employment_id": "EMP_POTUS",
+      "occurred": {
+        "start": "1998",
+        "end": "1999",
+        "inferred": false
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "governance"
+      ]
+    },
+    {
+      "id": "E_FOUNDATION_IMPACT",
+      "title": "Claimed public health outcomes of foundation work (unresolved)",
+      "star": {
+        "situation": "Foundation programmes report large figures for treatment access.",
+        "task": "Establish which figures are independently audited and attributable.",
+        "action": "No independent audit obtained.",
+        "result": null
+      },
+      "metrics": [
+        "reported figures pending verification"
+      ],
+      "skills": [
+        "global health"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_PUBLIC_RECORD",
+          "locator": "annual reports"
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": null,
+      "corroborators": [],
+      "role_fit_notes": "Self-reported programme figures are not corroboration. Kept out of artefacts until independently sourced.",
+      "employment_id": "EMP_FOUNDATION",
+      "occurred": {
+        "start": "2002",
+        "end": "2020",
+        "inferred": true
+      },
+      "capture": {
+        "method": "document_import",
+        "review_period": null
+      },
+      "tags": [
+        "philanthropy"
+      ],
+      "open_questions": [
+        "Which figures are independently audited?",
+        "What share is attributable to the foundation alone?"
+      ]
+    }
+  ],
+  "private_profile": {
+    "name": "Bill Clinton",
+    "location": "New York, United States",
+    "email": "not.a.real.address@example.com",
+    "phone": null,
+    "linkedin": null,
+    "personal_website": null,
+    "address": null,
+    "photo_reference": null,
+    "source_refs": [],
+    "publication_policy": "Parody pack. Contact details are deliberately fake."
+  },
+  "skills": {
+    "domain": [
+      "fiscal policy",
+      "trade policy",
+      "diplomacy"
+    ],
+    "leadership": [
+      "legislative strategy",
+      "conflict resolution"
+    ],
+    "technical": []
+  },
+  "skill_vocabulary": {
+    "diplomacy": [
+      "foreign policy",
+      "negotiation"
+    ],
+    "fiscal policy": [
+      "budget",
+      "economic policy"
+    ]
+  },
+  "metadata": {
+    "created": "2026-09-06",
+    "status": "example_only",
+    "warning": "Parody, built from public record and not endorsed by or connected to anyone. Contact details are fake. Never cite these atoms in a real artefact."
+  }
+}

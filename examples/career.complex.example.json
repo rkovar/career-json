@@ -1,0 +1,654 @@
+{
+  "$schema": "../schemas/career.schema.json",
+  "schema_version": "1.3",
+  "name": "Morgan Vale",
+  "purpose": "A fictional pack shaped like a real one, for tests that the small example cannot reach.",
+  "metadata": {
+    "created": "2026-09-06",
+    "status": "example_only",
+    "warning": "Entirely fictional. Morgan Vale does not exist. This pack exists because the five-atom example has no promotion chain, no withheld evidence, no unresolved claim and no undated atoms, so every test passed against a shape no real pack has. Three defects shipped behind that gap. Never cite these atoms."
+  },
+  "source_records": [
+    {
+      "source_id": "SRC_CX_CV",
+      "source_type": "pdf",
+      "path": "data/sources/fictional-cv.pdf",
+      "sha256": "29cdee48e28d8104186513c96be32955f6203cffa61833e36a88a37ecbff7989",
+      "character_count": 9120,
+      "byte_size": 184320,
+      "extraction_method": "pdftotext",
+      "independent": false
+    },
+    {
+      "source_id": "SRC_CX_LINKEDIN",
+      "source_type": "pdf",
+      "path": "data/sources/fictional-linkedin.pdf",
+      "sha256": "00a9e4255a5b63067b76cbfb9fd67f26bdb91be802d5ffcb177ec1b7a8d4c623",
+      "character_count": 5300,
+      "byte_size": 71000,
+      "extraction_method": "pdftotext",
+      "independent": false
+    },
+    {
+      "source_id": "SRC_CX_CONFERENCE",
+      "source_type": "url",
+      "path": "https://example.invalid/fictional-conference/2025/programme",
+      "retrieved": "2026-02-11",
+      "independent": true
+    }
+  ],
+  "employment": [
+    {
+      "employment_id": "EMP_CX_DIR",
+      "employer": "Northwind Systems",
+      "employer_of_record": null,
+      "title": "Director of Platform Security",
+      "start": "2022-03",
+      "end": "present",
+      "location": "London, United Kingdom",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true
+    },
+    {
+      "employment_id": "EMP_CX_LEAD",
+      "employer": "Northwind Systems",
+      "employer_of_record": null,
+      "title": "Lead Security Engineer",
+      "start": "2019-06",
+      "end": "2022-03",
+      "location": "London, United Kingdom",
+      "parent_employment_id": "EMP_CX_DIR",
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true
+    },
+    {
+      "employment_id": "EMP_CX_ENG",
+      "employer": "Northwind Systems",
+      "employer_of_record": null,
+      "title": "Security Engineer",
+      "start": "2017-01",
+      "end": "2019-06",
+      "location": "London, United Kingdom",
+      "parent_employment_id": "EMP_CX_DIR",
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 2"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true
+    },
+    {
+      "employment_id": "EMP_CX_CONTOSO",
+      "employer": "Contoso Retail",
+      "employer_of_record": "Fabrikam Contracting Ltd",
+      "title": "Senior Systems Engineer",
+      "start": "2013-04",
+      "end": "2016-12",
+      "location": "Manchester, United Kingdom",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 2"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true
+    },
+    {
+      "employment_id": "EMP_CX_UNI",
+      "employer": "Fictional University",
+      "employer_of_record": null,
+      "title": "Research Assistant",
+      "start": "2011-09",
+      "end": "2013-03",
+      "location": "Leeds, United Kingdom",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 2"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "id": "E_CX_FRAUD_LOSS",
+      "title": "Cut card-fraud losses with a new detection pipeline",
+      "star": {
+        "situation": "Card-fraud write-offs were growing faster than transaction volume.",
+        "task": "Reduce loss without raising the false-positive rate on genuine customers.",
+        "action": "Rebuilt the scoring pipeline, added velocity features, and ran a six-week shadow deployment before cutover.",
+        "result": "Quarterly fraud write-offs fell by roughly a third with the false-positive rate unchanged."
+      },
+      "metrics": [
+        {
+          "value": "~33% reduction in quarterly fraud write-offs",
+          "basis": "write-offs booked to the fraud ledger, Q1 2023 against Q1 2024, finance-reported",
+          "measured": true
+        },
+        {
+          "value": "false-positive rate unchanged",
+          "basis": null,
+          "measured": true
+        }
+      ],
+      "skills": [
+        "detection engineering",
+        "fraud",
+        "data pipelines"
+      ],
+      "tags": [
+        "cost-reduction"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "corroborated",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_DIR",
+      "occurred": {
+        "start": "2023-01",
+        "end": "2024-03",
+        "inferred": false
+      },
+      "corroborators": [
+        {
+          "kind": "former_manager",
+          "reference": "VP Engineering at the time",
+          "reachable": true,
+          "notes": "Signed off the cutover."
+        }
+      ]
+    },
+    {
+      "id": "E_CX_PLATFORM_MIGRATION",
+      "title": "Migrated the estate off a single-region deployment",
+      "star": {
+        "situation": "The whole platform ran in one region with no tested failover.",
+        "task": "Remove the single point of failure without a maintenance window.",
+        "action": "Introduced regional replicas, moved state to a quorum store, and rehearsed failover monthly.",
+        "result": "Survived a regional outage in 2025 with no customer-visible downtime."
+      },
+      "metrics": [
+        {
+          "value": "zero customer-visible downtime during the 2025 regional outage",
+          "basis": "status-page incident record and customer-impact review",
+          "measured": true
+        }
+      ],
+      "skills": [
+        "platform engineering",
+        "resilience"
+      ],
+      "tags": [
+        "reliability"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "business_outcome",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_DIR",
+      "occurred": {
+        "start": "2024-04",
+        "end": "2025-06",
+        "inferred": false
+      }
+    },
+    {
+      "id": "E_CX_DETECTION_PROGRAMME",
+      "title": "Built the detection engineering practice",
+      "star": {
+        "situation": "Detections were written ad hoc by whoever caught the incident.",
+        "task": "Make detection a reviewed, tested, version-controlled practice.",
+        "action": "Introduced detection-as-code, peer review, and a coverage map against ATT&CK.",
+        "result": "Detections became reviewable and testable; coverage gaps became visible rather than assumed."
+      },
+      "metrics": [
+        "70+ detections under review",
+        "coverage mapped to ATT&CK"
+      ],
+      "skills": [
+        "detection engineering",
+        "threat modelling"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "output",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_LEAD",
+      "occurred": {
+        "start": "2020-02",
+        "end": "2021-11",
+        "inferred": false
+      }
+    },
+    {
+      "id": "E_CX_ONCALL",
+      "title": "Rebuilt the on-call rotation",
+      "star": {
+        "situation": "A nine-person rotation was paging four times a night.",
+        "task": "Make the rotation sustainable without reducing coverage.",
+        "action": "Deleted or merged the noisiest alerts and introduced a follow-the-sun handover.",
+        "result": "Paging volume fell substantially with coverage unchanged."
+      },
+      "metrics": [
+        "team of 9",
+        "paging volume reduced"
+      ],
+      "skills": [
+        "incident management",
+        "team process"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "output",
+      "role_fit_notes": "Rotation and process work reads as management for an engineering title, and as strength for a head-of-function role.",
+      "employment_id": "EMP_CX_LEAD",
+      "occurred": {
+        "start": "2021-01",
+        "end": "2021-08",
+        "inferred": false
+      }
+    },
+    {
+      "id": "E_CX_CONF_TALK",
+      "title": "Delivered a conference talk on detection-as-code",
+      "star": {
+        "situation": "Practitioners had little public material on testing detections.",
+        "task": "Publish the approach and its limits.",
+        "action": "Wrote and delivered a conference talk with worked examples.",
+        "result": "Talk accepted and delivered; listed on the public programme."
+      },
+      "metrics": [],
+      "skills": [
+        "detection engineering",
+        "public speaking"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CONFERENCE",
+          "locator": "2025 programme, session listing"
+        },
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 2, speaking"
+        }
+      ],
+      "evidence_status": "externally_verified",
+      "external_safe": true,
+      "outcome_type": "output",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_DIR",
+      "occurred": {
+        "start": "2025-09",
+        "inferred": false
+      },
+      "corroborators": [
+        {
+          "kind": "public_artefact",
+          "reference": "Conference programme listing",
+          "reachable": true,
+          "notes": null
+        }
+      ]
+    },
+    {
+      "id": "E_CX_MENTORING",
+      "title": "Mentored engineers into security roles",
+      "star": {
+        "situation": "The team had no route in for engineers without a security background.",
+        "task": "Build a path from adjacent engineering into the security function.",
+        "action": "Ran a structured mentoring rotation with defined milestones.",
+        "result": "Several engineers moved into security roles from adjacent teams."
+      },
+      "metrics": [],
+      "skills": [
+        "mentoring"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "activity",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_DIR",
+      "occurred": null
+    },
+    {
+      "id": "E_CX_OPEN_SOURCE",
+      "title": "Maintained an open-source detection testing tool",
+      "star": {
+        "situation": "No lightweight way existed to unit-test detection rules.",
+        "task": "Publish something usable by small teams.",
+        "action": "Built and maintained a testing harness in the open.",
+        "result": "The tool is used publicly and accepts outside contributions."
+      },
+      "metrics": [],
+      "skills": [
+        "detection engineering",
+        "open source"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_LINKEDIN",
+          "locator": "projects"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "output",
+      "role_fit_notes": null,
+      "employment_id": null,
+      "occurred": null
+    },
+    {
+      "id": "E_CX_INTERNAL_TOOL",
+      "title": "Built the internal risk-tollgate platform",
+      "star": {
+        "situation": "Risk sign-off was a spreadsheet and a meeting.",
+        "task": "Make sign-off a controlled, auditable path.",
+        "action": "Shipped a tollgate platform integrated with the systems of record.",
+        "result": "Sign-off became auditable end to end and covered every production change."
+      },
+      "metrics": [
+        {
+          "value": "12 tollgates",
+          "basis": "platform configuration",
+          "measured": true
+        }
+      ],
+      "skills": [
+        "risk",
+        "governance"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "business_outcome",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_DIR",
+      "occurred": {
+        "start": "2025-01",
+        "end": "ongoing",
+        "inferred": false
+      },
+      "notes": "Employer-internal platform. Strong evidence for a governance role and unusable in any artefact."
+    },
+    {
+      "id": "E_CX_REVENUE_CLAIM",
+      "title": "Revenue-influence claim (unresolved)",
+      "star": {
+        "situation": "The detection programme was cited internally as a factor in renewals.",
+        "task": "Establish whether renewal revenue can be attributed to it, and on what basis.",
+        "action": "Claim recorded from the subject's own CV; no independent corroboration obtained.",
+        "result": null
+      },
+      "metrics": [
+        {
+          "value": ">\u00a340m influenced renewal revenue",
+          "basis": null,
+          "measured": false
+        }
+      ],
+      "skills": [
+        "detection engineering"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": null,
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_DIR",
+      "occurred": null,
+      "open_questions": [
+        "What is the measurement basis: influenced pipeline, attributed renewals, or total revenue of accounts covered?",
+        "Who produced the figure, over what period, and does any system support it?"
+      ],
+      "notes": "Held so the value is preserved rather than discarded, and excluded from every artefact until answered."
+    },
+    {
+      "id": "E_CX_COMPLIANCE",
+      "title": "Ran the audit and controls programme",
+      "star": {
+        "situation": "Audit evidence was gathered by hand every cycle.",
+        "task": "Reduce the manual burden and pass without findings.",
+        "action": "Automated evidence collection and mapped controls to the frameworks in scope.",
+        "result": "Audit cycles completed without material findings."
+      },
+      "metrics": [
+        "50+ annual audits supported"
+      ],
+      "skills": [
+        "governance",
+        "audit"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "activity",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_CONTOSO",
+      "occurred": {
+        "start": "2013-04",
+        "end": "2016-12",
+        "inferred": true
+      }
+    },
+    {
+      "id": "E_CX_EARLY_RESEARCH",
+      "title": "Published early research on network telemetry",
+      "star": {
+        "situation": "Telemetry at the university was collected and never analysed.",
+        "task": "Turn it into something publishable.",
+        "action": "Built the analysis pipeline and co-authored the paper.",
+        "result": "Paper published and cited in later work."
+      },
+      "metrics": [],
+      "skills": [
+        "research",
+        "data pipelines"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "output",
+      "role_fit_notes": null,
+      "employment_id": "EMP_CX_UNI",
+      "occurred": {
+        "start": "2012-01",
+        "end": "2013-02",
+        "inferred": false
+      }
+    },
+    {
+      "id": "E_CX_TEAM_GROWTH",
+      "title": "Grew the security function",
+      "star": {
+        "situation": "Security was two engineers inside the platform team.",
+        "task": "Build a standalone function with its own remit and budget.",
+        "action": "Hired against a defined competency model and set an annual budget.",
+        "result": "The function operated independently with its own roadmap."
+      },
+      "metrics": [
+        {
+          "value": "grew from 2 to 11 engineers",
+          "basis": "headcount at the start and end of FY2024, from the HR system",
+          "measured": true
+        }
+      ],
+      "skills": [
+        "leadership",
+        "hiring"
+      ],
+      "tags": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 1"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "activity",
+      "role_fit_notes": "Headcount growth reads as leadership evidence for a head-of role and as management overhead for a hands-on one.",
+      "employment_id": "EMP_CX_DIR",
+      "occurred": {
+        "start": "2022-03",
+        "end": "2024-12",
+        "inferred": false
+      }
+    }
+  ],
+  "skills": [
+    "detection engineering",
+    "platform engineering",
+    "threat modelling",
+    "governance",
+    "incident management",
+    "mentoring",
+    "research"
+  ],
+  "skill_vocabulary": {
+    "detection engineering": [
+      "detection-as-code",
+      "detections"
+    ],
+    "threat modelling": [
+      "threat modeling"
+    ],
+    "incident management": [
+      "on-call",
+      "operations"
+    ]
+  },
+  "private_profile": {
+    "name": "Morgan Vale",
+    "location": "London, United Kingdom",
+    "email": "morgan.vale@example.invalid",
+    "phone": "+44 20 7946 0123",
+    "linkedin": "https://www.linkedin.com/in/example-morgan-vale",
+    "personal_website": null,
+    "address": "1 Fictional Street, London N1 0AA",
+    "photo_reference": "data/private/fictional-headshot.jpg",
+    "source_refs": [
+      {
+        "source_id": "SRC_CX_CV",
+        "locator": "page 1, header"
+      }
+    ],
+    "publication_policy": "Private by default; expose only when explicitly requested for a specific artefact."
+  },
+  "education": [
+    {
+      "education_id": "EDU_CX_MSC",
+      "institution": "Fictional University",
+      "qualification": "MSc",
+      "field": "Information Security",
+      "start": "2012-09",
+      "end": "2013",
+      "grade": "Distinction",
+      "location": "Leeds, United Kingdom",
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 2, education"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true
+    },
+    {
+      "education_id": "EDU_CX_WITHHELD",
+      "institution": "Fictional Employer Academy",
+      "qualification": "Internal certification",
+      "field": null,
+      "start": "2018",
+      "end": "2018",
+      "grade": null,
+      "location": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_CX_CV",
+          "locator": "page 2"
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false
+    }
+  ]
+}

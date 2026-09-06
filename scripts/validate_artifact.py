@@ -17,6 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, sha256, this_year, ROOT  # noqa: E402
+import quantities  # noqa: E402
 
 EVIDENCE_ID = re.compile(r"E_[A-Z0-9_]+")
 # Internal vocabulary that must never reach a reader.
@@ -25,8 +26,14 @@ UNITS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven"
          "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
          "nineteen": 19}
 TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50}
+# A career-span claim, not any mention of years. "Progressed ... over nine years"
+# at one employer is a tenure claim and was being failed against the whole career
+# span. Requiring a career marker under-flags rather than over-flags, which is the
+# right direction: a missed span claim is silence, a false one trains people to
+# ignore the check.
 SPAN_CLAIM = re.compile(
-    r"\b((?:\d{1,2})|(?:(?:%s)(?:[\s-](?:%s))?)|(?:%s))\s+years\b"
+    r"\b((?:\d{1,2})|(?:(?:%s)(?:[\s-](?:%s))?)|(?:%s))\s+years?\b"
+    r"(?=[\s,]+(?:of\s+)?(?:experience|across))"
     % ("|".join(TENS), "|".join(UNITS), "|".join(UNITS)), re.I)
 
 
@@ -52,13 +59,20 @@ LEAKS = ["not publishable", "draft status", "publication warning", "withheld pen
          "external_safe", "unresolved", "TODO", "FIXME"]
 
 
+# The HTML void elements, which never close. The list was partial, so any page
+# carrying a form control read as permanently unclosed; artefacts have none, so
+# it stayed latent until the pack browser was validated with the same parser.
+VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+        "meta", "param", "source", "track", "wbr"}
+
+
 class Tags(HTMLParser):
     def __init__(self):
         super().__init__()
         self.stack, self.errors = [], []
 
     def handle_starttag(self, tag, attrs):
-        if tag not in ("meta", "br", "img", "hr", "link"):
+        if tag not in VOID:
             self.stack.append(tag)
 
     def handle_endtag(self, tag):
@@ -97,9 +111,16 @@ def check(md_path, html_path, pack, private=False, strict=False):
         errors.append("no evidence IDs: claims cannot be traced to the pack")
 
     seen = visible_text(md)
-    for leak in LEAKS:
-        if leak.lower() in seen.lower():
-            errors.append(f"internal vocabulary visible to a reader: {leak!r}")
+    # A private brief has no reader to leak to, and make-interview-brief requires
+    # this vocabulary: it must name which atoms are external_safe: false or
+    # unresolved so the candidate knows what not to discuss. The eligibility rules
+    # were already inverted for --private and the leak scan was not, so a real
+    # brief failed on the words that make it useful. The existing fixture missed
+    # it by never using them.
+    if not private:
+        for leak in LEAKS:
+            if leak.lower() in seen.lower():
+                errors.append(f"internal vocabulary visible to a reader: {leak!r}")
 
     for field in ("email", "phone"):
         if profile.get(field) and profile[field] in seen:
@@ -125,9 +146,10 @@ def check(md_path, html_path, pack, private=False, strict=False):
         if parser.stack or parser.errors:
             errors.append(f"html malformed: unclosed {parser.stack}, mismatched {parser.errors}")
         html_seen = re.sub(r'<span class="evidence">.*?</span>', "", html, flags=re.S)
-        for leak in LEAKS:
-            if leak.lower() in html_seen.lower():
-                errors.append(f"internal vocabulary visible in html: {leak!r}")
+        if not private:
+            for leak in LEAKS:
+                if leak.lower() in html_seen.lower():
+                    errors.append(f"internal vocabulary visible in html: {leak!r}")
 
     # Employment: dates, titles, and employers are what a background check tests,
     # and they carry no evidence ID, so nothing else here can see them.
@@ -178,9 +200,31 @@ def check(md_path, html_path, pack, private=False, strict=False):
         corroborated = sum(1 for a in cited if a in atoms and atoms[a].get("corroborators"))
         if cited and corroborated == 0:
             warnings.append("no cited atom has a corroborator identified")
+    # A magnitude in a bullet that its cited evidence does not carry. A warning,
+    # never an error: the risk is that a flag pressures the next draft into
+    # deleting the number rather than going back to the atom, and a vaguer
+    # document is a worse outcome than an unchecked one. Run against real drafts
+    # this found a "50+ personnel" metric written up as a 55-person organisation,
+    # and two documents disagreeing about the size of the same team.
+    for row in quantities.check(md, pack):
+        # Unknown ids are already an error above; do not report them twice.
+        carried = ", ".join(row["evidence_carries"]) or "no magnitude"
+        for item in row["unsupported"]:
+            warnings.append(
+                f"claims {item['value']:g} {item['kind']}, which "
+                f"{', '.join(row['cites']) or 'the cited evidence'} does not carry "
+                f"({carried}): {row['bullet'][:60]}")
+
+    # Only a finding about *this document* when the pack held a business outcome
+    # and the document did not use it. A pack with none makes every artefact fail
+    # this check forever, which is a pack-level property reported at the wrong
+    # altitude: validate_pack.py says it once instead.
     outcomes = [atoms[a].get("outcome_type") for a in cited if a in atoms]
-    if outcomes and not any(o == "business_outcome" for o in outcomes):
-        warnings.append("no cited atom is a business_outcome; the document describes work, not consequence")
+    pack_has_outcome = any(a.get("outcome_type") == "business_outcome"
+                           for a in pack.get("evidence_atoms", []))
+    if outcomes and pack_has_outcome and not any(o == "business_outcome" for o in outcomes):
+        warnings.append("no cited atom is a business_outcome, though the pack holds one; "
+                        "the document describes work, not consequence")
     return errors, warnings
 
 

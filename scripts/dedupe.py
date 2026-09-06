@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from current_pack import resolve, ROOT  # noqa: E402
+from current_pack import resolve, metric_text, ROOT  # noqa: E402
 
 NOTES = ROOT / "data" / "capture" / "notes.jsonl"
 STOP = set("""a an and are as at be by for from has have in into is it its of on or that the
@@ -37,7 +37,8 @@ def tokens(text):
 def atom_tokens(atom):
     star = atom.get("star") or {}
     parts = [atom.get("title", "")] + [star.get(k) or "" for k in ("situation", "task", "action", "result")]
-    parts += atom.get("metrics", []) + atom.get("skills", [])
+    parts += [metric_text(m) for m in atom.get("metrics", [])]
+    parts += atom.get("skills", [])
     return tokens(" ".join(parts))
 
 

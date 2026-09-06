@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from current_pack import resolve, sha256, this_year, ROOT  # noqa: E402
+from current_pack import resolve, sha256, this_year, metric_text, metric_basis, ROOT  # noqa: E402
 
 ROLES = ROOT / "data" / "roles"
 
@@ -101,6 +101,21 @@ def load_role(role_id):
     return json.loads(path.read_text())
 
 
+def recency(atom):
+    """Sort key for how current an atom is.
+
+    Two subtleties, both found by a pack that finally had a precise recent date
+    alongside ongoing work. `end` falls back to `start`, because a point-in-time
+    atom (a course release, an award) has a start and no end and is not undated.
+    And ongoing sorts above any dated month in the same year: work still running is
+    more current than something finished mid-year, and returning the bare year put
+    it below a YYYY-MM value from that same year on a string compare.
+    """
+    occurred = atom.get("occurred") or {}
+    end = occurred.get("end") or occurred.get("start") or "0000"
+    return f"{this_year()}-99" if end == "ongoing" else end
+
+
 def view(pack, audience="named_recipient", profile=None, limit=None):
     atoms = []
     for atom in pack.get("evidence_atoms", []):
@@ -111,7 +126,13 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
             "id": atom["id"],
             "title": atom["title"],
             "star": atom.get("star", {}),
-            "metrics": atom.get("metrics", []),
+            "metrics": [metric_text(m) for m in atom.get("metrics", [])],
+            # Carried so a bullet can be written against a figure whose basis is
+            # known, and so an unmeasured one is visible before it reaches a page.
+            "metric_basis": {metric_text(m): metric_basis(m)
+                             for m in atom.get("metrics", []) if metric_basis(m)},
+            "unmeasured_metrics": [metric_text(m) for m in atom.get("metrics", [])
+                                   if isinstance(m, dict) and m.get("measured") is False],
             "skills": atom.get("skills", []),
             "evidence_status": atom["evidence_status"],
             "occurred": atom.get("occurred"),
@@ -120,11 +141,6 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
             "role_fit_notes": atom.get("role_fit_notes"),
             "has_corroborator": bool(atom.get("corroborators")),
         })
-    def recency(atom):
-        occurred = atom.get("occurred") or {}
-        end = occurred.get("end") or occurred.get("start") or "0000"
-        return str(this_year()) if end == "ongoing" else end
-
     # Outcomes first, then recent work: a hiring manager discounts both workload
     # metrics and things you did twelve years ago.
     atoms.sort(key=lambda a: (OUTCOME_RANK[a["outcome_type"]],
@@ -166,6 +182,12 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
     years = [int(r["start"][:4]) for r in employment]
     ends = [this_year() if r.get("end") == "present" else int((r.get("end") or r["start"])[:4]) for r in employment]
 
+    # Same eligibility rule as employment: withheld or unresolved never reaches
+    # generation.
+    education = [r for r in pack.get("education", [])
+                 if r.get("external_safe") and r.get("evidence_status") not in ("unresolved", "declined")]
+    education.sort(key=lambda r: r.get("end") or r.get("start") or "", reverse=True)
+
     return {
         "audience": audience,
         "role": profile["role_id"] if profile else None,
@@ -173,10 +195,12 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
         "not_shortlisted": dropped,
         "contact": contact,
         "employment": employment,
+        "education": education,
         "career_span_years": (max(ends) - min(years)) if employment else None,
         "atoms": atoms,
         "summary": {
             "employment_records": len(employment),
+            "education_records": len(education),
             "eligible": len(atoms),
             "shortlisted_from": len(atoms) + len(dropped),
             "by_outcome": {k: sum(1 for a in atoms if a["outcome_type"] == k)

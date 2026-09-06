@@ -82,7 +82,11 @@ to write around.
 4. Build each substantive bullet from STAR fields, preserving the Result's
    meaning. Never add an outcome, metric, date, or scope the evidence lacks.
 4. Carry claim-to-evidence IDs as `<!-- Evidence: E_X -->` comments. The renderer
-   turns them into hidden spans so both formats stay in step.
+   turns them into hidden spans so both formats stay in step. Put the comment
+   **at the end of the claim's own line**, or on the line directly after it. Both
+   placements are supported and nothing else is: a comment separated from its
+   claim by a blank line binds to nothing, and `scripts/quantities.py` will then
+   compare that claim against no evidence at all.
 6. Draft status never appears inside the artefact: no banner, no "not
    publishable" notice, no bracketed note about withheld or pending evidence.
    That language reaches a hiring manager the first time the file is forwarded.
