@@ -107,6 +107,13 @@ document sent to a named recipient, name and location only on anything public.
 - An unanswered question is not a failure. Record it, set the atom to
   `unresolved`, and finish the run.
 
+Batching is right **here** and wrong afterwards. Ingestion must not block, so the
+questions arrive at the end as one list. Working through them is a different
+activity: hand the batch over by pointing at `review-evidence`, which asks them
+one at a time, adapts each question to the last answer, and shows what each one
+moved. Do not attempt that inside this run. `python3 scripts/open_questions.py`
+holds the queue, so nothing is lost between the two.
+
 ## Answering
 
 When the user answers in a later message, re-run review for the affected atoms

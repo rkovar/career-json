@@ -139,6 +139,12 @@ artefact exactly as it does an atom.
 Where material came from. Files carry a `sha256` and the character count of
 **extracted text**, not the file size. URLs carry a `retrieved` date instead.
 
+A `person` source is a conversation: the subject's own answers during a review,
+dated, pointing at the review record that holds them. It has no hash, so like a
+URL its `retrieved` date is the only thing making it auditable. It exists because
+an answer to a good question is evidence, and evidence with no provenance cannot
+be told apart from evidence a persuasive question produced.
+
 `independent: true` marks a source you did not write. Only atoms citing one can
 reach `externally_verified`.
 

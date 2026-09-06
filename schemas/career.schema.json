@@ -175,7 +175,7 @@
         "path": {
           "type": "string",
           "minLength": 1,
-          "description": "Workspace-relative file path, or the URL for a url source."
+          "description": "Workspace-relative file path, the URL for a url source, or for a person source the review record holding what was said."
         },
         "sha256": {
           "type": [
@@ -204,7 +204,7 @@
             "string",
             "null"
           ],
-          "description": "Date a url source was checked. Required for url sources to be auditable."
+          "description": "Date a url source was checked, or a person source was spoken to. Required for both, because neither has a hash: it is the only thing that makes them auditable."
         },
         "independent": {
           "type": "boolean",
@@ -217,7 +217,10 @@
           "if": {
             "properties": {
               "source_type": {
-                "const": "url"
+                "enum": [
+                  "url",
+                  "person"
+                ]
               }
             },
             "required": [

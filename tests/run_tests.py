@@ -670,6 +670,84 @@ def test_education():
     shutil.rmtree(workspace, ignore_errors=True)
 
 
+def test_open_questions():
+    """The queue of outstanding questions is a pure function over the pack and the
+    role profiles, so it is a script. Answering "what is still open?" by grepping
+    the pack by hand is how questions get missed and how ordering gets lost.
+
+    The ordering matters more than the content: a batch in pack order is abandoned
+    early, the same questions ranked by what each unlocks get answered.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    import open_questions  # noqa: E402
+
+    pack = json.loads(COMPLEX.read_text())
+    profile = {"role_id": "r", "title": "R", "central_requirement": "c",
+               "requirements": [{"weight": "essential", "text": "nothing evidences this",
+                                 "evidenced_by": []}]}
+    qs = open_questions.collect(pack, [profile], cited=set())
+    kinds = {q["kind"] for q in qs}
+
+    for kind in ("role_gap", "withheld", "undated", "metric_basis", "recorded"):
+        check(f"the queue finds {kind} questions", kind in kinds, str(sorted(kinds)))
+    check("an unevidenced essential requirement outranks everything else",
+          qs[0]["kind"] == "role_gap", str(qs[0]))
+    check("the queue is sorted by what answering unlocks",
+          [q["score"] for q in qs] == sorted((q["score"] for q in qs), reverse=True))
+    check("a withheld atom is named as withheld rather than missing",
+          any(q["kind"] == "withheld" and q["subject"] == "E_CX_INTERNAL_TOOL" for q in qs))
+    check("a metric that already records its basis is not asked about again",
+          not any(q["kind"] == "metric_basis" and "33%" in q["question"] for q in qs),
+          str([q["question"] for q in qs if q["kind"] == "metric_basis"]))
+    check("a metric carrying no magnitude is not asked for a baseline",
+          not any(q["kind"] == "metric_basis" and "coverage" in q["question"].lower() for q in qs))
+
+    cited = open_questions.collect(pack, [profile], cited={"E_CX_MENTORING"})
+    plain = {q["question"]: q["score"] for q in qs}
+    raised = [q for q in cited if q["subject"] == "E_CX_MENTORING"
+              and q["score"] > plain.get(q["question"], 0)]
+    check("a question about a claim that reaches artefacts is ranked higher", bool(raised))
+
+    # The guardrail: movement that cites nothing must be visible.
+    d = open_questions.delta(pack, COMPLEX)
+    check("the delta reports a verdict", "verdict" in d, str(d))
+
+    for args in ([], ["--markdown"], ["--delta"]):
+        code, out, err = run("open_questions.py", *args)
+        check(f"open_questions.py {' '.join(args) or '(default)'} runs", code == 0, err)
+
+
+def test_conversation_is_a_source():
+    """An atom created by an answer must say so. This is the difference between a
+    review that records what the subject recalled and one that records what a
+    persuasive question produced."""
+    sys.path.insert(0, str(SCRIPTS))
+    schema = json.loads((ROOT / "schemas" / "career.schema.json").read_text())
+    check("person is an allowed source_type",
+          "person" in schema["$defs"]["sourceRecord"]["properties"]["source_type"]["enum"])
+
+    def with_person_source(d):
+        d["source_records"].append({"source_id": "SRC_TALK", "source_type": "person",
+                                    "path": "reviews/r.md", "retrieved": "2026-09-06",
+                                    "independent": False})
+        d["evidence_atoms"][0]["source_refs"] = [{"source_id": "SRC_TALK"}]
+    code, out, _ = run("validate_pack.py", broken("p.json", with_person_source))
+    check("a person source validates without a sha256", code == 0, out)
+
+    def undated_person(d):
+        d["source_records"].append({"source_id": "SRC_TALK", "source_type": "person",
+                                    "path": "reviews/r.md", "independent": False})
+    code, out, _ = run("validate_pack.py", broken("p.json", undated_person))
+    check("a person source without a date is an error",
+          code == 1 and "retrieved date" in out, out)
+
+    def sourceless(d):
+        d["evidence_atoms"][0]["source_refs"] = []
+    code, out, _ = run("validate_pack.py", broken("p.json", sourceless))
+    check("an atom citing nothing is warned about, not silently accepted",
+          "traces to nothing" in out, out)
+
+
 def test_metric_measurement_basis():
     """A metric is a claim, and a claim whose denominator nobody recorded cannot
     be defended. The interview brief had to say "no baseline recorded" for the two
@@ -1175,7 +1253,13 @@ INVARIANTS = {
                           "review_period"],
     "review-evidence": ["self_asserted", "corroborated", "externally_verified",
                         "Repetition is not corroboration", "not a requirement",
-                        "Never chase them"],
+                        "Never chase them",
+                        # The iterative review mode. Every one of these is a rule
+                        # that stops the method becoming an inflation engine.
+                        "Ask one question. Wait.", "genuine null option",
+                        "written into `star.result`", "An answer is a source",
+                        "Close an unanswerable question", "open_questions.py",
+                        "indistinguishable from a coaching one"],
     "evaluate-output": ["external_safe", "contact block", "recruiter-screen",
                         "Background-check exposure", "employment", "employer_of_record",
                         "LinkedIn About"],
@@ -1314,7 +1398,8 @@ def main():
                  test_artifact_validation, test_private_brief, test_pack_pinning, test_manifest,
                  test_records, test_corroboration_plan, test_index_and_diff,
                  test_employment, test_role_fit, test_shortlist_actually_curates,
-                 test_metric_measurement_basis, test_complex_pack_shape, test_pack_html,
+                 test_metric_measurement_basis, test_open_questions,
+                 test_conversation_is_a_source, test_complex_pack_shape, test_pack_html,
                  test_education,
                  test_withheld_evidence_is_visible,
                  test_outcome_warning_altitude, test_verdict_log,

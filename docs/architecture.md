@@ -26,7 +26,7 @@ than any instruction.
 .claude/skills/     judgement: the nine skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              380 assertions plus a skill-invariant lint
+tests/              406 assertions plus a skill-invariant lint
 data/               your material. Git ignored, never leaves the machine
   sources/            raw input
   packs/career.json   the current record
@@ -56,6 +56,7 @@ reviews/            review records and decisions. Git ignored
 | `coverage.py` | Timeline, gaps, undated atoms, stale skills |
 | `role_fit.py` | Score the pack against every role profile, and name what no artefact may cite |
 | `pack_html.py` | Browsable private view of the whole pack, withheld atoms included. Never sendable |
+| `open_questions.py` | Every outstanding question, ranked by what answering unlocks. `--delta` reports movement resting on no source |
 | `corroboration_plan.py` | Optional: what is worth corroborating |
 | `verdict_log.py` | Screen verdicts over time |
 | `artifact_index.py`, `diff_artifact.py` | What exists, and what changed between versions |
@@ -78,7 +79,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 380 assertions: real tests over the scripts, plus a lint
+`make check` runs 406 assertions: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.

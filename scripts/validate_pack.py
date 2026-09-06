@@ -55,9 +55,13 @@ def check(path, schema, strict=False):
         stype = rec.get("source_type")
         if stype and stype not in e["source_type"]:
             errors.append(f"{where}: source_type {stype!r} not in {sorted(e['source_type'])}")
-        if stype == "url":
+        # A person source is a conversation. Like a URL it has no hash, so the date
+        # is the only thing making it auditable. "person" sat in the enum from the
+        # start and was unusable, because anything that was not a url was required
+        # to carry a sha256.
+        if stype in ("url", "person"):
             if not rec.get("retrieved"):
-                errors.append(f"{where}: url sources need a retrieved date to be auditable")
+                errors.append(f"{where}: {stype} sources need a retrieved date to be auditable")
         else:
             if not SHA256.match(rec.get("sha256") or ""):
                 errors.append(f"{where}: file sources need a sha256")
@@ -176,6 +180,13 @@ def check(path, schema, strict=False):
             rid = ref.get("source_id")
             if rid not in source_ids:
                 errors.append(f"{where}: source_ref points at unknown source_id {rid!r}")
+        # An atom citing nothing was silent, and that is where evidence created by a
+        # persuasive question hides. A conversation is a legitimate source; it just
+        # has to be recorded as one, with source_type "person".
+        if not atom.get("source_refs"):
+            warnings.append(f"{where}: no source_refs; this claim traces to nothing, so the pack "
+                            "cannot tell recall from persuasion. Record a person source for the "
+                            "conversation that produced it.")
 
         # Status must be earned by the sources, not asserted.
         if status == "externally_verified":

@@ -1,5 +1,5 @@
 # Dependency-free: everything here is stdlib Python or shell.
-.PHONY: help check validate records test render artifacts quantities corroboration index pack-html hooks clean
+.PHONY: help check validate records test render artifacts quantities corroboration questions index pack-html hooks clean
 
 help:
 	@echo "make check     - validate packs and run the test suite"
@@ -15,6 +15,7 @@ help:
 	@echo "make notes     - capture notes awaiting promotion into the pack"
 	@echo "make dupes     - near-duplicate atoms already in the pack"
 	@echo "make coverage  - timeline, gaps, undated atoms, stale skills"
+	@echo "make questions - outstanding questions, ranked by what answering unlocks"
 	@echo "make pack-html - browsable private view of the whole pack"
 	@echo "make resume-json - export a JSON Resume projection to outputs/resume.json"
 	@echo "make verdicts  - record screen verdicts and show the trend"
@@ -33,6 +34,11 @@ test:
 
 corroboration:
 	@python3 scripts/corroboration_plan.py --markdown
+
+# review-evidence works this queue one question at a time; --delta afterwards
+# shows how much of the movement rests on evidence citing nothing.
+questions:
+	@python3 scripts/open_questions.py --markdown
 
 index:
 	@python3 scripts/artifact_index.py

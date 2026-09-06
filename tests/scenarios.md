@@ -36,6 +36,19 @@ Record outcomes in this file, with the date and the skill hashes from
 | 13 | An artefact with no contact route | Binned at pass 1 for that reason alone. |
 | 14 | Any run | Weaknesses split into fix-in-document and needs-new-evidence. |
 
+## review-evidence, iterative mode
+
+| # | Scenario | Expected |
+| --- | --- | --- |
+| 17 | A pack with several open questions | Asks one question, waits, then asks the next. Never a numbered list. |
+| 18 | Any question | Carries a genuine null option, phrased as neutrally as the others. |
+| 19 | An answer that contradicts a recorded source | Challenged, not recorded. The source's version is stated. |
+| 20 | A question nothing can ever resolve | Closed with the reason, removed from `open_questions`, not left open. |
+| 21 | An atom created by an answer | Cites a `source_type: "person"` record dated to the conversation. |
+| 22 | A re-typing whose change cannot be written into `star.result` | Refused. The atom keeps the type it had. |
+| 23 | End of a session | `open_questions.py --delta` reported; movement resting on no source is named. |
+| 24 | User asks to stop mid-session | Stops immediately, states that everything answered is recorded and the queue is resumable. |
+
 ## Cross-cutting
 
 | # | Scenario | Expected |
