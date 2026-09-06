@@ -399,6 +399,75 @@ def test_pack_pinning():
     check("changed pack is reported as stale", "stale" in out, out)
 
 
+def test_approval_binding():
+    """Approval belongs to an exact document, not to a set of evidence ids.
+
+    Codex's probe: Markdown saying spend decreased and html saying it increased,
+    both citing one atom, passed with no warning. And a changed document kept
+    publishable: true and stale: false, because only the pack was pinned.
+    """
+    workspace = Path(tempfile.mkdtemp())
+    shutil.copytree(fixture(), workspace, dirs_exist_ok=True)
+    head = ("# Morgan Vale\n\nLondon · morgan.vale@example.invalid\n\n## Experience\n\n"
+            "### Northwind Systems | Director of Platform Security | 2022 to present\n\n")
+    md = workspace / "outputs" / "bind-draft.md"
+    md.write_text(head + "- Reduced fraud write-offs by roughly a third. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", md, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("a rendered artefact validates", code == 0, out)
+
+    other = workspace / "outputs" / "other.md"
+    other.write_text(head + "- Increased fraud write-offs by roughly a third. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", other, workspace=workspace)
+    shutil.copy(other.with_suffix(".html"), md.with_suffix(".html"))
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("html saying the opposite of the markdown fails, same ids or not",
+          code == 1 and "does not match the renderer" in out, out)
+    run("render.py", md, workspace=workspace)
+
+    manifest = json.loads(run("manifest.py", "Role", "--artifact", md, workspace=workspace)[1])
+    check("manifest pins the artefact hash", len(manifest.get("artifact_sha256") or "") == 64, str(manifest))
+    record = {"artifacts": ["outputs/bind-draft.md"], "target_role": "Role",
+              "audience": "named_recipient", "publishable": True, "evaluation_date": "2026-09-06",
+              "run": manifest, "findings": [], "passed_checks": []}
+    ev = workspace / "outputs" / "bind-evaluation.json"
+    ev.write_text(json.dumps(record))
+    code, out, _ = run("validate_records.py", ev, workspace=workspace)
+    check("a run block carrying artifact_sha256 validates", code == 0, out)
+    rows = json.loads(run("artifact_index.py", "--json", workspace=workspace)[1])
+    row = next(r for r in rows if r["artifact"] == "bind-draft.md")
+    check("the index shows an unchanged artefact as fresh", row["stale"] is False, str(row))
+
+    md.write_text(md.read_text().replace("roughly a third", "roughly a quarter"))
+    run("render.py", md, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("editing the prose is reported against its evaluation",
+          "changed since it was evaluated" in out, out)
+    rows = json.loads(run("artifact_index.py", "--json", workspace=workspace)[1])
+    row = next(r for r in rows if r["artifact"] == "bind-draft.md")
+    check("and the index marks it stale", row["stale"] is True, str(row))
+
+    # Audience is deterministic. A public artefact with an email in it failed
+    # nothing; now it fails validation, and the record's audience is honoured.
+    code, out, _ = run("validate_artifact.py", "--audience", "public", md, workspace=workspace)
+    check("contact details in a public artefact are an error",
+          code == 1 and "public artefact" in out, out)
+    record["audience"] = "public"
+    ev.write_text(json.dumps(record))
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("the audience is read from the evaluation record when no flag is given",
+          code == 1 and "public artefact" in out, out)
+    pub = workspace / "outputs" / "pub-draft.md"
+    pub.write_text("# Morgan Vale\n\nLondon, United Kingdom\n\n## Experience\n\n"
+                   "### Northwind Systems | Director of Platform Security | 2022 to present\n\n"
+                   "- Reduced fraud write-offs by roughly a third. <!-- Evidence: E_CX_FRAUD_LOSS -->\n")
+    run("render.py", pub, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", "--audience", "public", pub, workspace=workspace)
+    check("a public artefact with name and location only passes without a contact warning",
+          code == 0 and "no email or phone" not in out, out)
+    shutil.rmtree(workspace, ignore_errors=True)
+
+
 def test_manifest():
     code, out, _ = run("manifest.py", "Some Role")
     check("manifest runs", code == 0)
@@ -1724,7 +1793,8 @@ def check_documented_assertion_count():
 
 def main():
     for test in (test_pack_validation, test_selection_view, test_renderer,
-                 test_artifact_validation, test_private_brief, test_pack_pinning, test_manifest,
+                 test_artifact_validation, test_private_brief, test_pack_pinning,
+                 test_approval_binding, test_manifest,
                  test_records, test_corroboration_plan, test_index_and_diff,
                  test_employment, test_role_fit, test_shortlist_actually_curates,
                  test_metric_measurement_basis, test_open_questions,

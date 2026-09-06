@@ -8,6 +8,7 @@ detectable rather than silently wrong.
 
     python3 scripts/manifest.py "Head of AI Security"
 """
+import argparse
 import hashlib
 import json
 import sys
@@ -27,9 +28,9 @@ def skill_versions():
     return out
 
 
-def manifest(target_role=None):
+def manifest(target_role=None, artifact=None):
     pack = resolve()
-    return {
+    out = {
         "generated": date.today().isoformat(),
         "target_role": target_role,
         "pack": str(pack.relative_to(ROOT)) if pack else None,
@@ -37,10 +38,20 @@ def manifest(target_role=None):
         "schema_version": json.loads(pack.read_text()).get("schema_version") if pack else None,
         "skill_versions": skill_versions(),
     }
+    if artifact is not None:
+        # Approval belongs to an exact document. Pinning the pack alone let an
+        # edited artefact keep its evaluation.
+        out["artifact_sha256"] = sha256(Path(artifact))
+    return out
 
 
 def main(argv):
-    print(json.dumps(manifest(argv[1] if len(argv) > 1 else None), indent=2))
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("target_role", nargs="?", default=None)
+    parser.add_argument("--artifact", type=Path, default=None,
+                        help="the Markdown artefact this record evaluates; pins its sha256")
+    args = parser.parse_args(argv[1:])
+    print(json.dumps(manifest(args.target_role, args.artifact), indent=2))
     return 0
 
 

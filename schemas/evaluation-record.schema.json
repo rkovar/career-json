@@ -4,45 +4,148 @@
   "title": "Evaluation Record",
   "description": "Integrity review of a generated artefact. Written by evaluate-output.",
   "type": "object",
-  "required": ["artifacts", "target_role", "publishable", "evaluation_date", "run", "findings", "passed_checks"],
+  "required": [
+    "artifacts",
+    "target_role",
+    "publishable",
+    "evaluation_date",
+    "run",
+    "findings",
+    "passed_checks"
+  ],
   "properties": {
-    "artifacts": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-    "target_role": { "type": "string", "minLength": 1 },
-    "audience": { "type": "string", "enum": ["named_recipient", "public"] },
-    "publishable": { "type": "boolean" },
-    "evaluation_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
-    "datapack": { "type": "string" },
-    "generated_by": { "type": "string" },
-    "supersedes": { "type": "object" },
-    "run": { "$ref": "#/$defs/run" },
-    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
-    "passed_checks": { "type": "array", "items": { "type": "string" } }
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "named_recipient",
+        "public"
+      ]
+    },
+    "publishable": {
+      "type": "boolean"
+    },
+    "evaluation_date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "datapack": {
+      "type": "string"
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "supersedes": {
+      "type": "object"
+    },
+    "run": {
+      "$ref": "#/$defs/run"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "passed_checks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
   },
   "additionalProperties": false,
   "$defs": {
     "run": {
       "type": "object",
       "description": "Provenance. Without the pack hash a stale evaluation is undetectable.",
-      "required": ["generated", "pack", "pack_sha256", "skill_versions"],
+      "required": [
+        "generated",
+        "pack",
+        "pack_sha256",
+        "skill_versions"
+      ],
       "properties": {
-        "generated": { "type": "string" },
-        "target_role": { "type": ["string", "null"] },
-        "pack": { "type": "string" },
-        "pack_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "schema_version": { "type": ["string", "null"] },
-        "skill_versions": { "type": "object", "additionalProperties": { "type": "string" } }
+        "generated": {
+          "type": "string"
+        },
+        "target_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pack": {
+          "type": "string"
+        },
+        "pack_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "schema_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "skill_versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "sha256 of the artefact's Markdown at evaluation time. Without it an edited document kept publishable: true and stale: false."
+        }
       },
       "additionalProperties": false
     },
     "finding": {
       "type": "object",
-      "required": ["severity", "category", "message", "affected", "remediation"],
+      "required": [
+        "severity",
+        "category",
+        "message",
+        "affected",
+        "remediation"
+      ],
       "properties": {
-        "severity": { "type": "string", "enum": ["blocker", "warning", "info"] },
-        "category": { "type": "string", "minLength": 1 },
-        "message": { "type": "string", "minLength": 1 },
-        "affected": { "type": "string", "minLength": 1 },
-        "remediation": { "type": "string", "minLength": 1 }
+        "severity": {
+          "type": "string",
+          "enum": [
+            "blocker",
+            "warning",
+            "info"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remediation": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     }

@@ -18,6 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, sha256, this_year, ROOT  # noqa: E402
 import quantities  # noqa: E402
+import render  # noqa: E402
 from quantities import CITATION  # noqa: E402
 
 EVIDENCE_ID = re.compile(r"E_[A-Z0-9_]+")
@@ -88,9 +89,12 @@ def visible_text(markdown):
     return re.sub(r"<!--.*?-->", "", markdown, flags=re.S)
 
 
-def check(md_path, html_path, pack, private=False, strict=False):
+def check(md_path, html_path, pack, private=False, strict=False, audience="named_recipient"):
     """private: an interview brief. It is prepared from the whole pack on purpose,
     including atoms no artefact may cite, so eligibility and contact rules invert.
+
+    audience: a public artefact carries name and location only, so an email or
+    phone in it is an error rather than the absence being a warning.
     """
     errors, warnings = [], []
     md = md_path.read_text()
@@ -129,7 +133,12 @@ def check(md_path, html_path, pack, private=False, strict=False):
             break
     else:
         has_contact = False
-    if not has_contact and not private:
+    if audience == "public" and not private:
+        for field in ("email", "phone", "personal_website"):
+            if profile.get(field) and profile[field] in seen:
+                errors.append(f"{field} appears in a public artefact; a public document carries "
+                              "name and location only")
+    elif not has_contact and not private:
         warnings.append("no email or phone in the visible text; sendable only if this is a public artefact")
     if private and has_contact:
         warnings.append("a private brief does not need contact details")
@@ -142,6 +151,12 @@ def check(md_path, html_path, pack, private=False, strict=False):
         html = html_path.read_text()
         if set(EVIDENCE_ID.findall(html)) != cited:
             errors.append("markdown and html cite different evidence sets; regenerate with scripts/render.py")
+        # Same evidence ids is not the same document. "Reduced spend" and
+        # "Increased spend" citing one atom passed this check; the renderer is
+        # deterministic, so the html must be exactly what it would produce.
+        elif html != render.render(md):
+            errors.append("html does not match the renderer's output for this markdown; "
+                          "regenerate with scripts/render.py")
         parser = Tags()
         parser.feed(html)
         if parser.stack or parser.errors:
@@ -308,6 +323,19 @@ def check(md_path, html_path, pack, private=False, strict=False):
     return errors, warnings
 
 
+def evaluation_record(md_path):
+    """The evaluation record beside an artefact, if there is one."""
+    for candidate in (md_path.with_name(md_path.stem.replace("-draft", "") + "-evaluation.json"),
+                      md_path.with_suffix(".evaluation.json")):
+        if not candidate.exists():
+            continue
+        try:
+            return json.loads(candidate.read_text())
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
 def producing_pack(md_path):
     """The pack this artefact was generated from, if its evaluation record pinned one.
 
@@ -315,24 +343,16 @@ def producing_pack(md_path):
     are about drift, not about the document. manifest.py records the pin precisely
     so this can be answered; not reading it made the pin decorative.
     """
-    for candidate in (md_path.with_name(md_path.stem.replace("-draft", "") + "-evaluation.json"),
-                      md_path.with_suffix(".evaluation.json")):
-        if not candidate.exists():
-            continue
-        try:
-            run = (json.loads(candidate.read_text()).get("run") or {})
-        except json.JSONDecodeError:
-            continue
-        pinned, digest = run.get("pack"), run.get("pack_sha256")
-        if not pinned:
-            continue
-        path = ROOT / pinned
-        if not path.exists():
-            return None, f"evaluation pins {pinned}, which no longer exists"
-        if digest and sha256(path) != digest:
-            return None, f"{pinned} has changed since this artefact was generated; the evaluation is stale"
-        return path, None
-    return None, None
+    run = (evaluation_record(md_path) or {}).get("run") or {}
+    pinned, digest = run.get("pack"), run.get("pack_sha256")
+    if not pinned:
+        return None, None
+    path = ROOT / pinned
+    if not path.exists():
+        return None, f"evaluation pins {pinned}, which no longer exists"
+    if digest and sha256(path) != digest:
+        return None, f"{pinned} has changed since this artefact was generated; the evaluation is stale"
+    return path, None
 
 
 def main(argv):
@@ -345,6 +365,8 @@ def main(argv):
                         help="an interview brief: expects ineligible evidence, has no contact block")
     parser.add_argument("--current", action="store_true",
                         help="check against the current pack even if the artefact pins an older one")
+    parser.add_argument("--audience", choices=("named_recipient", "public"), default=None,
+                        help="defaults to the evaluation record's audience, else named_recipient")
     args = parser.parse_args(argv[1:])
 
     md_path = args.markdown
@@ -361,9 +383,16 @@ def main(argv):
         return 1
     pack = json.loads(pack_path.read_text())
 
-    errors, warnings = check(md_path, html_path, pack, private=args.private, strict=args.strict)
+    record = evaluation_record(md_path) or {}
+    audience = args.audience or record.get("audience") or "named_recipient"
+    errors, warnings = check(md_path, html_path, pack, private=args.private, strict=args.strict,
+                             audience=audience)
     if note:
         warnings.insert(0, note)
+    pinned_artifact = (record.get("run") or {}).get("artifact_sha256")
+    if pinned_artifact and pinned_artifact != sha256(md_path):
+        warnings.insert(0, "the artefact has changed since it was evaluated; the evaluation "
+                           "does not cover this text")
     print(f"{'FAIL' if errors else 'ok'}  {md_path}  (against {pack_path.relative_to(ROOT)})")
     for err in errors:
         print(f"      error: {err}")

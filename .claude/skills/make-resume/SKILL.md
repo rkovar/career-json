@@ -30,7 +30,7 @@ python3 scripts/select_evidence.py                 # everything eligible, unrank
 python3 scripts/select_evidence.py --excluded      # what was withheld, and why
 python3 scripts/render.py outputs/<name>.md        # HTML, never hand-written
 python3 scripts/validate_artifact.py outputs/<name>.md
-python3 scripts/manifest.py "<target role>"        # provenance for the record
+python3 scripts/manifest.py "<target role>" --artifact outputs/<name>.md   # provenance for the record
 ```
 
 Generate from the selection view, not from the raw pack. Pass `--role` whenever a
