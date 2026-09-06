@@ -108,7 +108,8 @@
         }
       ],
       "evidence_status": "self_asserted",
-      "external_safe": true
+      "external_safe": true,
+      "notes": "Operator note: contract via Fabrikam; reference checks go there, never on a page."
     },
     {
       "employment_id": "EMP_CX_UNI",
@@ -571,7 +572,11 @@
         "start": "2022-03",
         "end": "2024-12",
         "inferred": false
-      }
+      },
+      "constraints": [
+        "Headcount is the function's, not direct reports: do not imply sole ownership."
+      ],
+      "notes": "Internal only: the FY2024 headcount plan was contested; keep the figure as recorded."
     }
   ],
   "skills": [

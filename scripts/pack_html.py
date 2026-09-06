@@ -240,6 +240,8 @@ def atom_html(atom, employers):
     meta.append(f"<div><b>sources:</b> {esc(refs) or 'none'}</div>")
     if atom.get("role_fit_notes"):
         meta.append(f"<div><b>counts against:</b> {esc(atom['role_fit_notes'])}</div>")
+    if atom.get("constraints"):
+        meta.append(f"<div><b>constraints:</b> {esc('; '.join(atom['constraints']))}</div>")
     parts.append('<div class="meta">' + "".join(meta) + "</div>")
 
     if atom.get("open_questions"):

@@ -83,6 +83,11 @@ employment window rather than being recorded, which for a nine-year tenure is
 barely a date. Without this the pack cannot do recency, ordering, or gap
 detection, which is most of what a career memory is for.
 
+**`constraints`** — reviewed handling rules a generated claim must obey:
+"prototype only", "team contribution, do not imply sole ownership". These reach
+the selection view. `notes` is the operator's field and never does, which is why
+internal names can live there safely and constraints cannot.
+
 **`role_fit_notes`** — where the evidence counts *against* you. Media reach reads
 as strength for an advocacy role and as "communicator, not builder" for a
 hands-on engineering one.

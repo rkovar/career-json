@@ -1222,6 +1222,77 @@ def test_role_aware_selection():
     check("unknown role fails loudly", code != 0 and "Available" in err)
 
 
+def test_selection_contract():
+    """What generation may see is a contract, not whatever fell through.
+
+    The view dropped employment_id, so overlapping roles were attributed by
+    guesswork, and dropped every reviewed constraint, so "do not imply sole
+    ownership" vanished before the bullet was written. Meanwhile the whole
+    employment record passed through, employer_of_record and operator notes
+    included, which data-model.md says never appear in an artefact.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    import select_evidence as sel
+
+    pack = fixture_pack()
+    view = sel.view(pack)
+    blob = json.dumps(view)
+    atom = next(a for a in view["atoms"] if a["id"] == "E_CX_TEAM_GROWTH")
+    check("the view carries employment_id", atom.get("employment_id") == "EMP_CX_DIR", str(atom))
+    check("the view carries reviewed constraints",
+          any("sole ownership" in c for c in atom.get("constraints", [])), str(atom.get("constraints")))
+    check("operator notes on atoms never reach generation", "FY2024 headcount plan" not in blob)
+    allowed = {"employment_id", "employer", "title", "start", "end", "location", "parent_employment_id"}
+    check("employment is projected through an allowlist",
+          all(set(r) <= allowed for r in view["employment"]),
+          str([sorted(r) for r in view["employment"]][:1]))
+    check("employer_of_record never reaches generation", "Fabrikam" not in blob)
+    check("employment notes never reach generation", "reference checks go there" not in blob)
+
+    # Whether a fit note counts against a role is judgement; it is carried, not
+    # scored. Codex's probe: a note saying "strong for a head-of role" was
+    # penalised 1.5 on head-of roles.
+    profile = {"role_id": "r", "title": "R", "central_requirement": "c",
+               "requirements": [{"weight": "essential", "text": "grow a function",
+                                 "evidenced_by": ["E_CX_TEAM_GROWTH"]}],
+               "ats_keywords": []}
+    scored = sel.view(pack, profile=profile)["atoms"]
+    growth = next(a for a in scored if a["id"] == "E_CX_TEAM_GROWTH")
+    check("role_fit_notes is surfaced rather than penalised",
+          any("role_fit_notes" in r for r in growth["why_selected"])
+          and not any("negative signal" in r for r in growth["why_selected"]), str(growth["why_selected"]))
+    check("a noted essential atom still scores its essential weight", growth["role_score"] >= 5.0)
+
+    # Essential coverage survives the limit. Two strong examples of one
+    # essential used to push out the only example of another.
+    grown = json.loads(json.dumps(pack))
+    strong = json.loads(json.dumps(next(a for a in grown["evidence_atoms"] if a["id"] == "E_CX_FRAUD_LOSS")))
+    strong.update(id="E_STRONG_A", role_fit_notes=None)
+    dup = json.loads(json.dumps(strong)); dup["id"] = "E_STRONG_B"
+    unique = json.loads(json.dumps(strong))
+    unique.update(id="E_UNIQUE", outcome_type="activity", occurred={"start": "2010", "inferred": False})
+    grown["evidence_atoms"] = [strong, dup, unique]
+    two = {"role_id": "two", "title": "Two", "central_requirement": "c", "ats_keywords": [],
+           "requirements": [{"text": "Build", "weight": "essential", "evidenced_by": ["E_STRONG_A", "E_STRONG_B"]},
+                            {"text": "Govern", "weight": "essential", "evidenced_by": ["E_UNIQUE"]}]}
+    kept = {a["id"] for a in sel.view(grown, profile=two, limit=2)["atoms"]}
+    check("a two-slot shortlist keeps the sole evidence for each essential",
+          kept == {"E_STRONG_A", "E_UNIQUE"}, str(kept))
+
+    # Per-requirement coverage tells withheld from missing from cut-by-limit.
+    cov_profile = {"role_id": "c", "title": "C", "central_requirement": "c", "ats_keywords": [],
+                   "requirements": [
+                       {"text": "fraud", "weight": "essential", "evidenced_by": ["E_CX_FRAUD_LOSS"]},
+                       {"text": "governance tooling", "weight": "essential", "evidenced_by": ["E_CX_INTERNAL_TOOL"]},
+                       {"text": "nothing", "weight": "important", "evidenced_by": []},
+                       {"text": "mentoring", "weight": "nice_to_have", "evidenced_by": ["E_CX_MENTORING"]}]}
+    cov = {c["text"]: c["status"] for c in sel.view(pack, profile=cov_profile, limit=1)["requirement_coverage"]}
+    check("requirement coverage reports covered, withheld, missing and omitted",
+          cov == {"fraud": "covered", "governance tooling": "withheld",
+                  "nothing": "missing", "mentoring": "omitted"}, str(cov))
+    check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
+
+
 def test_capture_edit_delete():
     root = sandbox()
     run("capture.py", "original text", workspace=root)
@@ -1513,7 +1584,7 @@ INVARIANTS = {
                          "reject", "screen-record.schema.json"],
     "ingest-career-materials": ["self_asserted", "extract_text.sh", "independent",
                                "employment", "employer_of_record"],
-    "generate-resume": ["outcome_type", "role_fit_notes", "contact block"],
+    "generate-resume": ["outcome_type", "role_fit_notes", "contact block", "constraints"],
 }
 FORBIDDEN = ["user_asserted", "`verified`"]
 
@@ -1664,7 +1735,7 @@ def main():
                  test_verdict_log,
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
-                 test_role_aware_selection, test_capture_edit_delete, test_coverage,
+                 test_role_aware_selection, test_selection_contract, test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
                  test_skill_contracts, test_docs_match_reality,
                  test_walkthrough, test_fun_packs):

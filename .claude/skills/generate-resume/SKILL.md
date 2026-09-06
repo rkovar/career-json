@@ -42,3 +42,10 @@ user, not to the hiring manager.
 ## Style
 
 Use specific verbs, concrete scope, honest metrics, and natural language. Avoid generic claims such as “results-driven professional”, “proven track record”, and “dynamic team player”.
+
+## Constraints
+
+Each atom in the selection view may carry `constraints`: reviewed handling rules
+such as "prototype only, did not reach production" or "team contribution, do not
+imply sole ownership". A bullet must respect every one of them. They are the
+generation-facing half of a review; the operator's `notes` never reach this view.

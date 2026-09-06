@@ -87,8 +87,10 @@ def role_score(atom, profile, canon):
             reasons.append(f"{age} years old")
 
     if atom.get("role_fit_notes"):
-        score -= 1.5
-        reasons.append("flagged as a negative signal for some roles")
+        # Whether a note counts against THIS role is judgement, so it is carried
+        # rather than scored. A blanket penalty demoted "strong for a head-of
+        # role" on head-of roles.
+        reasons.append("carries role_fit_notes; read them before citing")
 
     return round(score, 2), reasons
 
@@ -139,6 +141,13 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
             "tags": atom.get("tags", []),
             "outcome_type": atom.get("outcome_type"),
             "role_fit_notes": atom.get("role_fit_notes"),
+            # An identifier, not private. Without it overlapping roles and undated
+            # work had to be attributed to an employer by guesswork.
+            "employment_id": atom.get("employment_id"),
+            # Reviewed handling constraints the bullet must respect. Operator
+            # `notes` stay out of the view on purpose: that is where internal
+            # names live.
+            "constraints": atom.get("constraints", []),
             "has_corroborator": bool(atom.get("corroborators")),
         })
     # Outcomes first, then recent work: a hiring manager discounts both workload
@@ -148,7 +157,7 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
     atoms.sort(key=recency, reverse=True)
     atoms.sort(key=lambda a: OUTCOME_RANK[a["outcome_type"]])
 
-    dropped = []
+    dropped, coverage = [], []
     if profile:
         # Rank against the role before generation sees anything. Sending the whole
         # pack and asking a model to curate does not survive a pack of 500 atoms.
@@ -160,10 +169,43 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
             atom["why_selected"] = reasons
             scored.append(atom)
         scored.sort(key=lambda a: -a["role_score"])
-        keep = scored[: (limit or 30)]
+        cap = limit or 30
+        # Essential coverage first. Taking the top N by score let two strong
+        # examples of one essential push out the only example of another, which
+        # is curation removing the thing the role hires for.
+        keep = []
+        for req in profile.get("requirements", []):
+            if req.get("weight") != "essential":
+                continue
+            best = next((a for a in scored if a["id"] in req.get("evidenced_by", [])), None)
+            if best and best not in keep:
+                keep.append(best)
+        for atom in scored:
+            if len(keep) >= cap:
+                break
+            if atom not in keep:
+                keep.append(atom)
+        keep.sort(key=lambda a: -a["role_score"])
         dropped = [{"id": a["id"], "title": a["title"], "role_score": a["role_score"]}
-                   for a in scored[len(keep):]]
+                   for a in scored if a not in keep]
         atoms = keep
+        # Per requirement: covered by the shortlist, omitted by the limit, withheld
+        # from every artefact, or missing from the pack. A single percentage could
+        # not tell the last two apart.
+        kept_ids = {a["id"] for a in keep}
+        eligible_ids = {a["id"] for a in scored}
+        all_ids = {a["id"] for a in pack.get("evidence_atoms", [])}
+        for req in profile.get("requirements", []):
+            linked = req.get("evidenced_by", [])
+            if any(i in kept_ids for i in linked):
+                status = "covered"
+            elif any(i in eligible_ids for i in linked):
+                status = "omitted"
+            elif any(i in all_ids for i in linked):
+                status = "withheld"
+            else:
+                status = "missing"
+            coverage.append({"text": req["text"], "weight": req["weight"], "status": status})
 
     # Named `contact`, not `profile`: this function already takes a role profile,
     # and the collision silently overwrote it.
@@ -176,7 +218,12 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
         for field in ("email", "phone", "personal_website"):
             contact.pop(field, None)
 
-    employment = [r for r in pack.get("employment", [])
+    # Projected through an allowlist. The whole record used to pass through,
+    # carrying employer_of_record and operator notes that data-model.md says
+    # never appear in an artefact.
+    employment = [{k: r.get(k) for k in ("employment_id", "employer", "title", "start",
+                                         "end", "location", "parent_employment_id")}
+                  for r in pack.get("employment", [])
                   if r.get("external_safe") and r.get("evidence_status") not in ("unresolved", "declined")]
     employment.sort(key=lambda r: r["start"], reverse=True)
     years = [int(r["start"][:4]) for r in employment]
@@ -184,7 +231,9 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
 
     # Same eligibility rule as employment: withheld or unresolved never reaches
     # generation.
-    education = [r for r in pack.get("education", [])
+    education = [{k: r.get(k) for k in ("education_id", "institution", "qualification",
+                                        "field", "start", "end", "grade", "location")}
+                 for r in pack.get("education", [])
                  if r.get("external_safe") and r.get("evidence_status") not in ("unresolved", "declined")]
     education.sort(key=lambda r: r.get("end") or r.get("start") or "", reverse=True)
 
@@ -193,6 +242,7 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
         "role": profile["role_id"] if profile else None,
         "central_requirement": profile.get("central_requirement") if profile else None,
         "not_shortlisted": dropped,
+        "requirement_coverage": coverage,
         "contact": contact,
         "employment": employment,
         "education": education,

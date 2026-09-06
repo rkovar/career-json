@@ -81,6 +81,8 @@ to write around.
    experience" from `career_span_years`, never by hand.
 4. Build each substantive bullet from STAR fields, preserving the Result's
    meaning. Never add an outcome, metric, date, or scope the evidence lacks.
+   Obey every entry in the atom's `constraints`: "prototype only" means the
+   bullet says so, "do not imply sole ownership" means it does not.
 4. Carry claim-to-evidence IDs as `<!-- Evidence: E_X -->` comments. The renderer
    turns them into hidden spans so both formats stay in step. Put the comment
    **at the end of the claim's own line**, or on the line directly after it. Both

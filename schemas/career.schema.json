@@ -451,7 +451,7 @@
             "string",
             "null"
           ],
-          "description": "Operator note about how this atom must be handled. Not candidate-facing text."
+          "description": "Operator note about how this atom must be handled. Not candidate-facing text, and never carried into the selection view; a constraint the generator must obey belongs in `constraints`."
         },
         "open_questions": {
           "type": "array",
@@ -541,6 +541,13 @@
             "type": "string"
           },
           "description": "Narrative threads that cut across employers, such as scaling-teams or incident-response. Skills describe the work; tags describe the story it belongs to."
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Reviewed handling constraints a generated claim must respect: 'prototype only, did not reach production', 'team contribution, do not imply sole ownership'. These reach the selection view. Operator `notes` do not, which is why the two are separate fields."
         }
       },
       "additionalProperties": false
