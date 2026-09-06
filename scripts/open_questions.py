@@ -35,6 +35,7 @@ ROLES = ROOT / "data" / "roles"
 # tidies a field, however tidy the field would be.
 UNLOCK = {
     "role_verdict": 5.0,
+    "empty_role": 4.5,
     "publishability": 4.0,
     "provenance": 3.5,
     "background_check": 3.0,
@@ -152,6 +153,32 @@ def collect(pack, profiles, cited):
                 f"Is there a capturable URL or record behind \"{atom['title']}\"? "
                 f"It is corroborated with nothing recorded.",
                 "status_promotion", subject=aid)
+
+    # An employer with no evidence at all. This is a hole in every document
+    # generated from the pack, and it shows: the role heading renders with an
+    # employer, a title, dates and nothing underneath, which reads worse than
+    # omitting the role. Found by the subject noticing a blank block on a draft,
+    # not by this script, which is why it is here now.
+    with_atoms = {a.get("employment_id") for a in atoms.values()}
+    for rec in pack.get("employment", []):
+        eid = rec["employment_id"]
+        if eid in with_atoms:
+            continue
+        # A promotion with no atoms of its own is not a hole: generation collapses a
+        # progression into its parent, so the achievements render under the parent's
+        # heading. Only ask when the whole chain is empty, which is a real gap.
+        parent = rec.get("parent_employment_id")
+        if parent:
+            chain = {parent} | {r["employment_id"] for r in pack.get("employment", [])
+                                if r.get("parent_employment_id") == parent}
+            if chain & with_atoms:
+                continue
+        add("empty_role",
+            f"What did you actually do at {rec['employer']} as {rec['title']}? "
+            f"No evidence atom is linked to this role at all "
+            f"({rec.get('start')} to {rec.get('end')}).",
+            "empty_role", subject=eid,
+            detail="Every resume from this pack renders the heading with nothing under it.")
 
     # Employment is what a background check actually tests.
     for rec in pack.get("employment", []):

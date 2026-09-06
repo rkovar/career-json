@@ -688,6 +688,28 @@ def test_open_questions():
     qs = open_questions.collect(pack, [profile], cited=set())
     kinds = {q["kind"] for q in qs}
 
+    # Found by the subject spotting a blank role block on a finished resume, which
+    # is exactly the kind of thing the queue exists to catch first.
+    empty = json.loads(COMPLEX.read_text())
+    empty["evidence_atoms"] = [a for a in empty["evidence_atoms"]
+                               if a.get("employment_id") != "EMP_CX_UNI"]
+    eq = open_questions.collect(empty, [], cited=set())
+    check("an employer with no evidence at all is surfaced",
+          any(q["kind"] == "empty_role" and q["subject"] == "EMP_CX_UNI" for q in eq),
+          str([q["subject"] for q in eq if q["kind"] == "empty_role"]))
+    check("and it outranks everything except an unevidenced essential requirement",
+          eq[0]["kind"] == "empty_role", str(eq[0]))
+
+    # A promotion with no atoms of its own is not a hole: generation collapses the
+    # progression into the parent, so the work renders under the parent's heading.
+    promo = json.loads(COMPLEX.read_text())
+    promo["evidence_atoms"] = [a for a in promo["evidence_atoms"]
+                               if a.get("employment_id") != "EMP_CX_LEAD"]
+    pq = open_questions.collect(promo, [], cited=set())
+    check("an empty promotion inside a chain that has evidence is not asked about",
+          not any(q["kind"] == "empty_role" and q["subject"] == "EMP_CX_LEAD" for q in pq),
+          str([q["subject"] for q in pq if q["kind"] == "empty_role"]))
+
     for kind in ("role_gap", "withheld", "undated", "metric_basis", "recorded"):
         check(f"the queue finds {kind} questions", kind in kinds, str(sorted(kinds)))
     check("an unevidenced essential requirement outranks everything else",
@@ -836,6 +858,33 @@ def test_withheld_evidence_is_visible():
     code, out, _ = run("role_fit.py", "--markdown")
     check("the fit report names what no artefact may cite",
           code == 0 and "Withheld from every artefact" in out, out)
+
+
+def test_empty_role_heading():
+    """A role heading with nothing under it reads worse than omitting the role.
+
+    Only a finding when the pack HELD eligible evidence and the document did not
+    use it. Where the pack has nothing to say, the gap is in the record and
+    open_questions.py owns it; blaming the document would be the wrong altitude,
+    the same mistake the business_outcome warning used to make.
+    """
+    workspace = sandbox()
+    md = workspace / "outputs" / "d-draft.md"
+    head = ("# X\n\nLondon · a@b.example\n\n## Experience\n\n"
+            "### Northwind Systems | Staff Platform Engineer | 2022 to present\n\n")
+    md.write_text(head + "### Acme Retail Group | Senior Software Engineer | 2018 to 2022\n\n"
+                  "- A claim. <!-- Evidence: E_EXAMPLE_PLATFORM_COST -->\n")
+    run("render.py", md, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("a heading with unused eligible evidence under it is flagged",
+          "has no claims under it" in out, out)
+
+    md.write_text(head + "- A claim. <!-- Evidence: E_EXAMPLE_PLATFORM_COST -->\n")
+    run("render.py", md, workspace=workspace)
+    code, out, _ = run("validate_artifact.py", md, workspace=workspace)
+    check("a heading with claims under it is not flagged",
+          "has no claims under it" not in out, out)
+    shutil.rmtree(workspace, ignore_errors=True)
 
 
 def test_outcome_warning_altitude():
@@ -1402,7 +1451,8 @@ def main():
                  test_conversation_is_a_source, test_complex_pack_shape, test_pack_html,
                  test_education,
                  test_withheld_evidence_is_visible,
-                 test_outcome_warning_altitude, test_verdict_log,
+                 test_outcome_warning_altitude, test_empty_role_heading,
+                 test_verdict_log,
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_capture_edit_delete, test_coverage,

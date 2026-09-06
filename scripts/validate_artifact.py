@@ -162,6 +162,33 @@ def check(md_path, html_path, pack, private=False, strict=False):
             for value in (rec.get("start"), rec.get("end")):
                 if value and value != "present":
                     years.add(value[:4])
+        # A role heading with no bullets under it. Only a finding when the pack
+        # HELD eligible evidence for that role and the document did not use it:
+        # a heading with nothing under it is a normal convention for early career,
+        # and reporting it when the pack has nothing to say would be blaming the
+        # document for a gap in the record. open_questions.py owns that case.
+        by_employment = {}
+        for atom in pack.get("evidence_atoms", []):
+            eid = atom.get("employment_id")
+            if eid and atom.get("external_safe") and \
+                    atom.get("evidence_status") not in ("unresolved", "declined"):
+                by_employment.setdefault(eid, []).append(atom["id"])
+        blocks = re.split(r"^###\s+", md, flags=re.M)[1:]
+        for block in blocks:
+            head = block.splitlines()[0]
+            parts = [p.strip() for p in head.split("|")]
+            if len(parts) < 3 or re.search(r"^\s*[-*]\s", block, re.M):
+                continue
+            for rec in records:
+                if rec["employer"] != parts[0] or rec["title"] != parts[1]:
+                    continue
+                unused = [i for i in by_employment.get(rec["employment_id"], [])
+                          if i not in cited]
+                if unused:
+                    warnings.append(
+                        f"role heading {parts[0]!r} has no claims under it, but the pack holds "
+                        f"eligible evidence for it: {', '.join(sorted(unused))}")
+
         # Role headings are written as "### Employer | Title | Dates".
         for heading in re.findall(r"^###\s+(.+)$", md, re.M):
             parts = [p.strip() for p in heading.split("|")]
