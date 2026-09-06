@@ -37,9 +37,21 @@ def load():
     return [json.loads(line) for line in NOTES.read_text().splitlines() if line.strip()]
 
 
+def _write_atomically(path, text):
+    """Write to a sibling temp file and replace. write_text() truncates before it
+    writes, so an interruption mid-save left the log empty: the one file this
+    product exists to keep. os.replace is atomic on the same filesystem."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    with tmp.open("w") as handle:
+        handle.write(text)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(tmp, path)
+
+
 def save_all(notes):
-    NOTES.parent.mkdir(parents=True, exist_ok=True)
-    NOTES.write_text("".join(json.dumps(n) + "\n" for n in notes))
+    _write_atomically(NOTES, "".join(json.dumps(n) + "\n" for n in notes))
 
 
 def next_id(notes):
@@ -62,8 +74,7 @@ def next_id(notes):
         except ValueError:
             pass
     nxt = highest + 1
-    SEQ.parent.mkdir(parents=True, exist_ok=True)
-    SEQ.write_text(str(nxt))
+    _write_atomically(SEQ, str(nxt))
     return f"N{nxt:04d}"
 
 

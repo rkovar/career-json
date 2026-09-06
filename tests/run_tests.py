@@ -1433,6 +1433,31 @@ def test_selection_contract():
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
 
 
+def test_capture_is_durable():
+    """The log was rewritten with write_text(), which truncates before it writes,
+    so an interrupted save could leave notes.jsonl empty. Writes now go to a
+    temp file and are replaced atomically. Fault injection: make the directory
+    unwritable so the temp file cannot be created, and check the existing log
+    survives untouched and nothing half-written is left behind."""
+    root = sandbox()
+    run("capture.py", "the note that must survive", workspace=root)
+    log = root / "data" / "capture" / "notes.jsonl"
+    before = log.read_text()
+    capture_dir = log.parent
+    capture_dir.chmod(0o500)
+    try:
+        code, _, err = run("capture.py", "a note during a failed write", workspace=root)
+    finally:
+        capture_dir.chmod(0o700)
+    check("a save that cannot complete fails loudly", code != 0, err[:200])
+    check("and the existing log is untouched", log.read_text() == before)
+    check("and no half-written file is left behind",
+          not list(capture_dir.glob("*.tmp")), str(list(capture_dir.glob("*"))))
+    code, out, _ = run("capture.py", "--list", workspace=root)
+    check("the surviving note is still listed", "must survive" in out, out)
+    shutil.rmtree(root, ignore_errors=True)
+
+
 def test_capture_edit_delete():
     root = sandbox()
     run("capture.py", "original text", workspace=root)
@@ -1912,7 +1937,8 @@ def main():
                  test_verdict_log,
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
-                 test_role_aware_selection, test_selection_contract, test_capture_edit_delete, test_coverage,
+                 test_role_aware_selection, test_selection_contract, test_capture_is_durable,
+                 test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
                  test_skill_contracts, test_docs_match_reality,
                  test_walkthrough, test_docx_extraction, test_fun_packs):
