@@ -50,6 +50,24 @@ TEMPLATE = """<!doctype html>
 """
 
 EVIDENCE = re.compile(r"\s*<!--\s*Evidence:\s*(.+?)\s*-->")
+LINK = re.compile(r"\[(.+?)\]\((.+?)\)")
+# A link target must be one of these, or the text is rendered without the link.
+# Anything else (javascript:, data:, a bare quote that closes the attribute) is
+# untrusted content reaching an attribute, which is exactly where escaping with
+# quote=False stops being enough.
+SAFE_SCHEMES = ("http://", "https://", "mailto:")
+# Section headings that name a part of the document rather than the role it
+# targets. The first H2 that is not one of these names the page title.
+SECTIONS = {"experience", "education", "skills", "summary", "profile", "certifications",
+            "publications", "teaching", "research", "awards", "projects", "languages",
+            "interests", "references", "teaching, research and standing"}
+
+
+def link(match):
+    text, target = match.group(1), htmllib.unescape(match.group(2))
+    if not target.lower().startswith(SAFE_SCHEMES):
+        return text
+    return f'<a href="{htmllib.escape(target, quote=True)}">{text}</a>'
 
 
 def inline(text):
@@ -61,55 +79,89 @@ def inline(text):
     # and silently mangle the visible text.
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
     text = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", text)
-    text = re.sub(r"\[(.+?)\]\((.+?)\)", r'<a href="\2">\1</a>', text)
+    text = LINK.sub(link, text)
     if ids:
         text += f' <span class="evidence">[{htmllib.escape(ids, quote=False)}]</span>'
     return text
 
 
+def blocks(markdown):
+    """Group source lines into blocks the way Markdown reads them: a heading or
+    list item is its own block; consecutive text lines are one paragraph until a
+    blank line; a line indented under a list item continues that item.
+
+    The renderer used to emit every physical line as a paragraph, so a summary
+    soft-wrapped at eighty columns became five paragraphs and its evidence
+    comment, on a line of its own, a sixth. The Markdown said one thing and the
+    HTML another, which is the drift this script exists to prevent."""
+    out, para = [], []
+
+    def flush():
+        if para:
+            out.append(("p", " ".join(para)))
+            para.clear()
+
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("---"):
+            flush()
+            continue
+        if line.startswith("- "):
+            flush()
+            out.append(("li", line[2:].strip()))
+        elif line[:1].isspace() and out and out[-1][0] == "li" and not para:
+            out[-1] = ("li", out[-1][1] + " " + stripped)
+        elif line.startswith("### "):
+            flush()
+            out.append(("h3", line[4:].strip()))
+        elif line.startswith("## "):
+            flush()
+            out.append(("h2", line[3:].strip()))
+        elif line.startswith("# "):
+            flush()
+            out.append(("h1", line[2:].strip()))
+        else:
+            para.append(stripped)
+    flush()
+    return out
+
+
 def render(markdown):
     name, role = None, None
     out, in_list = [], False
-    lines = markdown.splitlines()
-    # The line after the H1 is the contact block, whatever it contains.
-    contact_index = None
-    for i, line in enumerate(lines):
-        if line.startswith("# "):
-            for j in range(i + 1, len(lines)):
-                if lines[j].strip():
-                    contact_index = j
-                    break
-            break
+    # The first paragraph after the H1 is the contact block, whatever it contains.
+    contact_pending = False
 
-    for index, line in enumerate(lines):
-        if line.startswith("- "):
+    for kind, text in blocks(markdown):
+        if kind == "li":
             if not in_list:
                 out.append("    <ul>")
                 in_list = True
-            out.append(f"      <li>{inline(line[2:])}</li>")
+            out.append(f"      <li>{inline(text)}</li>")
             continue
         if in_list:
             out.append("    </ul>")
             in_list = False
-        if line.startswith("### "):
-            out.append(f"    <h3>{inline(line[4:])}</h3>")
-        elif line.startswith("## "):
-            heading = EVIDENCE.sub("", line[3:]).strip()
-            if role is None:
+        if kind == "h3":
+            out.append(f"    <h3>{inline(text)}</h3>")
+        elif kind == "h2":
+            heading = EVIDENCE.sub("", text).strip()
+            if role is None and heading.lower() not in SECTIONS:
                 role = heading
-            out.append(f"    <h2>{inline(line[3:])}</h2>")
-        elif line.startswith("# "):
-            name = EVIDENCE.sub("", line[2:]).strip()
-            out.append(f"    <h1>{inline(line[2:])}</h1>")
-        elif line.strip() and not line.startswith("---"):
-            stripped = line.strip()
-            if index == contact_index:
+            out.append(f"    <h2>{inline(text)}</h2>")
+        elif kind == "h1":
+            name = EVIDENCE.sub("", text).strip()
+            contact_pending = True
+            out.append(f"    <h1>{inline(text)}</h1>")
+        else:
+            if contact_pending:
                 cls = ' class="contact"'
-            elif stripped.count("|") > 6:
+                contact_pending = False
+            elif text.count("|") > 6:
                 cls = ' class="skills"'
             else:
                 cls = ""
-            out.append(f"    <p{cls}>{inline(stripped)}</p>")
+            out.append(f"    <p{cls}>{inline(text)}</p>")
     if in_list:
         out.append("    </ul>")
     title = " - ".join(part for part in (name, role) if part) or "Artefact"

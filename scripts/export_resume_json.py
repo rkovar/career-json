@@ -24,14 +24,29 @@ from current_pack import resolve, this_year, ROOT  # noqa: E402
 from select_evidence import eligible, load_role, role_score, canonical  # noqa: E402
 
 
-def iso(value, end=False):
-    """JSON Resume wants ISO 8601. Our dates are YYYY or YYYY-MM."""
+def iso(value):
+    """JSON Resume v1.0.0 accepts YYYY, YYYY-MM, or YYYY-MM-DD, so a pack date
+    passes through at the precision the sources gave it. This used to
+    manufacture January 1 and December 31 for year-only dates, which a reader
+    takes as fact and a background check can contradict."""
     if not value or value in ("present", "ongoing"):
         return None
-    parts = value.split("-")
-    if len(parts) == 1:
-        return f"{parts[0]}-12-31" if end else f"{parts[0]}-01-01"
-    return f"{parts[0]}-{parts[1]}-01"
+    return value
+
+
+def end_date(rec, warnings):
+    """An unknown end is not a current role. JSON Resume can only say "present"
+    by omitting endDate, so that is what happens, and the projection says so
+    in meta.warnings rather than letting the reader infer employment."""
+    end = rec.get("end")
+    if end in ("present", "ongoing"):
+        return None
+    if not end:
+        warnings.append(f"{rec.get('employment_id') or rec.get('education_id')}: end date is unknown, "
+                        f"so endDate is omitted; JSON Resume readers will take that to mean current. "
+                        f"Set end in the pack before publishing this projection.")
+        return None
+    return iso(end)
 
 
 def export(pack, audience="named_recipient", profile=None, limit=None):
@@ -58,6 +73,7 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
         atoms.sort(key=lambda a: -a["_score"])
         atoms = atoms[: (limit or 30)]
     kept = {a["id"] for a in atoms}
+    warnings = []
 
     work = []
     for rec in sorted((r for r in pack.get("employment", [])
@@ -75,9 +91,13 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
                    for e in pack.get("employment", [])):
                 result = (atom.get("star") or {}).get("result")
                 highlights.append(result or atom["title"])
+        # A collapsed role spans the whole chain. Taking the parent's own start
+        # dated a nine-year tenure from its final promotion.
+        chain_start = min([rec["start"]] + [e["start"] for e in pack.get("employment", [])
+                                            if e.get("parent_employment_id") == rec["employment_id"]])
         entry = {"name": rec["employer"], "position": rec["title"],
-                 "startDate": iso(rec["start"]),
-                 "endDate": iso(rec.get("end"), end=True),
+                 "startDate": iso(chain_start),
+                 "endDate": end_date(rec, warnings),
                  "highlights": highlights}
         if rec.get("location"):
             entry["location"] = rec["location"]
@@ -91,7 +111,7 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
                       key=lambda r: r.get("end") or r.get("start") or "", reverse=True):
         entry = {"institution": rec["institution"], "studyType": rec["qualification"],
                  "area": rec.get("field"), "score": rec.get("grade"),
-                 "startDate": iso(rec.get("start")), "endDate": iso(rec.get("end"), end=True)}
+                 "startDate": iso(rec.get("start")), "endDate": end_date(rec, warnings)}
         education.append({k: v for k, v in entry.items() if v not in (None, [], "")})
 
     vocab = pack.get("skill_vocabulary") or {}
@@ -111,7 +131,10 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
                        "generated_from": {"pack": "career.json",
                                           "note": "Lossy projection. Evidence, provenance, confidence, "
                                                   "and non-publishable material are not representable in "
-                                                  "JSON Resume and were dropped."},
+                                                  "JSON Resume and were dropped. Promotions are collapsed "
+                                                  "into the role they grew from, under its latest title, "
+                                                  "with their achievements attached to it."},
+                       "warnings": warnings,
                        "role": profile["role_id"] if profile else None,
                        "audience": audience,
                        "version": "v1.0.0"}}
@@ -133,6 +156,8 @@ def main(argv):
     pack = json.loads(path.read_text())
     profile = load_role(args.role) if args.role else None
     resume = export(pack, args.audience, profile, args.limit)
+    for warning in resume["meta"]["warnings"]:
+        print(f"warning: {warning}", file=sys.stderr)
     text = json.dumps(resume, indent=2, ensure_ascii=False) + "\n"
     if args.output:
         args.output.write_text(text)

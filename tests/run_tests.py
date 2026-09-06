@@ -297,6 +297,49 @@ def test_renderer():
     check("list rendered", html.count("<li>") == 2)
     check("render is idempotent", render_twice(tmp))
 
+    # Regression: every physical line became a paragraph, so a soft-wrapped
+    # summary rendered as several, and its evidence comment on its own line as
+    # one more. The contact block wrapped over two lines lost its second half
+    # from the styled paragraph, and "Experience" became the page title's role.
+    wrapped = Path(tempfile.mkdtemp()) / "w.md"
+    wrapped.write_text("# N\n\nLondon · n@example.com\n· linkedin.com/in/n\n\n"
+                       "Line one of the summary\nline two of the summary.\n"
+                       "<!-- Evidence: E_ONE -->\n\n## Experience\n\n"
+                       "### Employer | Title | 2020 - 2024\n\n"
+                       "- A bullet that\n  continues on the next line. <!-- Evidence: E_TWO -->\n")
+    run("render.py", wrapped)
+    w_html = wrapped.with_suffix(".html").read_text()
+    body = re.sub(r"<style>.*?</style>", "", w_html, flags=re.S)
+    check("a soft-wrapped summary is one paragraph",
+          body.count("<p>") == 1 and "summary line two" in body, body[-600:])
+    check("its evidence comment joins that paragraph, not a paragraph of its own",
+          "E_ONE" in body and "<p> <span" not in body, body[-600:])
+    check("a wrapped contact block stays one styled paragraph",
+          "linkedin.com/in/n</p>" in body and body.count('class="contact"') == 1, body[-600:])
+    check("a list continuation line stays inside its item",
+          "continues on the next line" in body and body.count("<li>") == 1, body[-600:])
+    check("a section heading does not become the page title's role",
+          "<title>N</title>" in w_html, w_html[:400])
+
+    # Regression: link targets went into a quoted attribute escaped with
+    # quote=False, so a quote in the target closed the attribute and the rest
+    # became markup. Now attribute-escaped, and only http, https and mailto
+    # are linked at all.
+    links = Path(tempfile.mkdtemp()) / "l.md"
+    links.write_text('# N\n\nLondon\n\n## R\n\n'
+                     'See [site](https://example.com/a?b=1&c=2) and '
+                     '[bad](https://x.example/" onmouseover="alert) and '
+                     '[script](javascript:alert) and [mail](mailto:n@example.com).\n')
+    run("render.py", links)
+    l_html = links.with_suffix(".html").read_text()
+    check("an https link renders with its target attribute-escaped",
+          'href="https://example.com/a?b=1&amp;c=2">site</a>' in l_html, l_html[-500:])
+    check("a quote in a target cannot open a new attribute",
+          'onmouseover="' not in l_html and "&quot; onmouseover=&quot;" in l_html, l_html[-500:])
+    check("a javascript: target is rendered as plain text",
+          "javascript:" not in l_html and "and script and" in l_html, l_html[-500:])
+    check("a mailto link is allowed", 'href="mailto:n@example.com">mail</a>' in l_html)
+
 
 def render_twice(path):
     run("render.py", path)
@@ -1528,12 +1571,40 @@ def test_resume_json_export():
           {"basics", "work", "skills"} <= set(resume))
     check("declares the schema it targets", "jsonresume" in resume.get("$schema", ""))
     check("records that it is a projection", resume["meta"]["canonical"] == "career.json")
-    check("dates are ISO 8601",
-          all(re.fullmatch(r"\d{4}-\d{2}-\d{2}", w["startDate"]) for w in resume["work"]))
+    # JSON Resume v1.0.0 accepts YYYY, YYYY-MM and YYYY-MM-DD. The export used
+    # to invent January 1 and December 31 around a year-only date.
+    check("dates keep the precision the pack gave them",
+          all(re.fullmatch(r"\d{4}(-\d{2}){0,2}", w["startDate"])
+              and not w["startDate"].endswith(("-01-01", "-12-31")) for w in resume["work"]),
+          str([w["startDate"] for w in resume["work"]]))
     check("a current role has no endDate",
           any("endDate" not in w for w in resume["work"]))
+    check("a clean pack produces no export warnings", resume["meta"]["warnings"] == [])
+    check("the projection states that promotions collapse",
+          "collapsed" in resume["meta"]["generated_from"]["note"])
+
+    # An unknown end used to look exactly like a current role. JSON Resume has
+    # no way to say "unknown", so the endDate is still omitted, but the export
+    # now says so where a reader of the file can see it.
+    root = sandbox()
+    p = json.loads(COMPLEX.read_text())
+    for rec in p["employment"]:
+        if rec["employment_id"] == "EMP_CX_CONTOSO":
+            rec["end"] = None
+    (root / "data" / "packs" / "pack.json").write_text(json.dumps(p))
+    code, out, err = run("export_resume_json.py", workspace=root)
+    unknown = json.loads(out) if code == 0 else {"meta": {"warnings": []}}
+    check("an unknown end date is reported in meta.warnings",
+          any("EMP_CX_CONTOSO" in w and "unknown" in w for w in unknown["meta"]["warnings"]),
+          str(unknown["meta"]["warnings"]) + err[:200])
+    check("and printed to stderr", "EMP_CX_CONTOSO" in err, err[:200])
+    shutil.rmtree(root, ignore_errors=True)
     check("promotions collapse into their parent role",
           len(resume["work"]) < len(fixture_pack()["employment"]))
+    # The live export dated a nine-year tenure from its final promotion.
+    check("a collapsed role starts where its chain started, not at the last promotion",
+          any(w["startDate"] == "2017-01" for w in resume["work"]),
+          str([(w["name"], w["startDate"]) for w in resume["work"]]))
 
     pack = fixture_pack()
     banned = {a["id"] for a in pack["evidence_atoms"]
