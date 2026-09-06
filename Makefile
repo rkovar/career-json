@@ -1,5 +1,5 @@
 # Dependency-free: everything here is stdlib Python or shell.
-.PHONY: help check validate records test render artifacts quantities corroboration questions index pack-html hooks clean
+.PHONY: help check validate records test render artifacts quantities corroboration questions index pack-html excerpts hooks clean
 
 help:
 	@echo "make check     - validate packs and run the test suite"
@@ -8,6 +8,7 @@ help:
 	@echo "make render    - regenerate HTML from every Markdown draft in outputs/"
 	@echo "make artifacts - validate every generated artefact against its pack"
 	@echo "make records   - validate evaluation and screen records"
+	@echo "make excerpts  - check every recorded excerpt against the source it cites"
 	@echo "make quantities - magnitudes a draft claims that its evidence does not carry"
 	@echo "make corroboration - ranked list of evidence worth corroborating"
 	@echo "make index     - regenerate outputs/INDEX.md"
@@ -21,13 +22,18 @@ help:
 	@echo "make verdicts  - record screen verdicts and show the trend"
 	@echo "make hooks     - install the pre-commit hook"
 
-check: validate records test
+check: validate records excerpts test
 
 validate:
 	@python3 scripts/validate_pack.py
 
 records:
 	@python3 scripts/validate_records.py
+
+# The source-to-atom hop: re-extracts each cited file and fails on an excerpt
+# the source does not contain. Exit 0 with no pack, so a clean checkout passes.
+excerpts:
+	@python3 scripts/verify_excerpts.py --quiet
 
 test:
 	@python3 tests/run_tests.py

@@ -21,7 +21,12 @@ Convert user-provided career material into candidate evidence while preserving p
    start, end, location, and source refs. Ask about `employer_of_record` wherever
    the work was delivered for a client rather than the paying entity. Link each
    atom to the role it happened in with `employment_id`.
-6. Assign stable evidence IDs and source references, including a short locator or excerpt.
+6. Assign stable evidence IDs and source references. Each ref carries a
+   `locator` (where to look) and an `excerpt`: the source's own words, copied
+   verbatim from the extracted text, not paraphrased and not tidied. Use `...`
+   to elide. `scripts/verify_excerpts.py` re-reads the source and fails on any
+   excerpt it does not contain, which is the only check on this hop, so an atom
+   without one is unverifiable and `validate_pack.py` says so.
 7. Set `occurred` for every atom. Take it from the source where the source says
    when; otherwise inherit the employment window and set `inferred: true` so it is
    visibly an approximation rather than a fact. Record `capture.method`.

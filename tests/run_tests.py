@@ -1499,6 +1499,79 @@ def test_selection_contract():
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
 
 
+def test_verify_excerpts():
+    """The source-to-atom hop. Nothing read an excerpt back until now, so a
+    claim rewritten under its old citation stayed green. Planted text source,
+    then each way an excerpt can be right or wrong."""
+    root = Path(tempfile.mkdtemp())
+    (root / "data" / "packs").mkdir(parents=True)
+    (root / "data" / "sources").mkdir()
+    (root / "reviews").mkdir()
+    shutil.copytree(ROOT / "schemas", root / "schemas")
+    src = root / "data" / "sources" / "cv.txt"
+    src.write_text("Led the “fraud detection” programme\nacross three regions – losses fell\n"
+                   "by roughly forty per cent in the first year.\n")
+    (root / "reviews" / "r.md").write_text("Q: who measured it?\nA: Finance did, quarterly.\n")
+    import hashlib
+    digest = hashlib.sha256(src.read_bytes()).hexdigest()
+    pack = json.loads(COMPLEX.read_text())
+    pack["source_records"] += [
+        {"source_id": "S_CV", "source_type": "text", "path": "data/sources/cv.txt",
+         "sha256": digest, "character_count": 100, "byte_size": 100, "independent": False},
+        {"source_id": "S_URL", "source_type": "url", "path": "https://example.invalid/x",
+         "retrieved": "2026-09-06", "independent": True},
+        {"source_id": "S_PERSON", "source_type": "person", "path": "reviews/r.md",
+         "retrieved": "2026-09-06", "independent": False}]
+    # Six atoms: five get planted refs, the sixth keeps its original citation
+    # with no excerpt, which is the uncovered case.
+    atoms = pack["evidence_atoms"][:6]
+    pack["evidence_atoms"] = atoms
+    for atom in atoms:
+        atom["evidence_status"] = "self_asserted"  # the planted refs are not independent
+    atoms[0]["source_refs"] = [{"source_id": "S_CV", "locator": "l1",
+                                "excerpt": 'led the "fraud detection" programme across three regions - losses fell'}]
+    atoms[1]["source_refs"] = [{"source_id": "S_CV", "locator": "l1",
+                                "excerpt": "Led the ... programme ... forty per cent"}]
+    atoms[2]["source_refs"] = [{"source_id": "S_CV", "locator": "l1",
+                                "excerpt": "losses fell by roughly half"}]
+    atoms[3]["source_refs"] = [{"source_id": "S_URL", "locator": "page",
+                                "excerpt": "anything at all"}]
+    atoms[4]["source_refs"] = [{"source_id": "S_PERSON", "locator": "Q1",
+                                "excerpt": "Finance did, quarterly"}]
+    pack_path = root / "data" / "packs" / "pack.json"
+    pack_path.write_text(json.dumps(pack))
+    code, out, err = run("verify_excerpts.py", "--json", workspace=root)
+    report = json.loads(out) if out.strip().startswith("{") else {"excerpts": []}
+    status = {r["atom"]: r["status"] for r in report["excerpts"]}
+    check("a verbatim excerpt is verified despite wrapping, curly quotes and dashes",
+          status.get(atoms[0]["id"]) == "verified", out[:400] + err[:200])
+    check("an ellipsis elides text and the fragments must appear in order",
+          status.get(atoms[1]["id"]) == "verified", out[:400])
+    check("a paraphrase is a mismatch", status.get(atoms[2]["id"]) == "mismatch", out[:400])
+    check("a url source with no saved copy is unverifiable, not failed",
+          status.get(atoms[3]["id"]) == "unverifiable", out[:400])
+    check("a person source is checked against its review record",
+          status.get(atoms[4]["id"]) == "verified", out[:400])
+    check("a mismatch fails the run", code == 1)
+
+    # A replaced source cannot vouch for an excerpt taken from its predecessor.
+    src.write_text("Something else entirely.\n")
+    code, out, _ = run("verify_excerpts.py", "--json", workspace=root)
+    report = json.loads(out)
+    changed = [r for r in report["excerpts"] if r["atom"] == atoms[0]["id"]][0]
+    check("a source whose bytes changed since it was recorded is a mismatch",
+          changed["status"] == "mismatch" and "sha256" in changed["detail"], str(changed))
+
+    # Coverage is reported, and validate_pack warns per atom, so an atom nobody
+    # can check is visible without failing today's pack.
+    code, out, _ = run("validate_pack.py", workspace=root)
+    check("validate_pack warns on an atom with no excerpt",
+          "no excerpt on any source_ref" in out, out[-400:])
+    check("verify_excerpts runs clean where there is no pack at all",
+          run("verify_excerpts.py", workspace=Path(tempfile.mkdtemp()))[0] == 0)
+    shutil.rmtree(root, ignore_errors=True)
+
+
 def test_capture_is_durable():
     """The log was rewritten with write_text(), which truncates before it writes,
     so an interrupted save could leave notes.jsonl empty. Writes now go to a
@@ -2031,7 +2104,8 @@ def main():
                  test_verdict_log,
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
-                 test_role_aware_selection, test_selection_contract, test_capture_is_durable,
+                 test_role_aware_selection, test_selection_contract, test_verify_excerpts,
+                 test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
                  test_skill_contracts, test_docs_match_reality,

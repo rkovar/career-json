@@ -203,6 +203,11 @@ def check(path, schema, strict=False):
             warnings.append(f"{where}: no source_refs; this claim traces to nothing, so the pack "
                             "cannot tell recall from persuasion. Record a person source for the "
                             "conversation that produced it.")
+        # A citation says where to look; an excerpt says what was found. Without
+        # one, verify_excerpts.py cannot check the source-to-atom hop at all.
+        elif not any(r.get("excerpt") for r in atom.get("source_refs", [])):
+            warnings.append(f"{where}: no excerpt on any source_ref, so the claim cannot be checked "
+                            "against its source (verify_excerpts.py)")
 
         # Status must be earned by the sources, not asserted.
         if status == "externally_verified":
