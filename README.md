@@ -55,14 +55,11 @@ It ingests, reviews the evidence, and ends with one batch of questions plus a
 readiness statement. Then:
 
 ```
-Use make-resume for Federation Ambassador to Vulcan
+Use make-resume for Head of AI Security
 ```
 
 You get a draft, an integrity evaluation, and a recruiter's verdict on whether it
 would actually be shortlisted.
-
-*Examples throughout are drawn from the service record of Jean-Luc Picard, who
-has four decades of logs and the same two-page problem as everyone else.*
 
 ## The loop
 
@@ -100,10 +97,10 @@ is a hook for memory, and every question asked here makes the next capture less
 likely.
 
 ```
-Remember that I invoked the Treaty of Armens to force Sheliak arbitration and bought three weeks to evacuate Tau Cygna V
+Remember that I cleared the controls backlog in two weeks without formal authority
 ```
 ```
-capture that I served as Arbiter of Succession for the Klingon High Council, tag it diplomacy
+capture that I shipped the MCP delegation pattern, tag it ai-security
 ```
 ```
 What notes do I have waiting?
@@ -115,10 +112,10 @@ Setup, run whenever you have new material. Ingests and reviews in one pass, then
 asks everything at once and tells you how ready the pack is.
 
 ```
-Use build-career-pack on my 2369 Enterprise command evaluation
+Use build-career-pack on my 2026 end-of-year review
 ```
 ```
-I've added my Starfleet service record, update the pack
+I've added my LinkedIn export, update the pack
 ```
 
 ### `make-resume`
@@ -131,7 +128,7 @@ and every inference is reported afterwards.
 Use make-resume for this job description
 ```
 ```
-Make me a cover letter for the Starfleet Academy Chancellor role
+Make me a cover letter for the Head of Security Architecture role
 ```
 ```
 Draft a LinkedIn About section
@@ -144,7 +141,7 @@ no artefact may cite, because the claims you had to leave out are the ones an
 interviewer will find.
 
 ```
-Prep me for the Federation Council hearing on Thursday
+Prep me for the interview on Thursday
 ```
 
 ### `recruiter-screen`
@@ -153,7 +150,7 @@ Runs automatically at the end of `make-resume`, and on its own against anything 
 including documents this workspace did not produce.
 
 ```
-Review my existing service record as a recruiter
+Review my existing CV as a recruiter
 ```
 ```
 Would this get shortlisted?
@@ -185,11 +182,11 @@ Everything is standard library Python or shell. There are no dependencies.
 | `make hooks` | Install the pre-commit hook |
 
 ```sh
-scripts/capture.py "negotiated the Sheliak withdrawal"            # 30-second note
-scripts/find.py --skill "first contact" --since 2364
-scripts/select_evidence.py --role ambassador-to-vulcan            # ranked shortlist
-scripts/dedupe.py --text "<claim>"                                # already in the pack?
-scripts/extract_text.sh --record data/sources/service-record.pdf  # text and provenance
+scripts/capture.py "what you did"                      # 30-second note
+scripts/find.py --skill "threat modelling" --since 2020
+scripts/select_evidence.py --role head-of-ai-security  # ranked shortlist
+scripts/dedupe.py --text "<claim>"                     # already in the pack?
+scripts/extract_text.sh --record data/sources/cv.pdf   # text and provenance
 ```
 
 ## Privacy
@@ -213,7 +210,7 @@ So the two are layers, not competitors. `career.json` is the private superset;
 `resume.json` is a lossy projection of it that anyone's renderer can consume.
 
 ```sh
-scripts/export_resume_json.py --role ambassador-to-vulcan -o outputs/resume.json
+scripts/export_resume_json.py --role head-of-ai-security -o outputs/resume.json
 scripts/export_resume_json.py --audience public          # name and location only
 ```
 
