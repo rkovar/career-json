@@ -1717,6 +1717,40 @@ def test_walkthrough():
 FUN = ROOT / "examples" / "fun"
 
 
+def test_docx_extraction():
+    """A .docx read as bytes produced 120,000 "characters" of zip noise and a
+    source record that was provenance for nothing. The extractor now reads
+    word/document.xml (or pandoc where installed). The fixture is built here
+    from the standard library so the test never depends on pandoc."""
+    import zipfile
+    tmp = Path(tempfile.mkdtemp())
+    docx = tmp / "old-resume.docx"
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    body = "".join(f"<w:p><w:r><w:t>{para}</w:t></w:r></w:p>" for para in (
+        "Morgan Vale", "Systems Engineer 2003 to 2007",
+        "Deployed new infrastructure on site for a fictional agency."))
+    with zipfile.ZipFile(docx, "w") as z:
+        z.writestr("[Content_Types].xml",
+                   '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+                   '<Default Extension="xml" ContentType="application/xml"/>'
+                   '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>')
+        z.writestr("word/document.xml",
+                   f'<?xml version="1.0"?><w:document xmlns:w="{W}"><w:body>{body}</w:body></w:document>')
+    proc = subprocess.run(["bash", str(SCRIPTS / "extract_text.sh"), str(docx)],
+                          capture_output=True, text=True)
+    check("docx text is extracted", proc.returncode == 0 and "fictional agency" in proc.stdout,
+          proc.stdout[:200] + proc.stderr[:200])
+    check("docx zip noise is not treated as text", "[Content_Types]" not in proc.stdout)
+    rec = subprocess.run(["bash", str(SCRIPTS / "extract_text.sh"), "--record", str(docx)],
+                         capture_output=True, text=True).stdout
+    count = int(re.search(r'"character_count": (\d+)', rec).group(1))
+    check("docx provenance counts extracted characters, not bytes",
+          60 <= count <= 200, rec)
+    check("docx provenance records a source_type the schema allows",
+          '"source_type": "other"' in rec, rec)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
 def test_fun_packs():
     """The parody packs are committed, so they must validate and stay labelled.
 
@@ -1808,7 +1842,7 @@ def main():
                  test_role_aware_selection, test_selection_contract, test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
                  test_skill_contracts, test_docs_match_reality,
-                 test_walkthrough, test_fun_packs):
+                 test_walkthrough, test_docx_extraction, test_fun_packs):
         test()
     check_live_tree_untouched()
     check_documented_assertion_count()

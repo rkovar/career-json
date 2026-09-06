@@ -18,11 +18,18 @@ scripts/extract_text.sh --record data/sources/resume.pdf    # source record fiel
 | --- | --- |
 | PDF, any platform with poppler | `pdftotext -layout` |
 | PDF, macOS without poppler | Swift PDFKit, no install required |
+| Word `.docx`, with pandoc | `pandoc -t plain`, which keeps tab and column spacing |
+| Word `.docx`, without pandoc | `word/document.xml` read with the standard library, no install required |
 | Anything else | Direct UTF-8 read |
 
 If neither PDF extractor is present the script says so and exits non-zero. Install
 poppler (`brew install poppler`, `apt install poppler-utils`) or convert the file
 to text by hand.
+
+A `.docx` is a zip, and read as bytes it yields around 120,000 "characters" of
+zip noise: a source record that is provenance for nothing. Both docx paths read
+the document text; `--record` reports `source_type: "other"` for it, since the
+schema has no Word type and "text" would misdescribe the file.
 
 ## Two things to get right
 

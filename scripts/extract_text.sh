@@ -37,8 +37,29 @@ SWIFT
   fi
 }
 
+extract_docx() {
+  # pandoc first, as the workspace docx skill recommends: it keeps tab and
+  # column spacing. Otherwise a .docx is a zip holding word/document.xml and
+  # the text is the w:t runs, one paragraph per w:p; that fallback needs
+  # nothing installed. Read as bytes it produced 120,000 "characters" of zip
+  # noise and a source record that was provenance for nothing.
+  if command -v pandoc >/dev/null 2>&1; then
+    pandoc -t plain --wrap=none "$1"
+    return
+  fi
+  python3 - "$1" <<'PY'
+import sys, zipfile, xml.etree.ElementTree as ET
+W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+with zipfile.ZipFile(sys.argv[1]) as z:
+    root = ET.fromstring(z.read("word/document.xml"))
+for para in root.iter(W + "p"):
+    print("".join(t.text or "" for t in para.iter(W + "t")))
+PY
+}
+
 case "${FILE##*.}" in
   pdf|PDF) METHOD="pdftotext or macOS PDFKit"; TEXT="$(extract_pdf "$FILE")" ;;
+  docx|DOCX) METHOD="$(command -v pandoc >/dev/null 2>&1 && echo 'pandoc -t plain' || echo 'python zipfile, word/document.xml')"; TEXT="$(extract_docx "$FILE")" ;;
   *)       METHOD="direct UTF-8 read";        TEXT="$(cat "$FILE")" ;;
 esac
 
@@ -46,7 +67,8 @@ if [ "$RECORD" -eq 1 ]; then
   CHARS=$(printf '%s' "$TEXT" | wc -m | tr -d ' ')
   BYTES=$(wc -c < "$FILE" | tr -d ' ')
   SHA=$(shasum -a 256 "$FILE" | cut -d' ' -f1)
-  printf '  "source_type": "%s",\n' "$([ "${FILE##*.}" = "pdf" ] && echo pdf || echo text)"
+  case "${FILE##*.}" in pdf|PDF) STYPE=pdf ;; docx|DOCX) STYPE=other ;; *) STYPE=text ;; esac
+  printf '  "source_type": "%s",\n' "$STYPE"
   printf '  "path": "%s",\n  "sha256": "%s",\n  "character_count": %s,\n  "byte_size": %s,\n' "$FILE" "$SHA" "$CHARS" "$BYTES"
   printf '  "extraction_method": "%s",\n  "independent": false\n' "$METHOD"
 else
