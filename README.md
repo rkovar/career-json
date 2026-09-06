@@ -74,8 +74,9 @@ end-of-year write-up, whatever you have to start with. Then, in Claude Code:
 Use build-career-pack on everything in data/sources/
 ```
 
-It ingests, reviews the evidence, and ends with one batch of questions plus a
-readiness statement. Then:
+It ingests, queues the questions the evidence raises, and ends with a readiness
+statement. `review-evidence` then asks those questions one at a time, recording
+each answer as you give it. Then:
 
 ```
 Use make-resume for Head of Platform Engineering

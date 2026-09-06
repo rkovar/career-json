@@ -100,8 +100,9 @@ decided 2026-09-06:
   candidates, and a review that promotes everything has stopped being a review.
 - An answer is a source. Record it as one: a `source_type: "person"` record dated
   to the conversation, pointing at the review record, cited by every atom the
-  answer created or changed. An atom that cites nothing cannot be told apart from
-  one invented by a persuasive question.
+  answer created or changed, with the answer itself as the ref's `excerpt` so
+  `verify_excerpts.py` can check the record holds it. An atom that cites nothing
+  cannot be told apart from one invented by a persuasive question.
 
 ## Running an iterative review session
 
@@ -125,9 +126,18 @@ answering unlocks rather than by pack order, so work from the top.
    recall", "reach was the outcome", "narrow the title instead". Phrase it as
    neutrally as the others. Without it the questions lead, and a review that only
    ever ratchets upwards is producing claims the subject cannot defend.
-4. **Apply each answer immediately and show the movement.** Re-run
-   `scripts/role_fit.py` and say what changed. That feedback is what makes the
-   twentieth question worth answering.
+4. **Record the answer at the moment it is given, in the subject's words.**
+   `scripts/answer.py <review record> --atom E_X --question "..." --answer "..."`
+   appends it verbatim to the session's review record and prints the
+   `source_ref` to attach to the atom, so the record the atom cites actually
+   contains what was said. Three atoms were once found citing a record that held
+   none of their answers; the transcript had them and the workspace did not.
+   Then apply the answer to the atom and say what it changed *in the record*:
+   the field written, the status, the constraint.
+   **Do not re-run `role_fit.py` between questions.** Reading the score after
+   every answer turns a review into steering towards a number, and the delta
+   check cannot see that because the movement is sourced. Read it once, at the
+   end of the session, and report it then.
 5. **Challenge an answer that does not match the evidence.** Where a repository
    names three authors, "I led it" is a claim about the artefact that the artefact
    does not support. Say so, and record what the source shows.
@@ -156,7 +166,8 @@ Write a review record containing the evidence ID, questions, answers, status,
 corroborators identified, conflicts, and approval decision. Include a concise
 recommendation for the next action.
 
-End an iterative session with `python3 scripts/open_questions.py --delta`. It
+End an iterative session with `python3 scripts/role_fit.py --markdown`, read
+once, and `python3 scripts/open_questions.py --delta`. It
 reports what the pack version changed and how much of that movement rests on
 atoms citing no source. **A questioning process that reliably improves a score is
 indistinguishable from a coaching one**, and this is what makes the difference

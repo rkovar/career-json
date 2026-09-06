@@ -102,15 +102,16 @@ def kind_of(path):
 
 
 def check(path):
+    """Returns (kind, errors, warnings). Warnings are printed and never fail."""
     kind, schema_name = kind_of(path)
     if kind is None:
-        return None, [f"{path.name}: not a recognised record type"]
+        return None, [f"{path.name}: not a recognised record type"], []
     try:
         record = json.loads(path.read_text())
     except json.JSONDecodeError as exc:
-        return kind, [f"invalid JSON: {exc}"]
+        return kind, [f"invalid JSON: {exc}"], []
     schema = load(schema_name)
-    errors = []
+    errors, warnings = [], []
     walk(record, schema, schema, "", errors)
 
     # Cross-record consistency the schema cannot express.
@@ -145,7 +146,14 @@ def check(path):
             errors.append(f"artifact {artefact} does not exist")
         if record.get("verdict") == "reject" and not record.get("reason"):
             errors.append("reject verdict with no reason")
-    return kind, errors
+        # A screen produced in the context that wrote the document is the model
+        # grading its own work. Recorded so a verdict says where it came from;
+        # a warning, not an error, so screens written before the field existed
+        # still validate and are visibly the weaker kind.
+        if record.get("context") != "fresh":
+            warnings.append("screen context is not 'fresh': the verdict was produced in the context "
+                            "that generated the document, or does not say. Re-screen in a fresh context.")
+    return kind, errors, warnings
 
 
 def main(argv):
@@ -163,10 +171,12 @@ def main(argv):
         return 0
     failed = False
     for path in targets:
-        kind, errors = check(path)
+        kind, errors, warnings = check(path)
         print(f"{'FAIL' if errors else 'ok'}  {path.name}" + (f"  ({kind} record)" if kind else ""))
         for err in errors:
             print(f"      error: {err}")
+        for warn in warnings:
+            print(f"      warn:  {warn}")
         failed |= bool(errors)
     return 1 if failed else 0
 

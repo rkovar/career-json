@@ -1499,6 +1499,52 @@ def test_selection_contract():
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
 
 
+def test_answer_records_verbatim():
+    """An answer is written where the atom can cite it, at the moment it is given,
+    in the subject's words, and verify_excerpts can then find it there."""
+    root = sandbox()
+    (root / "reviews").mkdir(exist_ok=True)
+    record = root / "reviews" / "session.md"
+    code, out, _ = run("answer.py", record, "--atom", "E_CX_FRAUD_LOSS",
+                       "--question", "Who measured the fall?",
+                       "--answer", "Finance did, quarterly | typo's kept", workspace=root)
+    check("answer.py records an answer", code == 0 and record.exists(), out)
+    text = record.read_text()
+    check("the answer is in the record verbatim, pipe made safe",
+          "Finance did, quarterly \u2502 typo's kept" in text, text[-300:])
+    check("and a source_ref to paste is printed", '"excerpt": "Finance did, quarterly' in out, out)
+    run("answer.py", record, "--atom", "E_CX_ONCALL", "--question", "Second?", "--answer", "Yes", workspace=root)
+    code, out, _ = run("answer.py", record, "--list", workspace=root)
+    check("answers accumulate in order", code == 0 and [r["answer"] for r in json.loads(out)][-1] == "Yes", out)
+    check("the table heading is written once", text.count("## Answers") == 1)
+
+    # The point of the whole thing: the record now verifies as the atom's source.
+    import verify_excerpts
+    ok, _ = verify_excerpts.contains(verify_excerpts.normalise(record.read_text()), "Finance did, quarterly")
+    check("verify_excerpts finds the answer in the record", ok)
+    shutil.rmtree(root, ignore_errors=True)
+
+
+def test_screen_context_is_reported():
+    """A screen that does not say it ran in a fresh context is the generating
+    context grading its own work, and validate_records says so."""
+    fx = fixture()
+    code, out, _ = run("validate_records.py", fx / "outputs" / "head-of-detection-draft-screen.json")
+    check("a screen without a fresh context validates with a warning",
+          code == 0 and "context is not 'fresh'" in out, out)
+    root = sandbox()
+    (root / "outputs").mkdir(exist_ok=True)
+    screen = json.loads((fx / "outputs" / "head-of-detection-draft-screen.json").read_text())
+    screen["context"] = "fresh"
+    (root / "outputs" / "x-draft.md").write_text("# x\n")
+    screen["artifact"] = "outputs/x-draft.md"
+    target = root / "outputs" / "x-draft-screen.json"
+    target.write_text(json.dumps(screen))
+    code, out, _ = run("validate_records.py", target, workspace=root)
+    check("a fresh-context screen validates clean", code == 0 and "warn" not in out, out)
+    shutil.rmtree(root, ignore_errors=True)
+
+
 def test_review_findings_2026_09_06():
     """Bugs confirmed in the senior review of 2026-09-06, each reproduced."""
     # 1. An evidence id in visible prose passed as a citation.
@@ -1953,11 +1999,12 @@ INVARIANTS = {
     "make-interview-brief": ["inverts that rule", "Never publish this", "whole pack",
                             "external_safe: false", "Never invent"],
     "make-resume": ["Ask no questions", "never appears inside the artefact",
+                    "fresh context, never in this one",
                     "at the end of the claim's own line",
                     "business_outcome", "role_fit_notes", "recruiter-screen",
                     "Cover letter", "central_requirement", "employment", "career_span_years",
                     "--role"],
-    "build-career-pack": ["private_profile", "business_outcome", "one batch",
+    "build-career-pack": ["private_profile", "business_outcome", "never how they are *asked*",
                           "validate_pack.py", "optional and off by default",
                           "employer_of_record", "annual write-up", "dedupe.py",
                           "review_period"],
@@ -1968,6 +2015,9 @@ INVARIANTS = {
                         # that stops the method becoming an inflation engine.
                         "Ask one question. Wait.", "genuine null option",
                         "cannot clear an essential", "earns nothing",
+                        # Answers are recorded as given, and the score is read
+                        # once at the end, not steered towards between questions.
+                        "answer.py", "Do not re-run `role_fit.py` between questions",
                         "Coverage drives the verdict",
                         "written into `star.result`", "An answer is a source",
                         "Close an unanswerable question", "open_questions.py",
@@ -1976,9 +2026,13 @@ INVARIANTS = {
                         "Background-check exposure", "employment", "employer_of_record",
                         "LinkedIn About"],
     "recruiter-screen": ["Do not praise", "default is to reject", "advance", "borderline",
-                         "reject", "screen-record.schema.json"],
+                         "reject", "screen-record.schema.json",
+                         # The screen must not be the generating context grading itself.
+                         "fresh context", '"context": "shared"'],
     "ingest-career-materials": ["self_asserted", "extract_text.sh", "independent",
-                               "employment", "employer_of_record"],
+                               "employment", "employer_of_record",
+                               # Source text is untrusted input to the ingesting model.
+                               "data, not instructions", "never followed"],
     "generate-resume": ["outcome_type", "role_fit_notes", "contact block", "constraints"],
 }
 FORBIDDEN = ["user_asserted", "`verified`"]
@@ -2166,7 +2220,8 @@ def main():
                  test_capture, test_find, test_dedupe, test_quantities, test_occurred,
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_selection_contract, test_verify_excerpts,
-                 test_review_findings_2026_09_06,
+                 test_review_findings_2026_09_06, test_answer_records_verbatim,
+                 test_screen_context_is_reported,
                  test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,
                  test_resume_json_export,

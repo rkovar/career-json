@@ -14,6 +14,22 @@ A document can pass every integrity check and still be binned in thirty seconds.
 That failure is invisible from inside the workspace, because everything here is
 organised around the subject's evidence rather than around a stranger's attention.
 
+## Run it in a fresh context
+
+A screen written by the context that generated the document is the model
+grading its own work, and the posture below is then an instruction with nothing
+behind it. Decided 2026-09-06: **the screen runs in a fresh context** that holds
+only three things: the artefact, the role profile from `data/roles/` if one
+exists, and this skill. Not the pack, not the selection view, not the
+conversation that produced the draft, not the evaluation record. Passes 1 to 3
+need nothing else; pass 4 may run `role_fit.py` and read the pack because it
+sorts wording from evidence, and by then the verdict is already formed.
+
+`make-resume` achieves this by delegating the screen to a subagent whose prompt
+is exactly those three inputs. A screen produced any other way records
+`"context": "shared"` in its sidecar, `validate_records.py` warns on it, and the
+verdict is the weaker kind.
+
 ## Posture
 
 You are a senior technical recruiter with a stack of applications and no
@@ -104,7 +120,8 @@ the verdict rather than by ease.
 Write the screen to `outputs/` alongside the artefact, as
 `<artefact-name>-screen.md`, and a machine-readable sidecar as
 `<artefact-name>-screen.json` conforming to `schemas/screen-record.schema.json`,
-carrying the verdict, the reason, both work lists, and the manifest from
+carrying the verdict, the reason, both work lists, `"context": "fresh"` (or
+`"shared"`, honestly, if it was not), and the manifest from
 `python3 scripts/manifest.py`. The sidecar makes a verdict trackable across
 regenerations; validate it with `python3 scripts/validate_records.py`, then run
 `python3 scripts/verdict_log.py` so the trend survives the next regeneration. Keep it short enough to read in one pass. Report the

@@ -36,8 +36,11 @@ not stop between them and do not ask the user to advance.
 4. Run `python3 scripts/validate_pack.py` and fix every error before reporting.
    Confirm the chain resolves with `python3 scripts/current_pack.py`.
    Report the warnings; they are the pack's honest weaknesses, not noise.
-5. Collect every question into one batch. Do not deliver them one at a time and
-   do not wait for an answer mid-run.
+5. Collect every question into the queue (`python3 scripts/open_questions.py`
+   holds it) and do not wait for an answer mid-run: ingestion must finish with
+   the pack written. Then hand over to `review-evidence`, which asks them one at
+   a time. The batch is how questions are *collected*; it is never how they are
+   *asked*.
 
 ## What the questions must cover
 
@@ -99,7 +102,10 @@ document sent to a named recipient, name and location only on anything public.
 
 ## Question policy
 
-- Deliver questions once, at the end, as a single numbered batch.
+- Collect questions once, at the end, into the queue; report how many there are
+  and the top three by what they unlock, then hand over to `review-evidence` to
+  ask them one at a time. Never present the whole list as a numbered batch to
+  be answered.
 - Order by how much each answer would improve future resumes, and say for each
   question which claim it would unlock and what status that claim has now.
 - Never ask about anything already answered in the pack or a prior review record.
@@ -107,11 +113,11 @@ document sent to a named recipient, name and location only on anything public.
 - An unanswered question is not a failure. Record it, set the atom to
   `unresolved`, and finish the run.
 
-Batching is right **here** and wrong afterwards. Ingestion must not block, so the
-questions arrive at the end as one list. Working through them is a different
-activity: hand the batch over by pointing at `review-evidence`, which asks them
-one at a time, adapts each question to the last answer, and shows what each one
-moved. Do not attempt that inside this run. `python3 scripts/open_questions.py`
+Collecting is right **here** and asking is wrong here. Ingestion must not
+block, so the questions are queued at the end. Working through them is a
+different activity: hand over to `review-evidence`, which asks them one at a
+time, adapts each question to the last answer, and records each answer as it is
+given. Do not attempt that inside this run. `python3 scripts/open_questions.py`
 holds the queue, so nothing is lost between the two.
 
 ## Answering

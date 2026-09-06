@@ -108,6 +108,15 @@ Never skip the screen because the evaluation passed: a document can be faithful,
 safe, and unshortlistable, and only the screen will say so. Write the evaluation
 record with the manifest as its `run` block.
 
+**The screen runs in a fresh context, never in this one.** This context wrote
+the document and cannot read it cold. Delegate to a subagent whose prompt
+contains only the artefact path, the role profile path if one exists, and an
+instruction to follow `recruiter-screen`; pass nothing else, not the pack, not
+the selection view, not this conversation. The subagent writes the screen and
+its sidecar with `"context": "fresh"`. If delegation is impossible, run the
+screen here and record `"context": "shared"`: an honest weaker verdict beats a
+flattering one dressed as independent.
+
 `publishable: true` requires a clean evaluation. It is a status, not a stop: a run
 ending `publishable: false` completes normally and names the blockers.
 

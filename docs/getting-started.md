@@ -24,10 +24,11 @@ Good first sources, in rough order of value:
 Use build-career-pack on everything in data/sources/
 ```
 
-It runs ingestion and evidence review without stopping, then gives you one batch
-of questions and a readiness statement. On a first run the batch includes your
-contact details, because a pack without them cannot produce a document anyone can
-reply to.
+It runs ingestion without stopping, queues the questions the evidence raises,
+and gives you a readiness statement. The questions are then asked one at a time
+by `review-evidence`, which records each answer as you give it. On a first run
+they include your contact details, because a pack without them cannot produce a
+document anyone can reply to.
 
 Answer what you can. **Unanswered questions are not a blocker**: they mark the
 claim `unresolved` and it is simply left out of documents until you come back to

@@ -26,7 +26,7 @@ than any instruction.
 .claude/skills/     judgement: the nine skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              506 assertions plus a skill-invariant lint
+tests/              521 assertions plus a skill-invariant lint
 data/               your material. Git ignored, never leaves the machine
   sources/            raw input
   packs/career.json   the current record
@@ -34,7 +34,10 @@ data/               your material. Git ignored, never leaves the machine
   roles/              structured role profiles
   capture/            the append-only note log
   private/            pre-schema profiles
-outputs/            generated artefacts, evaluations, screens. Git ignored
+outputs/            generated artefacts, evaluations, screens. Git ignored.
+                    A screen records its context: "fresh" means it was produced
+                    by a context holding only the artefact, the role profile and
+                    the skill, never by the context that wrote the document.
 reviews/            review records and decisions. Git ignored
 ```
 
@@ -45,6 +48,7 @@ reviews/            review records and decisions. Git ignored
 | `current_pack.py` | Resolves the current pack by supersedes chain, not by mtime. Refuses when ambiguous |
 | `select_evidence.py` | Emits only eligible evidence; `--role` ranks and shortlists against a profile |
 | `render.py` | Markdown to HTML through one template, so the two cannot drift |
+| `answer.py` | Records a review answer verbatim, at the moment it is given, where the atom can cite it |
 | `verify_excerpts.py` | Re-extracts each cited source and fails on an excerpt it does not contain: the source-to-atom hop |
 | `validate_pack.py` | Structural check on a pack |
 | `validate_artifact.py` | An artefact against the pack that produced it |
@@ -80,7 +84,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 506 assertions: real tests over the scripts, plus a lint
+`make check` runs 521 assertions: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.
@@ -92,7 +96,7 @@ atoms, and an independent source. Everything used to run against the small one
 only, and three defects shipped behind that gap — a leak scan that failed the
 private brief on the words it exists to state, a magnitude check that emitted
 eighty warnings on one document, and a fit score with no eligibility filter. None
-were visible to three hundred passing506 assertions; all three appeared within one
+were visible to three hundred passing521 assertions; all three appeared within one
 run against real data.
 
 Behavioural claims that need a model in the loop are listed in
