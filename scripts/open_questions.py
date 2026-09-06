@@ -232,15 +232,31 @@ def delta(pack, pack_path):
                 and a.get("outcome_type") != prior[a["id"]].get("outcome_type")]
     unsourced = [a for a in (added + promoted) if not a.get("source_refs")]
 
+    # A rewritten Result that kept its old citation. The review found a changed
+    # claim returned "clean" because only additions and re-typings were compared;
+    # what the atom *says* is the thing most worth watching. A rewrite whose
+    # sources did not change is legitimate (a wording fix) and is listed, not
+    # flagged: this is a report, and a report that cries wolf gets skipped.
+    def claim(a):
+        return json.dumps({"title": a.get("title"), "star": a.get("star"),
+                           "metrics": a.get("metrics")}, sort_keys=True)
+    def sources(a):
+        return sorted(r.get("source_id", "") for r in a.get("source_refs") or [])
+    rewritten = [a for a in atoms if a["id"] in prior and claim(a) != claim(prior[a["id"]])]
+    rewritten_same_sources = [a["id"] for a in rewritten if sources(a) == sources(prior[a["id"]])]
+
     return {"pack": str(pack_path.relative_to(ROOT)), "supersedes": previous,
             "atoms_added": [a["id"] for a in added],
             "outcome_type_changed": [a["id"] for a in promoted],
+            "claims_rewritten": [a["id"] for a in rewritten],
+            "rewritten_with_no_new_source": rewritten_same_sources,
             "added_or_promoted_with_no_source": [a["id"] for a in unsourced],
             "verdict": (
-                "clean" if not unsourced else
-                f"{len(unsourced)} of {len(added) + len(promoted)} added or re-typed atoms cite "
-                f"no source. That movement rests on conversation alone; record a person source "
-                f"for it or treat the improvement as unproven.")}
+                (f"{len(unsourced)} of {len(added) + len(promoted)} added or re-typed atoms cite "
+                 f"no source. That movement rests on conversation alone; record a person source "
+                 f"for it or treat the improvement as unproven.") if unsourced else
+                ("clean" + (f"; {len(rewritten_same_sources)} claim(s) rewritten with no new "
+                            f"source, listed above for review" if rewritten_same_sources else "")))}
 
 
 def main(argv):

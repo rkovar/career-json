@@ -997,6 +997,29 @@ def test_open_questions():
     d = open_questions.delta(pack, COMPLEX)
     check("the delta reports a verdict", "verdict" in d, str(d))
 
+    # A rewritten Result that kept its old citation returned "clean". Codex's
+    # probe. It is now listed; not flagged, because a wording fix with the same
+    # sources is legitimate and the report must not cry wolf.
+    ws = Path(tempfile.mkdtemp())
+    (ws / "data" / "packs" / "archive").mkdir(parents=True)
+    shutil.copytree(ROOT / "schemas", ws / "schemas")
+    shutil.copy(COMPLEX, ws / "data" / "packs" / "archive" / "prior.json")
+    current = json.loads(COMPLEX.read_text())
+    current["metadata"]["supersedes"] = "data/packs/archive/prior.json"
+    for a in current["evidence_atoms"]:
+        if a["id"] == "E_CX_FRAUD_LOSS":
+            a["star"]["result"] = "Quarterly fraud write-offs fell by roughly half."
+    (ws / "data" / "packs" / "pack.json").write_text(json.dumps(current))
+    code, out, err = run("open_questions.py", "--delta", workspace=ws)
+    d2 = json.loads(out) if code == 0 else {}
+    check("a rewritten Result is reported by the delta",
+          d2.get("claims_rewritten") == ["E_CX_FRAUD_LOSS"], out[:300] + err[:200])
+    check("and named as having no new source behind the rewrite",
+          d2.get("rewritten_with_no_new_source") == ["E_CX_FRAUD_LOSS"], out[:300])
+    check("without turning a sourced rewrite into an unclean verdict",
+          d2.get("verdict", "").startswith("clean"), d2.get("verdict"))
+    shutil.rmtree(ws, ignore_errors=True)
+
     for args in ([], ["--markdown"], ["--delta"]):
         code, out, err = run("open_questions.py", *args)
         check(f"open_questions.py {' '.join(args) or '(default)'} runs", code == 0, err)
