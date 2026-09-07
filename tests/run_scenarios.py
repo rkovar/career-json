@@ -285,8 +285,18 @@ SCENARIOS = {
 
 
 def unchanged_source_skipped(root, text):
+    """Said in the report, or provable from the pack: the two original sources keep
+    their records and hashes, and the note added between runs got one. The
+    report text alone missed a run whose final message was the first review
+    question rather than the ingestion report."""
     low = text.lower()
-    return any(k in low for k in ("unchanged", "skipped", "hash-match", "hash match", "already ingested")), text[:300]
+    said = any(k in low for k in ("unchanged", "skipped", "hash-match", "hash match", "already ingested"))
+    if not packs(root):
+        return False, "no pack"
+    pack = json.loads(packs(root)[-1].read_text())
+    paths = {s.get("path", "") for s in pack.get("source_records", [])}
+    recorded = all(any(name in p for p in paths) for name in ("fictional-cv.txt", "fictional-linkedin.txt", "award-note.txt"))
+    return said or recorded, f"said: {said}; recorded: {sorted(paths)}"
 
 
 def new_version_supersedes(root, text, before):
