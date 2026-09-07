@@ -79,8 +79,11 @@ def link(match):
 
 
 def inline(text):
-    match = EVIDENCE.search(text)
-    ids = match.group(1) if match else None
+    # Every citation in the block, not the first: a summary paragraph with an
+    # inline comment and an end comment lost the second set in the HTML, so the
+    # Markdown and the HTML cited different evidence.
+    found = [m.group(1) for m in EVIDENCE.finditer(text)]
+    ids = ", ".join(found) if found else None
     text = EVIDENCE.sub("", text).strip()
     text = htmllib.escape(text, quote=False)
     # Bold first: a greedy single-asterisk rule would otherwise chew through ** pairs

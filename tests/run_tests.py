@@ -326,6 +326,12 @@ def test_renderer():
           "continues on the next line" in body and body.count("<li>") == 1, body[-600:])
     check("a section heading does not become the page title's role",
           "<title>N</title>" in w_html, w_html[:400])
+    # A block with two citations kept only the first in the HTML.
+    two = Path(tempfile.mkdtemp()) / "t.md"
+    two.write_text("# N\n\nLondon\n\n## R\n\nOpening sentence. <!-- Evidence: E_ONE -->\nRest of the summary.\n<!-- Evidence: E_TWO, E_THREE -->\n")
+    run("render.py", two)
+    t_html = two.with_suffix(".html").read_text()
+    check("every citation in a block reaches the HTML", all(i in t_html for i in ("E_ONE", "E_TWO", "E_THREE")), t_html[-400:])
 
     # Regression: link targets went into a quoted attribute escaped with
     # quote=False, so a quote in the target closed the attribute and the rest
