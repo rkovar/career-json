@@ -1454,7 +1454,7 @@ def test_selection_contract():
     check("the view carries reviewed constraints",
           any("sole ownership" in c for c in atom.get("constraints", [])), str(atom.get("constraints")))
     check("operator notes on atoms never reach generation", "FY2024 headcount plan" not in blob)
-    allowed = {"employment_id", "employer", "title", "start", "end", "location", "parent_employment_id"}
+    allowed = {"employment_id", "employer", "title", "start", "end", "location", "parent_employment_id", "scope"}
     check("employment is projected through an allowlist",
           all(set(r) <= allowed for r in view["employment"]),
           str([sorted(r) for r in view["employment"]][:1]))
@@ -1503,6 +1503,78 @@ def test_selection_contract():
           cov == {"fraud": "covered", "governance tooling": "withheld",
                   "nothing": "missing", "mentoring": "omitted"}, str(cov))
     check("a pack with no role profile reports empty coverage", view["requirement_coverage"] == [])
+
+
+def test_resume_shape_checks():
+    """What recruiters told us and the cold screens kept repeating: scope on the
+    role line, the level story in the summary, bullet economics, the target
+    title and its proof in the top third, no cliches, and screen gaps that
+    reach the queue instead of going nowhere."""
+    root = sandbox()
+    pack = json.loads(COMPLEX.read_text())
+    pack["employment"][0]["scope"] = {"team_size": "6", "geography": "UK and India", "org_size": "55"}
+    (root / "data" / "packs" / "pack.json").write_text(json.dumps(pack))
+    (root / "data" / "roles").mkdir(exist_ok=True)
+    profile = {"role_id": "head-of-detection", "title": "Head of Detection",
+               "central_requirement": "Runs detection engineering as a function.",
+               "requirements": [{"weight": "essential", "text": "Runs detection engineering",
+                                 "evidenced_by": L(["E_CX_DETECTION_PROGRAMME"])}],
+               "ats_keywords": ["detection engineering", "fraud", "kubernetes"],
+               "negative_signals": [], "length": "two A4 pages", "audience": "named_recipient",
+               "positioning": {"why_this_role": "I want to run the function, not advise it.",
+                               "source_id": "SRC_CX_CV", "on": "2026-09-07"}}
+    (root / "data" / "roles" / "head-of-detection.json").write_text(json.dumps(profile))
+    code, out, _ = run("select_evidence.py", "--role", "head-of-detection", workspace=root)
+    view = json.loads(out)
+    check("scope facts reach the selection view on the employment record",
+          any((r.get("scope") or {}).get("team_size") == "6" for r in view["employment"]), out[:300])
+    check("positioning reaches the view", view["positioning"]["why_this_role"].startswith("I want"), str(view.get("positioning")))
+
+    head = "# Morgan Vale\n\nLondon · morgan.vale@example.invalid\n\n"
+    bad = (head + "A results-driven cross-functional leader. " + "word " * 80 + "\n\n## Experience\n\n"
+           "### Northwind Systems | Director of Platform Security | 2022-03 to present\n\n"
+           + "".join(f"- Bullet number {i} about something. <!-- Evidence: E_CX_ONCALL -->\n" for i in range(7))
+           + "- " + "long " * 45 + "<!-- Evidence: E_CX_ONCALL -->\n\n"
+           "### Contoso Retail | Senior Systems Engineer | 2013-04 to 2016-12\n\n"
+           "- Detection work here. <!-- Evidence: E_CX_DETECTION_PROGRAMME -->\n")
+    md = root / "outputs" / "bad.md"
+    md.write_text(bad)
+    run("render.py", md, workspace=root)
+    code, out, _ = run("validate_artifact.py", md, "--role", "head-of-detection", workspace=root)
+    check("too many bullets on the current role is warned", "has 8 bullets" in out, out[-900:])
+    check("an over-long bullet is warned", "words (limit 40)" in out, out[-900:])
+    check("an over-long summary is warned", "summary is" in out and "words (limit 75)" in out, out[-900:])
+    check("cliches are warned", "results-driven" in out and "cross-functional leader" in out, out[-900:])
+    check("a missing target title in the headline is warned", "does not appear in the headline" in out, out[-900:])
+    check("proof of an essential below the fold is warned", "below the fold" in out, out[-900:])
+    check("shape findings are warnings, not errors", code == 0)
+
+    good = (head + "Head of Detection who runs detection engineering as a function. <!-- Evidence: E_CX_DETECTION_PROGRAMME -->\n\n"
+            "## Experience\n\n### Northwind Systems | Director of Platform Security | 2022-03 to present\n\n"
+            "- Made detection a reviewed practice. <!-- Evidence: E_CX_DETECTION_PROGRAMME -->\n")
+    md2 = root / "outputs" / "good.md"
+    md2.write_text(good)
+    run("render.py", md2, workspace=root)
+    code, out, _ = run("validate_artifact.py", md2, "--role", "head-of-detection", workspace=root)
+    check("a well-shaped draft raises none of them",
+          not any(k in out for k in ("bullets;", "limit", "cliche", "headline", "below the fold")), out[-600:])
+
+    code, out, _ = run("keyword_coverage.py", md2, "--role", "head-of-detection", "--json", workspace=root)
+    cov = json.loads(out)
+    check("keyword coverage reports present and missing terms",
+          "detection engineering" in cov["present"] and any(m["keyword"] == "kubernetes" for m in cov["missing"]), out[:300])
+    check("a missing keyword names the confirmed atoms that carry it, or says none does",
+          all("confirmed_atoms_carrying_it" in m for m in cov["missing"]))
+
+    screen = json.loads((ROOT / "examples" / "walkthrough" / "head-of-platform-engineering-screen.json").read_text())
+    screen.update({"artifact": "outputs/good.md", "target_role": "Head of Detection", "verdict": "borderline",
+                   "needs_new_evidence": ["A budget figure for the function"], "context": "fresh"})
+    (root / "outputs" / "good-screen.json").write_text(json.dumps(screen))
+    code, out, _ = run("open_questions.py", workspace=root)
+    qs = json.loads(out)["questions"]
+    check("a screen's needs-new-evidence entry becomes a queued question",
+          any(q["kind"] == "screen_gap" and "budget figure" in q["question"] for q in qs), str([q["kind"] for q in qs]))
+    shutil.rmtree(root, ignore_errors=True)
 
 
 def test_link_provenance():
@@ -2113,6 +2185,8 @@ INVARIANTS = {
     "make-interview-brief": ["inverts that rule", "Never publish this", "whole pack",
                             "external_safe: false", "Never invent"],
     "make-resume": ["Ask no questions", "never appears inside the artefact", "<role_id>-draft.md",
+                    "Scope on the role line", "Positioning opens the summary", "Bullet economics",
+                    "never invents intent", "keyword_coverage.py",
                     "fresh context, never in this one",
                     "at the end of the claim's own line",
                     "business_outcome", "role_fit_notes", "recruiter-screen",
@@ -2132,7 +2206,7 @@ INVARIANTS = {
                         # Answers are recorded as given, and the score is read
                         # once at the end, not steered towards between questions.
                         "answer.py", "Do not re-run `role_fit.py` between questions",
-                        "link_evidence.py", "earns nothing until",
+                        "link_evidence.py", "earns nothing until", "Positioning", "Scope facts",
                         "Coverage drives the verdict",
                         "written into `star.result`", "An answer is a source",
                         "Close an unanswerable question", "open_questions.py",
@@ -2336,7 +2410,7 @@ def main():
                  test_no_hardcoded_year, test_view_carries_time_and_tags,
                  test_role_aware_selection, test_selection_contract, test_verify_excerpts,
                  test_review_findings_2026_09_06, test_answer_records_verbatim, test_entailment_plumbing,
-                 test_link_provenance,
+                 test_link_provenance, test_resume_shape_checks,
                  test_screen_context_is_reported,
                  test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,

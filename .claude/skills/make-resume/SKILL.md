@@ -73,6 +73,27 @@ to write around.
 
 ## Writing the document
 
+Shape rules first, because the screens keep failing drafts on them:
+
+- **Scope on the role line.** If an employment record carries `scope` (team size,
+  direct reports, budget, org size, geography), render it as one plain line under
+  the heading: "Team of 6 across the UK and India; deputy head of a 55-person
+  organisation." These are record facts, so the line carries no evidence comment.
+- **Positioning opens the summary.** If the view carries `positioning`, the
+  summary opens with the subject's own level story in one sentence and cites its
+  person source. If it is null, the summary states only what the evidence shows
+  and never invents intent; a screen will ask, and that goes in the report.
+- **Bullet economics.** At most five bullets on the current role, three on the
+  previous one, one line for a role that ended more than twelve years ago, no
+  bullet over two lines, summary under four lines. `validate_artifact.py` warns
+  on each; treat a warning as a cut to make, not a note to carry.
+- **Top third.** The target title in the headline, and a confirmed atom for an
+  essential requirement cited in the summary or the first role block.
+  `validate_artifact.py` warns when either is missing.
+- **No cliches.** `validate_artifact.py` lists the phrases recruiters discount.
+- Run `python3 scripts/keyword_coverage.py <draft> --role <role_id>` and phrase
+  bullets with the missing terms only where a confirmed atom carries them.
+
 1. Take the smallest set of evidence that answers the role. The view is ordered
    `business_outcome`, then `output`, then `activity`: prefer that order. Never
    let activity metrics such as engagement counts or throughput percentages carry

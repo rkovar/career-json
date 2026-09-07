@@ -652,6 +652,58 @@
             "string",
             "null"
           ]
+        },
+        "scope": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Facts about the size of the role, which a background check can test like dates and a recruiter reads first: team size, direct reports, budget owned, organisation size, geography. Rendered on the role line by make-resume. Cold screens asked for these on every draft; atoms had nowhere to put them.",
+          "properties": {
+            "team_size": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "direct_reports": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "budget": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "org_size": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "geography": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/sourceRef"
+              }
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

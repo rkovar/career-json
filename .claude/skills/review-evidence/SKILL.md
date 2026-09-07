@@ -153,6 +153,19 @@ answering unlocks rather than by pack order, so work from the top.
    lives in the pack, so a session is resumable by construction. Say so, so that
    stopping does not feel like abandoning.
 
+## Scope and positioning
+
+Two things every cold screen asks for that atoms cannot hold:
+
+- **Scope facts** on the employment record: team size, direct reports, budget
+  owned, organisation size, geography. Ask for the current and previous role
+  first. Record them in the record's `scope` with a person source; they are
+  background-check facts and render on the role line.
+- **Positioning** on the role profile: why this role now, what the subject wants
+  more of, what they are stepping away from. Two sentences in their words, dated,
+  cited as a person source. The null option is "do not state it"; then the
+  summary says only what the evidence shows and the screen's question stands.
+
 ## Confirming role links
 
 `role_fit.py` counts only links the subject confirmed. A link written into a

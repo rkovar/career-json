@@ -56,6 +56,19 @@ def words_to_number(text):
     return total
 
 
+# Phrases recruiters told us they discount on sight. Warnings: the fix is a
+# rewrite, and a document is not unsafe for carrying one.
+CLICHES = ["results-driven", "results driven", "proven track record", "passionate about",
+           "dynamic team player", "team player", "self-starter", "go-getter", "synergy",
+           "leverage", "leveraged", "thought leader", "cross-functional leader", "detail-oriented",
+           "hard-working", "hardworking", "responsible for", "seasoned", "guru", "ninja", "rockstar"]
+# Bullet economics. A recruiter's first pass is seconds; these are the limits the
+# screens kept asking for, as warnings until their rate is measured.
+MAX_BULLETS = {"current": 5, "recent": 3, "old": 1}
+OLD_AFTER_YEARS = 12
+MAX_BULLET_WORDS = 40
+MAX_SUMMARY_WORDS = 75
+
 LEAKS = ["not publishable", "draft status", "publication warning", "withheld pending",
          "pending confirmation", "self_asserted", "user_asserted", "evidence_status",
          "external_safe", "unresolved", "TODO", "FIXME"]
@@ -89,7 +102,68 @@ def visible_text(markdown):
     return re.sub(r"<!--.*?-->", "", markdown, flags=re.S)
 
 
-def check(md_path, html_path, pack, private=False, strict=False, audience="named_recipient"):
+def economics(md, records):
+    """Bullets per role block against the role's age, bullet length, summary length."""
+    out = []
+    by_key = {(r["employer"], r["title"]): r for r in records}
+    blocks = re.split(r"^(?=###\s)", md, flags=re.M)
+    for block in blocks:
+        head = block.splitlines()[0] if block.strip() else ""
+        if not head.startswith("### "):
+            continue
+        parts = [p.strip() for p in head[4:].split("|")]
+        if len(parts) < 3:
+            continue
+        rec = by_key.get((parts[0], parts[1]))
+        bullets = re.findall(r"^\s*[-*]\s+(.+)$", block, re.M)
+        if rec:
+            end = rec.get("end")
+            if end == "present":
+                kind = "current"
+            else:
+                ended = int((end or rec["start"])[:4])
+                kind = "old" if this_year() - ended > OLD_AFTER_YEARS else "recent"
+            limit = MAX_BULLETS[kind]
+            if len(bullets) > limit:
+                out.append(f"{parts[0]!r} ({kind} role) has {len(bullets)} bullets; a recruiter's first pass "
+                           f"gives it {limit}. Cut to the ones that prove the role's requirements")
+        for b in bullets:
+            words = len(re.sub(r"<!--.*?-->", "", b).split())
+            if words > MAX_BULLET_WORDS:
+                out.append(f"bullet of {words} words (limit {MAX_BULLET_WORDS}): {b[:60]!r}")
+    # The summary: the first paragraph after the contact block.
+    paras = [p for p in re.split(r"\n\s*\n", md.split("\n## ")[0]) if p.strip() and not p.startswith("#")]
+    if len(paras) >= 2:
+        words = len(re.sub(r"<!--.*?-->", "", paras[1]).split())
+        if words > MAX_SUMMARY_WORDS:
+            out.append(f"summary is {words} words (limit {MAX_SUMMARY_WORDS}); four lines is what gets read")
+    return out
+
+
+def top_third(md, profile, pack):
+    """The target title in the headline, and an essential requirement's confirmed
+    evidence cited before the second role heading. What ATS and human both look
+    for first, and what the AI Security draft buried under an architect title."""
+    from select_evidence import linked_ids
+    out = []
+    before_roles = md.split("\n### ")[0]
+    headline = "\n".join(before_roles.splitlines()[:8]).lower()
+    title = (profile.get("title") or "").lower()
+    if title and title not in headline and not all(w in headline for w in title.split()):
+        out.append(f"the target title {profile.get('title')!r} does not appear in the headline or summary; "
+                   "a recruiter matching titles will not find it")
+    top = md.split("\n### ", 2)
+    top_text = top[0] + ("\n### " + top[1] if len(top) > 1 else "")
+    cited_top = set(EVIDENCE_ID.findall(top_text))
+    essentials = [req for req in profile.get("requirements", []) if req.get("weight") == "essential"]
+    proven = [req for req in essentials if set(linked_ids(req, confirmed_only=True)) & cited_top]
+    if essentials and not proven:
+        out.append("no confirmed evidence for an essential requirement is cited in the summary or first role "
+                   "block; the proof of the central requirement sits below the fold")
+    return out
+
+
+def check(md_path, html_path, pack, private=False, strict=False, audience="named_recipient", role=None):
     """private: an interview brief. It is prepared from the whole pack on purpose,
     including atoms no artefact may cite, so eligibility and contact rules invert.
 
@@ -299,6 +373,14 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
                         f"claims {value} years of experience; employment records span "
                         f"{earliest} to {latest}, which is {latest - earliest}")
 
+    if not private:
+        for phrase in CLICHES:
+            if re.search(r"(?<![a-z])" + re.escape(phrase) + r"(?![a-z])", seen.lower()):
+                warnings.append(f"cliche a recruiter discounts on sight: {phrase!r}")
+        warnings.extend(economics(md, [r for r in pack.get("employment", []) if r.get("external_safe")]))
+        if role:
+            warnings.extend(top_third(md, role, pack))
+
     if strict:
         statuses = [atoms[a]["evidence_status"] for a in cited if a in atoms]
         if statuses and all(s == "self_asserted" for s in statuses):
@@ -378,6 +460,8 @@ def main(argv):
                         help="check against the current pack even if the artefact pins an older one")
     parser.add_argument("--audience", choices=("named_recipient", "public"), default=None,
                         help="defaults to the evaluation record's audience, else named_recipient")
+    parser.add_argument("--role", help="role_id in data/roles/; defaults to the profile whose title matches "
+                                       "the evaluation record's target_role, if any")
     args = parser.parse_args(argv[1:])
 
     md_path = args.markdown
@@ -396,8 +480,17 @@ def main(argv):
 
     record = evaluation_record(md_path) or {}
     audience = args.audience or record.get("audience") or "named_recipient"
+    profile = None
+    roles = ROOT / "data" / "roles"
+    if args.role and (roles / f"{args.role}.json").exists():
+        profile = json.loads((roles / f"{args.role}.json").read_text())
+    elif record.get("target_role") and roles.is_dir():
+        for path in roles.glob("*.json"):
+            candidate = json.loads(path.read_text())
+            if candidate.get("title", "").lower() == record["target_role"].lower():
+                profile = candidate
     errors, warnings = check(md_path, html_path, pack, private=args.private, strict=args.strict,
-                             audience=audience)
+                             audience=audience, role=profile)
     if note:
         warnings.insert(0, note)
     pinned_artifact = (record.get("run") or {}).get("artifact_sha256")

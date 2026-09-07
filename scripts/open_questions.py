@@ -46,7 +46,23 @@ UNLOCK = {
     "recency": 1.5,
     "recorded_question": 2.5,
     "link_confirmation": 4.0,
+    "screen_gap": 3.5,
 }
+
+
+def screen_gaps():
+    """What the latest cold screen of each artefact said needs new evidence.
+    Sidecars are overwritten on regeneration, so a gap that was closed stops
+    being asked without anyone editing the queue."""
+    rows = []
+    for path in sorted((ROOT / "outputs").glob("*-screen.json")):
+        try:
+            data = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        for gap in data.get("needs_new_evidence") or []:
+            rows.append((data.get("target_role") or path.name, data.get("verdict"), gap))
+    return rows
 
 
 def cited_ids():
@@ -211,6 +227,16 @@ def collect(pack, profiles, cited):
                 f"When did {rec['employer']} / {rec['title']} end? An unknown end date "
                 f"is a gap a background check will find.",
                 "background_check", subject=rec["employment_id"])
+
+    # A screen's "needs new evidence" list used to go nowhere. Each entry is a
+    # question the recruiter effectively asked; it is answered in the pack, not
+    # the document, so it belongs in this queue.
+    for role, verdict, gap in screen_gaps():
+        add("screen_gap",
+            f"The cold screen for {role} ({verdict}) says this needs new evidence: {gap}",
+            "screen_gap", subject=role,
+            detail="Answer it in the pack as an atom, a scope fact on the employment record, or a "
+                   "positioning line on the role profile; a rewrite cannot close it.")
 
     for conflict in pack.get("metadata", {}).get("known_conflicts", []):
         if conflict.startswith("RESOLVED"):

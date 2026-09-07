@@ -243,6 +243,15 @@ def weak_draft_without_contact(root):
     script(root, "render.py", root / "outputs" / "weak-draft.md")
 
 
+def add_a_note_source(root):
+    """Between the two runs a new source appears, so the re-run must both skip the
+    unchanged files and write a superseding version. Without it a re-run that
+    writes nothing is the correct behaviour, and the first run of this eval
+    failed a model for being right."""
+    (root / "data" / "sources" / "award-note.txt").write_text(
+        "Morgan Vale received the Northwind Engineering Excellence Award in 2024 for the fraud detection programme.\n")
+
+
 SCENARIOS = {
     1: dict(skill="make-resume",
             request="Follow .claude/skills/make-resume/SKILL.md for the role head-of-detection (profile in data/roles/). Produce the document in outputs/.",
@@ -270,13 +279,14 @@ SCENARIOS = {
             checks=[pack_written_and_valid, everything_self_asserted, sources_hashed, contact_was_asked_or_found],
             turns=80, then=8),
     8: dict(skill="build-career-pack",
-            request="Follow .claude/skills/build-career-pack/SKILL.md again on the same workspace: re-ingest everything in data/sources/ against the current pack.",
-            checks=[], turns=40, after=7),
+            request="Follow .claude/skills/build-career-pack/SKILL.md again on the same workspace: re-ingest everything in data/sources/ against the current pack. One source is new.",
+            setup=add_a_note_source, checks=[], turns=60, after=7),
 }
 
 
 def unchanged_source_skipped(root, text):
-    return "unchanged" in text.lower() or "skipped" in text.lower(), text[:300]
+    low = text.lower()
+    return any(k in low for k in ("unchanged", "skipped", "hash-match", "hash match", "already ingested")), text[:300]
 
 
 def new_version_supersedes(root, text, before):
@@ -312,6 +322,8 @@ def main(argv):
                 print(f"SKIP  #{number}: needs #{spec['after']} in the same run")
                 continue
             before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in packs(root)}
+            if spec.get("setup"):
+                spec["setup"](root)
         else:
             root = workspace()
             if spec.get("setup"):

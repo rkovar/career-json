@@ -256,7 +256,7 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
     # carrying employer_of_record and operator notes that data-model.md says
     # never appear in an artefact.
     employment = [{k: r.get(k) for k in ("employment_id", "employer", "title", "start",
-                                         "end", "location", "parent_employment_id")}
+                                         "end", "location", "parent_employment_id", "scope")}
                   for r in pack.get("employment", [])
                   if r.get("external_safe") and r.get("evidence_status") not in ("unresolved", "declined")]
     employment.sort(key=lambda r: r["start"], reverse=True)
@@ -275,6 +275,9 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
         "audience": audience,
         "role": profile["role_id"] if profile else None,
         "central_requirement": profile.get("central_requirement") if profile else None,
+        # The subject's own level story, or null. Generation may open with it and
+        # must not invent one when it is null.
+        "positioning": (profile.get("positioning") if profile else None),
         "not_shortlisted": dropped,
         "requirement_coverage": coverage,
         "contact": contact,

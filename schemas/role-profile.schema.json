@@ -190,6 +190,46 @@
         "named_recipient",
         "public"
       ]
+    },
+    "positioning": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The level story, in the subject's words, which no atom can supply: why this role now, what they want more of, what they are stepping away from. Asked by review-evidence, cited as a person source, and the only thing the summary may open with that is not evidence.",
+      "properties": {
+        "why_this_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "wants_more_of": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stepping_away_from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "on": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

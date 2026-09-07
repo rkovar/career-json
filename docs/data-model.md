@@ -187,3 +187,15 @@ everything JSON Resume cannot represent.
 
 Project down for compatibility. Never treat the projection as the record: it has
 thrown away the parts that make the record trustworthy.
+
+## Scope and positioning (2026-09-07)
+
+Two things every cold recruiter screen asked for that evidence atoms cannot hold.
+
+- `employment[].scope`: team size, direct reports, budget owned, organisation
+  size, geography, with source refs. Background-check facts, like dates, so they
+  live on the employment record and render on the role line.
+- `role profile.positioning`: the level story in the subject's words: why this
+  role now, what they want more of, what they are stepping away from. Dated and
+  cited as a person source. When null, the summary states only what the evidence
+  shows and never invents intent.

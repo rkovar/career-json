@@ -16,6 +16,7 @@ help:
 	@echo "make index     - regenerate outputs/INDEX.md"
 	@echo "make fit       - score the pack against every role profile"
 	@echo "make links     - confirmed and proposed requirement-to-evidence links per role"
+	@echo "make keywords ROLE=<role_id> ARTEFACT=<path> - ATS keyword coverage of a draft"
 	@echo "make notes     - capture notes awaiting promotion into the pack"
 	@echo "make dupes     - near-duplicate atoms already in the pack"
 	@echo "make coverage  - timeline, gaps, undated atoms, stale skills"
@@ -57,6 +58,9 @@ fit:
 
 links:
 	@python3 scripts/link_evidence.py --status
+
+keywords:
+	@python3 scripts/keyword_coverage.py "$(ARTEFACT)" --role "$(ROLE)"
 
 notes:
 	@python3 scripts/capture.py --list
