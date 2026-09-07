@@ -80,9 +80,12 @@ Shape rules first, because the screens keep failing drafts on them:
   the heading: "Team of 6 across the UK and India; deputy head of a 55-person
   organisation." These are record facts, so the line carries no evidence comment.
 - **Positioning opens the summary.** If the view carries `positioning`, the
-  summary opens with the subject's own level story in one sentence and cites its
-  person source. If it is null, the summary states only what the evidence shows
-  and never invents intent; a screen will ask, and that goes in the report.
+  summary opens with the subject's level story in one sentence and cites its
+  person source. Paraphrase is allowed (decided by the subject 2026-09-07): put
+  it in page-ready words, keep its meaning, add nothing it does not say; the
+  review record keeps the original. If it is null, the summary states only what
+  the evidence shows and never invents intent; a screen will ask, and that goes
+  in the report.
 - **Bullet economics.** At most five bullets on the current role, three on the
   previous one, one line for a role that ended more than twelve years ago, no
   bullet over two lines, summary under four lines. `validate_artifact.py` warns
