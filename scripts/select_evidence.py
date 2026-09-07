@@ -248,6 +248,7 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
     # Never in any artefact, so never in context either.
     contact.pop("address", None)
     contact.pop("photo_reference", None)
+    contact.pop("right_to_work", None)
     if audience == "public":
         for field in ("email", "phone", "personal_website"):
             contact.pop(field, None)

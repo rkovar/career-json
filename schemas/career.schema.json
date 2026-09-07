@@ -112,6 +112,13 @@
             "string",
             "null"
           ]
+        },
+        "right_to_work": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Work-authorisation status, in the subject's words. Private: never reaches the selection view or any artefact; the interview brief may use it."
         }
       },
       "additionalProperties": true
