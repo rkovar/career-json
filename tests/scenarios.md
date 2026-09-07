@@ -68,3 +68,4 @@ Runner coverage: #1 (with #6, #15, #16), #2, #3, #4, #7 (with #9, #10), #8 (with
 | --- | --- |
 | 2026-09-06 | #1 pass, #2 pass, #13 pass, #17 pass (first run: #1 failed on draft naming, #17 on an over-strict check; both fixed and rerun). Skills: make-resume=c4dde6ef7e6b recruiter-screen=afa7d94b12c7 review-evidence=594d57830e97 |
 | 2026-09-07 | #4 pass, #7 pass, #8 fail (the model correctly wrote no version when nothing changed; scenario fixed to add a source between runs) |
+| 2026-09-07 | #7 pass, #8 pass after the scenario fix; all eight runner-backed scenarios have now passed at least once |
