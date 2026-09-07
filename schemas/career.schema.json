@@ -701,6 +701,13 @@
               "items": {
                 "$ref": "#/$defs/sourceRef"
               }
+            },
+            "remit": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "What the function formally owns: gates, standards, patterns, control paths. The thing a head-of screen asks for first."
             }
           },
           "additionalProperties": false

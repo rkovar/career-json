@@ -75,9 +75,9 @@ to write around.
 
 Shape rules first, because the screens keep failing drafts on them:
 
-- **Scope on the role line.** If an employment record carries `scope` (team size,
-  direct reports, budget, org size, geography), render it as one plain line under
-  the heading: "Team of 6 across the UK and India; deputy head of a 55-person
+- **Scope on the role line.** If an employment record carries `scope` (remit,
+  team size, direct reports, budget, org size, geography), render it as one or
+  two plain lines under the heading, remit first: "Team of 6 across the UK and India; deputy head of a 55-person
   organisation." These are record facts, so the line carries no evidence comment.
 - **Positioning opens the summary.** If the view carries `positioning`, the
   summary opens with the subject's level story in one sentence and cites its
