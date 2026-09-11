@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.4",
+  "employment": [
+    {
+      "employment_id": "EMP_CURRENT",
+      "employer": "Fictional Fieldwork Ltd",
+      "employer_of_record": "Fictional Fieldwork Ltd",
+      "title": "Head of Engineering",
+      "start": "2018-01",
+      "end": "present",
+      "location": "London",
+      "parent_employment_id": null,
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, January 2018 to present. London."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "corroborators": []
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "id": "E_STORY_1",
+      "title": "Created a deployment rehearsal tool",
+      "star": {
+        "situation": "Created a deployment rehearsal tool",
+        "task": "Improve this work within my role",
+        "action": "Designed the rehearsal format and co-built its runner with engineers",
+        "result": "Two teams adopted rehearsals before deployment"
+      },
+      "metrics": [],
+      "skills": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "In March 2019 I designed a deployment rehearsal format and co-built its runner with engineers. Two teams adopted rehearsals before deployment."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2019-03",
+        "end": "2019-03",
+        "inferred": false
+      },
+      "constraints": []
+    },
+    {
+      "id": "E_STORY_2",
+      "title": "Built an engineering practice",
+      "star": {
+        "situation": "Built an engineering practice",
+        "task": "Improve this work within my role",
+        "action": "Hired and coached engineers while introducing peer design reviews",
+        "result": "The engineering group adopted peer design reviews"
+      },
+      "metrics": [],
+      "skills": [],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "In February 2025 I hired and coached engineers while introducing peer design reviews. The engineering group adopted peer design reviews."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2025-02",
+        "end": "2025-02",
+        "inferred": false
+      },
+      "constraints": [],
+      "open_questions": [
+        "What part of coaching was most useful to the engineers?"
+      ]
+    }
+  ],
+  "name": "Jules Elm",
+  "private_profile": {
+    "name": "Jules Elm",
+    "location": "London"
+  },
+  "purpose": "Entirely fictional first-pack demonstration; never use as personal evidence.",
+  "source_records": [
+    {
+      "source_id": "SRC_SUBJECT",
+      "source_type": "markdown",
+      "path": "data/sources/resume.md",
+      "independent": false,
+      "sha256": "467bb70e65e3ab34b085e481bd78d650781595dd6813da9d8823258f20d313a3",
+      "character_count": 395
+    }
+  ],
+  "metadata": {
+    "human_review": {
+      "session": {
+        "path": "reviews/pack-reviews/fictional-first-pack/session.json",
+        "sha256": "99cb2521b14cb129a9543522f1adb2baf2c6fca55065ec5b50be3131ae34cb97"
+      },
+      "items": {
+        "employment/EMP_CURRENT": {
+          "fingerprint": "6f526c58b9fcef8f964aa16b821ba87b87dcdd15086c1908232b70de99d61172",
+          "reviewed_fingerprint": "6f526c58b9fcef8f964aa16b821ba87b87dcdd15086c1908232b70de99d61172",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        },
+        "evidence_atoms/E_STORY_1": {
+          "fingerprint": "3b85df3b9b8436dbf5dddd979485c4ea7932f154170a0ee5a080d2ec7662cb55",
+          "reviewed_fingerprint": "3b85df3b9b8436dbf5dddd979485c4ea7932f154170a0ee5a080d2ec7662cb55",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        },
+        "evidence_atoms/E_STORY_2": {
+          "fingerprint": "f788b0bee7ebe1a6f7e99ce9f806653b0dfe9aaadced5615906d802864e398da",
+          "reviewed_fingerprint": "f788b0bee7ebe1a6f7e99ce9f806653b0dfe9aaadced5615906d802864e398da",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        },
+        "field/name": {
+          "fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
+          "reviewed_fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        },
+        "field/private_profile": {
+          "fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
+          "reviewed_fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        },
+        "field/purpose": {
+          "fingerprint": "9d0f89e3e11083d53e5c2075ca4199b6a9c7d578cb8afdbae4e8f86dda5e555c",
+          "reviewed_fingerprint": "9d0f89e3e11083d53e5c2075ca4199b6a9c7d578cb8afdbae4e8f86dda5e555c",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        },
+        "source_records/SRC_SUBJECT": {
+          "fingerprint": "2a84e0f5933c22034628bb773a724f5d874f8117a12cbef3cdced0fbf4a4dbcc",
+          "reviewed_fingerprint": "2a84e0f5933c22034628bb773a724f5d874f8117a12cbef3cdced0fbf4a4dbcc",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-11T10:35:22.003069+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+          }
+        }
+      },
+      "applied_batches": [
+        {
+          "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+          "sha256": "1a21e3104483fb05d1fe64c37f664053e92144613b5a3949b8f7b7d2ceaa4b74"
+        }
+      ],
+      "accepted_at": "2026-09-11T10:35:22.007816+00:00"
+    }
+  }
+}

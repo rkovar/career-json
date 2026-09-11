@@ -2,7 +2,7 @@
 
 Career Evidence Core and Resume Application have separate promises, versions and
 release gates. The current local release candidates are **career-core
-0.1.0-alpha.2** (early access) and **career-resume 0.1.0-beta.2** (beta companion).
+0.1.0-alpha.3** (early access) and **career-resume 0.1.0-beta.3** (beta companion).
 These names describe prepared artifacts, not an announcement of publication.
 
 | Responsibility | Career Evidence Core | Resume Application |

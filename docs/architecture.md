@@ -110,7 +110,7 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 585 assertions in the original suite and 35 editorial tests, 6 core tests, 17 human-review tests and 6 release installation tests: real tests over the scripts, plus a lint
+`make check` runs 585 assertions in the original suite and 35 editorial tests, 8 core tests, 25 human-review tests and 6 release installation tests: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.

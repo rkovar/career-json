@@ -1,6 +1,6 @@
 ---
 name: build-career-pack
-description: "Use for the setup phase: building or extending the career datapack from source material. Triggers on requests such as build my career pack, ingest these, I have more material to add, here is my new resume or LinkedIn export, or update my pack with this project. Chains ingestion and Socratic review in one invocation. This is the phase where questions are expected."
+description: "Build or extend a career datapack from source material, apply user-supplied review decisions, or continue a saved career-pack review. Handles first-pack onboarding and later imports without requiring a target job."
 ---
 
 # Build Or Extend The Career Datapack
@@ -12,13 +12,57 @@ can be answered from without further interrogation. Questions are the deliverabl
 here, not an interruption. The goal is to front-load them so that
 `make-resume` never has to ask.
 
-Run `ingest-career-materials` then `review-evidence` in a single invocation. Do
-not stop between them and do not ask the user to advance.
+Run `ingest-career-materials`, finish the proposal and its readable overview, then
+hand over to `review-evidence`. Do not ask the user to operate the scripts.
+
+## First session and returning reviews
+
+Follow `docs/first-session.md` for the short conversational path. With no existing
+pack, start from the one source the person supplied; do not request their full
+archive or a target job. If they explicitly supplied a larger scope, honor it.
+Keep the first pack private. Extract name/location when present; defer requests
+for email, phone and external-publication choices until they are needed.
+
+Present the review-page link, a short career timeline and recorded contributions
+before asking questions. Describe supported observations without inventing a
+career narrative. Offer one useful question; allow the person to stop after a
+few accepted achievements. An unmeasured result, architectural judgment, incident
+prevention or mentoring can be valuable without a fabricated financial outcome.
+
+When the person says “apply my saved review decisions,” use the exact file they
+supplied. Copy it into `data/private/` if needed, then run `career_core.py review
+apply --input <file> --output <new-pack-path>`. The file identifies its session.
+Never fill in supporting-record approvals yourself. If acceptance is blocked,
+show the relevant role/source/profile records for review, preserve the decisions
+and explain what remains. Rerender the page after applying decisions.
+
+For “continue my career-pack review,” run `career_core.py review resume`. Use the
+session named in the conversation, or the sole unfinished session. If several
+are plausible, ask which one; do not create another proposal merely to resume.
+Corrections go through recorded answers and a revised candidate with exact wording
+shown again. Reuse unchanged accepted facts and prior answers.
+
+End with the saved roles/achievements, pending corrections/questions and a clear
+stopping point from the review summary. Counts do not establish completeness.
+Offer one recall example from the accepted pack: a recorded contribution plus
+its original source. If nothing is accepted yet, explain that the proposal is
+saved and identify the records needed for the first coherent acceptance.
+
+For a first session, use a compact handover: the clickable review-page link,
+timeline and two contributions, at most one question, and the stopping point.
+Keep full validation counts, IDs and file inventories in the review record rather
+than duplicating them in the conversation. Explain errors that block saving;
+missing email/phone or an unmeasured business outcome are not first-pack defects.
+The detailed final-report checklist below applies to broader intake runs.
+After rendering the first-session page, run `career_core.py review handover
+--session <session-path> --page <rendered-page-path>` and return that grounded
+handover without extra validation tables, connector notes or file inventories.
+If the person wants to interview now, follow it with one answerable question.
 
 ## Inputs
 
 - new or changed source material (default: everything in `data/sources/`)
-- the current pack, if one exists (default: newest in `data/packs/`)
+- the current pack, if one exists (resolve its supersedes chain with `current_pack.py`)
 
 ## Workflow
 
@@ -27,9 +71,9 @@ not stop between them and do not ask the user to advance.
    Use `scripts/extract_text.sh --record <file>` for text and provenance fields;
    see `docs/extraction.md`. Do not improvise an extractor, and do not record a
    file's byte size as its `character_count`.
-2. Run `review-evidence` across every atom that is new, incomplete, vague,
+2. Identify review questions for every atom that is new, incomplete, vague,
    inflated, or consequential. Include atoms carried over from earlier runs whose
-   questions are still unanswered.
+   questions are still unanswered. Finish extraction before asking them.
 3. Write the proposed pack to `data/candidates/` and the review record to
    `reviews/`. Follow `docs/pack-review.md`: stage the candidate and render its
    offline review page. Never edit a previous pack or make unreviewed extraction
@@ -104,10 +148,10 @@ properties a generic document import does not.
 A pack without `private_profile` cannot produce a sendable resume, because
 `make-resume` has no contact block to build. Creating it is part of setup.
 
-On the first run, or whenever `private_profile` is missing or has no email and no
-phone, extract what the sources contain and include the remainder in the question
-batch: name, location, email, phone, LinkedIn, and personal website. Ask once,
-with everything else. Never ask for a street address or a photo; record them only
+On the first run, extract what the source contains into `private_profile` without
+inventing missing values. Name/location are enough for private career capture;
+when the person wants a sendable document, queue any needed email, phone, LinkedIn
+or website details. Never ask for a street address or a photo; record them only
 if the user supplies them unprompted, and never place either in an artefact.
 
 Set `publication_policy` to private by default: the full block appears on a

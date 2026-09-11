@@ -9,27 +9,21 @@ Copy whatever you already have into `data/sources/`. That directory is Git
 ignored and excluded from release archives. Material you ask Claude to read is
 processed by your configured model service; Git ignore rules do not prevent that.
 
-Good first sources, in rough order of value:
-
-1. Your most recent resume or CV.
-2. Your LinkedIn data export. Not the PDF: use Settings, Data privacy, Get a copy
-   of your data. See [linkedin.md](linkedin.md) for why the export beats both the
-   PDF and any API.
-3. End-of-year self-reviews. These are the richest source most people own, because
-   you wrote them while you still remembered.
-4. A list of public work: talks, articles, repositories.
+Start with **one resume**. Follow [your first session](first-session.md) for the
+short conversational path, or [preview the fictional result](../examples/first-pack/README.md).
+Add LinkedIn exports, annual reviews and public work after you have a useful first record.
 
 ## 2. Build the pack
 
 ```
-Use build-career-pack on everything in data/sources/
+Build my first career pack from data/sources/my-resume.pdf. Keep it private.
+Show me the overview before asking questions.
 ```
 
 It runs ingestion without stopping, queues the questions the evidence raises,
 and gives you a readiness statement. The questions are then asked one at a time
-by `review-evidence`, which records each answer as you give it. On a first run
-they include your contact details, because a pack without them cannot produce a
-document anyone can reply to.
+by `review-evidence`, which records each answer as you give it. Contact details
+beyond the recorded name and location can wait until you want a document to send.
 
 Answer what you can. **Unanswered questions are not a blocker**: they mark the
 claim `unresolved` and it is simply left out of documents until you come back to

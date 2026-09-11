@@ -1,0 +1,10 @@
+{
+  "review_id": "fictional-first-pack",
+  "created": "2026-09-11T10:35:21.845889+00:00",
+  "proposal": {
+    "path": "reviews/pack-reviews/fictional-first-pack/proposal.json",
+    "sha256": "5c4d4335299ff3def4bbff95a6fdb608bbe439ac6384afb19adeddba82e35f04"
+  },
+  "base": null,
+  "validation_warnings": []
+}

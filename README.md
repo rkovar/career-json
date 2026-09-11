@@ -2,21 +2,16 @@
 
 **Your career, in a file you own.**
 
-A Claude-native career evidence toolkit with an optional resume application.
-The evidence record and document generation have separate release readiness.
+Turn one existing resume into a private, readable record of your roles,
+achievements and sources. Correct it in your own words, keep useful questions for
+later, and reuse the record without reconstructing your career each time.
 
-| Component | Status | Purpose |
-| --- | --- | --- |
-| **Career Evidence Core** | Early access: `0.1.0-alpha.2` | Capture, review, maintain and privately export a portable career record |
-| **Resume Application** | Beta: `0.1.0-beta.2` | Select, tailor, review and render documents from that record |
+**See the result before installing:** [follow Jules’s fictional first pack](examples/first-pack/README.md),
+from a short resume to a reviewed career record and a recalled achievement.
 
-Both live in this repository. The core runs independently; the resume add-on
-consumes it through the versioned career schema. Start with the
-[core workflow](docs/core-workflow.md), add the
-[resume workflow](docs/resume-workflow.md) when useful, and see
-[release boundaries and installation](docs/releases.md) for the separate local
-archives and quality gates. Broader onboarding and resume benchmarks remain
-necessary before either component is described as mature.
+Start with **one document**. You do not need a target job, a full archive, verified
+metrics or a finished career narrative. The tool runs through Claude Code; the
+career record is yours to keep. Resume generation is optional.
 
 ## The problem
 
@@ -68,23 +63,23 @@ Two rules govern the record and its applications:
 
 You need [Claude Code](https://claude.com/claude-code) and a Claude plan that
 covers it, Python 3.9 or later, `make`, and macOS or Linux. Runs consume tokens
-like any other Claude session; a first pack build over a long resume is the
-expensive one, and everything after it is small.
+like any other Claude session. First-run duration and token use depend on the
+source and configured model; there is no reliable estimate yet. Start with one
+short document and stop after reviewing a few useful achievements.
 
 ```sh
 git clone https://github.com/rkovar/career-json.git
 cd career-json
 make check                      # confirm the workspace is sound
-make hooks                      # optional: validate on commit
 ```
 
 Outside macOS, PDF sources also need poppler (`apt install poppler-utils`).
 
-Put your material in `data/sources/` — a resume, a LinkedIn export, an
-end-of-year write-up, whatever you have to start with. Then, in Claude Code:
+Put one resume in `data/sources/`. Open Claude Code in this directory and say:
 
 ```
-Use build-career-pack on everything in data/sources/
+Build my first career pack from data/sources/my-resume.pdf.
+Keep it private. Show me the overview before asking questions.
 ```
 
 It stages a proposed pack and produces a private HTML review page. Review your
@@ -96,7 +91,18 @@ accepted items. Pending proposals stay outside the current career pack.
 `review-evidence` asks follow-up questions one at a time and records your answers.
 Use `review-strengths` to explore supported strengths and future direction; the
 interview can pause or be skipped. Once you have an accepted pack, you can stop
-here and privately export it:
+here. Try retrieving something before adding more material:
+
+```
+Show me one recorded achievement and its original source.
+```
+
+To pause or return, say **“Continue my career-pack review.”** To save choices from
+the browser, say **“Apply my saved review decisions and show me what remains”**
+and tell the tool where the downloaded file is. It handles the session and commands.
+See [your first session](docs/first-session.md) for the complete short path.
+
+You can also privately export the accepted pack:
 
 ```sh
 make strengths
@@ -155,20 +161,24 @@ See [career-pack review](docs/pack-review.md) for commands and correction handli
 
 ## The loop
 
-```mermaid
-flowchart LR
-    Sources[Resumes, exports and annual reviews] --> Intake[Build career pack]
-    Notes[Capture work] --> Intake
-    Intake --> Proposal[Proposed career pack]
-    Proposal --> Review[Human review and questions]
-    Review -->|Accepted items| Pack[Current career pack]
-    Review -->|Corrections or missing work| Proposal
-    Pack --> Export[Private export and recall]
-    Pack --> Selection[Ranked evidence and output brief]
-    Selection --> Document[Resume, biography or interview brief]
-    Document --> Checks[Integrity and representation review]
-    Checks --> Screen[Recruiter screen for applications]
+```text
+One resume or new notes
+          |
+          v
+     Proposed pack <----- Corrections / missing work
+          |                         ^
+          v                         |
+   Overview + your review ----------+
+          |
+     Accepted items
+          |
+          v
+    Your career pack
+      |           |
+      v           v
+ Recall/export  Optional documents
 ```
+
 
 **Start from the resume you already have.** The first run bootstraps the pack
 from whatever exists today — a resume, a LinkedIn export, an old CV in a drawer.
@@ -306,6 +316,24 @@ is a successful run: it is cheaper here than in the market.
 `evaluate-output` are called by the two orchestrators above. Use them directly
 only to run one stage deliberately.
 
+## Components and releases
+
+A Claude-native career evidence toolkit with an optional resume application.
+The evidence record and document generation have separate release readiness.
+
+| Component | Status | Purpose |
+| --- | --- | --- |
+| **Career Evidence Core** | Early access: `0.1.0-alpha.3` | Capture, review, maintain and privately export a portable career record |
+| **Resume Application** | Beta: `0.1.0-beta.3` | Select, tailor, review and render documents from that record |
+
+Both live in this repository. The core runs independently; the resume add-on
+consumes it through the versioned career schema. Start with the
+[core workflow](docs/core-workflow.md), add the
+[resume workflow](docs/resume-workflow.md) when useful, and see
+[release boundaries and installation](docs/releases.md) for the separate local
+archives and quality gates. Broader onboarding and resume benchmarks remain
+necessary before either component is described as mature.
+
 ## Command line
 
 Everything is standard library Python or shell. There are no Python dependencies.
@@ -384,7 +412,8 @@ says where it came from. What you get back is every JSON Resume theme for free.
 - [Career-pack review](docs/pack-review.md) — inspect, correct, accept and resume proposed changes
 - [Editorial memory](docs/editorial-memory.md) — preserve strengths, briefs and scoped decisions
 - [Resume workflow](docs/resume-workflow.md) — the optional document application
-- [Getting started](docs/getting-started.md) — a first session, end to end
+- [First session](docs/first-session.md) — one source, review, stop and resume
+- [Getting started](docs/getting-started.md) — setup and optional next steps
 - [Workflow](docs/claude-workflow.md) — how the pieces fit
 - [Data model](docs/data-model.md) — the datapack schema and why it is shaped this way
 - [Source intake](docs/source-intake.md) — what to feed it

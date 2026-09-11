@@ -1,0 +1,18 @@
+{
+  "current_pack": "data/packs/accepted.json",
+  "saved_roles": 1,
+  "saved_achievements": 2,
+  "reviewed_items": 7,
+  "pending_items": 1,
+  "corrections": 0,
+  "questions": 1,
+  "next_items": [
+    {
+      "key": "strengths_profile/S_DISTINCTIVE",
+      "action": "later"
+    }
+  ],
+  "stopping_point": "Your saved career record is available for recall. You can stop here and return to pending items later.",
+  "resume_prompt": "Continue my career-pack review.",
+  "recall_prompt": "Show me one recorded achievement and its original source."
+}

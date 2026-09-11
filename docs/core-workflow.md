@@ -6,6 +6,12 @@ material, then use `review-evidence` and the optional `review-strengths` intervi
 Capture subsequent work with `capture-work`. Python commands require no model;
 the conversational skills run in Claude Code.
 
+For a first pack, use [your first session](first-session.md): one source, a readable
+overview, a few accepted achievements and a recall example. Returning users can
+say “Continue my career-pack review”; `career_core.py review resume` finds the
+saved sessions. “Apply my saved review decisions” uses the supplied file through
+`review apply` and returns a stopping-point summary.
+
 ## Maintain the record
 
 Keep unreviewed proposals under `data/candidates/`. Use the readable

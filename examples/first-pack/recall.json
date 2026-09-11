@@ -1,0 +1,31 @@
+[
+  {
+    "id": "E_STORY_1",
+    "title": "Created a deployment rehearsal tool",
+    "star": {
+      "situation": "Created a deployment rehearsal tool",
+      "task": "Improve this work within my role",
+      "action": "Designed the rehearsal format and co-built its runner with engineers",
+      "result": "Two teams adopted rehearsals before deployment"
+    },
+    "metrics": [],
+    "skills": [],
+    "source_refs": [
+      {
+        "source_id": "SRC_SUBJECT",
+        "excerpt": "In March 2019 I designed a deployment rehearsal format and co-built its runner with engineers. Two teams adopted rehearsals before deployment."
+      }
+    ],
+    "evidence_status": "self_asserted",
+    "external_safe": false,
+    "outcome_type": "output",
+    "corroborators": [],
+    "employment_id": "EMP_CURRENT",
+    "occurred": {
+      "start": "2019-03",
+      "end": "2019-03",
+      "inferred": false
+    },
+    "constraints": []
+  }
+]

@@ -115,3 +115,13 @@ Model scenario reports retain model usage metadata as well as checks and cost.
 Passing deterministic checks still requires manual inspection of final prose;
 these checks do not establish print quality, every semantic implication, or hiring
 outcomes.
+
+## First career pack
+
+`python3 tests/run_editorial_scenarios.py --scenario first-pack --installation core --budget 2 --report /tmp/first-pack.json`
+
+Starts from one fictional Markdown resume and no current pack. Requires a staged
+private proposal, an overview in the response, a readable review page and at most
+one initial question. No wording has been approved, so no current pack may appear.
+The deterministic walkthrough separately exercises explicit fixture acceptance,
+a deferred strength, a stopping-point summary and recall from the accepted pack.

@@ -9,6 +9,8 @@ Requires Python 3.9+, `make`, and macOS or Linux. Conversational onboarding uses
 Claude Code and its configured model. PDF intake uses poppler or macOS PDFKit.
 No Python dependencies are installed.
 
+[Preview a complete fictional first pack](examples/first-pack/README.md) before installing.
+
 Unzip the core archive into a new directory and open that directory in Claude Code.
 
 ```sh
@@ -16,7 +18,9 @@ make check
 mkdir -p data/sources
 ```
 
-Add source material, then ask: `Use build-career-pack on data/sources/`.
+Add one resume, then ask: **Build my first career pack from data/sources/my-resume.pdf.
+Keep it private and show me the overview before asking questions.**
+Follow `docs/first-session.md`; the assistant handles review commands and saved sessions.
 Open the private review page produced by onboarding; inspect the proposed data,
 record your choices and save accepted items as described in `docs/pack-review.md`.
 Continue with `review-evidence` and, if useful, `review-strengths`. A skipped

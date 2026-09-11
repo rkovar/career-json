@@ -210,5 +210,88 @@ class PackReviewTests(unittest.TestCase):
         self.choices({'evidence_atoms/E_STORY_1':'accept'})
         self.publish(success=False)
 
+    def test_apply_resolves_session_and_reports_saved_and_pending_work(self):
+        (self.root/'data/packs/base.json').unlink()
+        self.proposed=self.pack
+        self.start()
+        self.choices({key:('later' if key.startswith('strengths_profile/') else 'accept') for key in units(self.proposed)})
+        state=json.loads(self.cli('apply','--input','reviews/choices.json','--output','data/packs/accepted.json').stdout)
+        self.assertEqual(state['saved_pack'],'data/packs/accepted.json')
+        self.assertIsNone(state['save_blocked'])
+        self.assertEqual(state['summary']['saved_roles'],1)
+        self.assertEqual(state['summary']['saved_achievements'],len(self.proposed['evidence_atoms']))
+        self.assertEqual(state['summary']['pending_items'],1)
+        self.assertIn('original source',state['summary']['recall_prompt'])
+        self.assertNotIn('complete',state['summary']['stopping_point'])
+        repeated=json.loads(self.cli('apply','--input','reviews/choices.json','--output','data/packs/repeated.json').stdout)
+        self.assertIsNone(repeated['saved_pack'])
+        self.assertFalse((self.root/'data/packs/repeated.json').exists())
+
+    def test_apply_preserves_notes_without_claiming_to_save_a_pack(self):
+        self.start();self.choices({'evidence_atoms/E_STORY_1':'correct'})
+        state=json.loads(self.cli('apply','--input','reviews/choices.json','--output','data/packs/accepted.json').stdout)
+        self.assertIsNone(state['saved_pack'])
+        self.assertIsNone(state['save_blocked'])
+        self.assertEqual(state['summary']['corrections'],1)
+
+    def test_apply_reports_missing_support_without_losing_decisions(self):
+        (self.root/'data/packs/base.json').unlink()
+        self.start();self.choices({'evidence_atoms/E_STORY_1':'accept'})
+        state=json.loads(self.cli('apply','--input','reviews/choices.json','--output','data/packs/accepted.json',success=False).stdout)
+        self.assertTrue(state['save_blocked'])
+        self.assertIsNone(state['saved_pack'])
+        self.assertTrue((self.root/'reviews/pack-reviews/check/decisions/000001.json').exists())
+        self.assertIsNone(state['summary']['current_pack'])
+
+    def test_resume_discovers_multiple_sessions_without_mutation(self):
+        self.start();self.choices({'evidence_atoms/E_STORY_1':'later'})
+        self.cli('start','--candidate','data/candidates/proposal.json','--id','another')
+        before={str(p):p.read_bytes() for p in self.root.rglob('*.json')}
+        result=json.loads(self.cli('resume').stdout)
+        self.assertEqual(len(result['sessions']),2)
+        self.assertIn('never infer approval',result['instruction'])
+        self.assertEqual(before,{str(p):p.read_bytes() for p in self.root.rglob('*.json')})
+
+    def test_overview_precedes_decisions_and_contributions_precede_metadata(self):
+        self.start();self.cli('render','--session',self.session,'--output','outputs/review.html')
+        text=(self.root/'outputs/review.html').read_text()
+        self.assertLess(text.index('Your career at a glance'),text.index('What your choices mean'))
+        self.assertLess(text.index('data-group="evidence_atoms"'),text.index('data-group="field"'))
+        for value in ('A useful place to stop','Save my review and pause','Continue my career-pack review',
+                      'All career sections','External use (optional'):
+            self.assertIn(value,text)
+
+    def test_fictional_walkthrough_builds_and_recalls_accepted_evidence(self):
+        destination=self.root/'example'
+        result=subprocess.run([sys.executable,str(ROOT/'tests/build_first_pack_demo.py'),'--output-dir',str(destination)],
+                              capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        summary=json.loads((destination/'summary.json').read_text())
+        self.assertEqual(summary['saved_achievements'],2)
+        self.assertEqual(summary['pending_items'],1)
+        recalled=json.loads((destination/'recall.json').read_text())
+        self.assertEqual([r['id'] for r in recalled],['E_STORY_1'])
+        self.assertIn('Fictional demonstration',(destination/'review.html').read_text())
+
+    def test_demo_refuses_to_replace_an_existing_career_workspace(self):
+        before=(self.root/'data/packs/base.json').read_bytes()
+        result=subprocess.run([sys.executable,str(ROOT/'tests/build_first_pack_demo.py'),'--output-dir',str(self.root)],
+                              capture_output=True,text=True)
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual((self.root/'data/packs/base.json').read_bytes(),before)
+
+    def test_handover_has_real_contributions_and_a_stopping_point(self):
+        self.start()
+        rendered=self.cli('render','--session',self.session,'--output','outputs/review.html').stdout
+        self.assertIn('Continue my career-pack review',rendered)
+        self.assertIn('Your current pack contains',rendered)
+        result=self.cli('handover','--session',self.session,'--page','outputs/review.html').stdout
+        self.assertIn('[Open your private career review](outputs/review.html)',result)
+        self.assertIn(self.proposed['evidence_atoms'][0]['star']['action'],result)
+        self.assertIn('You can stop here',result)
+        self.assertIn('Continue my career-pack review',result)
+        self.assertIn('Show me one recorded achievement and its original source',result)
+        self.cli('handover','--session',self.session,'--page','outputs/missing.html',success=False)
+
 
 if __name__=='__main__':unittest.main(verbosity=2)

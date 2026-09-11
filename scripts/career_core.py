@@ -71,8 +71,14 @@ def main(argv=None):
             record.setdefault('strengths_profile', [])
             record.setdefault('positioning_preferences', [])
             metadata = record.setdefault('metadata', {})
-            if args.command == 'migrate' or not metadata.get('supersedes'):
+            if args.command == 'migrate':
                 metadata['supersedes'] = str(path.relative_to(ROOT.resolve()))
+            elif not metadata.get('supersedes'):
+                # Working candidates are not pack history. A first import has
+                # no predecessor; later candidates refer to the accepted head.
+                previous = resolve()
+                if previous:
+                    metadata['supersedes'] = str(local(previous).relative_to(ROOT.resolve()))
             if args.command == 'bind-strength':
                 strength = next((s for s in record['strengths_profile'] if s['id'] == args.strength), None)
                 if strength is None:

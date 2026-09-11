@@ -1,0 +1,65 @@
+{
+  "review_id": "fictional-first-pack",
+  "proposal_sha256": "5c4d4335299ff3def4bbff95a6fdb608bbe439ac6384afb19adeddba82e35f04",
+  "reviewed_by": "Jules Elm (scripted fictional example)",
+  "omissions": [],
+  "decisions": [
+    {
+      "key": "employment/EMP_CURRENT",
+      "fingerprint": "6f526c58b9fcef8f964aa16b821ba87b87dcdd15086c1908232b70de99d61172",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_STORY_1",
+      "fingerprint": "3b85df3b9b8436dbf5dddd979485c4ea7932f154170a0ee5a080d2ec7662cb55",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_STORY_2",
+      "fingerprint": "f788b0bee7ebe1a6f7e99ce9f806653b0dfe9aaadced5615906d802864e398da",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "field/name",
+      "fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "field/private_profile",
+      "fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "field/purpose",
+      "fingerprint": "9d0f89e3e11083d53e5c2075ca4199b6a9c7d578cb8afdbae4e8f86dda5e555c",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_SUBJECT",
+      "fingerprint": "2a84e0f5933c22034628bb773a724f5d874f8117a12cbef3cdced0fbf4a4dbcc",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "strengths_profile/S_DISTINCTIVE",
+      "fingerprint": "d985fdfb6afdfb7c571535c667304a3d9a4039bf2f3516ef02b585474c2577b9",
+      "action": "later",
+      "publication": "unchanged",
+      "note": ""
+    }
+  ],
+  "recorded": "2026-09-11T10:35:22.003069+00:00"
+}

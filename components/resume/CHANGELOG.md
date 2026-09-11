@@ -1,5 +1,9 @@
 # Resume Application release notes
 
+## 0.1.0-beta.3 — local release candidate, 2026-09-11
+
+- Requires career-core 0.1.0-alpha.3. Resume generation remains optional after first-pack onboarding.
+
 ## 0.1.0-beta.2 — local release candidate, 2026-09-09
 
 - Requires career-core 0.1.0-alpha.2, including staged human review.

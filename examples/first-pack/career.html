@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jules Elm — pack</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f2ee; --card: #fff; --ink: #1b2733; --muted: #5d6b7a;
+    --line: #dcd7ce; --accent: #a44d2f; --warn: #8a5a00; --warn-bg: #fdf3e0;
+    --stop: #8f2d2d; --stop-bg: #fbeded; --good: #2f6b4f; --good-bg: #eaf4ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14181d; --card: #1c222a; --ink: #e6e9ec; --muted: #97a3b0;
+      --line: #2c343d; --accent: #e08a63; --warn: #e3b464; --warn-bg: #2d2617;
+      --stop: #e08c8c; --stop-bg: #2e1c1c; --good: #7fc3a1; --good-bg: #17271f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+        color: var(--accent); border-bottom: 1px solid var(--line);
+        padding-bottom: 6px; margin: 34px 0 14px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+  .private { background: var(--stop-bg); border: 1px solid var(--stop); color: var(--stop);
+              border-radius: 8px; padding: 12px 14px; font-size: 13px; margin: 0 0 22px; }
+  .private strong { display: block; margin-bottom: 3px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+           padding: 8px 12px; font-size: 13px; }
+  .stat b { font-size: 17px; display: block; }
+  .stat.flag { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+  .controls { position: sticky; top: 0; z-index: 5; background: var(--bg);
+               border-bottom: 1px solid var(--line); padding: 12px 0; margin-bottom: 14px;
+               display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  select, input { font: inherit; font-size: 13px; padding: 6px 9px; border-radius: 7px;
+                   border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  input { flex: 1 1 220px; min-width: 160px; }
+  .count { color: var(--muted); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px;
+           background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px;
+        text-transform: uppercase; letter-spacing: .05em; }
+  tr:last-child td { border-bottom: none; }
+  .atom { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--line);
+           border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+  .atom.withheld { border-left-color: var(--stop); }
+  .atom.outcome { border-left-color: var(--good); }
+  .atom h3 { margin: 0 0 3px; font-size: 15.5px; }
+  .aid { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); }
+  .badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 10px; }
+  .b { font-size: 11.5px; padding: 2px 8px; border-radius: 20px;
+        border: 1px solid var(--line); color: var(--muted); }
+  .b.good { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+  .b.warn { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+  .b.stop { background: var(--stop-bg); border-color: var(--stop); color: var(--stop); }
+  .star { margin: 0; font-size: 14px; }
+  .star div { margin-bottom: 5px; }
+  .star .k { display: inline-block; min-width: 74px; color: var(--muted);
+              font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em;
+              vertical-align: top; }
+  .star .v { display: inline-block; max-width: calc(100% - 82px); }
+  .missing { color: var(--muted); font-style: italic; }
+  .meta { margin-top: 11px; padding-top: 10px; border-top: 1px dashed var(--line);
+           font-size: 12.5px; color: var(--muted); }
+  .meta div { margin-bottom: 3px; }
+  .basis { color: var(--good); }
+  .nobasis { color: var(--warn); }
+  .q { background: var(--warn-bg); border-left: 3px solid var(--warn); color: var(--warn);
+        padding: 8px 11px; border-radius: 0 6px 6px 0; margin-top: 10px; font-size: 13px; }
+  .q ul { margin: 5px 0 0; padding-left: 18px; }
+  .note { font-size: 12.5px; color: var(--muted); margin-top: 8px; font-style: italic; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 40px;
+            border-top: 1px solid var(--line); padding-top: 12px; }
+  @media (max-width: 620px) {
+    .star .k { display: block; min-width: 0; }
+    .star .v { display: block; max-width: none; }
+    table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body><p style="padding:16px;background:#fff2cd;text-align:center"><strong>Fictional demonstration.</strong> No real career or approvals are represented. <a href="README.md">Read the walkthrough</a>.</p>
+<main>
+<h1>Jules Elm</h1>
+<p class="sub">data/packs/accepted.json · sha256 fa4102a05e03… · schema 1.4</p>
+<div class="private"><strong>Private working view. Do not send.</strong>This page shows the whole pack, including atoms marked withheld that no artefact may cite. Contact details are deliberately not rendered.</div>
+<div class="stats"><div class="stat "><b>2</b>atoms</div><div class="stat flag"><b>0</b>business outcome</div><div class="stat "><b>2</b>output</div><div class="stat "><b>0</b>activity</div><div class="stat flag"><b>2</b>withheld</div><div class="stat "><b>0</b>undated</div><div class="stat "><b>0</b>metrics with no basis</div></div>
+<section><h2>Your review</h2><p>Review whether this record reflects your contribution, not just whether fields are complete. A wording review is separate from evidence confidence and permission for external use.</p><p>Use the guided review workflow to compare a proposal, record corrections and accept changes. See <code>docs/pack-review.md</code>. This page is a read-only snapshot.</p></section>
+<h2>Employment · My career timeline</h2>
+<table><tr><th>Employer</th><th>Title</th><th>Dates</th><th></th></tr><tr><td>Fictional Fieldwork Ltd</td><td>Head of Engineering</td><td>2018-01 to present</td><td></td></tr></table>
+<h2>My strengths</h2>
+<p>No interpretations recorded yet.</p>
+<h2>What I want next</h2>
+<p>No preferences recorded yet.</p>
+<h2>Evidence atoms · My achievements</h2>
+<div class="controls"><select id="f-outcome" data-key="outcome"><option value="">any outcome type</option><option value="business_outcome">business_outcome</option><option value="output">output</option><option value="activity">activity</option><option value="none">none</option></select><select id="f-status" data-key="status"><option value="">any status</option><option value="self_asserted">self_asserted</option></select><select id="f-eligible" data-key="eligible"><option value="">withheld or not</option><option value="yes">yes</option><option value="no">no</option></select><select id="f-employer" data-key="employer"><option value="">any employer</option><option value="Fictional Fieldwork Ltd">Fictional Fieldwork Ltd</option></select><input id="f-search" type="search" placeholder="search every field"><span class="count" id="f-count"></span></div>
+<div class="atom withheld" data-outcome="output" data-status="self_asserted" data-eligible="no" data-employer="Fictional Fieldwork Ltd"><h3>Created a deployment rehearsal tool</h3><div class="aid">E_STORY_1</div><div class="badges"><span class="b ">output</span><span class="b ">self_asserted</span><span class="b stop">withheld: external_safe is false</span></div><div class="star"><div><span class="k">situation</span><span class="v">Created a deployment rehearsal tool</span></div><div><span class="k">task</span><span class="v">Improve this work within my role</span></div><div><span class="k">action</span><span class="v">Designed the rehearsal format and co-built its runner with engineers</span></div><div><span class="k">result</span><span class="v">Two teams adopted rehearsals before deployment</span></div></div><div class="star"><div><span class="k">metrics</span><span class="v missing">none</span></div></div><div class="meta"><div><b>when:</b> 2019-03 to 2019-03</div><div><b>employer:</b> Fictional Fieldwork Ltd</div><div><b>sources:</b> SRC_SUBJECT</div><div><b>Your wording review:</b> accepted</div></div><details><summary>Show original source excerpts</summary><p><b>SRC_SUBJECT</b> </p><blockquote>In March 2019 I designed a deployment rehearsal format and co-built its runner with engineers. Two teams adopted rehearsals before deployment.</blockquote></details></div><div class="atom withheld" data-outcome="output" data-status="self_asserted" data-eligible="no" data-employer="Fictional Fieldwork Ltd"><h3>Built an engineering practice</h3><div class="aid">E_STORY_2</div><div class="badges"><span class="b ">output</span><span class="b ">self_asserted</span><span class="b stop">withheld: external_safe is false</span></div><div class="star"><div><span class="k">situation</span><span class="v">Built an engineering practice</span></div><div><span class="k">task</span><span class="v">Improve this work within my role</span></div><div><span class="k">action</span><span class="v">Hired and coached engineers while introducing peer design reviews</span></div><div><span class="k">result</span><span class="v">The engineering group adopted peer design reviews</span></div></div><div class="star"><div><span class="k">metrics</span><span class="v missing">none</span></div></div><div class="meta"><div><b>when:</b> 2025-02 to 2025-02</div><div><b>employer:</b> Fictional Fieldwork Ltd</div><div><b>sources:</b> SRC_SUBJECT</div><div><b>Your wording review:</b> accepted</div></div><details><summary>Show original source excerpts</summary><p><b>SRC_SUBJECT</b> </p><blockquote>In February 2025 I hired and coached engineers while introducing peer design reviews. The engineering group adopted peer design reviews.</blockquote></details><div class="q"><b>Open questions</b><ul><li>What part of coaching was most useful to the engineers?</li></ul></div></div>
+<footer>Generated by scripts/pack_html.py. Regenerate with <code>make pack-html</code> after any pack change: this file does not update itself.</footer>
+</main>
+<script>
+const atoms = Array.from(document.querySelectorAll('.atom'));
+const controls = ['f-outcome', 'f-status', 'f-eligible', 'f-employer'].map(id => document.getElementById(id));
+const search = document.getElementById('f-search');
+const count = document.getElementById('f-count');
+function apply() {
+  const term = search.value.trim().toLowerCase();
+  let shown = 0;
+  for (const atom of atoms) {
+    let ok = controls.every(c => !c.value || atom.dataset[c.dataset.key] === c.value);
+    if (ok && term) ok = atom.innerText.toLowerCase().includes(term);
+    atom.hidden = !ok;
+    if (ok) shown++;
+  }
+  count.textContent = shown + ' of ' + atoms.length + ' atoms';
+}
+for (const c of controls) c.addEventListener('change', apply);
+search.addEventListener('input', apply);
+apply();
+</script>
+</body>
+</html>

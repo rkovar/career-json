@@ -98,6 +98,31 @@ class CoreTests(unittest.TestCase):
             result = self.run_cli(script, *args)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_binding_first_import_never_links_a_temporary_candidate(self):
+        (self.root/'data/packs/pack.json').unlink()
+        candidate=self.root/'data/candidates/unbound.json'
+        candidate.parent.mkdir(parents=True)
+        candidate.write_text(json.dumps(self.pack))
+        result=self.run_cli('career_core.py','bind-strength','--pack','data/candidates/unbound.json',
+                            '--strength','S_DISTINCTIVE','--output','data/candidates/proposal.json')
+        self.assertEqual(result.returncode,0,result.stderr)
+        candidate.unlink()
+        proposal=json.loads((self.root/'data/candidates/proposal.json').read_text())
+        self.assertNotIn('supersedes',proposal['metadata'])
+        valid=self.run_cli('validate_pack.py','data/candidates/proposal.json')
+        self.assertEqual(valid.returncode,0,valid.stdout+valid.stderr)
+
+    def test_binding_later_candidate_links_the_accepted_head(self):
+        candidate=self.root/'data/candidates/unbound.json'
+        candidate.parent.mkdir(parents=True)
+        candidate.write_text(json.dumps(self.pack))
+        result=self.run_cli('career_core.py','bind-strength','--pack','data/candidates/unbound.json',
+                            '--strength','S_DISTINCTIVE','--output','data/candidates/proposal.json')
+        self.assertEqual(result.returncode,0,result.stderr)
+        candidate.unlink()
+        proposal=json.loads((self.root/'data/candidates/proposal.json').read_text())
+        self.assertEqual(proposal['metadata']['supersedes'],'data/packs/pack.json')
+
     def test_schema_union_and_external_reference_still_validate(self):
         for node, expected in [('text', False), ({'value':'an estimate'}, False), ([], True)]:
             errors=[]

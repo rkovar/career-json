@@ -1,5 +1,11 @@
 # Career Evidence Core release notes
 
+## 0.1.0-alpha.3 — local release candidate, 2026-09-11
+
+- Strength refreshes link accepted history, never temporary first-import candidates.
+
+- One-document onboarding, a complete fictional walkthrough, career-first review pages, apply/resume commands and useful stopping-point summaries.
+
 ## 0.1.0-alpha.2 — local release candidate, 2026-09-09
 
 - Stage proposed career changes separately from the accepted pack.

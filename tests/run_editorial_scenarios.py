@@ -52,6 +52,10 @@ def workspace(scenario, installation='checkout'):
         shutil.copy(ROOT / 'CLAUDE.md', root / 'CLAUDE.md')
     for folder in ('data/packs', 'data/roles', 'data/briefs', 'data/selections', 'data/private', 'outputs', 'reviews/decisions'):
         (root / folder).mkdir(parents=True, exist_ok=True)
+    if scenario == 'first-pack':
+        (root / 'data/sources').mkdir(parents=True, exist_ok=True)
+        shutil.copy(ROOT / 'examples/first-pack/data/sources/resume.md', root / 'data/sources/resume.md')
+        return root
     person = next(p for p in personas() if p['id'] == ('specialist' if scenario == 'representation' else 'technical-leader'))
     pack = pack_for(person)
     save(root, 'data/packs/pack.json', pack)
@@ -85,6 +89,9 @@ def workspace(scenario, installation='checkout'):
 
 
 REQUESTS = {
+    'first-pack': 'Use .claude/skills/build-career-pack/SKILL.md to build my first career pack from data/sources/resume.md. '
+                  'Keep it private and show me the career overview before asking questions. '
+                  'I want a useful first record, not a resume. I have not approved any extracted wording yet.',
     'grounding': 'Use evaluate-output and review-representation to review outputs/fixture-draft.md against the current pack, '
                  'data/briefs/resume-brief.json and data/selections/resume-selection.json. Save outputs/fixture-evaluation.json '
                  'and the representation sidecar with a shared saved manifest. This is review only: leave the artifact and all '
@@ -138,6 +145,27 @@ def checks(root, scenario, payload):
                 check('record_validates', True)
             except RuntimeError:
                 check('record_validates', False)
+    elif scenario == 'first-pack':
+        proposals = list((root / 'data/candidates').glob('*.json'))
+        pages = list((root / 'outputs').glob('*.html'))
+        check('proposal_created', bool(proposals))
+        check('readable_review_created', bool(pages) and any('Your career at a glance' in p.read_text() for p in pages))
+        check('no_unapproved_current_pack', not list((root / 'data/packs').glob('*.json')))
+        check('overview_in_response', 'rehearsal' in payload.get('result', '').lower())
+        check('at_most_one_question', payload.get('result', '').count('?') <= 1)
+        # Check the user can pause and find how to return, not whether the model
+        # copied a particular helper's sentence verbatim.
+        response = payload.get('result', '').lower()
+        check('resumable_handover', ('pause' in response or 'stop' in response) and
+              any('Continue my career-pack review' in p.read_text() for p in pages))
+        for proposed in proposals:
+            data = json.loads(proposed.read_text())
+            check('candidate_stays_private', all(not r.get('external_safe') for r in data.get('evidence_atoms', []) + data.get('employment', [])))
+            try:
+                script(root, 'validate_pack.py', proposed)
+                check('candidate_validates', True)
+            except RuntimeError:
+                check('candidate_validates', False)
     elif scenario == 'interview':
         text = payload.get('result', '')
         check('one_question', text.count('?') == 1)
@@ -176,17 +204,17 @@ def main():
     parser.add_argument('--budget', type=float, default=2)
     parser.add_argument('--report', type=Path, required=True, help='report path; workspace path included for review')
     args = parser.parse_args()
-    if args.installation == 'core' and args.scenario != 'interview':
-        parser.error('the core-only installation supports the interview scenario; document generation needs the add-on')
+    if args.installation == 'core' and args.scenario not in ('interview', 'first-pack'):
+        parser.error('the core-only installation supports the interview and first-pack scenarios; document generation needs the add-on')
     if args.installation == 'core' and not (ROOT / 'scripts/build_release.py').is_file():
         parser.error('building a core-only test archive requires the developer checkout')
     root = workspace(args.scenario, args.installation)
     print('Fictional evaluation workspace: ' + str(root), flush=True)
-    original_pack = (root / 'data/packs/pack.json').read_bytes()
+    original_pack = (root / 'data/packs/pack.json').read_bytes() if args.scenario != 'first-pack' else None
     original_artifact = (root / 'outputs/fixture-draft.md').read_bytes() if args.scenario in ('representation', 'grounding') else None
     cmd = ['claude', '-p', REQUESTS[args.scenario], '--output-format', 'json', '--no-session-persistence',
            '--permission-mode', 'acceptEdits', '--tools', 'Read,Write,Edit,Glob,Grep,Bash',
-           '--allowedTools', 'Read,Write,Edit,Glob,Grep,Bash(python3 scripts/*)',
+           '--allowedTools', 'Read,Write,Edit,Glob,Grep,Bash(python3 scripts/*),Bash(python3 data/candidates/*),Bash(scripts/extract_text.sh *),Bash(bash scripts/extract_text.sh *)',
            '--max-budget-usd', str(args.budget)]
     try:
         proc = subprocess.run(cmd, cwd=root, env={**os.environ, 'CAREER_WORKSPACE': str(root)},
@@ -195,7 +223,7 @@ def main():
     except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as exc:
         payload = {'is_error': True, 'result': str(exc)}
     result = checks(root, args.scenario, payload)
-    if args.scenario != 'interview':
+    if args.scenario not in ('interview', 'first-pack'):
         result.append({'check': 'source_pack_unchanged', 'passed': (root / 'data/packs/pack.json').read_bytes() == original_pack})
     if original_artifact is not None:
         result.append({'check': 'reviewed_artifact_unchanged', 'passed': (root / 'outputs/fixture-draft.md').read_bytes() == original_artifact})

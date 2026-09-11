@@ -306,7 +306,89 @@ def status(path):
             if choice['action'] == 'accept' and choice['batch'] in applied:
                 row['review_status'] = review_status(row['key'], read(current))
     feedback = [item for p in batches(path) for item in read(p)['omissions']]
-    return {'session': session, 'items': rows, 'omissions': feedback}
+    latest = read(current) if current else {}
+    pending = [r for r in rows if r['review_status'] != 'accepted']
+    summary = {
+        'current_pack': str(local(current).relative_to(ROOT.resolve())) if current else None,
+        'saved_roles': len(latest.get('employment', [])),
+        'saved_achievements': len(latest.get('evidence_atoms', [])),
+        'reviewed_items': len(rows) - len(pending), 'pending_items': len(pending),
+        'corrections': sum(r.get('decision', {}).get('action') == 'correct' for r in pending),
+        'questions': sum(len(a.get('open_questions') or []) for a in proposed.get('evidence_atoms', [])),
+        'next_items': [{'key': r['key'], 'action': r.get('decision', {}).get('action', 'review')} for r in pending],
+        'stopping_point': ('Your saved career record is available for recall. You can stop here and return to pending items later.'
+                           if latest.get('evidence_atoms') else
+                           'You can pause now. Your proposal is saved; accept a supported achievement and its required records to start your current pack.'),
+        'resume_prompt': 'Continue my career-pack review.',
+        'recall_prompt': 'Show me one recorded achievement and its original source.' if latest.get('evidence_atoms') else None,
+    }
+    return {'session': session, 'items': rows, 'omissions': feedback, 'summary': summary}
+
+
+def resume(path=None):
+    """Discover sessions without guessing which pending decisions to apply."""
+    if path:
+        return status(path)
+    sessions = []
+    for candidate in local('reviews/pack-reviews').glob('*/session.json'):
+        try:
+            state = status(candidate)
+            sessions.append({'path': str(candidate.relative_to(ROOT.resolve())),
+                             'review_id': state['session']['review_id'],
+                             'created': state['session']['created'], 'summary': state['summary']})
+        except (ValueError, KeyError, OSError) as exc:
+            sessions.append({'path': str(candidate.relative_to(ROOT.resolve())), 'error': str(exc), 'created': ''})
+    return {'sessions': sorted(sessions, key=lambda row: row['created'], reverse=True),
+            'instruction': 'Resume the session named in the conversation. If several are pending and the intent is unclear, ask which one; never infer approval.'}
+
+
+def handover(path, page):
+    """Give the conversational operator a concise, directly grounded handover."""
+    state = status(path)
+    page = local(page)
+    if not page.is_file():
+        raise ValueError('render the review page before handing it over')
+    relative = str(page.relative_to(ROOT.resolve()))
+    summary = state['summary']
+    lines = [f'[Open your private career review]({relative})', '',
+             'Here is the proposed record from your material. Only explicitly accepted items enter your current pack.', '']
+    roles = [r['after'] for r in state['items'] if r['key'].startswith('employment/') and r['after']]
+    atoms = [r['after'] for r in state['items'] if r['key'].startswith('evidence_atoms/') and r['after']]
+    for role in sorted(roles, key=lambda r: r.get('start') or '', reverse=True)[:2]:
+        lines.append(f"- **{role['title']} — {role['employer']}**: {role.get('start') or 'start not recorded'} to {role.get('end') or 'end not recorded'}.")
+    for atom in atoms[:2]:
+        star = atom.get('star') or {}
+        lines.append(f"- **{atom['title']}**: {star.get('action') or 'Contribution needs clarification.'} {star.get('result') or 'Outcome not yet recorded.'}")
+    count = lambda n, label: str(n) + ' ' + label + ('' if n == 1 else 's')
+    lines.extend(['', 'Your current pack contains ' + count(summary['saved_roles'], 'role') + ' and ' + count(summary['saved_achievements'], 'achievement') + '. '
+                  + count(summary['pending_items'], 'review item') + ' still to review, including ' + count(summary['corrections'], 'correction request') + '.',
+                  '', summary['stopping_point'], '',
+                  'To save browser choices, say **“Apply my saved review decisions”** and give the downloaded file location. '
+                  'To return, say **“Continue my career-pack review.”**'])
+    if summary['recall_prompt']:
+        lines.extend(['', 'Try your saved record: **“' + summary['recall_prompt'] + '”**'])
+    return '\n'.join(lines) + '\n'
+
+
+def apply_decisions(input_path, output):
+    """Import actual user choices, save accepted content, and report what remains."""
+    payload = read(input_path)
+    review_id = payload.get('review_id', '')
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', review_id):
+        raise ValueError('invalid review id in decisions file')
+    path = local('reviews/pack-reviews/' + review_id + '/session.json')
+    record(path, payload)
+    saved = None
+    blocked = None
+    try:
+        saved = publish(path, output)
+    except ValueError as exc:
+        if not str(exc).startswith('no new accepted changes or privacy restrictions'):
+            blocked = str(exc)
+    state = status(path)
+    state['saved_pack'] = str(saved.relative_to(ROOT.resolve())) if saved else None
+    state['save_blocked'] = blocked
+    return state
 
 
 def main(argv=None):
@@ -315,12 +397,20 @@ def main(argv=None):
     begin = commands.add_parser('start')
     begin.add_argument('--candidate', required=True)
     begin.add_argument('--id', required=True)
-    for name in ('status', 'record', 'publish', 'render'):
+    continuation = commands.add_parser('resume', help='find saved reviews or show a named review')
+    continuation.add_argument('--session')
+    handoff = commands.add_parser('handover', help='short readable first-session or return summary')
+    handoff.add_argument('--session', required=True)
+    handoff.add_argument('--page', required=True)
+    apply = commands.add_parser('apply', help='import user decisions and save accepted items locally')
+    apply.add_argument('--input', required=True)
+    apply.add_argument('--output', required=True)
+    for name in ('status', 'record', 'publish', 'accept', 'render'):
         sub = commands.add_parser(name)
         sub.add_argument('--session', required=True)
         if name == 'record':
             sub.add_argument('--input', required=True, help='decisions explicitly supplied by the person; never infer approval')
-        if name in ('publish', 'render'):
+        if name in ('publish', 'accept', 'render'):
             sub.add_argument('--output', required=True)
     args = parser.parse_args(argv)
     try:
@@ -328,8 +418,18 @@ def main(argv=None):
             result = start(args.candidate, args.id)
         elif args.command == 'record':
             result = record(args.session, read(args.input))
-        elif args.command == 'publish':
+        elif args.command in ('publish', 'accept'):
             result = publish(args.session, args.output)
+        elif args.command == 'resume':
+            print(json.dumps(resume(args.session), indent=2))
+            return 0
+        elif args.command == 'handover':
+            print(handover(args.session, args.page), end='')
+            return 0
+        elif args.command == 'apply':
+            result = apply_decisions(args.input, args.output)
+            print(json.dumps(result, indent=2))
+            return 1 if result['save_blocked'] else 0
         elif args.command == 'render':
             from review_html import render_review
             result = local(args.output)
@@ -339,6 +439,8 @@ def main(argv=None):
             print(json.dumps(status(args.session), indent=2))
             return 0
         print(str(result.relative_to(ROOT.resolve())))
+        if args.command == 'render':
+            print(handover(args.session, result), end='')
         return 0
     except (ValueError, KeyError, OSError) as exc:
         print('error: ' + str(exc), file=sys.stderr)
