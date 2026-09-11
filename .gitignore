@@ -22,3 +22,15 @@ data/capture/*
 !data/capture/.gitkeep
 
 data/capture/.seq
+
+# Durable editorial context is private, even though generated outputs are disposable.
+data/briefs/
+data/selections/
+
+# Local component release archives and Python caches.
+dist/
+__pycache__/
+*.pyc
+
+# Proposed career packs never become the current record until reviewed.
+data/candidates/

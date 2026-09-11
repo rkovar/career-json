@@ -1,0 +1,53 @@
+{
+  "name": "career-resume",
+  "version": "0.1.0-beta.2",
+  "channel": "beta",
+  "career_schema_versions": [
+    "1.3",
+    "1.4"
+  ],
+  "requires": {
+    "career-core": "0.1.0-alpha.2"
+  },
+  "files": {
+    ".claude/skills/evaluate-output/SKILL.md": ".claude/skills/evaluate-output/SKILL.md",
+    ".claude/skills/generate-resume/SKILL.md": ".claude/skills/generate-resume/SKILL.md",
+    ".claude/skills/make-interview-brief/SKILL.md": ".claude/skills/make-interview-brief/SKILL.md",
+    ".claude/skills/make-resume/SKILL.md": ".claude/skills/make-resume/SKILL.md",
+    ".claude/skills/recruiter-screen/SKILL.md": ".claude/skills/recruiter-screen/SKILL.md",
+    ".claude/skills/review-representation/SKILL.md": ".claude/skills/review-representation/SKILL.md",
+    ".claude/skills/review-selection/SKILL.md": ".claude/skills/review-selection/SKILL.md",
+    "Makefile.resume": "components/resume/Makefile",
+    "components/resume/CHANGELOG.md": "components/resume/CHANGELOG.md",
+    "components/resume/LICENSE": "LICENSE",
+    "components/resume/README.md": "components/resume/README.md",
+    "components/resume/component.json": "components/resume/component.json",
+    "docs/editorial-memory.md": "docs/editorial-memory.md",
+    "docs/resume-workflow.md": "docs/resume-workflow.md",
+    "schemas/editorial-decision.schema.json": "schemas/editorial-decision.schema.json",
+    "schemas/evaluation-record.schema.json": "schemas/evaluation-record.schema.json",
+    "schemas/output-brief.schema.json": "schemas/output-brief.schema.json",
+    "schemas/representation-record.schema.json": "schemas/representation-record.schema.json",
+    "schemas/role-profile.schema.json": "schemas/role-profile.schema.json",
+    "schemas/screen-record.schema.json": "schemas/screen-record.schema.json",
+    "schemas/selection-record.schema.json": "schemas/selection-record.schema.json",
+    "scripts/artifact_index.py": "scripts/artifact_index.py",
+    "scripts/diff_artifact.py": "scripts/diff_artifact.py",
+    "scripts/editorial.py": "scripts/editorial.py",
+    "scripts/entailment.py": "scripts/entailment.py",
+    "scripts/export_resume_json.py": "scripts/export_resume_json.py",
+    "scripts/keyword_coverage.py": "scripts/keyword_coverage.py",
+    "scripts/link_evidence.py": "scripts/link_evidence.py",
+    "scripts/manifest.py": "scripts/manifest.py",
+    "scripts/private_facts.py": "scripts/private_facts.py",
+    "scripts/render.py": "scripts/render.py",
+    "scripts/role_fit.py": "scripts/role_fit.py",
+    "scripts/save_review.py": "scripts/save_review.py",
+    "scripts/select_evidence.py": "scripts/select_evidence.py",
+    "scripts/validate_artifact.py": "scripts/validate_artifact.py",
+    "scripts/validate_records.py": "scripts/validate_records.py",
+    "scripts/verdict_log.py": "scripts/verdict_log.py",
+    "tests/run_editorial_scenarios.py": "tests/run_editorial_scenarios.py",
+    "tests/test_editorial.py": "tests/test_editorial.py"
+  }
+}

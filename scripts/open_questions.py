@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, metric_basis, metric_text, ROOT  # noqa: E402
-from select_evidence import eligible, links, linked_ids  # noqa: E402
+from evidence_rules import eligible, links, linked_ids  # noqa: E402
 from quantities import extract  # noqa: E402
 
 ROLES = ROOT / "data" / "roles"
@@ -284,7 +284,7 @@ def delta(pack, pack_path):
     rewritten = [a for a in atoms if a["id"] in prior and claim(a) != claim(prior[a["id"]])]
     rewritten_same_sources = [a["id"] for a in rewritten if sources(a) == sources(prior[a["id"]])]
 
-    return {"pack": str(pack_path.relative_to(ROOT)), "supersedes": previous,
+    return {"pack": str(pack_path.resolve().relative_to(ROOT.resolve())), "supersedes": previous,
             "atoms_added": [a["id"] for a in added],
             "outcome_type_changed": [a["id"] for a in promoted],
             "claims_rewritten": [a["id"] for a in rewritten],
@@ -300,13 +300,17 @@ def delta(pack, pack_path):
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--markdown", action="store_true")
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument("--markdown", action="store_true")
+    output.add_argument("--json", action="store_true", help="explicit JSON output (the default)")
     parser.add_argument("--delta", action="store_true",
                         help="what the current pack version changed, and what has no source")
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--pack", help="inspect a staged candidate before acceptance")
     args = parser.parse_args(argv[1:])
 
-    path = resolve()
+    from pack_io import local
+    path = local(args.pack) if args.pack else resolve()
     if path is None:
         print("no pack found", file=sys.stderr)
         return 1
@@ -321,11 +325,11 @@ def main(argv):
         questions = questions[: args.limit]
 
     if not args.markdown:
-        print(json.dumps({"pack": str(path.relative_to(ROOT)),
+        print(json.dumps({"pack": str(path.resolve().relative_to(ROOT.resolve())),
                           "open": len(questions), "questions": questions}, indent=2))
         return 0
 
-    out = ["# Open questions", "", f"Pack: `{path.relative_to(ROOT)}`", "",
+    out = ["# Open questions", "", f"Pack: `{path.resolve().relative_to(ROOT.resolve())}`", "",
            "Ordered by what answering each one unlocks, not by where it sits in the",
            "pack. Answer from the top: the first few are the ones that move something.", ""]
     if not questions:

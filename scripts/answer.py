@@ -81,7 +81,9 @@ def rows(record):
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("record", type=Path, help="the review record for this session")
-    parser.add_argument("--atom", help="the atom this answer bears on")
+    subject = parser.add_mutually_exclusive_group()
+    subject.add_argument("--atom", help="the atom this answer bears on")
+    subject.add_argument("--subject", help="strength or preference ID; does not create an evidence atom")
     parser.add_argument("--question")
     parser.add_argument("--answer", help="the subject's words, unedited")
     parser.add_argument("--source", help="the person source_id to cite; printed as a placeholder otherwise")
@@ -92,11 +94,12 @@ def main(argv):
         recorded = rows(args.record)
         print(json.dumps(recorded, indent=2) if recorded else "no answers recorded")
         return 0
-    if not (args.atom and args.question and args.answer):
-        parser.error("--atom, --question and --answer are all required")
-    ref = append(args.record, args.atom, args.question, args.answer, args.source)
+    target = args.atom or args.subject
+    if not (target and args.question and args.answer):
+        parser.error("--atom or --subject, --question and --answer are all required")
+    ref = append(args.record, target, args.question, args.answer, args.source)
     record = ref.pop("_record")
-    print(f"recorded in {record}; cite it from {args.atom} with:")
+    print(f"recorded in {record}; cite it from {target} with:")
     print(json.dumps(ref, indent=2))
     return 0
 

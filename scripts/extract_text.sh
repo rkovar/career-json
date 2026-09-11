@@ -30,7 +30,16 @@ for path in CommandLine.arguments.dropFirst() {
     print(text)
 }
 SWIFT
-    swift "$tmp" "$1"; rm -f "$tmp"
+    # This function runs inside command substitution, where `set -e` does not
+    # reliably stop on the failed Swift command. Cleanup must not turn a cache
+    # or PDF extraction failure into successful empty text.
+    if swift "$tmp" "$1"; then
+      rm -f "$tmp"
+    else
+      local extraction_status=$?
+      rm -f "$tmp"
+      return "$extraction_status"
+    fi
   else
     echo "No PDF extractor available. Install poppler (brew install poppler, apt install poppler-utils) or convert the file to text by hand." >&2
     exit 1

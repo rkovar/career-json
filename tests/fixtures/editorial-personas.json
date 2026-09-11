@@ -1,0 +1,47 @@
+[
+  {
+    "id": "early-career", "name": "Lena West", "title": "Junior Data Analyst", "start": "2025-01",
+    "strength": "Makes unfamiliar data usable through careful investigation",
+    "direction": "Build deeper analysis skills", "basis": "single_achievement",
+    "examples": [
+      ["Investigated a broken reporting feed", "Traced inconsistent dates to a parsing error and documented the correction", "The corrected feed supplied the team's weekly report", "2025-03"],
+      ["Maintained a reporting schedule", "Prepared the weekly report and recorded validation checks", "Reports were delivered on the agreed schedule", "2026-02"]
+    ]
+  },
+  {
+    "id": "specialist", "name": "Owen Birch", "title": "Compiler Engineer", "start": "2015-01",
+    "strength": "Turns difficult compiler failures into reproducible technical tools",
+    "direction": "Continue individual technical contribution", "basis": "single_achievement",
+    "examples": [
+      ["Created a compiler failure reducer", "Designed a reducer that isolates the code triggering a compiler failure", "The team used reduced examples to investigate previously opaque defects", "2016-03"],
+      ["Completed compiler maintenance", "Updated routine compatibility checks for language releases", "Compatibility checks covered the supported releases", "2026-02"]
+    ]
+  },
+  {
+    "id": "operator", "name": "Mira Ash", "title": "Service Operations Lead", "start": "2021-01",
+    "strength": "Makes operational handovers usable by the people doing the work",
+    "direction": "Improve reliable service operations", "basis": "recurring_pattern",
+    "examples": [
+      ["Redesigned shift handovers", "Observed missed handovers and tested a concise checklist with the shifts", "Both shifts adopted the checklist", "2022-03"],
+      ["Introduced incident review handovers", "Worked with responders to make incident actions explicit at shift change", "Responders used the handover to track outstanding actions", "2025-02"]
+    ]
+  },
+  {
+    "id": "career-changer", "name": "Theo Reed", "title": "Technical Trainer", "start": "2020-01",
+    "strength": "Makes difficult technical material accessible to new practitioners",
+    "direction": "Move toward developer documentation; no claim of production engineering experience", "basis": "single_achievement",
+    "examples": [
+      ["Created a debugging workshop", "Designed exercises explaining how to investigate a failing program", "The training group adopted the workshop for new learners", "2021-03"],
+      ["Coordinated course delivery", "Scheduled sessions and maintained learner materials", "Courses ran on the agreed timetable", "2026-02"]
+    ]
+  },
+  {
+    "id": "technical-leader", "name": "Jules Elm", "title": "Head of Engineering", "start": "2018-01",
+    "strength": "Builds technical capabilities that teams adopt",
+    "direction": "Combine technical design and people leadership", "basis": "recurring_pattern",
+    "examples": [
+      ["Created a deployment rehearsal tool", "Designed the rehearsal format and co-built its runner with engineers", "Two teams adopted rehearsals before deployment", "2019-03"],
+      ["Built an engineering practice", "Hired and coached engineers while introducing peer design reviews", "The engineering group adopted peer design reviews", "2025-02"]
+    ]
+  }
+]

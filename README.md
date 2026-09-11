@@ -2,8 +2,21 @@
 
 **Your career, in a file you own.**
 
-A Claude-native workspace for remembering what you did, and for building a
-different resume from it every time.
+A Claude-native career evidence toolkit with an optional resume application.
+The evidence record and document generation have separate release readiness.
+
+| Component | Status | Purpose |
+| --- | --- | --- |
+| **Career Evidence Core** | Early access: `0.1.0-alpha.2` | Capture, review, maintain and privately export a portable career record |
+| **Resume Application** | Beta: `0.1.0-beta.2` | Select, tailor, review and render documents from that record |
+
+Both live in this repository. The core runs independently; the resume add-on
+consumes it through the versioned career schema. Start with the
+[core workflow](docs/core-workflow.md), add the
+[resume workflow](docs/resume-workflow.md) when useful, and see
+[release boundaries and installation](docs/releases.md) for the separate local
+archives and quality gates. Broader onboarding and resume benchmarks remain
+necessary before either component is described as mature.
 
 ## The problem
 
@@ -28,10 +41,10 @@ The record is a **datapack**: evidence atoms in STAR form, employment history,
 skills, each traceable to the source it came from. The pack is the product. A
 resume is a query against it, shaped for one role.
 
-Two properties make it trustworthy enough to build on:
+Two rules govern the record and its applications:
 
-- **Nothing is invented.** Every claim traces to a source. Every employer, title,
-  and date traces to an employment record. If evidence for something does not
+- **Claims must be grounded.** Every claim must trace to recorded evidence. Every
+  employer, title, and date must trace to an employment record. If evidence for something does not
   exist, the document says less rather than more.
 - **The record knows what it does not know.** Unresolved claims, inferred dates,
   gaps in the timeline, and evidence that would read badly for a given role are
@@ -74,9 +87,24 @@ end-of-year write-up, whatever you have to start with. Then, in Claude Code:
 Use build-career-pack on everything in data/sources/
 ```
 
-It ingests, queues the questions the evidence raises, and ends with a readiness
-statement. `review-evidence` then asks those questions one at a time, recording
-each answer as you give it. Then:
+It stages a proposed pack and produces a private HTML review page. Review your
+history, achievements and source excerpts in batches of five. Accept accurate
+wording, request corrections, defer items, and choose external-use permission
+separately. Download your decisions and give the file back to the tool to save
+accepted items. Pending proposals stay outside the current career pack.
+
+`review-evidence` asks follow-up questions one at a time and records your answers.
+Use `review-strengths` to explore supported strengths and future direction; the
+interview can pause or be skipped. Once you have an accepted pack, you can stop
+here and privately export it:
+
+```sh
+make strengths
+python3 scripts/career_core.py export --output data/private/career-export.json
+```
+
+Resume generation is an optional beta application. In the combined checkout it is
+already available; core-only archive users install the add-on first. Then:
 
 ```
 Use make-resume for Head of Platform Engineering
@@ -101,25 +129,51 @@ An unflattering first verdict is the system working. See
 [examples/walkthrough](examples/walkthrough/) for the complete fictional run:
 the pack, the draft, the evaluation record, and the full screen.
 
+## Review what the system recorded
+
+The review page includes your career timeline, achievements, education, original
+source excerpts, supported strengths and future preferences. It shows previous
+values alongside proposed changes and asks about missing or understated work.
+
+| Your choice | What happens |
+| --- | --- |
+| Looks accurate | Accepts the exact wording; does not independently verify it |
+| Correct this | Saves your explanation for a revised proposal |
+| Not sure / Review later | Keeps the item pending and preserves the previous record |
+| Keep private | Restricts external use independently of wording acceptance |
+| Allow externally | Requires acceptance of the exact proposed content |
+
+New or changed content stays private unless you separately allow external use.
+Saved decisions apply to the exact proposal; materially changed content needs a
+fresh review. You can accept part of a proposal and return to the rest later,
+provided its supporting records are accepted together.
+
+The HTML works offline. Download decisions to keep a portable copy, then give the
+file to the tool for import; the browser does not directly change your pack.
+See [career-pack review](docs/pack-review.md) for commands and correction handling.
+`make pack-html` provides a separate read-only overview of the current record.
+
 ## The loop
 
-```
-    existing resume ───────┐
-    (first run, once)      │
-                           │
-    capture-work ──────────┤
-    (seconds, any time)    │
-                           ▼
-    annual write-up ──▶ build-career-pack ──▶  datapack  ──▶ make-resume ──▶ draft
-    (once a year)                              (the product)      │            │
-                                                                  ▼            ▼
-                                                          make-interview-brief  recruiter-screen
+```mermaid
+flowchart LR
+    Sources[Resumes, exports and annual reviews] --> Intake[Build career pack]
+    Notes[Capture work] --> Intake
+    Intake --> Proposal[Proposed career pack]
+    Proposal --> Review[Human review and questions]
+    Review -->|Accepted items| Pack[Current career pack]
+    Review -->|Corrections or missing work| Proposal
+    Pack --> Export[Private export and recall]
+    Pack --> Selection[Ranked evidence and output brief]
+    Selection --> Document[Resume, biography or interview brief]
+    Document --> Checks[Integrity and representation review]
+    Checks --> Screen[Recruiter screen for applications]
 ```
 
 **Start from the resume you already have.** The first run bootstraps the pack
 from whatever exists today — a resume, a LinkedIn export, an old CV in a drawer.
-It is the one step that turns a decade of unwritten work into something you can
-query, and it is a one-off: you never do it again.
+It gives you a first record to inspect and correct. Later imports extend that
+record while preserving sources, stable IDs and earlier versions.
 
 **Capture continuously.** `capture-work` records a one-line note in seconds and
 never touches the pack, because a note that costs a pack version is a note nobody
@@ -136,8 +190,8 @@ grows past what anyone would read.
 
 ## Skills
 
-Invoke these by name in Claude Code. The first three carry the normal workflow;
-the last two run when you need them.
+Invoke these by name in Claude Code. Core skills build and maintain the career
+record; application skills use it to create and review documents.
 
 ### `build-career-pack`
 
@@ -153,9 +207,10 @@ Use build-career-pack on my resume
 Use build-career-pack on everything in data/sources/
 ```
 
-After that it is a top-up, run whenever new material arrives. It ingests and
-reviews in one pass, then asks everything at once and tells you how ready the pack
-is.
+Run it again whenever new material arrives. It finishes extraction and stages a
+reviewable proposal, queues unanswered questions, and reports readiness. Follow-up
+questions are asked one at a time; unreviewed extraction never becomes current
+through the onboarding workflow.
 
 ```
 Use build-career-pack on my 2026 end-of-year review
@@ -180,11 +235,34 @@ capture that I shipped the MCP delegation pattern, tag it ai-security
 What notes do I have waiting?
 ```
 
+### `review-strengths`
+
+A resumable interview about what your achievements demonstrate and what you want
+next. Each proposed strength names its supporting achievements and limitations.
+You can confirm, correct or reject an interpretation. Your answer does not raise
+the underlying evidence confidence. Changed support makes an interpretation stale.
+
+```
+Use review-strengths to help me describe my strengths and future direction
+```
+
+### `review-selection` and `review-representation`
+
+The Resume Application can show a ranked evidence selection with reasons,
+alternatives and gaps before writing. `review-selection` lets you change those
+choices and save their scope. `review-representation` checks whether the resulting
+document actually conveys the intended strengths. Briefs and decisions survive
+shortening, retargeting and deletion of generated documents.
+
+```
+Use review-selection before generating this resume
+```
+
 ### `make-resume`
 
 Delivery. Reads the pack, writes the document, evaluates it, and screens it.
-**Asks nothing** — ambiguity is resolved by inference or by narrowing the claim,
-and every inference is reported afterwards.
+**Asks nothing** — missing evidence narrows or drops a claim; editorial choices
+are recorded without inventing facts.
 
 ```
 Use make-resume for this job description
@@ -237,6 +315,12 @@ PDF extraction needs poppler outside macOS, where it uses PDFKit instead.
 | --- | --- |
 | `make check` | Validate packs and records, run the test suite |
 | `make validate` | Structural check on every live pack |
+| `make check-core` / `make check-resume` | Validate the components independently |
+| `make test-releases` | Test clean core and add-on installations |
+| `make release-core` / `make release-resume` | Build separate local ZIP archives |
+| `make strengths` | Resume the current pack's strengths question queue |
+| `make pack-html` | Render a private read-only career overview |
+| `python3 scripts/career_core.py review --help` | Stage proposals, save decisions and accept reviewed changes |
 | `make records` | Validate evaluation, screen, and role-profile records |
 | `make excerpts` | Check every recorded excerpt against the source it cites: the source-to-atom hop |
 | `make test` | The regression suite on its own |
@@ -262,13 +346,17 @@ scripts/extract_text.sh --record data/sources/cv.pdf   # text and provenance
 
 ## Privacy
 
-`data/`, `outputs/`, and `reviews/` are ignored by Git and never leave your
-machine. `examples/` is committed and contains only fictional material. The
+`data/`, `outputs/`, and `reviews/` are ignored by Git and excluded from release
+archives. Material read in a Claude session is processed by the configured model
+service; Git ignore rules do not provide a network privacy guarantee. `examples/` is committed and contains only fictional material. The
 pre-commit hook refuses any commit that stages private material.
 
-Contact details live in the pack's `private_profile` and appear in full only on a
-document sent to a named recipient. A public artefact gets name and location.
-Street address and photo references never appear in any artefact.
+Contact details live in the pack's `private_profile`. A document for a named
+recipient can include contact details; a public document gets name and location.
+Street addresses and photo references are excluded from generated application
+documents. The private guided review and lossless JSON export contain the recorded
+personal details so you can inspect them. Keep review pages and downloaded
+decisions private, and back up `data/` and `reviews/` together.
 
 ## Interoperability: resume.json
 
@@ -291,6 +379,11 @@ says where it came from. What you get back is every JSON Resume theme for free.
 
 ## Documentation
 
+- [Release boundaries](docs/releases.md) — core early access, resume beta and separate builds
+- [Core workflow](docs/core-workflow.md) — maintain career evidence without resume generation
+- [Career-pack review](docs/pack-review.md) — inspect, correct, accept and resume proposed changes
+- [Editorial memory](docs/editorial-memory.md) — preserve strengths, briefs and scoped decisions
+- [Resume workflow](docs/resume-workflow.md) — the optional document application
 - [Getting started](docs/getting-started.md) — a first session, end to end
 - [Workflow](docs/claude-workflow.md) — how the pieces fit
 - [Data model](docs/data-model.md) — the datapack schema and why it is shaped this way
@@ -317,3 +410,9 @@ employers, titles, and dates are what a background check actually tests.
 **Honest beats flattering.** The evaluation will tell you a document is not
 publishable, the screen will tell you it would be rejected, and role fit will tell
 you your evidence does not support a title. Those are the product working.
+
+
+Career packs can also retain evidence-backed strengths and subject-sourced
+positioning preferences. Output briefs and scoped selection decisions preserve
+what matters through shortening and retargeting. See
+[durable editorial memory](docs/editorial-memory.md) for onboarding and usage.

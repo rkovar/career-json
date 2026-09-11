@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-09",
+  "published": false,
+  "archives": [
+    {
+      "component": "career-core",
+      "version": "0.1.0-alpha.1",
+      "channel": "early-access",
+      "archive": "dist/career-core-0.1.0-alpha.1.zip",
+      "bytes": 108552,
+      "sha256": "178fca7541a61ac284b54efab1f3178d52969a129fdd9b4563e02d0d1435de27",
+      "requires": {},
+      "schema_versions": [
+        "1.3",
+        "1.4"
+      ]
+    },
+    {
+      "component": "career-resume",
+      "version": "0.1.0-beta.1",
+      "channel": "beta",
+      "archive": "dist/career-resume-0.1.0-beta.1.zip",
+      "bytes": 104181,
+      "sha256": "a3d56ab25886dd339531d3c4a398f65ea5d513e6775dffcf85df1248fc5d1aa7",
+      "requires": {
+        "career-core": "0.1.0-alpha.1"
+      },
+      "schema_versions": [
+        "1.3",
+        "1.4"
+      ]
+    }
+  ],
+  "verification": {
+    "legacy_assertions": 585,
+    "editorial_tests": 35,
+    "core_tests": 6,
+    "release_tests": 6,
+    "source_excerpts_verified": 85
+  },
+  "core_only_interview": {
+    "checks": [
+      {
+        "check": "model_completed",
+        "passed": true
+      },
+      {
+        "check": "one_question",
+        "passed": true
+      },
+      {
+        "check": "existing_evidence_used",
+        "passed": true
+      },
+      {
+        "check": "does_not_confirm_for_user",
+        "passed": true
+      }
+    ],
+    "model_usage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 936,
+        "outputTokens": 12,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.000996,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-fable-5-1": {
+        "inputTokens": 98,
+        "outputTokens": 1337,
+        "cacheReadInputTokens": 52301,
+        "cacheCreationInputTokens": 18320,
+        "webSearchRequests": 0,
+        "costUSD": 0.44730525,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 104,
+        "canonicalModel": "claude-fable-5-1",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "cost_usd": 0.44830125
+  },
+  "private_integrity": {
+    "files_checked": 161,
+    "changed": []
+  },
+  "remaining_release_gates": [
+    "Broader real-user core onboarding across career types.",
+    "Professionally reviewed resume benchmarks and export-layout checks before promoting the beta."
+  ]
+}

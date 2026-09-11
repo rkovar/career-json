@@ -1,0 +1,242 @@
+{
+  "date": "2026-09-08",
+  "original_assertions_passed": 585,
+  "editorial_tests_passed": 35,
+  "new_regression_tests": 10,
+  "source_excerpts_verified": 85,
+  "existing_private_files_unchanged": 161,
+  "model_scenarios": {
+    "representation": {
+      "checks": [
+        {
+          "check": "model_completed",
+          "passed": true
+        },
+        {
+          "check": "review_created",
+          "passed": true
+        },
+        {
+          "check": "lost_strength_identified",
+          "passed": true
+        },
+        {
+          "check": "reader_impressions_recorded",
+          "passed": true
+        },
+        {
+          "check": "exact_saved_manifest_preserved",
+          "passed": true
+        },
+        {
+          "check": "record_validates",
+          "passed": true
+        },
+        {
+          "check": "source_pack_unchanged",
+          "passed": true
+        }
+      ],
+      "model_usage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 981,
+          "outputTokens": 14,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.001051,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-fable-5-1": {
+          "inputTokens": 226,
+          "outputTokens": 4410,
+          "cacheReadInputTokens": 172132,
+          "cacheCreationInputTokens": 26785,
+          "webSearchRequests": 0,
+          "costUSD": 0.801493,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 97,
+          "canonicalModel": "claude-fable-5-1",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cost_usd": 0.8025439999999999
+    },
+    "grounding": {
+      "checks": [
+        {
+          "check": "model_completed",
+          "passed": true
+        },
+        {
+          "check": "evaluation_created",
+          "passed": true
+        },
+        {
+          "check": "unsupported_contrast_blocks_publishability",
+          "passed": true
+        },
+        {
+          "check": "record_validates",
+          "passed": true
+        },
+        {
+          "check": "source_pack_unchanged",
+          "passed": true
+        },
+        {
+          "check": "reviewed_artifact_unchanged",
+          "passed": true
+        }
+      ],
+      "model_usage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 987,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.001062,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-fable-5-1": {
+          "inputTokens": 322,
+          "outputTokens": 7878,
+          "cacheReadInputTokens": 303433,
+          "cacheCreationInputTokens": 34240,
+          "webSearchRequests": 0,
+          "costUSD": 1.15777825,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 928,
+          "canonicalModel": "claude-fable-5-1",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cost_usd": 1.15884025
+    },
+    "formats-final": {
+      "checks": [
+        {
+          "check": "model_completed",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_exists",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_validates",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_privacy",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_distinctive_evidence",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_representation_record",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_exists",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_validates",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_privacy",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_distinctive_evidence",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_representation_record",
+          "passed": true
+        },
+        {
+          "check": "fixture-interview-brief.md_exists",
+          "passed": true
+        },
+        {
+          "check": "fixture-interview-brief.md_validates",
+          "passed": true
+        },
+        {
+          "check": "fixture-interview-brief.md_representation_record",
+          "passed": true
+        },
+        {
+          "check": "all_records_validate",
+          "passed": true
+        },
+        {
+          "check": "source_pack_unchanged",
+          "passed": true
+        }
+      ],
+      "model_usage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 1066,
+          "outputTokens": 20,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.0011660000000000002,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-fable-5-1": {
+          "inputTokens": 450,
+          "outputTokens": 20592,
+          "cacheReadInputTokens": 732930,
+          "cacheCreationInputTokens": 79989,
+          "webSearchRequests": 0,
+          "costUSD": 2.8171125000000004,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 4144,
+          "canonicalModel": "claude-fable-5-1",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cost_usd": 2.8182785
+    }
+  },
+  "manual_review": {
+    "final_resume": "Preserves technical design, shared runner ownership, hiring/coaching and adoption.",
+    "final_biography": "Preserves both contributions without inventing voluntary adoption or absence of a mandate.",
+    "final_private_brief": "Uses recorded absolute dates; measurement absence remains unknown; private evidence stays private."
+  },
+  "development_observation": "The first formats rerun passed automated checks but manual review found an unsupported voluntary-adoption comparison. Generation and integrity instructions were tightened; a dedicated grounding scenario now rejects it, and the final formats rerun avoids it.",
+  "limitations": [
+    "Specific regressions and model samples do not prove every semantic implication or hiring outcome.",
+    "Private prose guardrails deliberately prefer recorded dates and named metrics; semantic review remains required.",
+    "No recruiter screen or PDF layout verification was requested in these model scenarios."
+  ]
+}

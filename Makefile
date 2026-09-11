@@ -2,6 +2,9 @@
 .PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts links hooks clean
 
 help:
+	@echo "make check-core / check-resume - independent component checks"
+	@echo "make test-releases - test clean core and add-on installations"
+	@echo "make release-core / release-resume - build local archives in dist/"
 	@echo "make check     - validate packs and run the test suite"
 	@echo "make validate  - structural check on every live pack"
 	@echo "make test      - regression suite"
@@ -41,6 +44,10 @@ excerpts:
 
 test:
 	@python3 tests/run_tests.py
+	@python3 tests/test_editorial.py
+	@python3 tests/test_core.py
+	@python3 tests/test_pack_review.py
+	@python3 tests/test_releases.py
 
 corroboration:
 	@python3 scripts/corroboration_plan.py --markdown
@@ -116,3 +123,22 @@ artifacts:
 	@for f in $(wildcard outputs/*-interview-brief.md); do \
 		python3 scripts/validate_artifact.py --private "$$f" || true; \
 	done
+
+
+.PHONY: check-core check-resume test-core test-releases release-core release-resume strengths
+check-core: validate excerpts test-core
+	@python3 scripts/check_components.py --require core
+check-resume: records
+	@python3 scripts/check_components.py --require resume
+	@python3 tests/test_editorial.py
+test-core:
+	@python3 tests/test_core.py
+	@python3 tests/test_pack_review.py
+test-releases:
+	@python3 tests/test_releases.py
+release-core: check-core
+	@python3 scripts/build_release.py core
+release-resume: check-resume
+	@python3 scripts/build_release.py resume
+strengths:
+	@python3 scripts/career_core.py status

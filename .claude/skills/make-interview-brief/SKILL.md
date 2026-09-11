@@ -22,13 +22,19 @@ Never publish this. Never send it. It is `external_safe: false` by nature.
 
 ## What to include, that an artefact may not
 
-Read the **whole pack** here, not the selection view.
+Read the **whole pack** here, not the selection view. Run
+`python3 scripts/private_facts.py` for recorded dates and explicit measurement
+states. Use absolute dates at their recorded precision; do not estimate how many
+years ago an event happened. Empty metrics or absent/null `measured` or `basis`
+mean the information is not recorded, not that the result was never measured.
+Only `measured: false` supports calling that specific metric unmeasured.
+Use nearby evidence citations for measurement statements so they can be checked.
 
 - Atoms that are `unresolved` or `external_safe: false`. The candidate must know
   what they cannot discuss, and have a prepared way to decline that does not read
   as evasion.
 - Every `open_questions` entry, because an interviewer will find the same gap.
-- Every claim with no corroborator, flagged as reference-check exposure.
+- Any recorded reference-check concern; absent corroboration alone is not a defect.
 
 ## Structure
 
@@ -46,8 +52,8 @@ Read the **whole pack** here, not the selection view.
    Give the question as an interviewer would ask it.
 5. **Do not discuss.** Atoms that are `external_safe: false`, with a one-line way
    to decline that stays professional and does not invent a reason.
-6. **Reference exposure.** Claims with no corroborator, and who the candidate
-   should line up before a final stage.
+6. **Reference preparation.** Recorded employment or reference-check issues, if
+   any. Do not initiate corroboration chasing unless the user requests it.
 7. **Their gaps, not yours.** Requirements in the role profile with an empty
    `evidenced_by`. The candidate should decide in advance how to address the gap
    honestly rather than improvising under pressure.
@@ -66,3 +72,19 @@ Read the **whole pack** here, not the selection view.
 Write to `outputs/<role>-interview-brief.md`. State at the top that it is private
 and must not be sent. Report to the user the three questions most likely to be
 asked and the single weakest answer.
+
+## Shared career context
+
+Read `docs/editorial-memory.md`. Create or reuse an output brief with
+`format: interview_brief` and `audience: private`; prepare a durable selection
+for provenance and story priorities. Read the full pack for private preparation,
+including strengths and preferences, and use application-scoped decisions to
+understand omissions in the sent resume. Output-scoped resume omissions do not
+ban those stories from private preparation. Facts still come from the atoms;
+never turn an aspiration or a polished resume sentence into an achievement.
+
+Use `review-representation` to assess the intended strengths, accounting privately
+for withheld evidence without suggesting disclosure. Pin the selection using
+`manifest.py --selection` and validate with `validate_artifact.py --private`.
+The filtered external selection view is intentionally unavailable for private
+briefs. Regeneration must remain possible from the pack and saved context.

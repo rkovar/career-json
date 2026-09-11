@@ -22,7 +22,16 @@ SCHEMAS = ROOT / "schemas"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve  # noqa: E402
 from select_evidence import links, atom_prose  # noqa: E402
+from schema_tools import type_ok, walk as schema_walk
+
+def walk(node, spec, schema, where, errors):
+    return schema_walk(node, spec, schema, where, errors, loader=load)
+
 KINDS = {
+    "brief": (re.compile(r"-brief\.json$"), "output-brief.schema.json"),
+    "decision": (re.compile(r"-decision\.json$"), "editorial-decision.schema.json"),
+    "selection": (re.compile(r"-selection\.json$"), "selection-record.schema.json"),
+    "representation": (re.compile(r"-representation\.json$"), "representation-record.schema.json"),
     "evaluation": (re.compile(r"-evaluation\.json$"), "evaluation-record.schema.json"),
     "screen": (re.compile(r"-screen\.json$"), "screen-record.schema.json"),
     "role": (re.compile(r"^(?!.*-(evaluation|screen)\.json$).*\.json$"), "role-profile.schema.json"),
@@ -33,65 +42,11 @@ def load(name):
     return json.loads((SCHEMAS / name).read_text())
 
 
-def type_ok(value, spec):
-    types = spec.get("type")
-    if types is None:
-        return True
-    if isinstance(types, str):
-        types = [types]
-    checks = {"string": str, "boolean": bool, "object": dict, "array": list,
-              "integer": int, "number": (int, float), "null": type(None)}
-    return any(isinstance(value, checks[t]) for t in types if t in checks)
-
-
-def walk(node, spec, schema, where, errors):
-    if "$ref" in spec:
-        ref = spec["$ref"]
-        if ref.startswith("#/$defs/"):
-            spec = schema["$defs"][ref.split("/")[-1]]
-        else:
-            file_part, _, frag = ref.partition("#")
-            other = load(file_part)
-            spec = other
-            for part in frag.strip("/").split("/"):
-                if part:
-                    spec = spec[part]
-            schema = other
-
-    if not type_ok(node, spec):
-        errors.append(f"{where}: expected {spec.get('type')}, got {type(node).__name__}")
-        return
-
-    if isinstance(node, dict):
-        for field in spec.get("required", []):
-            if field not in node:
-                errors.append(f"{where}: missing required field {field!r}")
-        props = spec.get("properties", {})
-        if spec.get("additionalProperties") is False:
-            for field in set(node) - set(props):
-                errors.append(f"{where}: unknown field {field!r}")
-        for field, value in node.items():
-            if field in props:
-                walk(value, props[field], schema, f"{where}.{field}" if where else field, errors)
-    elif isinstance(node, list):
-        item_spec = spec.get("items")
-        if spec.get("minItems") and len(node) < spec["minItems"]:
-            errors.append(f"{where}: needs at least {spec['minItems']} item(s)")
-        if spec.get("maxItems") and len(node) > spec["maxItems"]:
-            errors.append(f"{where}: at most {spec['maxItems']} item(s)")
-        if item_spec:
-            for i, item in enumerate(node):
-                walk(item, item_spec, schema, f"{where}[{i}]", errors)
-    else:
-        if "enum" in spec and node not in spec["enum"]:
-            errors.append(f"{where}: {node!r} not in {spec['enum']}")
-        if "pattern" in spec and isinstance(node, str) and not re.search(spec["pattern"], node):
-            errors.append(f"{where}: {node!r} does not match {spec['pattern']}")
-        if spec.get("minLength") and isinstance(node, str) and len(node) < spec["minLength"]:
-            errors.append(f"{where}: must not be empty")
-
-
 def kind_of(path):
+    directories = {"briefs": "brief", "decisions": "decision", "selections": "selection"}
+    if path.parent.name in directories:
+        kind = directories[path.parent.name]
+        return kind, KINDS[kind][1]
     if path.parent.name == "roles":
         return "role", "role-profile.schema.json"
     for kind, (pattern, schema_name) in KINDS.items():
@@ -114,6 +69,12 @@ def check(path):
     schema = load(schema_name)
     errors, warnings = [], []
     walk(record, schema, schema, "", errors)
+    if errors:
+        return kind, errors, warnings
+    if kind in ("brief", "decision", "selection", "representation"):
+        from editorial import validate_record
+        more_errors, more_warnings = validate_record(kind, record, path)
+        return kind, errors + more_errors, warnings + more_warnings
 
     # Cross-record consistency the schema cannot express.
     if kind == "evaluation":
@@ -123,6 +84,25 @@ def check(path):
         for artefact in record.get("artifacts", []):
             if not (ROOT / artefact).exists():
                 errors.append(f"artifact {artefact} does not exist")
+        if record.get('run', {}).get('editorial_inputs'):
+            from manifest import editorial_staleness
+            warnings.extend(editorial_staleness(record['run']))
+            for artifact in record['artifacts']:
+                if not artifact.endswith('.md'):
+                    continue
+                representation = (ROOT / artifact).with_name(Path(artifact).stem + '-representation.json')
+                if not representation.exists():
+                    errors.append('editorial evaluation needs a representation record for ' + artifact)
+                else:
+                    _, rep_errors, rep_warnings = check(representation)
+                    errors.extend(rep_errors)
+                    warnings.extend(rep_warnings)
+                    rep = json.loads(representation.read_text())
+                    if rep.get('run') != record['run']:
+                        errors.append('representation and evaluation must pin the same run')
+                    if record.get('publishable') and (any(r.get('status') == 'inadequately_represented' for r in rep.get('strengths', []))
+                                                    or any(f.get('severity') == 'blocker' for f in rep.get('findings', []))):
+                        errors.append('publishable is true with unresolved representation findings')
     if kind == "role":
         essential = [r for r in record.get("requirements", []) if r.get("weight") == "essential"]
         if not essential:
@@ -184,6 +164,8 @@ def main(argv):
         # a resume.json there that then failed `make records` as an unknown
         # record type. An explicit path is still checked whatever it is called.
         found = sorted(ROOT.glob("outputs/*.json")) + sorted(ROOT.glob("data/roles/*.json"))
+        for folder in ("data/briefs", "data/selections", "reviews/decisions"):
+            found += sorted(ROOT.glob(folder + "/*.json"))
         targets = [p for p in found if kind_of(p)[0] is not None]
     if not targets:
         print("no records found")

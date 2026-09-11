@@ -30,17 +30,30 @@ not stop between them and do not ask the user to advance.
 2. Run `review-evidence` across every atom that is new, incomplete, vague,
    inflated, or consequential. Include atoms carried over from earlier runs whose
    questions are still unanswered.
-3. Write the updated pack to `data/packs/` with a new version, and the review
-   record to `reviews/`. Never edit a previous pack in place. Set
-   `metadata.supersedes` to the previous pack's path.
-4. Run `python3 scripts/validate_pack.py` and fix every error before reporting.
-   Confirm the chain resolves with `python3 scripts/current_pack.py`.
+3. Write the proposed pack to `data/candidates/` and the review record to
+   `reviews/`. Follow `docs/pack-review.md`: stage the candidate and render its
+   offline review page. Never edit a previous pack or make unreviewed extraction
+   current. An accepted version later sets `metadata.supersedes` to its predecessor.
+4. Run `python3 scripts/validate_pack.py <candidate-path>` and fix every error before reporting.
+   When an accepted pack exists, confirm its chain with `python3 scripts/current_pack.py`.
    Report the warnings; they are the pack's honest weaknesses, not noise.
-5. Collect every question into the queue (`python3 scripts/open_questions.py`
+5. Collect every question into the queue (`python3 scripts/open_questions.py --pack <candidate-path>`
    holds it) and do not wait for an answer mid-run: ingestion must finish with
-   the pack written. Then hand over to `review-evidence`, which asks them one at
+   the proposed pack written. Then hand over to `review-evidence`, which asks them one at
    a time. The batch is how questions are *collected*; it is never how they are
    *asked*.
+
+## Durable strengths and direction
+
+After staging the evidence proposal, follow `review-strengths` to prepare supported
+interpretations and their resumable question queue. Ingestion still finishes
+before the interview starts. Offer the strengths interview as normal onboarding;
+a user can pause or skip it and generate from the available evidence. Read
+`docs/core-workflow.md` for schema 1.4 migration and storage. Preserve existing
+strengths, preferences, rejected interpretations and answer references in every
+new pack version. Changed supporting atoms make interpretations stale until
+reassessed. Never recover factual authority from a previously generated document;
+trace its claims back to source evidence before importing anything new.
 
 ## What the questions must cover
 
@@ -56,8 +69,8 @@ Provenance alone is not enough. Every batch must reach for three things:
    Never invent a number to reach `business_outcome`.
 
 Also record `role_fit_notes` where evidence cuts both ways. Reach and speaking
-metrics support advocacy roles and undercut hands-on engineering ones. The pack
-should know that before generation does.
+metrics can establish technical influence, but their relevance depends on the
+target and the rest of the selection. Record context, not a universal penalty.
 
 ## Importing an annual write-up
 
@@ -130,7 +143,8 @@ as `self_asserted`, regardless of how confidently they were given. Promotion to
 
 ## Readiness
 
-End every run by stating how ready the pack is for resume generation:
+End every run by stating how ready the career record is for reuse. Resume
+generation is an optional application; a target role is not required:
 
 - counts by `evidence_status`
 - how many are `external_safe: true`
@@ -148,8 +162,9 @@ The exception is employment. Employers, titles, and dates are what a background
 check actually tests, so flag a missing `end` date or an unconfirmed
 `employer_of_record` even though corroboration generally is optional.
 
-Say plainly whether the pack is usable for `make-resume` now. A pack with open
-questions is usable; it will simply produce a narrower resume.
+A pack with open questions is usable; describe its limits. When the Resume
+Application is installed, also say whether it is usable for `make-resume` now;
+remaining gaps will produce a narrower resume.
 
 ## Final report
 
@@ -159,3 +174,18 @@ questions is usable; it will simply produce a narrower resume.
 4. Files written.
 5. The question batch.
 6. The readiness statement.
+
+
+## Human review checkpoint
+
+The deliverable is the proposed pack, its private readable review page and a
+concise change summary. Show where the person can inspect dates, ownership,
+source excerpts, strengths and future preferences. Surface important missing work
+as well as doubtful statements. Do not make the person reread JSON.
+
+Use `docs/pack-review.md` for exact commands and choices. Save decisions only when
+the person supplies them. A skipped review leaves the existing accepted pack
+usable; a first import stays a proposal until sufficient items are accepted.
+Never label `self_asserted` extraction as user-reviewed. Accepting wording does not
+increase evidence confidence or grant permission for external use. Preserve
+corrections, uncertain answers, deferred items and omission feedback across turns.

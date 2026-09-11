@@ -112,7 +112,9 @@ numbered list of twenty questions gets abandoned at the fourth; the same twenty
 asked one at a time get answered, because each answer visibly moves something and
 because the interesting questions only exist once an earlier one is answered.
 
-Run `python3 scripts/open_questions.py --json` for the queue. It ranks by what
+Run `python3 scripts/open_questions.py --json` for the queue. When reviewing
+a staged proposal, add `--pack <candidate-path>` (also for `--delta`); an initial
+import does not have an accepted pack yet. It ranks by what
 answering unlocks rather than by pack order, so work from the top.
 
 1. **Ask one question. Wait. Then ask the next.** Never present a list. The
@@ -132,7 +134,7 @@ answering unlocks rather than by pack order, so work from the top.
    `source_ref` to attach to the atom, so the record the atom cites actually
    contains what was said. Three atoms were once found citing a record that held
    none of their answers; the transcript had them and the workspace did not.
-   Then apply the answer to the atom and say what it changed *in the record*:
+   Then apply the answer to a candidate atom and say what it proposes to change *in the record*:
    the field written, the status, the constraint.
    **Do not re-run `role_fit.py` between questions.** Reading the score after
    every answer turns a review into steering towards a number, and the delta
@@ -168,6 +170,9 @@ Two things every cold screen asks for that atoms cannot hold:
 
 ## Confirming role links
 
+This section requires the optional Resume Application and saved role profiles.
+Skip it in a core-only installation; evidence review does not require a target role.
+
 `role_fit.py` counts only links the subject confirmed. A link written into a
 profile by a model, or left as a bare id, is *proposed*: it is listed beside the
 verdict, queued by `open_questions.py`, and earns nothing until confirmed.
@@ -200,10 +205,33 @@ Write a review record containing the evidence ID, questions, answers, status,
 corroborators identified, conflicts, and approval decision. Include a concise
 recommendation for the next action.
 
-End an iterative session with `python3 scripts/role_fit.py --markdown`, read
-once, and `python3 scripts/open_questions.py --delta`. It
+End an iterative session with `python3 scripts/open_questions.py --delta`.
+When the Resume Application is installed and role profiles exist, also run
+`python3 scripts/role_fit.py --markdown` once. It
 reports what the pack version changed and how much of that movement rests on
 atoms citing no source. **A questioning process that reliably improves a score is
 indistinguishable from a coaching one**, and this is what makes the difference
 visible. If the delta is not clean, either record the person source behind the
 movement or say plainly that the improvement is unproven.
+
+## Route durable feedback
+
+Use `review-strengths` for cross-career interpretations and general future
+direction. Keep role-specific positioning on the role or output brief. A factual
+correction updates the underlying atom in a new pack version and triggers
+reassessment of dependent strengths. A disclosure correction updates the atom's
+constraints. An editorial omission goes in a scoped decision, not in evidence
+status. Read `docs/core-workflow.md` for career feedback and, when the Resume Application
+is installed, `docs/editorial-memory.md` for output decisions; generated prose is never a new source
+merely because the system wrote it earlier.
+
+
+## Review the recorded wording
+
+Follow `docs/pack-review.md` when new extraction or factual corrections change the
+career pack. Present the readable proposal, including exact source excerpts and
+previous values. Stage changes in `data/candidates/`; save accepted pack versions
+only through the explicit review checkpoint. Ask about omitted achievements and
+understated contribution as well as uncertain facts. Use actual user decisions;
+never infer approval from silence or successful validation. Deferred items and
+correction notes remain durable without becoming facts automatically.

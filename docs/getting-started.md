@@ -6,7 +6,8 @@ open in it.
 ## 1. Add source material
 
 Copy whatever you already have into `data/sources/`. That directory is Git
-ignored, so nothing leaves your machine.
+ignored and excluded from release archives. Material you ask Claude to read is
+processed by your configured model service; Git ignore rules do not prevent that.
 
 Good first sources, in rough order of value:
 
@@ -34,14 +35,41 @@ Answer what you can. **Unanswered questions are not a blocker**: they mark the
 claim `unresolved` and it is simply left out of documents until you come back to
 it.
 
-Check what you got:
+Open the private career review page produced by the tool. It shows your timeline,
+achievements, source excerpts, strengths and future direction in small batches.
+Accept accurate wording, request corrections, or leave items for later; choose
+external-use permission separately. Download your decisions and give the file
+back to the tool to save the accepted items. It preserves the rest as pending.
+See [review your career record](pack-review.md) for the complete flow.
+
+Check the accepted record (the tool validates proposals separately):
 
 ```sh
 make check          # the pack validates
 make coverage       # where the record is thin
 ```
 
-## 3. Describe a role
+## 3. Keep or export your career pack
+
+You can finish onboarding here without generating a document. Review strengths
+with `review-strengths`, then resume or export the accepted record:
+
+```sh
+python3 scripts/career_core.py status
+python3 scripts/career_core.py export --output data/private/career-export.json
+```
+
+The export is a lossless private JSON copy. While the first pack is still a
+proposal, use `status --pack <candidate-path>` instead. Back up `data/` and
+`reviews/` together so source files and review decisions stay with the record.
+See [core workflow](core-workflow.md) for details.
+
+## 4. Optionally add the Resume Application (beta)
+
+The combined checkout includes it. Core archive users can install the matching
+add-on using [release instructions](releases.md). The following steps need it.
+
+### Describe a role
 
 Selection and screening work much better against a structured role profile than
 against a title. Put a job description in `data/sources/` and ask Claude to build
@@ -56,7 +84,7 @@ better to know now.
 make fit            # which roles your evidence actually supports
 ```
 
-## 4. Make something
+### Make something
 
 ```
 Use make-resume for <role>

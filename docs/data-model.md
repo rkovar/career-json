@@ -74,9 +74,10 @@ generation, so an unmeasured figure is visible before it reaches a page.
 organisation). Generation prefers outcomes, because hiring managers discount
 workload metrics.
 
-**`external_safe`** — false means it never reaches any artefact. Ineligible atoms
-are filtered out before generation sees anything, so the rule cannot be broken by
-a lapse in judgement.
+**`external_safe`** — false excludes a claim from external document generation.
+Private career reviews and interview preparation may inspect withheld evidence;
+that visibility does not grant permission to publish it. Wording acceptance and
+external permission are separate choices in the human-review workflow.
 
 **`occurred`** — when it happened. `inferred: true` means the dates came from the
 employment window rather than being recorded, which for a nine-year tenure is
@@ -137,7 +138,7 @@ a degree is not a STAR achievement, it is a fact a background check verifies.
 Absent from the schema until 2026-09-06, which meant a degree could not be
 recorded at all and `export_resume_json.py` could never fill JSON Resume's
 education section. `external_safe: false` withholds a qualification from every
-artefact exactly as it does an atom.
+external document exactly as it does an atom.
 
 ## Source records
 
@@ -161,10 +162,11 @@ break recall; a search that silently misses things is worse than no search.
 
 ## Private profile
 
-Name, location, email, phone, LinkedIn. Included in full only on a document sent
-to a named recipient; a public artefact gets name and location. `address` and
-`photo_reference` never appear in any artefact and are stripped before generation
-sees the pack.
+Name, location, email, phone, LinkedIn. A document for a named recipient can use
+contact details; a public document gets name and location. `address` and
+`photo_reference` are stripped from application generation context. The private
+guided review and lossless JSON export preserve the full recorded profile for
+inspection and backup; the read-only `pack_html.py` overview omits contact details.
 
 ## Capture notes
 
@@ -199,3 +201,42 @@ Two things every cold recruiter screen asked for that evidence atoms cannot hold
   role now, what they want more of, what they are stepping away from. Dated and
   cited as a person source. When null, the summary states only what the evidence
   shows and never invents intent.
+
+## Supported strengths and future direction
+
+Schema 1.4 adds optional `strengths_profile` and `positioning_preferences` arrays.
+A strength has an interpretation, supporting atom IDs and fingerprints, timeframe,
+limitations, status and interview state. Confirmation or rejection requires a
+person-source answer. Changed supporting evidence makes the interpretation stale;
+refresh fingerprints only after reassessment. Preferences record future intent,
+not historical achievements. Neither record can promote an atom's evidence status.
+
+## Proposed and accepted career data
+
+The career schema describes a pack's contents. Storage and review records determine
+whether that content is proposed or current:
+
+| Record | Location | Purpose |
+| --- | --- | --- |
+| Proposed pack | `data/candidates/` | Complete candidate preserving stable IDs and existing fields |
+| Review snapshot | `reviews/pack-reviews/<id>/proposal.json` | Exact content shown to the person |
+| Review session | `reviews/pack-reviews/<id>/session.json` | Hash pins for the proposal and previous pack |
+| Decision batches | `reviews/pack-reviews/<id>/decisions/` | Explicit choices, reviewer name, explanations and omission notes |
+| Accepted pack | `data/packs/` | Current/history chain resolved through `metadata.supersedes` |
+| Acceptance receipts | `metadata.human_review` | Accepted item fingerprints and decision-file pins |
+
+The decision input contract is
+[`pack-review-decisions.schema.json`](../schemas/pack-review-decisions.schema.json).
+Human review binds exact wording and supporting records; it is independent from
+`evidence_status` and `external_safe`. A receipt stops showing as accepted if its
+content or decision-file pin changes. Reviewer names record attribution locally;
+they are not an authentication mechanism.
+
+Partial acceptance preserves existing unaccepted facts. Missing supporting records
+or inconsistent references block a new version. Legacy schema issues may be shown
+in a review, but must be corrected before saving a new accepted version. Capture
+`captured` dates require `YYYY-MM-DD` or null; `occurred` supports less precise
+career dates. Never infer a capture day just to pass validation.
+
+See [career-pack review](pack-review.md) for the save/resume flow. Output briefs
+and scoped selections belong to the optional Resume Application.

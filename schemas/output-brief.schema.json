@@ -1,0 +1,131 @@
+{
+  "type": "object",
+  "properties": {
+    "brief_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "application_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "role_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "role_family": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "resume",
+        "cover_letter",
+        "biography",
+        "linkedin",
+        "interview_brief",
+        "promotion_case"
+      ]
+    },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "named_recipient",
+        "public",
+        "private"
+      ]
+    },
+    "length": {
+      "type": "string",
+      "minLength": 1
+    },
+    "strength_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "preference_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "priority_evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "instructions": {
+      "type": "string"
+    },
+    "external_safe": {
+      "type": "boolean"
+    },
+    "created_by": {
+      "type": "string",
+      "enum": [
+        "user",
+        "system"
+      ]
+    },
+    "supersedes": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "output_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "Stable logical output across brief versions. Older records fall back to brief_id."
+    }
+  },
+  "required": [
+    "brief_id",
+    "application_id",
+    "role_id",
+    "role_family",
+    "format",
+    "audience",
+    "length",
+    "strength_ids",
+    "preference_ids",
+    "priority_evidence_ids",
+    "instructions",
+    "external_safe",
+    "created_by"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "output-brief.schema.json"
+}

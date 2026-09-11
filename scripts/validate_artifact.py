@@ -21,7 +21,7 @@ import quantities  # noqa: E402
 import render  # noqa: E402
 from quantities import CITATION  # noqa: E402
 
-EVIDENCE_ID = re.compile(r"E_[A-Z0-9_]+")
+EVIDENCE_ID = re.compile(r"\bE_[A-Z0-9_]+\b")
 # Internal vocabulary that must never reach a reader.
 UNITS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
          "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13,
@@ -131,12 +131,15 @@ def economics(md, records):
             words = len(re.sub(r"<!--.*?-->", "", b).split())
             if words > MAX_BULLET_WORDS:
                 out.append(f"bullet of {words} words (limit {MAX_BULLET_WORDS}): {b[:60]!r}")
-    # The summary: the first paragraph after the contact block.
-    paras = [p for p in re.split(r"\n\s*\n", md.split("\n## ")[0]) if p.strip() and not p.startswith("#")]
-    if len(paras) >= 2:
-        words = len(re.sub(r"<!--.*?-->", "", paras[1]).split())
+    # Count every summary paragraph, excluding the role and contact regardless
+    # of their order. A paragraph headline used to make us count the contact;
+    # an H2 headline made us stop before the summary even began.
+    parts = render.blocks(md)
+    _, _, summary = render.header(parts)
+    if summary:
+        words = len(visible_text(" ".join(parts[i][1] for i in summary)).split())
         if words > MAX_SUMMARY_WORDS:
-            out.append(f"summary is {words} words (limit {MAX_SUMMARY_WORDS}); four lines is what gets read")
+            out.append(f"summary is {words} words (limit {MAX_SUMMARY_WORDS}); shorten it and check the rendered layout")
     return out
 
 
@@ -172,6 +175,9 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
     """
     errors, warnings = [], []
     md = md_path.read_text()
+    if private:
+        from private_facts import grounding_errors
+        errors.extend(grounding_errors(md, pack))
     atoms = {a["id"]: a for a in pack["evidence_atoms"]}
     profile = pack.get("private_profile") or {}
 
@@ -437,6 +443,10 @@ def producing_pack(md_path):
     so this can be answered; not reading it made the pin decorative.
     """
     run = (evaluation_record(md_path) or {}).get("run") or {}
+    from manifest import editorial_staleness
+    editorial_errors = editorial_staleness(run)
+    if editorial_errors:
+        return None, 'editorial evaluation is stale: ' + '; '.join(editorial_errors)
     pinned, digest = run.get("pack"), run.get("pack_sha256")
     if not pinned:
         return None, None

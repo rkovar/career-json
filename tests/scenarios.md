@@ -69,3 +69,49 @@ Runner coverage: #1 (with #6, #15, #16), #2, #3, #4, #7 (with #9, #10), #8 (with
 | 2026-09-06 | #1 pass, #2 pass, #13 pass, #17 pass (first run: #1 failed on draft naming, #17 on an over-strict check; both fixed and rerun). Skills: make-resume=c4dde6ef7e6b recruiter-screen=afa7d94b12c7 review-evidence=594d57830e97 |
 | 2026-09-07 | #4 pass, #7 pass, #8 fail (the model correctly wrote no version when nothing changed; scenario fixed to add a source between runs) |
 | 2026-09-07 | #7 pass, #8 pass after the scenario fix; all eight runner-backed scenarios have now passed at least once |
+
+
+## Editorial memory scenarios
+
+`tests/test_editorial.py` tests persistence, safe projection, scope, immutable
+versions and invalidation across five fictional career profiles.
+`tests/run_editorial_scenarios.py` runs bounded, isolated model checks separately:
+
+| Scenario | Expected behavior |
+| --- | --- |
+| grounding | Reject unsupported motives and negative comparisons even when the underlying adoption claims are valid |
+| representation | Detect the lost sole example of a compiler specialist's intended strength, despite valid remaining claims |
+| formats | Produce a resume, public biography and private interview brief from one pack; preserve contribution and apply audience restrictions |
+| interview | Explain a proposed strength using existing examples, ask one answerable question, then wait |
+
+Initial 2026-09-08 results: representation passed; formats passed, including manual
+inspection of personal/shared contribution and adoption in the resume and biography.
+The interview initially bundled ownership follow-ups into the first question; the
+skill was narrowed to one answerable issue before re-testing. These checks establish
+specific behaviors, not universal prose quality or hiring outcomes. PDF layout was
+not exercised by these scenarios.
+
+The revised interview passed on 2026-09-08: one question grounded in the existing
+examples, with the interpretation still proposed pending the person's answer.
+The formats run also passed independent validation of all eleven saved records.
+
+
+Regression coverage added after the 2026-09-08 critical review:
+
+- Saved strength omissions reach the writer while supporting atoms remain usable.
+- Saved recommendation order survives projection, including reserve entries.
+- Missing, wrong, changed and extraneous role pins are rejected; malformed older
+  manifests cannot bypass freshness checks.
+- Review assembly preserves the exact saved manifest, rejects stale or incomplete
+  inputs and failed replacements, and enforces representation before publishability.
+- Private preparation distinguishes empty/unknown measurement states from explicit
+  `measured: false` and uses stable recorded dates. The private artifact CLI rejects
+  the observed unsupported age and measurement claims.
+- The `grounding` model scenario presents a document with valid adoption evidence
+  and an unsupported claim of voluntary uptake without a mandate. The reviewer
+  must record a blocker and withhold publishability without changing the document.
+
+Model scenario reports retain model usage metadata as well as checks and cost.
+Passing deterministic checks still requires manual inspection of final prose;
+these checks do not establish print quality, every semantic implication, or hiring
+outcomes.

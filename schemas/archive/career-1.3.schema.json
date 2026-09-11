@@ -1,0 +1,808 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "career.schema.json",
+  "title": "career.json",
+  "description": "A durable, evidence-backed record of one career. The pack is the product; resumes are disposable projections of it.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "evidence_atoms"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.3"
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "purpose": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sourceRecord"
+      }
+    },
+    "employment": {
+      "type": "array",
+      "description": "Employers, titles, and dates. These are the most background-checkable facts on a resume and previously lived nowhere in the pack, so generation supplied them from source text with no evidence ID. Every date, title, and employer in an artefact must trace to a record here.",
+      "items": {
+        "$ref": "#/$defs/employmentRecord"
+      }
+    },
+    "evidence_atoms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/evidenceAtom"
+      }
+    },
+    "private_profile": {
+      "type": "object",
+      "description": "Contact and identity details for the subject. Created during setup, never published in a public artefact, and included in full only in a document sent to a named recipient. A pack without this cannot produce a sendable resume.",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "City and country as it should appear on an artefact."
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "phone": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "linkedin": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "personal_website": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "address": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Never appears in any artefact, public or private."
+        },
+        "photo_reference": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Never appears in any artefact, public or private."
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "publication_policy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "right_to_work": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Work-authorisation status, in the subject's words. Private: never reaches the selection view or any artefact; the interview brief may use it."
+        }
+      },
+      "additionalProperties": true
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "skill_vocabulary": {
+      "type": "object",
+      "description": "Canonical skill names mapped to their aliases. Free-text skills fragment as a pack grows ('threat modelling' and 'threat modeling' becoming different things), which quietly breaks recall.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/educationRecord"
+      },
+      "description": "Qualifications. Absent from the schema until 2026-09-06, so a degree could not be recorded at all and JSON Resume's education section could never be filled."
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "sourceRecord": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "source_type",
+        "path"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "pdf",
+            "text",
+            "markdown",
+            "json",
+            "url",
+            "person",
+            "other"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Workspace-relative file path, the URL for a url source, or for a person source the review record holding what was said."
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "character_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Characters of extracted text, not the file size on disk. Record the file size in byte_size."
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "extraction_method": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "retrieved": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Date a url source was checked, or a person source was spoken to. Required for both, because neither has a hash: it is the only thing that makes them auditable."
+        },
+        "independent": {
+          "type": "boolean",
+          "description": "True when the source is not authored or controlled by the subject. A resume and a LinkedIn profile are both self-authored and neither is independent."
+        },
+        "saved_copy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "For a url source: workspace-relative path of a saved copy of the page, so excerpts can be verified offline. The URL stays in path."
+        },
+        "saved_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source_type": {
+                "enum": [
+                  "url",
+                  "person"
+                ]
+              }
+            },
+            "required": [
+              "source_type"
+            ]
+          },
+          "then": {
+            "required": [
+              "retrieved"
+            ]
+          },
+          "else": {
+            "required": [
+              "sha256",
+              "character_count"
+            ]
+          }
+        }
+      ]
+    },
+    "sourceRef": {
+      "type": "object",
+      "required": [
+        "source_id"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "excerpt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "star": {
+      "type": "object",
+      "properties": {
+        "situation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "task": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "action": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "result": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "evidenceAtom": {
+      "type": "object",
+      "description": "evidence_status and external_safe are required so that an atom cannot fail open past the publication guard.",
+      "required": [
+        "id",
+        "title",
+        "evidence_status",
+        "external_safe"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "star": {
+          "$ref": "#/$defs/star"
+        },
+        "metrics": {
+          "type": "array",
+          "description": "A metric is a claim, and a claim whose denominator nobody recorded cannot be defended. A plain string is still valid, so existing packs need no migration; the object form exists so the basis has somewhere to live rather than being reconstructed in an interview.",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The metric as it would appear in a document."
+                  },
+                  "basis": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "How it was measured: the baseline, the denominator, the period, and who produced it. null means not recorded, which is honest; omitting the field says nothing."
+                  },
+                  "measured": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "False where the figure is an estimate or a recollection rather than something a system produced."
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "self_asserted",
+            "corroborated",
+            "externally_verified",
+            "unresolved",
+            "declined"
+          ],
+          "description": "self_asserted: appears only in material the subject wrote, however many times. corroborated: a named third party or public artefact supports it, but no auditable record is captured. externally_verified: supported by an independent source recorded in source_records with independent: true. unresolved: an open question. declined: the subject chose not to pursue it. Repetition across the subject's own resume and LinkedIn is not corroboration."
+        },
+        "external_safe": {
+          "type": "boolean"
+        },
+        "corroborators": {
+          "type": "array",
+          "description": "Who or what would confirm this claim in a reference check or interview. Empty means nobody has been identified, which is a commercial risk, not a schema error.",
+          "items": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "former_manager",
+                  "peer",
+                  "direct_report",
+                  "customer",
+                  "public_artefact",
+                  "internal_record",
+                  "other"
+                ]
+              },
+              "reference": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Role or artefact, not a personal name unless the subject supplied one for this purpose."
+              },
+              "reachable": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "outcome_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "activity",
+            "output",
+            "business_outcome",
+            null
+          ],
+          "description": "activity: how much work happened (engagements run, tasks defined). output: what was produced (patterns, artefacts, courses). business_outcome: what changed for the organisation (risk reduced, revenue, time-to-market, incidents avoided). Hiring managers discount activity metrics; prefer business_outcome when selecting evidence."
+        },
+        "role_fit_notes": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Where this evidence counts against the subject as well as for them. Media reach and speaking volume read as strength for a field or advocacy role and as a negative signal for a hands-on engineering role."
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Operator note about how this atom must be handled. Not candidate-facing text, and never carried into the selection view; a constraint the generator must obey belongs in `constraints`."
+        },
+        "open_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Unanswered questions blocking this atom. Required in practice for unresolved atoms, which is what makes unresolved actionable rather than a shrug."
+        },
+        "employment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The employment record this happened during. Gives the atom a date without duplicating one."
+        },
+        "occurred": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "When this happened. A pack that cannot answer this cannot do recency, ordering, or gap detection, which is most of what a career memory is for.",
+          "required": [
+            "start"
+          ],
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^\\d{4}(-\\d{2})?$"
+            },
+            "end": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^(\\d{4}(-\\d{2})?|ongoing)$"
+            },
+            "inferred": {
+              "type": "boolean",
+              "description": "True when the dates were taken from the employment window rather than recorded directly. An inferred nine-year window is barely an answer; narrow it when the detail is still fresh."
+            }
+          },
+          "additionalProperties": false
+        },
+        "capture": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "How this atom entered the pack. Annual write-ups are the main capture event, so knowing which review period produced an atom is what makes the next import able to skip it.",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "annual_review",
+                "note",
+                "document_import",
+                "manual"
+              ]
+            },
+            "captured": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "review_period": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "e.g. FY2026, or 2026-H1."
+            },
+            "note_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The capture note this was promoted from."
+            }
+          },
+          "additionalProperties": false
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Narrative threads that cut across employers, such as scaling-teams or incident-response. Skills describe the work; tags describe the story it belongs to."
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Reviewed handling constraints a generated claim must respect: 'prototype only, did not reach production', 'team contribution, do not imply sole ownership'. These reach the selection view. Operator `notes` do not, which is why the two are separate fields."
+        }
+      },
+      "additionalProperties": false
+    },
+    "employmentRecord": {
+      "type": "object",
+      "required": [
+        "employment_id",
+        "employer",
+        "title",
+        "start",
+        "evidence_status",
+        "external_safe"
+      ],
+      "properties": {
+        "employment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "employer": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name as it should appear on an artefact."
+        },
+        "employer_of_record": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The entity that actually paid the subject, where it differs from the name on the artefact. A background check compares against this, not the client."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^\\d{4}(-\\d{2})?$"
+        },
+        "end": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(\\d{4}(-\\d{2})?|present)$",
+          "description": "'present' for a current role. Null means unknown, which is a gap to resolve, not a current role."
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_employment_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "For a promotion within one employer, so a progression can be collapsed without losing the detail."
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "self_asserted",
+            "corroborated",
+            "externally_verified",
+            "unresolved",
+            "declined"
+          ]
+        },
+        "external_safe": {
+          "type": "boolean"
+        },
+        "corroborators": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scope": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Facts about the size of the role, which a background check can test like dates and a recruiter reads first: team size, direct reports, budget owned, organisation size, geography. Rendered on the role line by make-resume. Cold screens asked for these on every draft; atoms had nowhere to put them.",
+          "properties": {
+            "team_size": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "direct_reports": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "budget": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "org_size": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "geography": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/sourceRef"
+              }
+            },
+            "remit": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "What the function formally owns: gates, standards, patterns, control paths. The thing a head-of screen asks for first."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "educationRecord": {
+      "type": "object",
+      "description": "A qualification. Recorded separately from evidence atoms for the same reason employment is: a degree is not a STAR achievement, it is a fact a background check verifies, and it needs provenance rather than a narrative.",
+      "required": [
+        "education_id",
+        "institution",
+        "qualification",
+        "evidence_status",
+        "external_safe"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "education_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "institution": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name as it should appear on an artefact."
+        },
+        "qualification": {
+          "type": "string",
+          "minLength": 1,
+          "description": "MSc, BSc, diploma, certification. The award, not the subject."
+        },
+        "field": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Subject studied."
+        },
+        "start": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}(-\\d{2})?$"
+        },
+        "end": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(\\d{4}(-\\d{2})?|present)$",
+          "description": "Year awarded. 'present' for study in progress."
+        },
+        "grade": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Distinction, honours class, GPA. Only where the subject supplied it."
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "self_asserted",
+            "corroborated",
+            "externally_verified",
+            "unresolved",
+            "declined"
+          ]
+        },
+        "external_safe": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -30,8 +30,14 @@ TEMPLATE = """<!doctype html>
     h1 {{ margin: 0; font-size: 26pt; }}
     h2 {{ margin: 18px 0 8px; border-bottom: 1px solid #a44d2f; color: #a44d2f; font-size: 11pt; letter-spacing: .08em; text-transform: uppercase; }}
     h3 {{ margin: 13px 0 4px; font-size: 10.5pt; }}
-    p, li {{ font-size: 9.5pt; line-height: 1.35; }}
-    .contact {{ margin: 5px 0 16px; color: #59636e; font: 9pt Arial, sans-serif; }}
+    p, li {{ font-size: 10.5pt; line-height: 1.35; orphans: 2; widows: 2; }}
+    h2, h3 {{ break-after: avoid; page-break-after: avoid; }}
+    h3 + p, h3 + p + p {{ break-after: avoid; page-break-after: avoid; }}
+    li {{ break-inside: avoid; page-break-inside: avoid; }}
+    .role {{ margin: 4px 0 8px; border: 0; color: #17202a; font: bold 12pt Arial, sans-serif; letter-spacing: 0; text-transform: none; }}
+    .dates {{ white-space: nowrap; font-weight: normal; }}
+    .contact {{ margin: 5px 0 12px; color: #59636e; font: 9.5pt Arial, sans-serif; }}
+    a {{ color: inherit; text-decoration-color: #a44d2f; overflow-wrap: anywhere; }}
     ul {{ margin-top: 6px; padding-left: 18px; }}
     li {{ margin-bottom: 7px; }}
     .skills {{ line-height: 1.55; }}
@@ -60,7 +66,8 @@ SAFE_SCHEMES = ("http://", "https://", "mailto:")
 # targets. The first H2 that is not one of these names the page title.
 SECTIONS = {"experience", "employment", "education", "skills", "summary", "profile",
             "certifications", "publications", "teaching", "research", "awards", "projects",
-            "languages", "interests", "references", "speaking", "recognition", "volunteering"}
+            "languages", "interests", "references", "speaking", "recognition", "volunteering",
+            "hands", "selected", "earlier", "technical", "professional"}
 
 
 def is_section(heading):
@@ -137,13 +144,42 @@ def blocks(markdown):
     return out
 
 
+def header(parts):
+    """Locate the role, contact and summary without confusing a title for contact.
+
+    New drafts use an H2 role before the contact paragraph. Accept the previous
+    contact-then-H2 convention too, and legacy paragraph titles when followed by
+    an identifiable contact block. Location-only public contacts need no email.
+    The first real section ends the header; later headings cannot rename a CV.
+    """
+    role, contact, paragraphs = None, None, []
+    for index, (kind, text) in enumerate(parts):
+        if kind in ("h3", "li") or (kind == "h2" and is_section(text)):
+            break
+        if kind == "h2" and role is None:
+            role = index
+        elif kind == "p":
+            paragraphs.append(index)
+    if paragraphs:
+        contact = paragraphs[0]
+        if role is None and len(paragraphs) >= 2:
+            first, second = (parts[i][1] for i in paragraphs[:2])
+            contact_marker = r"@|linkedin\.com/|\+\d[\d .()-]{6,}"
+            if (len(first.split()) <= 12 and not EVIDENCE.search(first)
+                    and not re.search(contact_marker, first)
+                    and re.search(contact_marker, second)):
+                role, contact = paragraphs[:2]
+    summary = [i for i in paragraphs if i not in (role, contact)]
+    return role, contact, summary
+
+
 def render(markdown):
     name, role = None, None
     out, in_list = [], False
-    # The first paragraph after the H1 is the contact block, whatever it contains.
-    contact_pending = False
+    parts = blocks(markdown)
+    role_index, contact_index, _ = header(parts)
 
-    for kind, text in blocks(markdown):
+    for index, (kind, text) in enumerate(parts):
         if kind == "li":
             if not in_list:
                 out.append("    <ul>")
@@ -154,20 +190,29 @@ def render(markdown):
             out.append("    </ul>")
             in_list = False
         if kind == "h3":
-            out.append(f"    <h3>{inline(text)}</h3>")
+            # Keep an employment date range together even when the long official
+            # employer/title wraps. Other H3 headings remain ordinary Markdown.
+            fields = text.rsplit("|", 1)
+            if len(fields) == 2 and re.match(r"\s*\d{4}\b", fields[1]):
+                body = f'{inline(fields[0])} | <span class="dates">{inline(fields[1])}</span>'
+            else:
+                body = inline(text)
+            out.append(f"    <h3>{body}</h3>")
         elif kind == "h2":
             heading = EVIDENCE.sub("", text).strip()
-            if role is None and not is_section(heading):
+            if index == role_index:
                 role = heading
-            out.append(f"    <h2>{inline(text)}</h2>")
+            cls = ' class="role"' if index == role_index else ""
+            out.append(f"    <h2{cls}>{inline(text)}</h2>")
         elif kind == "h1":
             name = EVIDENCE.sub("", text).strip()
-            contact_pending = True
             out.append(f"    <h1>{inline(text)}</h1>")
         else:
-            if contact_pending:
+            if index == role_index:
+                role = EVIDENCE.sub("", text).strip()
+                cls = ' class="role"'
+            elif index == contact_index:
                 cls = ' class="contact"'
-                contact_pending = False
             elif text.count("|") > 6:
                 cls = ' class="skills"'
             else:

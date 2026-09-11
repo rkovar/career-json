@@ -1,0 +1,182 @@
+{
+  "date": "2026-09-08",
+  "data": "Entirely fictional fixtures; no real career data was used by model scenarios.",
+  "deterministic": {
+    "original_assertions_passed": 585,
+    "editorial_tests_passed": 25,
+    "career_profiles": 5
+  },
+  "model_checks": [
+    {
+      "scenario": "representation",
+      "checks": [
+        {
+          "check": "model_completed",
+          "passed": true
+        },
+        {
+          "check": "review_created",
+          "passed": true
+        },
+        {
+          "check": "lost_strength_identified",
+          "passed": true
+        },
+        {
+          "check": "reader_impressions_recorded",
+          "passed": true
+        },
+        {
+          "check": "record_validates",
+          "passed": true
+        },
+        {
+          "check": "source_pack_unchanged",
+          "passed": true
+        }
+      ],
+      "cost_usd": 0.949742,
+      "skill_versions": {
+        "build-career-pack": "8c89c71452e1",
+        "capture-work": "1e6d3fc247c3",
+        "evaluate-output": "c119bd4a4ce7",
+        "generate-resume": "eef8f4f75b51",
+        "ingest-career-materials": "2cb61181e063",
+        "make-interview-brief": "afc656c48d7a",
+        "make-resume": "8e39cda569cd",
+        "recruiter-screen": "c2584fb10d13",
+        "review-evidence": "f35e547fbcca",
+        "review-representation": "15b22f276129",
+        "review-selection": "335faeab1455",
+        "review-strengths": "796d52993cc6"
+      }
+    },
+    {
+      "scenario": "formats",
+      "checks": [
+        {
+          "check": "model_completed",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_exists",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_validates",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_privacy",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_distinctive_evidence",
+          "passed": true
+        },
+        {
+          "check": "fixture-draft.md_representation_record",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_exists",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_validates",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_privacy",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_distinctive_evidence",
+          "passed": true
+        },
+        {
+          "check": "fixture-biography-draft.md_representation_record",
+          "passed": true
+        },
+        {
+          "check": "fixture-interview-brief.md_exists",
+          "passed": true
+        },
+        {
+          "check": "fixture-interview-brief.md_validates",
+          "passed": true
+        },
+        {
+          "check": "fixture-interview-brief.md_representation_record",
+          "passed": true
+        },
+        {
+          "check": "all_records_validate",
+          "passed": true
+        },
+        {
+          "check": "source_pack_unchanged",
+          "passed": true
+        }
+      ],
+      "cost_usd": 3.55623975,
+      "skill_versions": {
+        "build-career-pack": "8c89c71452e1",
+        "capture-work": "1e6d3fc247c3",
+        "evaluate-output": "c119bd4a4ce7",
+        "generate-resume": "eef8f4f75b51",
+        "ingest-career-materials": "2cb61181e063",
+        "make-interview-brief": "afc656c48d7a",
+        "make-resume": "8e39cda569cd",
+        "recruiter-screen": "c2584fb10d13",
+        "review-evidence": "f35e547fbcca",
+        "review-representation": "15b22f276129",
+        "review-selection": "335faeab1455",
+        "review-strengths": "796d52993cc6"
+      }
+    },
+    {
+      "scenario": "interview",
+      "checks": [
+        {
+          "check": "model_completed",
+          "passed": true
+        },
+        {
+          "check": "one_question",
+          "passed": true
+        },
+        {
+          "check": "existing_evidence_used",
+          "passed": true
+        },
+        {
+          "check": "does_not_confirm_for_user",
+          "passed": true
+        }
+      ],
+      "cost_usd": 0.432081,
+      "skill_versions": {
+        "build-career-pack": "c6b8d287018c",
+        "capture-work": "1e6d3fc247c3",
+        "evaluate-output": "02434093940e",
+        "generate-resume": "3127f706b027",
+        "ingest-career-materials": "2cb61181e063",
+        "make-interview-brief": "afc656c48d7a",
+        "make-resume": "3e1ff4cee3de",
+        "recruiter-screen": "c2584fb10d13",
+        "review-evidence": "f35e547fbcca",
+        "review-representation": "15b22f276129",
+        "review-selection": "023d3a855e60",
+        "review-strengths": "872302420335"
+      }
+    }
+  ],
+  "observed_fix": "The initial strengths interview bundled two ownership follow-ups into its first question. The revised workflow asks one answerable issue, then waits; the rerun passed.",
+  "limitations": [
+    "Model scenarios cover specific examples, not universal writing quality or hiring outcomes.",
+    "The formats scenario did not exercise PDF export or a recruiter screen.",
+    "The configured CLI model name was not captured in these initial runs; per-run skill hashes are recorded.",
+    "The optional skill-creator validator required unavailable PyYAML; stdlib frontmatter/reference checks and project tests were used instead."
+  ]
+}

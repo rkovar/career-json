@@ -1,5 +1,19 @@
 # Architecture
 
+## Components and release boundaries
+
+Career Evidence Core is an independently runnable early-access toolkit; Resume
+Application is a beta add-on. See [releases](releases.md) for ownership, compatibility
+and quality gates. `components/*/component.json` declares independent versions and
+explicit release file lists. `build_release.py` checks dependencies and builds
+separate archives; the add-on cannot replace core files or include private data.
+
+`career_core.py`, `career_profile.py`, `pack_io.py`, `schema_tools.py` and
+`evidence_rules.py` own shared maintenance and validation primitives. Resume
+modules consume them. `editorial.py` retains output decisions and selection while
+forwarding its historical core commands for compatibility. Core pack validation
+no longer imports the application. Clean-install tests exercise this boundary.
+
 ## The dividing line
 
 **Anything decidable from the pack alone is a script. Everything requiring
@@ -23,28 +37,35 @@ than any instruction.
 ## Layout
 
 ```
-.claude/skills/     judgement: the nine skills
+.claude/skills/     judgement: the twelve skills
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
-tests/              566 assertions plus a skill-invariant lint
-data/               your material. Git ignored, never leaves the machine
+tests/              regression, human-review and clean-install checks
+data/               your private material, excluded from Git and release archives
   sources/            raw input
-  packs/career.json   the current record
-  packs/archive/      superseded versions
+  candidates/         proposed changes awaiting human review
+  packs/              current and previous versions linked by metadata.supersedes
   roles/              structured role profiles
+  briefs/             durable output briefs
+  selections/         immutable evidence selections and alternatives
   capture/            the append-only note log
   private/            pre-schema profiles
 outputs/            generated artefacts, evaluations, screens. Git ignored.
                     A screen records its context: "fresh" means it was produced
                     by a context holding only the artefact, the role profile and
                     the skill, never by the context that wrote the document.
-reviews/            review records and decisions. Git ignored
+reviews/            source answers and review records. Git ignored
+  pack-reviews/       proposal snapshots, sessions and immutable decision batches
+  decisions/          scoped editorial decisions
 ```
 
 ## Scripts
 
 | Script | Role |
 | --- | --- |
+| `career_core.py` | Core maintenance, candidate strengths queues, private export and review commands |
+| `pack_review.py` | Stages proposals, records human decisions and saves accepted local versions |
+| `review_html.py` / `pack_html.py` | Offline guided proposal review and read-only current-pack overview |
 | `current_pack.py` | Resolves the current pack by supersedes chain, not by mtime. Refuses when ambiguous |
 | `select_evidence.py` | Emits only eligible evidence; `--role` ranks and shortlists against a profile |
 | `render.py` | Markdown to HTML through one template, so the two cannot drift |
@@ -58,6 +79,8 @@ reviews/            review records and decisions. Git ignored
 | `validate_records.py` | Evaluation, screen, and role-profile records |
 | `quantities.py` | Magnitudes a bullet asserts that its cited atom does not carry. Warns through `validate_artifact.py`; never blocks |
 | `manifest.py` | Pack hash and skill hashes, pinned into an evaluation record |
+| `save_review.py` | Attach the exact saved manifest and validate a review before atomic publication |
+| `private_facts.py` | Recorded dates and explicit measurement states for private briefs |
 | `capture.py` | The note log. Never writes to the pack |
 | `find.py` | Recall by term, skill, tag, employer, date, outcome, status |
 | `dedupe.py` | Is this claim already in the pack? |
@@ -87,20 +110,44 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 566 assertions: real tests over the scripts, plus a lint
+`make check` runs 585 assertions in the original suite and 35 editorial tests, 6 core tests, 17 human-review tests and 6 release installation tests: real tests over the scripts, plus a lint
 asserting each skill still states its load-bearing rules. That lint exists because
 prose regressions are invisible — during one refactor it caught a rewrite that had
 silently dropped two rules from a skill file.
 
-Tests run against **two** fictional fixtures, and the second one matters.
+The original suite runs against **two** fictional fixtures, and the second one matters.
 `career.example.json` is small and readable. `career.complex.example.json` has the
 shape of a real pack: a promotion chain, withheld and unresolved evidence, undated
 atoms, and an independent source. Everything used to run against the small one
 only, and three defects shipped behind that gap — a leak scan that failed the
 private brief on the words it exists to state, a magnitude check that emitted
 eighty warnings on one document, and a fit score with no eligibility filter. None
-were visible to three hundred passing566 assertions; all three appeared within one
+were visible to the passing checks; all three appeared within one
 run against real data.
 
 Behavioural claims that need a model in the loop are listed in
 `tests/scenarios.md` and run by hand after a material skill edit.
+
+
+## Editorial memory
+
+See [editorial-memory.md](editorial-memory.md) for the contracts and full workflow.
+`editorial.py` validates references, resolves scoped decisions, builds durable
+selections, filters profile context and detects changed support. Schema 1.4 adds
+optional strengths and preferences; archived schema 1.3 keeps older packs usable.
+The three new skills interview for strengths, review selection when requested,
+and assess representation. Selection reasons and briefs survive deletion of outputs.
+
+The editorial tests additionally cover five fictional career profiles and sequences
+of shortening, retargeting, correction and regeneration. Model-driven checks in
+`tests/run_editorial_scenarios.py` test actual interpretation and writing in an
+isolated fixture workspace; they are separate from `make check`.
+
+## Human review of career data
+
+See [pack review](pack-review.md). Proposed packs stay outside the current-pack
+chain. An offline document presents exact values, sources and before/after changes.
+Immutable decision batches bind a person’s choices to the proposal fingerprint;
+only explicitly accepted content and privacy restrictions enter a new pack.
+Human wording review is separate from evidence confidence and publication rights.
+Corrections and omissions remain follow-up notes until reviewed as new proposals.

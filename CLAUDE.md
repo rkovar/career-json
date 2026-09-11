@@ -2,6 +2,18 @@
 
 This repository is a Claude-native career evidence and artefact workspace. Claude is the primary operator. Do not introduce a web application, API provider integration, database, or Python dependency unless the user explicitly asks for one.
 
+## Component boundaries
+
+One repository contains Career Evidence Core (early access) and Resume Application
+(beta). See `docs/releases.md`. The core must run without resume modules. Core
+intake, validation, sources, facts, supported strengths and preferences are shared
+contracts; role targeting, briefs, selections, output decisions, writing and reviews
+belong to the application. New facts discovered during generation return through
+core review. Never treat a generated document as a factual update automatically.
+Use `career_core.py` for core status, migration, reassessment and private export.
+Existing `editorial.py` core commands remain compatibility entry points. Release
+builds use explicit public allowlists and do not touch data, outputs or reviews.
+
 ## Mission
 
 Keep one durable, evidence-backed record of a career in `career.json`, and treat resumes, CVs, cover letters, and websites as disposable projections of it. The record is the product. Two failure modes drive the design: the user forgets what they did, and they have too much to fit any single document.
@@ -41,7 +53,7 @@ Create private working directories only when needed. Do not commit raw PII or ge
 3. Ask Socratic questions for missing STAR fields, ownership, scope, timeframe, measurement, or corroboration.
 4. Record answers and unresolved gaps in `reviews/`.
 5. Produce or update a versioned datapack.
-6. Select evidence against the requested role and modifiers.
+6. Prepare or reuse a durable output brief and scoped selection; select evidence against the requested role, supported strengths, preferences and modifiers.
 7. Generate the requested artefact using STAR-grounded claims.
 8. Evaluate factual grounding, privacy, ATS coverage, length, and anti-slop quality.
 9. Screen the artefact as a recruiter and hiring manager would, and return a shortlist verdict.
@@ -61,3 +73,21 @@ relaxes the evidence, privacy, or publication rules above.
 ## Claude behaviour
 
 Use the skills in `.claude/skills/` when their trigger applies. Keep questions focused and explain why a claim needs support. Do not ask the user to repeat information already present in the datapack or source material.
+
+## Durable editorial context
+
+Use `docs/editorial-memory.md` for schema 1.4 strengths and preferences, resumable
+`review-strengths`, optional `review-selection`, and `review-representation`.
+Briefs and selections live in private data directories; decisions live in reviews.
+Generated documents are never new evidence merely because the system wrote them.
+Delivery remains quiet; evidence preview is a separately requested workflow.
+
+
+## Human review of proposed data
+
+Use `docs/pack-review.md`. Unreviewed extraction and corrections live in
+`data/candidates/`; they must not become current by being written to `data/packs/`.
+Present the private readable review and save only explicit user decisions. Exact
+wording acceptance, evidence confidence and external-use permission are separate.
+The review helper saves accepted local pack versions and preserves deferred items,
+correction notes and omission feedback. Never fill in approvals for the person.

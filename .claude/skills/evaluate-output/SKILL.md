@@ -25,6 +25,14 @@ the artefact cold as a stranger. Passing here is necessary and not sufficient.
   reference material and never artefact text.
 - Every metric, date, title, employer, and outcome is supported.
 - STAR meaning has not changed during compression or tailoring.
+- Review connecting prose and contrasts as factual claims too. Unsupported
+  causes, motives, comparisons and negative assertions are integrity failures
+  requiring revision, even when described as "interpretive framing". Adoption
+  does not prove voluntary uptake or absence of a mandate; absent metric
+  records do not prove that measurement never happened. For each such clause,
+  identify direct support or remove it before marking publishable.
+- Current-tense claims agree with `occurred`; historical work is not presented
+  as current maintenance, production use, or recent domain experience.
 - Conflicting source values are not silently resolved.
 
 ### Safety and privacy
@@ -55,6 +63,11 @@ the artefact cold as a stranger. Passing here is necessary and not sufficient.
   given prominence.
 - Where the target role's central requirement has no eligible evidence behind it,
   that is a blocker, not a warning. Name it as the likely reason for rejection.
+- Assess each component of a compound essential requirement separately. A linked
+  atom or a high `role_fit.py` score does not establish every component: team
+  leadership does not imply budget ownership, and output does not imply adoption.
+  Record material unmet essential components as blockers. Distinguish absent
+  evidence from evidence deliberately withheld under publication constraints.
 
 ### Background-check exposure
 
@@ -91,10 +104,34 @@ no date precision beyond what the employment records support.
 - The writing is specific, credible, and natural.
 - No generic AI phrasing, inflated claims, repetition, or empty adjectives remain.
 - Missing outcomes are visible rather than invented.
+- The opening states relevant value, each bullet has one principal achievement,
+  and scope supports the requested role. Public-work references identify the work.
+- Verify requested page count and heading/bullet placement from the final PDF,
+  and inspect extracted text. Record the actual checks and any unverified export
+  limitations; HTML validity and word counts do not establish print quality or
+  compatibility with a specific ATS.
+
+## Representation and input freshness
+
+For a generation with a durable brief, run `review-representation` and save its
+sidecar with the same final manifest `run`. Every intended strength needs a
+representation disposition. Resolve inadequate representation by revision or a
+saved, justified omission before marking publishable. Withheld or unsupported
+strengths remain explicit report limitations; they do not authorize a stronger
+claim. Keep this assessment separate from integrity, role coverage and reader
+quality. A cited atom alone does not prove successful representation.
+
+Validate the evaluation and representation records with `validate_records.py`.
+Use `manifest.py --selection` so changed briefs, roles, decisions and selections
+invalidate prior reviews. Re-evaluate after editing; old positive reviews do not
+approve new text. See `docs/editorial-memory.md`.
 
 ## Decision
 
-Write a machine-readable evaluation record with `publishable: true` only when
+Write the evaluation body without `run` in `data/private/` and assemble it with
+`scripts/save_review.py --kind evaluation`, using the same saved manifest as the
+representation sidecar (see `docs/editorial-memory.md`). Do not copy provenance
+fields by hand. Set `publishable: true` only when
 there are no material failures. `publishable: true` means fit to send, not likely
 to succeed. Hand the artefact to `recruiter-screen` before telling the user it is
 ready. Each finding must include severity, category, affected evidence ID or output section, and remediation.

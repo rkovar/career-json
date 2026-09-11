@@ -326,6 +326,25 @@ def test_renderer():
           "continues on the next line" in body and body.count("<li>") == 1, body[-600:])
     check("a section heading does not become the page title's role",
           "<title>N</title>" in w_html, w_html[:400])
+    # Both the old paragraph headline and the explicit H2 format must preserve
+    # contact styling, summary text and the target role in the page title.
+    for label, intro in {
+        "paragraph": "Head of Detection\n\nLondon · n@example.com",
+        "explicit": "## Head of Detection\n\nLondon · n@example.com",
+        "public": "## Head of Detection\n\nLondon, United Kingdom",
+    }.items():
+        draft = Path(tempfile.mkdtemp()) / "header.md"
+        draft.write_text("# N\n\n" + intro + "\n\nA relevant summary.\n\n"
+                         "## Hands-on and open source\n\nPublished tools.\n")
+        run("render.py", draft)
+        rendered = draft.with_suffix(".html").read_text()
+        check(f"{label} headline remains the document title",
+              "<title>N - Head of Detection</title>" in rendered, rendered[:300])
+        check(f"{label} contact styling stays on the contact",
+              'class="contact">London' in rendered and
+              'class="contact">Head of Detection' not in rendered, rendered[-600:])
+        check(f"{label} summary survives separately from the header",
+              "<p>A relevant summary.</p>" in rendered, rendered[-600:])
     # A block with two citations kept only the first in the HTML.
     two = Path(tempfile.mkdtemp()) / "t.md"
     two.write_text("# N\n\nLondon\n\n## R\n\nOpening sentence. <!-- Evidence: E_ONE -->\nRest of the summary.\n<!-- Evidence: E_TWO, E_THREE -->\n")
@@ -1565,6 +1584,22 @@ def test_resume_shape_checks():
     check("a well-shaped draft raises none of them",
           not any(k in out for k in ("bullets;", "limit", "cliche", "headline", "below the fold")), out[-600:])
 
+    # A headline must not hide an overlong summary, nor may splitting the
+    # summary into paragraphs evade the limit.
+    for label, intro in {
+        "H2 before contact": "## Head of Detection\n\nLondon · morgan.vale@example.invalid\n\n",
+        "paragraph before contact": "Head of Detection\n\nLondon · morgan.vale@example.invalid\n\n",
+        "H2 after contact": "London\n\n## Head of Detection\n\n",
+    }.items():
+        md3 = root / "outputs" / "long-summary.md"
+        md3.write_text("# Morgan Vale\n\n" + intro + "word " * 45 + "\n\n" +
+                       "word " * 40 + "\n\n## Experience\n\n" +
+                       good.split("## Experience\n\n", 1)[1])
+        run("render.py", md3, workspace=root)
+        _, summary_out, _ = run("validate_artifact.py", md3, workspace=root)
+        check(f"summary length includes both paragraphs with {label}",
+              "summary is 85 words" in summary_out, summary_out[-600:])
+
     code, out, _ = run("keyword_coverage.py", md2, "--role", "head-of-detection", "--json", workspace=root)
     cov = json.loads(out)
     check("keyword coverage reports present and missing terms",
@@ -2191,7 +2226,7 @@ INVARIANTS = {
     "make-interview-brief": ["inverts that rule", "Never publish this", "whole pack",
                             "external_safe: false", "Never invent"],
     "make-resume": ["Ask no questions", "never appears inside the artefact", "<role_id>-draft.md",
-                    "Scope on the role line", "Positioning opens the summary", "Bullet economics",
+                    "Scope on the role line", "Value opens the summary", "Bullet economics",
                     "never invents intent", "keyword_coverage.py",
                     "fresh context, never in this one",
                     "at the end of the claim's own line",
@@ -2220,7 +2255,7 @@ INVARIANTS = {
     "evaluate-output": ["external_safe", "contact block", "recruiter-screen",
                         "Background-check exposure", "employment", "employer_of_record",
                         "LinkedIn About"],
-    "recruiter-screen": ["Do not praise", "default is to reject", "advance", "borderline",
+    "recruiter-screen": ["supplied vacancy or role profile", "Do not invent competing applicants", "advance", "borderline",
                          "reject", "screen-record.schema.json",
                          # The screen must not be the generating context grading itself.
                          "fresh context", '"context": "shared"'],
@@ -2290,6 +2325,29 @@ def test_walkthrough():
 
 
 FUN = ROOT / "examples" / "fun"
+
+
+def test_pdf_extraction_failure():
+    """A Swift/cache failure must not look like a successfully empty PDF."""
+    root = Path(tempfile.mkdtemp())
+    for name, body in {
+        "uname": "printf Darwin",
+        "swift": "echo 'fixture: compiler cache inaccessible' >&2; exit 42",
+    }.items():
+        path = root / name
+        path.write_text("#!/bin/sh\n" + body + "\n")
+        path.chmod(0o755)
+    # Deliberately omit pdftotext, independently of what the host has installed.
+    for name in ("mktemp", "cat", "rm"):
+        (root / name).symlink_to(shutil.which(name))
+    pdf = root / "source.pdf"
+    pdf.write_bytes(b"%PDF-1.4\n")
+    env = dict(os.environ, PATH=str(root))
+    proc = subprocess.run([shutil.which("bash"), str(SCRIPTS / "extract_text.sh"), str(pdf)],
+                          env=env, capture_output=True, text=True)
+    check("PDF extractor propagates Swift failure instead of returning empty success",
+          proc.returncode == 42 and not proc.stdout and "compiler cache inaccessible" in proc.stderr,
+          str((proc.returncode, proc.stdout, proc.stderr)))
 
 
 def test_docx_extraction():
@@ -2422,7 +2480,7 @@ def main():
                  test_capture_edit_delete, test_coverage,
                  test_resume_json_export,
                  test_skill_contracts, test_docs_match_reality,
-                 test_walkthrough, test_docx_extraction, test_fun_packs):
+                 test_walkthrough, test_pdf_extraction_failure, test_docx_extraction, test_fun_packs):
         test()
     check_live_tree_untouched()
     check_documented_assertion_count()

@@ -11,7 +11,7 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.3"
+      "const": "1.4"
     },
     "name": {
       "type": [
@@ -151,6 +151,22 @@
         "$ref": "#/$defs/educationRecord"
       },
       "description": "Qualifications. Absent from the schema until 2026-09-06, so a degree could not be recorded at all and JSON Resume's education section could never be filled."
+    },
+    "strengths_profile": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/strength"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "positioning_preferences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/positioningPreference"
+      },
+      "minItems": 0,
+      "uniqueItems": true
     }
   },
   "additionalProperties": true,
@@ -803,6 +819,155 @@
           "type": "boolean"
         }
       }
+    },
+    "strength": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "evidence_fingerprints": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "confirmed",
+            "rejected"
+          ]
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "single_achievement",
+            "recurring_pattern"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "timeframe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external_safe": {
+          "type": "boolean"
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "review_question": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "question_status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "answered",
+            "declined"
+          ]
+        },
+        "reviewed_on": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "interpretation",
+        "evidence_ids",
+        "evidence_fingerprints",
+        "status",
+        "basis",
+        "limitations",
+        "timeframe",
+        "external_safe",
+        "source_refs",
+        "question_status"
+      ],
+      "additionalProperties": false
+    },
+    "positioningPreference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "direction",
+            "more_of",
+            "less_of",
+            "presentation"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "retired"
+          ]
+        },
+        "external_safe": {
+          "type": "boolean"
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "text",
+        "status",
+        "external_safe",
+        "source_refs"
+      ],
+      "additionalProperties": false
     }
   }
 }

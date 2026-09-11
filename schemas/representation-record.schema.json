@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "properties": {
+    "artifact": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run": {
+      "$ref": "evaluation-record.schema.json#/$defs/run"
+    },
+    "reader_impressions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "strength_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "clearly_represented",
+              "inadequately_represented",
+              "intentionally_omitted",
+              "withheld",
+              "unsupported"
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "artifact_excerpt": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "strength_id",
+          "status",
+          "evidence_ids",
+          "artifact_excerpt",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "evaluation-record.schema.json#/$defs/finding"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "artifact",
+    "run",
+    "reader_impressions",
+    "strengths",
+    "findings"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "representation-record.schema.json"
+}

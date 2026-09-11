@@ -38,6 +38,10 @@ def check(path, schema, strict=False):
     except json.JSONDecodeError as exc:
         return [f"invalid JSON: {exc}"], []
 
+    if pack.get("schema_version") == "1.3":
+        schema = json.loads((SCHEMA.parent / "archive" / "career-1.3.schema.json").read_text())
+        if 'strengths_profile' in pack or 'positioning_preferences' in pack:
+            errors.append('strengths and preferences require schema 1.4; migrate the pack first')
     e = enums(schema)
     if pack.get("schema_version") != e["version"]:
         errors.append(f"schema_version is {pack.get('schema_version')!r}, expected {e['version']!r}")
@@ -276,6 +280,16 @@ def check(path, schema, strict=False):
     elif not (profile.get("email") or profile.get("phone")):
         warnings.append("private_profile has no email or phone; a named-recipient resume cannot be actioned")
 
+    if pack.get("schema_version") == "1.4":
+        from schema_tools import walk
+        from career_profile import validate_profile
+        for field in ("strengths_profile", "positioning_preferences"):
+            if field in pack:
+                walk(pack[field], schema["properties"][field], schema, field, errors)
+        if not errors:
+            more_errors, more_warnings = validate_profile(pack)
+            errors.extend(more_errors)
+            warnings.extend(more_warnings)
     return errors, warnings
 
 
