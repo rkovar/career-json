@@ -72,6 +72,54 @@
       },
       "minItems": 0,
       "uniqueItems": true
+    },
+    "impressions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "clearly_represented",
+              "inadequately_represented",
+              "intentionally_omitted",
+              "withheld",
+              "unsupported"
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "artifact_excerpt": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impression_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "impression_id",
+          "status",
+          "evidence_ids",
+          "artifact_excerpt",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "uniqueItems": true
     }
   },
   "required": [

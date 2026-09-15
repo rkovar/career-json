@@ -61,6 +61,20 @@ class CoreTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
         self.assertEqual(len(list((self.root / 'data/packs').glob('*.json'))), 1)
 
+    def test_employment_parent_cycles_are_invalid(self):
+        first = self.pack['employment'][0]
+        for mutual in (False, True):
+            with self.subTest(mutual=mutual):
+                first['parent_employment_id'] = 'EMP_CHILD' if mutual else first['employment_id']
+                self.pack['employment'] = [first]
+                if mutual:
+                    self.pack['employment'].append(dict(first, employment_id='EMP_CHILD',
+                                                       parent_employment_id=first['employment_id']))
+                self.save(self.pack)
+                result = self.run_cli('validate_pack.py')
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('cycle in parent_employment_id', result.stdout + result.stderr)
+
     def test_legacy_migration_preserves_facts_and_lineage(self):
         self.pack['schema_version'] = '1.3'
         self.pack.pop('strengths_profile'); self.pack.pop('positioning_preferences')
@@ -86,9 +100,9 @@ class CoreTests(unittest.TestCase):
         status = json.loads(self.run_cli('career_core.py', 'status').stdout)
         self.assertTrue(status['strengths'][0]['ask'])
         result = self.run_cli('career_core.py', 'bind-strength', '--pack', 'data/packs/pack.json',
-                              '--strength', strength['id'], '--output', 'data/packs/v2.json')
+                              '--strength', strength['id'], '--output', 'data/candidates/v2.json')
         self.assertEqual(result.returncode, 0, result.stderr)
-        bound = json.loads((self.root / 'data/packs/v2.json').read_text())
+        bound = json.loads((self.root / 'data/candidates/v2.json').read_text())
         self.assertEqual(bound['strengths_profile'][0]['status'], strength['status'])
         self.assertEqual(next(a for a in bound['evidence_atoms'] if a['id'] == aid)['evidence_status'], original_status)
 

@@ -1,0 +1,23 @@
+name: Career workspace checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  fictional-workspaces:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate contracts and isolated journeys
+        run: make check
+      - name: Record lifecycle benchmark
+        run: python3 tests/run_journeys.py --output /tmp/career-journeys.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: career-journeys-${{ matrix.os }}
+          path: /tmp/career-journeys.json

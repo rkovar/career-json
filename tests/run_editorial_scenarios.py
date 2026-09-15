@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 from editorial_fixture import ROOT, personas, pack_for, brief_for
 
@@ -81,6 +82,8 @@ def workspace(scenario, installation='checkout'):
                             '- Designed a deployment rehearsal format and co-built its runner with engineers; two teams adopted rehearsals before deployment. <!-- Evidence: E_STORY_1 -->\n'
                             '- Hired and coached engineers while introducing peer design reviews; the engineering group adopted them. <!-- Evidence: E_STORY_2 -->\n\n'
                             'Teams freely chose these practices; no mandate was imposed. <!-- Evidence: E_STORY_1, E_STORY_2 -->\n')
+    if scenario == 'maintenance':
+        (root / 'reviews/update.md').write_text('I designed the rehearsal format; colleagues co-built the runner. The result was adoption by two teams, not a measured financial saving.')
     if scenario == 'interview':
         pack['strengths_profile'][0].update({'status': 'proposed', 'question_status': 'open',
                                             'review_question': 'Does this interpretation describe your contribution?'})
@@ -89,6 +92,17 @@ def workspace(scenario, installation='checkout'):
 
 
 REQUESTS = {
+    'resume': 'Use make-resume to create a UK resume for a Head of Engineering role from the approved fictional career pack. '
+              'The role values technical judgment, collaborative implementation and developing engineers. '
+              'Deliver PDF, TXT and DOCX from shared content. Use automatic delivery, a version-2 application brief, '
+              'a durable ready plan and saved evidence selection. Keep the career pack unchanged. '
+              'Do not invent a job description or financial metrics. Preserve shared ownership and the distinctive technical strength. '
+              'Perform the documented reviews and state any export or reviewer-context limitations accurately.',
+
+    'maintenance': 'Use build-career-pack and docs/workspace-maintenance.md to propose a refresh of E_STORY_1 using reviews/update.md. '
+                   'Keep my original achievements, sources and review history intact. Show me the revised contribution together with its sources '
+                   'in a readable review page. I have not accepted any proposed changes or external-use permissions. '
+                   'Do not ask for a financial outcome; the source states what was observed.',
     'first-pack': 'Use .claude/skills/build-career-pack/SKILL.md to build my first career pack from data/sources/resume.md. '
                   'Keep it private and show me the career overview before asking questions. '
                   'I want a useful first record, not a resume. I have not approved any extracted wording yet.',
@@ -118,7 +132,66 @@ def checks(root, scenario, payload):
     result = []
     def check(name, passed): result.append({'check': name, 'passed': bool(passed)})
     check('model_completed', not payload.get('is_error', True))
-    if scenario == 'grounding':
+    if scenario == 'resume':
+        drafts = sorted((root / 'outputs').glob('*-draft.md'))
+        check('final_resume_exists', bool(drafts))
+        for draft in drafts:
+            suffix = '_' + draft.stem
+            evaluation_path = draft.with_name(draft.stem + '-evaluation.json')
+            representation_path = draft.with_name(draft.stem + '-representation.json')
+            screen_path = draft.with_name(draft.stem + '-screen.json')
+            def record(path):
+                try:
+                    value = json.loads(path.read_text())
+                    return value if isinstance(value, dict) else {}
+                except (OSError, ValueError):
+                    return {}
+            def validates(path, current=True):
+                try:
+                    output = script(root, 'validate_records.py', path)
+                    return not current or 'warn:' not in output
+                except RuntimeError:
+                    return False
+            evaluation = record(evaluation_path)
+            run = evaluation.get('run') or {}
+            evaluation_valid = validates(evaluation_path)
+            representation_valid = validates(representation_path)
+            check('evaluation_valid_and_current' + suffix, evaluation_valid)
+            check('representation_valid_and_current' + suffix, representation_valid)
+            if not evaluation_valid or not representation_valid:
+                continue
+            check('publishable' + suffix, evaluation.get('publishable') is True)
+            artifact = str(draft.relative_to(root))
+            check('evaluation_targets_final_draft' + suffix, artifact in evaluation.get('artifacts', []))
+            try:
+                inputs = run['editorial_inputs']
+                plan_pin = inputs['plan']
+                script(root, 'resume_workflow.py', 'check', '--plan', plan_pin['path'])
+                check('plan_ready' + suffix, True)
+                export_pin = run['exports']
+                script(root, 'export_resume.py', '--check', export_pin['path'])
+                exported = record(root / export_pin['path'])
+                from hashlib import sha256
+                check('exports_match_final_run' + suffix,
+                      exported.get('artifact') == {'path': artifact, 'sha256': sha256(draft.read_bytes()).hexdigest()}
+                      and exported.get('plan') == plan_pin)
+            except (KeyError, TypeError, OSError, RuntimeError):
+                check('ready_plan_and_verified_exports' + suffix, False)
+            screen = record(screen_path)
+            check('screen_valid_for_final_run' + suffix,
+                  validates(screen_path, current=False) and screen.get('artifact') == artifact
+                  and bool(run) and screen.get('run') == run)
+            check('no_private_canary' + suffix, 'PRIVATE_CANARY' not in draft.read_text())
+    elif scenario == 'maintenance':
+        proposals = list((root / 'data/candidates').glob('*.json'))
+        check('maintenance_candidate_created', bool(proposals))
+        pages = list((root / 'outputs').glob('*.html'))
+        check('connected_review_available', any('Review achievement and supporting records together' in p.read_text() for p in pages))
+        candidates = [json.loads(p.read_text()) for p in proposals]
+        check('historical_achievement_id_preserved', any(any(a['id'] == 'E_STORY_1' for a in p.get('evidence_atoms', [])) for p in candidates))
+        check('maintenance_relationship_recorded', any(any(e['operation'] == 'refresh' for e in p.get('metadata', {}).get('evidence_maintenance', [])) for p in candidates))
+        check('at_most_one_question', payload.get('result', '').count('?') <= 1)
+    elif scenario == 'grounding':
         path = root / 'outputs/fixture-evaluation.json'
         check('evaluation_created', path.exists())
         if path.exists():
@@ -204,7 +277,7 @@ def main():
     parser.add_argument('--budget', type=float, default=2)
     parser.add_argument('--report', type=Path, required=True, help='report path; workspace path included for review')
     args = parser.parse_args()
-    if args.installation == 'core' and args.scenario not in ('interview', 'first-pack'):
+    if args.installation == 'core' and args.scenario not in ('interview', 'first-pack', 'maintenance'):
         parser.error('the core-only installation supports the interview and first-pack scenarios; document generation needs the add-on')
     if args.installation == 'core' and not (ROOT / 'scripts/build_release.py').is_file():
         parser.error('building a core-only test archive requires the developer checkout')
@@ -216,6 +289,7 @@ def main():
            '--permission-mode', 'acceptEdits', '--tools', 'Read,Write,Edit,Glob,Grep,Bash',
            '--allowedTools', 'Read,Write,Edit,Glob,Grep,Bash(python3 scripts/*),Bash(python3 data/candidates/*),Bash(scripts/extract_text.sh *),Bash(bash scripts/extract_text.sh *)',
            '--max-budget-usd', str(args.budget)]
+    started = time.monotonic()
     try:
         proc = subprocess.run(cmd, cwd=root, env={**os.environ, 'CAREER_WORKSPACE': str(root)},
                               capture_output=True, text=True, timeout=900)
@@ -228,7 +302,7 @@ def main():
     if original_artifact is not None:
         result.append({'check': 'reviewed_artifact_unchanged', 'passed': (root / 'outputs/fixture-draft.md').read_bytes() == original_artifact})
     report = {'scenario': args.scenario, 'installation': args.installation, 'workspace': str(root), 'checks': result,
-              'cost_usd': payload.get('total_cost_usd'), 'result': payload.get('result'),
+              'elapsed_seconds': round(time.monotonic() - started, 3), 'response_question_marks': payload.get('result', '').count('?'), 'human_burden': None, 'cost_usd': payload.get('total_cost_usd'), 'result': payload.get('result'),
               'model_usage': payload.get('modelUsage', {}),
               'permission_denials': payload.get('permission_denials', [])}
     args.report.parent.mkdir(parents=True, exist_ok=True)

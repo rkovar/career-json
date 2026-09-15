@@ -44,7 +44,7 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def resolve(directory=PACKS):
+def resolve(directory=PACKS, root=ROOT):
     packs = sorted(p for p in directory.glob("*.json"))
     if not packs:
         return None
@@ -55,7 +55,7 @@ def resolve(directory=PACKS):
         except json.JSONDecodeError:
             continue
         if meta.get("supersedes"):
-            superseded.add((ROOT / meta["supersedes"]).resolve())
+            superseded.add((root / meta["supersedes"]).resolve())
     live = [p for p in packs if p.resolve() not in superseded]
     if len(live) > 1:
         # Ambiguity is a bug in pack hygiene, not something to paper over.
@@ -64,7 +64,26 @@ def resolve(directory=PACKS):
             f"ambiguous: {len(live)} packs claim to be current ({names}).\n"
             "Set metadata.supersedes on the newer pack so the chain has one head."
         )
-    return live[0] if live else None
+    if not live:
+        raise SystemExit('invalid pack history: cycle or self-reference; no current head')
+    by_path = {p.resolve(): p for p in packs}
+    seen = set()
+    cursor = live[0].resolve()
+    while True:
+        if cursor in seen:
+            raise SystemExit('invalid pack history: cycle')
+        seen.add(cursor)
+        previous = (json.loads(cursor.read_text()).get('metadata') or {}).get('supersedes')
+        if not previous:
+            break
+        cursor = (root / previous).resolve()
+        if not cursor.is_file() or not cursor.is_relative_to(directory.resolve()):
+            # Legacy archives may have missing predecessors. Resolving the known
+            # head keeps recall usable; health and backup report the broken pin.
+            break
+    if not set(by_path) <= seen:
+        raise SystemExit('invalid pack history: disconnected versions')
+    return live[0]
 
 
 def main(argv):

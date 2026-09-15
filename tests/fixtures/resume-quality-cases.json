@@ -1,0 +1,800 @@
+{
+  "fixture_version": 1,
+  "fictional": true,
+  "cases": [
+    {
+      "case_id": "promotions",
+      "pack": {
+        "$schema": "../schemas/career.schema.json",
+        "schema_version": "1.4",
+        "name": "Alex Mercer",
+        "purpose": "Fully fictional resume quality evaluation fixture.",
+        "metadata": {},
+        "source_records": [
+          {
+            "source_id": "SRC_QUALITY",
+            "source_type": "person",
+            "path": "data/sources/fixture.txt",
+            "independent": false,
+            "retrieved": "2026-09-15"
+          }
+        ],
+        "employment": [
+          {
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Principal Engineer",
+            "start": "2022-03",
+            "end": "present",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          },
+          {
+            "employment_id": "EMP_STAFF_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Staff Engineer",
+            "start": "2018-06",
+            "end": "2022-03",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          },
+          {
+            "employment_id": "EMP_SENIOR_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Senior Engineer",
+            "start": "2015-01",
+            "end": "2018-06",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          }
+        ],
+        "evidence_atoms": [
+          {
+            "id": "E_PROGRESSION",
+            "title": "Maintained a shared reliability programme",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Maintained a shared reliability programme",
+              "action": "Co-led a reliability programme across engineering teams.",
+              "result": "Teams continued using its recovery exercises."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Co-led a reliability programme across engineering teams. Teams continued using its recovery exercises."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2017",
+              "end": "2025",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": [
+              "Shared contribution across several positions; do not attach the entire programme to the latest title."
+            ]
+          },
+          {
+            "id": "E_DELIVERY",
+            "title": "Built recovery tooling",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Built recovery tooling",
+              "action": "Designed and implemented recovery tooling with automated verification.",
+              "result": "The platform team adopted it as its standard recovery procedure."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Designed and implemented recovery tooling with automated verification. The platform team adopted it as its standard recovery procedure."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2024",
+              "end": "2024",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": []
+          }
+        ],
+        "skills": [],
+        "skill_vocabulary": {},
+        "private_profile": {
+          "name": "Alex Mercer",
+          "location": "London, United Kingdom",
+          "email": "alex.mercer@example.invalid"
+        },
+        "education": [],
+        "strengths_profile": [],
+        "positioning_preferences": []
+      },
+      "role": {
+        "role_id": "promotions",
+        "title": "Principal Platform Engineer",
+        "central_requirement": "Deliver adopted engineering capabilities",
+        "requirements": [
+          {
+            "text": "Deliver adopted engineering capabilities",
+            "weight": "essential",
+            "kind": "build",
+            "evidenced_by": [
+              {
+                "id": "E_DELIVERY",
+                "linked_by": "subject",
+                "on": "2026-09-15"
+              }
+            ]
+          },
+          {
+            "text": "Influence teams over time",
+            "weight": "important",
+            "kind": "lead",
+            "evidenced_by": [
+              {
+                "id": "E_PROGRESSION",
+                "linked_by": "subject",
+                "on": "2026-09-15"
+              }
+            ]
+          }
+        ],
+        "ats_keywords": [
+          "platform engineering"
+        ],
+        "source": "data/sources/role.txt"
+      },
+      "criteria": [
+        "Make the progression through three positions understandable under one employer.",
+        "Keep the multi-position programme explicitly at employer scope.",
+        "Establish technical delivery in the opening impression."
+      ],
+      "expectation": "Make the intended technical contribution clear while preserving factual boundaries. These expectations are coordinator material; record the reader impression before consulting them."
+    },
+    {
+      "case_id": "older-specialist",
+      "pack": {
+        "$schema": "../schemas/career.schema.json",
+        "schema_version": "1.4",
+        "name": "Sam Rowan",
+        "purpose": "Fully fictional resume quality evaluation fixture.",
+        "metadata": {},
+        "source_records": [
+          {
+            "source_id": "SRC_QUALITY",
+            "source_type": "person",
+            "path": "data/sources/fixture.txt",
+            "independent": false,
+            "retrieved": "2026-09-15"
+          }
+        ],
+        "employment": [
+          {
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Principal Engineer",
+            "start": "2022-03",
+            "end": "present",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          },
+          {
+            "employment_id": "EMP_RESEARCH_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Research Engineer",
+            "start": "2005-01",
+            "end": "2015-01",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          }
+        ],
+        "evidence_atoms": [
+          {
+            "id": "E_OLD_RESEARCH",
+            "title": "Developed a network-testing method",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Developed a network-testing method",
+              "action": "Designed and published a method for validating network isolation.",
+              "result": "Other teams adopted the method."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Designed and published a method for validating network isolation. Other teams adopted the method."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_RESEARCH_ENGINEER",
+            "occurred": {
+              "start": "2010",
+              "end": "2010",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": []
+          },
+          {
+            "id": "E_RECENT_VISIBILITY",
+            "title": "Expanded event attendance",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Expanded event attendance",
+              "action": "Organised an engineering event series.",
+              "result": "Attendance increased."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Organised an engineering event series. Attendance increased."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "business_outcome",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2025",
+              "end": "2025",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": []
+          }
+        ],
+        "skills": [],
+        "skill_vocabulary": {},
+        "private_profile": {
+          "name": "Sam Rowan",
+          "location": "London, United Kingdom",
+          "email": "sam.rowan@example.invalid"
+        },
+        "education": [],
+        "strengths_profile": [],
+        "positioning_preferences": []
+      },
+      "role": {
+        "role_id": "older-specialist",
+        "title": "Principal Platform Engineer",
+        "central_requirement": "Demonstrate network isolation design",
+        "requirements": [
+          {
+            "text": "Demonstrate network isolation design",
+            "weight": "essential",
+            "kind": "build",
+            "evidenced_by": [
+              {
+                "id": "E_OLD_RESEARCH",
+                "linked_by": "subject",
+                "on": "2026-09-15"
+              }
+            ]
+          }
+        ],
+        "ats_keywords": [
+          "platform engineering"
+        ],
+        "source": "data/sources/role.txt"
+      },
+      "criteria": [
+        "Retain the older example that establishes the central requirement.",
+        "Do not portray historical research as current hands-on implementation.",
+        "Do not let recent publicity displace the only direct technical evidence."
+      ],
+      "expectation": "Make the intended technical contribution clear while preserving factual boundaries. These expectations are coordinator material; record the reader impression before consulting them."
+    },
+    {
+      "case_id": "sparse-recent",
+      "pack": {
+        "$schema": "../schemas/career.schema.json",
+        "schema_version": "1.4",
+        "name": "Jamie Bell",
+        "purpose": "Fully fictional resume quality evaluation fixture.",
+        "metadata": {},
+        "source_records": [
+          {
+            "source_id": "SRC_QUALITY",
+            "source_type": "person",
+            "path": "data/sources/fixture.txt",
+            "independent": false,
+            "retrieved": "2026-09-15"
+          }
+        ],
+        "employment": [
+          {
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Principal Engineer",
+            "start": "2022-03",
+            "end": "present",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          },
+          {
+            "employment_id": "EMP_STAFF_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Staff Engineer",
+            "start": "2018-06",
+            "end": "2022-03",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          }
+        ],
+        "evidence_atoms": [
+          {
+            "id": "E_RECENT_RESPONSIBILITY",
+            "title": "Joined architecture reviews",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Joined architecture reviews",
+              "action": "Participated in architecture reviews after joining the team.",
+              "result": "No delivery outcome is recorded yet."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Participated in architecture reviews after joining the team. No delivery outcome is recorded yet."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "activity",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2026",
+              "end": "2026",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": []
+          },
+          {
+            "id": "E_EARLIER_DELIVERY",
+            "title": "Built a test harness",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Built a test harness",
+              "action": "Built a recovery test harness.",
+              "result": "The team used it in release readiness reviews."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Built a recovery test harness. The team used it in release readiness reviews."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_STAFF_ENGINEER",
+            "occurred": {
+              "start": "2021",
+              "end": "2021",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": []
+          }
+        ],
+        "skills": [],
+        "skill_vocabulary": {},
+        "private_profile": {
+          "name": "Jamie Bell",
+          "location": "London, United Kingdom",
+          "email": "jamie.bell@example.invalid"
+        },
+        "education": [],
+        "strengths_profile": [],
+        "positioning_preferences": []
+      },
+      "role": {
+        "role_id": "sparse-recent",
+        "title": "Principal Platform Engineer",
+        "central_requirement": "Build reliable delivery tooling",
+        "requirements": [
+          {
+            "text": "Build reliable delivery tooling",
+            "weight": "essential",
+            "kind": "build",
+            "evidenced_by": [
+              {
+                "id": "E_EARLIER_DELIVERY",
+                "linked_by": "subject",
+                "on": "2026-09-15"
+              }
+            ]
+          }
+        ],
+        "ats_keywords": [
+          "platform engineering"
+        ],
+        "source": "data/sources/role.txt"
+      },
+      "criteria": [
+        "Describe recent responsibilities narrowly without inventing results or numbers.",
+        "Use earlier delivery evidence without suggesting it occurred in the current role.",
+        "Treat sparse recent evidence as a document limitation, not failed career progress."
+      ],
+      "expectation": "Make the intended technical contribution clear while preserving factual boundaries. These expectations are coordinator material; record the reader impression before consulting them."
+    },
+    {
+      "case_id": "shared-outcome",
+      "pack": {
+        "$schema": "../schemas/career.schema.json",
+        "schema_version": "1.4",
+        "name": "Drew Ellis",
+        "purpose": "Fully fictional resume quality evaluation fixture.",
+        "metadata": {},
+        "source_records": [
+          {
+            "source_id": "SRC_QUALITY",
+            "source_type": "person",
+            "path": "data/sources/fixture.txt",
+            "independent": false,
+            "retrieved": "2026-09-15"
+          }
+        ],
+        "employment": [
+          {
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Principal Engineer",
+            "start": "2022-03",
+            "end": "present",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          }
+        ],
+        "evidence_atoms": [
+          {
+            "id": "E_SHARED_LAB",
+            "title": "Co-created a testing lab",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Co-created a testing lab",
+              "action": "Co-created a testing lab with Morgan Reed and directed its rollout.",
+              "result": "The lab served partner teams."
+            },
+            "metrics": [
+              {
+                "value": "80 participating teams",
+                "basis": "Cumulative team registrations during 2023\u20132025; not annual and not unique people.",
+                "measured": true
+              }
+            ],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Co-created a testing lab with Morgan Reed and directed its rollout. The lab served partner teams."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2023",
+              "end": "2025",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": [
+              "Co-created with Morgan Reed; never imply sole authorship.",
+              "80 counts cumulative team registrations during 2023\u20132025, not annual people."
+            ]
+          }
+        ],
+        "skills": [],
+        "skill_vocabulary": {},
+        "private_profile": {
+          "name": "Drew Ellis",
+          "location": "London, United Kingdom",
+          "email": "drew.ellis@example.invalid"
+        },
+        "education": [],
+        "strengths_profile": [],
+        "positioning_preferences": []
+      },
+      "role": {
+        "role_id": "shared-outcome",
+        "title": "Principal Platform Engineer",
+        "central_requirement": "Deliver shared engineering capabilities",
+        "requirements": [
+          {
+            "text": "Deliver shared engineering capabilities",
+            "weight": "essential",
+            "kind": "build",
+            "evidenced_by": [
+              {
+                "id": "E_SHARED_LAB",
+                "linked_by": "subject",
+                "on": "2026-09-15"
+              }
+            ]
+          }
+        ],
+        "ats_keywords": [
+          "platform engineering"
+        ],
+        "source": "data/sources/role.txt"
+      },
+      "criteria": [
+        "Preserve co-creation and distinguish personal work from team outcomes.",
+        "Preserve units and cumulative timeframe for any participant metric.",
+        "Avoid repeating the same result as multiple independent accomplishments."
+      ],
+      "expectation": "Make the intended technical contribution clear while preserving factual boundaries. These expectations are coordinator material; record the reader impression before consulting them."
+    },
+    {
+      "case_id": "nonfinancial-impact",
+      "pack": {
+        "$schema": "../schemas/career.schema.json",
+        "schema_version": "1.4",
+        "name": "Casey Hart",
+        "purpose": "Fully fictional resume quality evaluation fixture.",
+        "metadata": {},
+        "source_records": [
+          {
+            "source_id": "SRC_QUALITY",
+            "source_type": "person",
+            "path": "data/sources/fixture.txt",
+            "independent": false,
+            "retrieved": "2026-09-15"
+          }
+        ],
+        "employment": [
+          {
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "employer": "Alder Systems",
+            "employer_of_record": null,
+            "title": "Principal Engineer",
+            "start": "2022-03",
+            "end": "present",
+            "location": "London, United Kingdom",
+            "parent_employment_id": null,
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "locator": "employment"
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true
+          }
+        ],
+        "evidence_atoms": [
+          {
+            "id": "E_PREVENTION",
+            "title": "Designed a deployment safeguard",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Designed a deployment safeguard",
+              "action": "Co-designed a deployment safeguard and documented its failure modes.",
+              "result": "Two teams adopted the safeguard; avoided losses were not measured."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "Co-designed a deployment safeguard and documented its failure modes. Two teams adopted the safeguard; avoided losses were not measured."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": true,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2024",
+              "end": "2024",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": [
+              "No monetary savings or incidents prevented were measured."
+            ]
+          },
+          {
+            "id": "E_PRIVATE",
+            "title": "Private research",
+            "star": {
+              "situation": "A fictional organisation needed a dependable capability.",
+              "task": "Private research",
+              "action": "PRIVATE_CANARY: unreleased research.",
+              "result": "PRIVATE_CANARY: not for publication."
+            },
+            "metrics": [],
+            "skills": [
+              "platform engineering"
+            ],
+            "tags": [],
+            "source_refs": [
+              {
+                "source_id": "SRC_QUALITY",
+                "excerpt": "PRIVATE_CANARY: unreleased research. PRIVATE_CANARY: not for publication."
+              }
+            ],
+            "evidence_status": "self_asserted",
+            "external_safe": false,
+            "outcome_type": "output",
+            "role_fit_notes": null,
+            "employment_id": "EMP_PRINCIPAL_ENGINEER",
+            "occurred": {
+              "start": "2025",
+              "end": "2025",
+              "inferred": false
+            },
+            "corroborators": [],
+            "constraints": []
+          }
+        ],
+        "skills": [],
+        "skill_vocabulary": {},
+        "private_profile": {
+          "name": "Casey Hart",
+          "location": "London, United Kingdom",
+          "email": "casey.hart@example.invalid"
+        },
+        "education": [],
+        "strengths_profile": [],
+        "positioning_preferences": []
+      },
+      "role": {
+        "role_id": "nonfinancial-impact",
+        "title": "Principal Platform Engineer",
+        "central_requirement": "Design adopted preventative controls",
+        "requirements": [
+          {
+            "text": "Design adopted preventative controls",
+            "weight": "essential",
+            "kind": "build",
+            "evidenced_by": [
+              {
+                "id": "E_PREVENTION",
+                "linked_by": "subject",
+                "on": "2026-09-15"
+              }
+            ]
+          }
+        ],
+        "ats_keywords": [
+          "platform engineering"
+        ],
+        "source": "data/sources/role.txt"
+      },
+      "criteria": [
+        "Make the design contribution and adoption clear without inventing avoided losses.",
+        "Preserve shared ownership and the absence of a financial measurement.",
+        "Exclude private research from every candidate artifact."
+      ],
+      "expectation": "Make the intended technical contribution clear while preserving factual boundaries. These expectations are coordinator material; record the reader impression before consulting them."
+    }
+  ]
+}

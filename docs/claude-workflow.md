@@ -19,20 +19,22 @@ rules matter and are easy to miss:
 `unresolved` rather than blocking anything. The claim is simply left out of
 documents until you come back to it.
 
-**Delivery never asks.** That is the point of answering during setup. If evidence
-is thin, `make-resume` narrows or drops the claim and tells you afterwards.
+**Delivery follows the saved review mode.** Automatic delivery narrows thin
+claims and reports gaps; interactive delivery waits at requested selection and
+own-voice checkpoints. First-time users should be offered these reviews without
+overriding an explicit automatic request. Facts already recorded are not asked
+again. New factual answers return through Core review.
 
-`make-resume` opens with evidence of value for the role, selects relevant scope,
-and writes one principal achievement per bullet. It then evaluates and screens
-the draft, resolves actionable editorial findings within the publication rules,
-and checks the revised document again. This is normally one revision, with at
-most two editorial cycles; missing evidence is reported rather than invented.
+For resumes, follow [resume-authoring.md](resume-authoring.md): save an application
+brief and ready evidence plan, draft experience first, and add a summary only
+when it helps. Preserve contribution, context, ownership and meaningful older
+work. Track the default two editorial revision cycles in the [process record](resume-process.md), with separate integrity,
+representation, relevance, readability and delivery findings.
 
-The Markdown header is `# Name`, `## Target role`, contact paragraph, then
-summary. `render.py` recognises that structure and keeps contact and title styling
-separate. For a specified page count, export the final HTML to PDF and inspect
-pagination and extracted text. Valid HTML and a short word count do not establish
-that the final PDF meets the requested length or a particular ATS's requirements.
+[PDF, TXT and DOCX exports](resume-exports.md) are required from shared content.
+Inspect final PDF layout and verify recovered text; do not infer Word pagination,
+accessibility or employer ATS performance from content checks alone. Submission
+files exclude the internal citations retained in the editable draft and sidecars.
 
 ## Review before changes become current
 
@@ -64,8 +66,8 @@ what it found and what is missing before staging a proposed datapack for review.
 never promotes its status on its own: status follows the sources, not the answer.
 Keep unresolved questions in `reviews/`.
 
-**`generate-resume`** needs the approved datapack, target role, job description,
-ATS constraints, persona, target length, and recruiter context. Every substantive
+**`generate-resume`** uses the approved datapack through a selected safe view and
+a ready resume plan with application constraints. Every substantive
 claim keeps its evidence ID, carried as an `<!-- Evidence: ... -->` comment that
 the renderer hides.
 

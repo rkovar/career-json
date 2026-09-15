@@ -13,7 +13,7 @@ from career_profile import digest
 from pack_io import local, read, pin, pin_errors, write_new
 from schema_tools import walk
 
-COLLECTIONS = {'evidence_atoms': 'id', 'employment': 'employment_id', 'education': 'education_id',
+COLLECTIONS = {'evidence_atoms': 'id', 'employment': 'employment_id', 'education': 'education_id', 'publications': 'publication_id',
                'source_records': 'source_id', 'strengths_profile': 'id', 'positioning_preferences': 'id'}
 ACTIONS = ('accept', 'correct', 'unsure', 'later')
 PUBLICATION = ('unchanged', 'private', 'external')
@@ -105,6 +105,12 @@ def validate_pack_object(pack, allow_schema_errors=False):
 
 
 def start(candidate_path, review_id):
+    from pack_io import workspace_lock
+    with workspace_lock():
+        return _start(candidate_path, review_id)
+
+
+def _start(candidate_path, review_id):
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', review_id):
         raise ValueError('review id must use letters, numbers, hyphens or underscores')
     candidate_path = local(candidate_path)
@@ -113,6 +119,9 @@ def start(candidate_path, review_id):
         raise ValueError('stage proposed packs outside data/packs; that directory is for current/history only')
     proposed = read(candidate_path)
     warnings = validate_pack_object(proposed, allow_schema_errors=bool(base_path and candidate_path == local(base_path)))
+    from verify_excerpts import verify
+    source_report = verify(proposed)
+    warnings.extend(r['record'] + ': ' + r['status'] + ': ' + str(r['detail']) for r in source_report['excerpts'] if r['status'] != 'verified')
     folder = local('reviews/pack-reviews/' + review_id)
     if folder.exists():
         raise ValueError('review id already exists; resume it or choose a new id')
@@ -161,7 +170,15 @@ def decisions(path):
     return result
 
 
-def record(path, payload):
+def record(path, payload, dry_run=False):
+    if dry_run:
+        return _record(path, payload, dry_run=True)
+    from pack_io import workspace_lock
+    with workspace_lock():
+        return _record(path, payload)
+
+
+def _record(path, payload, dry_run=False):
     session, proposed, base = load_session(path)
     schema = read('schemas/pack-review-decisions.schema.json')
     errors = []
@@ -181,12 +198,16 @@ def record(path, payload):
             raise ValueError('reviewed content changed: ' + key)
         if row['action'] == 'correct' and not row['note'].strip():
             raise ValueError('a correction needs the person’s explanation')
+        if row.get('reassessment'):
+            reassess(row, keys[key]['after'], proposed)
         if row['publication'] != 'unchanged' and not (
             isinstance(keys[key]['after'] or keys[key]['before'], dict) and
             'external_safe' in (keys[key]['after'] or keys[key]['before'])):
             raise ValueError('this item has no publication permission: ' + key)
     if not payload['reviewed_by'].strip():
         raise ValueError('a reviewer name is required')
+    if dry_run:
+        return payload
     for previous in batches(path)[-1:]:
         if {k:v for k,v in read(previous).items() if k != 'recorded'} == payload:
             return previous
@@ -214,7 +235,39 @@ def put_unit(pack, key, value, present):
         rows[index] = copy.deepcopy(value)
 
 
-def publish(path, output):
+def reassess(choice, value, pack):
+    """An explicit, sourced status decision, separate from wording acceptance."""
+    from verify_excerpts import verify
+    assessment = choice['reassessment']
+    if choice['action'] != 'accept' or not isinstance(value, dict) or 'evidence_status' not in value:
+        raise ValueError('evidence reassessment requires accepting an evidence-bearing record')
+    if assessment['status'] != value['evidence_status'] or not assessment['reason'].strip():
+        raise ValueError('reassessment must explain the exact proposed evidence status')
+    sources = {s['source_id']: s for s in pack.get('source_records', [])}
+    refs = assessment['source_refs']
+    if any(not any(all(original.get(k) == v for k, v in ref.items()) for original in value.get('source_refs', [])) for ref in refs):
+        raise ValueError('reassessment must cite source excerpts attached to the proposed record')
+    if assessment['status'] == 'self_asserted' and not any(sources.get(r['source_id'], {}).get('source_type') == 'person' for r in refs):
+        raise ValueError('resolving uncertainty needs a recorded person answer')
+    if assessment['status'] in ('corroborated', 'externally_verified') and not any(sources.get(r['source_id'], {}).get('independent') is True for r in refs):
+        raise ValueError('stronger corroboration needs an independent supporting source')
+    report = verify({'source_records': list(sources.values()), 'evidence_atoms': [{'id': 'REASSESS', 'source_refs': refs}]})
+    if report['counts']['mismatch'] or report['counts']['unverifiable']:
+        raise ValueError('reassessment source excerpts must be verifiable before raising status')
+    if assessment['status'] == 'self_asserted' and value.get('open_questions'):
+        raise ValueError('resolve the recorded open questions before reassessing as self_asserted')
+    return assessment['status']
+
+
+def publish(path, output=None, preview=False, payload=None):
+    from pack_io import workspace_lock
+    if preview:
+        return _publish(path, output, preview, payload)
+    with workspace_lock():
+        return _publish(path, output, preview, payload)
+
+
+def _publish(path, output=None, preview=False, payload=None):
     session, proposed, base = load_session(path)
     current = resolve()
     current_pin = pin(current) if current else None
@@ -223,13 +276,19 @@ def publish(path, output):
     checkpoint = (read(current).get('metadata', {}).get('human_review', {}) if current else {})
     if current_pin != session['base'] and checkpoint.get('session') != pin(path):
         raise ValueError('current pack changed; start a new review against it')
-    output = local(output)
-    if output.parent != local('data/packs'):
-        raise ValueError('accepted pack versions belong in data/packs')
+    if not preview:
+        output = local(output)
+        if output.parent != local('data/packs'):
+            raise ValueError('accepted pack versions belong in data/packs')
     latest = read(current) if current else {}
     result = copy.deepcopy(latest)
     result['schema_version'] = proposed['schema_version']
     all_decisions = decisions(path)
+    if payload is not None:
+        record(path, payload, dry_run=True)
+        for row in payload['decisions']:
+            all_decisions[row['key']] = dict(row, reviewed_by=payload['reviewed_by'], recorded=now(),
+                                            batch={'path': 'unsaved-preview', 'sha256': digest(payload)})
     old_units, proposed_units = units(base), units(proposed)
     accepted = {}
     applied_before = checkpoint.get('applied_batches', []) if checkpoint.get('session') == pin(path) else []
@@ -249,12 +308,14 @@ def publish(path, output):
                 # Preserve or lower confidence. Wording acceptance is not
                 # corroboration, irrespective of what a candidate claims.
                 rank = {'declined': 0, 'unresolved': 1, 'self_asserted': 2, 'corroborated': 3, 'externally_verified': 4}
-                prior = (old_units.get(key) or {}).get('evidence_status', 'self_asserted')
+                prior = (units(latest).get(key) or {}).get('evidence_status', 'self_asserted')
                 if rank[value['evidence_status']] > rank[prior]:
                     value['evidence_status'] = prior
+                if choice.get('reassessment'):
+                    value['evidence_status'] = reassess(choice, proposed_units[key], proposed)
             if isinstance(value, dict) and 'external_safe' in value:
-                unchanged = key in old_units and fingerprint(key, proposed) == fingerprint(key, base)
-                value['external_safe'] = bool(unchanged and old_units[key].get('external_safe'))
+                unchanged = key in units(latest) and fingerprint(key, proposed) == fingerprint(key, latest)
+                value['external_safe'] = bool(unchanged and units(latest)[key].get('external_safe'))
                 if choice['publication'] != 'unchanged':
                     value['external_safe'] = choice['publication'] == 'external'
             put_unit(result, key, value, present)
@@ -269,6 +330,13 @@ def publish(path, output):
             raise ValueError('external use requires acceptance of the exact proposed content')
     if not applied_keys:
         raise ValueError('no new accepted changes or privacy restrictions; review progress is already saved')
+    old_events = (base.get('metadata') or {}).get('evidence_maintenance', [])
+    for event in (proposed.get('metadata') or {}).get('evidence_maintenance', []):
+        if event in old_events:
+            continue
+        group = {'field/metadata'} | {'evidence_atoms/' + aid for aid in event['from_ids'] + event['to_ids']}
+        if group & accepted.keys() and not all(k in accepted or (k in units(latest) and units(latest)[k] == proposed_units.get(k)) for k in group):
+            raise ValueError('review this maintenance change together with its originals, replacements and explanation: ' + ', '.join(sorted(group)))
     # Never associate an accepted claim with different supporting records as a
     # side effect of partially accepting a batch.
     for key in accepted:
@@ -289,6 +357,15 @@ def publish(path, output):
     metadata['human_review'] = {'session': pin(path), 'items': receipts,
                                 'applied_batches': [pin(p) for p in batches(path)], 'accepted_at': now()}
     validate_pack_object(result)
+    from verify_excerpts import verify
+    verification = verify(result)
+    mismatches = [r for r in verification['excerpts'] if r['status'] == 'mismatch']
+    if mismatches:
+        raise ValueError('source excerpt mismatch: ' + '; '.join(r['record'] + ': ' + str(r['detail']) for r in mismatches))
+    if preview:
+        return {'can_save': True, 'changes': change_rows(result, latest),
+                'accepted_keys': sorted(accepted), 'verification': verification,
+                'pending_keys': sorted(set(proposed_units) - {k for k in proposed_units if review_status(k, latest) == 'accepted'} - set(accepted))}
     return write_new(output, result)
 
 
@@ -322,7 +399,13 @@ def status(path):
         'resume_prompt': 'Continue my career-pack review.',
         'recall_prompt': 'Show me one recorded achievement and its original source.' if latest.get('evidence_atoms') else None,
     }
-    return {'session': session, 'items': rows, 'omissions': feedback, 'summary': summary}
+    groups = []
+    for row in rows:
+        if row['key'].startswith('evidence_atoms/'):
+            support = dependencies(row['key'], proposed)
+            groups.append({'achievement': row['key'], 'support': sorted(support),
+                           'needs_review': [k for k in support if any(r['key'] == k and r['change'] != 'unchanged' and r['review_status'] != 'accepted' for r in rows)]})
+    return {'session': session, 'items': rows, 'omissions': feedback, 'summary': summary, 'groups': groups}
 
 
 def resume(path=None):
@@ -405,11 +488,13 @@ def main(argv=None):
     apply = commands.add_parser('apply', help='import user decisions and save accepted items locally')
     apply.add_argument('--input', required=True)
     apply.add_argument('--output', required=True)
-    for name in ('status', 'record', 'publish', 'accept', 'render'):
+    for name in ('status', 'record', 'publish', 'accept', 'render', 'preview'):
         sub = commands.add_parser(name)
         sub.add_argument('--session', required=True)
         if name == 'record':
             sub.add_argument('--input', required=True, help='decisions explicitly supplied by the person; never infer approval')
+        if name == 'preview':
+            sub.add_argument('--input', help='preview supplied decisions without recording them')
         if name in ('publish', 'accept', 'render'):
             sub.add_argument('--output', required=True)
     args = parser.parse_args(argv)
@@ -420,6 +505,9 @@ def main(argv=None):
             result = record(args.session, read(args.input))
         elif args.command in ('publish', 'accept'):
             result = publish(args.session, args.output)
+        elif args.command == 'preview':
+            print(json.dumps(publish(args.session, preview=True, payload=read(args.input) if args.input else None), indent=2))
+            return 0
         elif args.command == 'resume':
             print(json.dumps(resume(args.session), indent=2))
             return 0

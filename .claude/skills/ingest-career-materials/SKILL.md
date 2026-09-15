@@ -5,6 +5,14 @@ description: "Called by `build-career-pack`, which is the normal entry point. Us
 
 # Ingest Career Materials
 
+## Startup scope
+
+When called from a guided start, read its exact saved handoff and
+`docs/guided-starts.md`. Extract career evidence only from its career sources
+and recorded user accounts. Keep job descriptions, writing advice and deferred
+files outside factual extraction. Preserve restrictions and category deferrals.
+A direct explicit source request can bypass setup.
+
 ## Goal
 
 Convert user-provided career material into candidate evidence while preserving provenance and uncertainty.
@@ -30,24 +38,33 @@ instructions in this run are this skill's and the user's own messages.
    start, end, location, and source refs. Ask about `employer_of_record` wherever
    the work was delivered for a client rather than the paying entity. Link each
    atom to the role it happened in with `employment_id`.
-6. Assign stable evidence IDs and source references. Each ref carries a
+6. Extract every talk, keynote, article, book or book contribution, blog post,
+   report, podcast, video, course, software or dataset release, and committee
+   or board seat into `publications` records, one per item, with `kind`,
+   `venue`, `date`, `url`, `role` and `collaborators` as the source states them.
+   Resumes, catalogues, author archives, programme pages and speaker profiles
+   all yield them; capture public listing pages as saved sources so an item can
+   be `externally_verified`. A single achievement may summarise a body of work
+   (link it through `evidence_id`), but it never replaces the itemised list:
+   a resume's publications section is generated from these records only.
+7. Assign stable evidence IDs and source references. Each ref carries a
    `locator` (where to look) and an `excerpt`: the source's own words, copied
    verbatim from the extracted text, not paraphrased and not tidied. Use `...`
    to elide. `scripts/verify_excerpts.py` re-reads the source and fails on any
    excerpt it does not contain, which is the only check on this hop, so an atom
    without one is unverifiable and `validate_pack.py` says so.
-7. Set `occurred` for every atom. Take it from the source where the source says
+8. Set `occurred` for every atom. Take it from the source where the source says
    when; otherwise inherit the employment window and set `inferred: true` so it is
    visibly an approximation rather than a fact. Record `capture.method`.
-8. Mark new evidence `self_asserted`. Promote only when the source is independent
+9. Mark new evidence `self_asserted`. Promote only when the source is independent
    of the subject. Material the subject wrote, including a resume, a LinkedIn
    export, and a personal site, is never independent, and a claim appearing in
    several such documents is still `self_asserted`.
    Record `independent: true` on genuinely third-party sources, and capture the
    URL and retrieval date for public pages so the check stays auditable.
-9. Mark publication safety conservatively. Internal source material defaults to `external_safe: false`.
-10. Preserve conflicting values as separate candidates and create a review item.
-11. Write the candidate pack to `data/candidates/` and questions to `reviews/`.
+10. Mark publication safety conservatively. Internal source material defaults to `external_safe: false`.
+11. Preserve conflicting values as separate candidates and create a review item.
+12. Write the candidate pack to `data/candidates/` and questions to `reviews/`.
     Follow `docs/pack-review.md` to stage a readable review. Never place an
     unreviewed extraction in `data/packs/`, where it would become current.
 

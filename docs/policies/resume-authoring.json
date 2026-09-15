@@ -1,0 +1,95 @@
+{
+  "policy_version": "1.1.0",
+  "reviewed_on": "2026-09-14",
+  "evidence_basis": "Four user-supplied research memos in resume_information, dated 2026-09-11. Their cited external pages have not been independently reverified for this implementation.",
+  "precedence": [
+    "factual accuracy and publication permission",
+    "explicit employer requirements",
+    "explicit user preferences",
+    "scoped editorial decisions",
+    "contextual defaults"
+  ],
+  "sources": {
+    "achievement": {
+      "memo": "Research Memo_ Human-Readable Achievement Writing for Recruiter-Facing Resumes.md",
+      "scope": "Institutional practice guidance; largely student and early-career sources; no universal hiring-outcome proof."
+    },
+    "structure": {
+      "memo": "ATS Parsing and Document Structure_ Evidence-Led Resume Authoring Memo.md",
+      "scope": "Named vendor parsing risks and accessibility guidance; no universal ATS guarantee."
+    },
+    "market": {
+      "memo": "Research Memo_ UK and US Resume_CV Conventions for Job Applications.md",
+      "scope": "UK and US conventions; current specialized portal requirements require verification before enforcement."
+    },
+    "screening": {
+      "memo": "Research memo_ AI-assisted recruitment screening, fairness, and resume authorship.md",
+      "scope": "Screening variability and simulation limits; no candidate ranking or hiring prediction."
+    }
+  },
+  "rules": [
+    {
+      "id": "truth",
+      "category": "requirement",
+      "source": "achievement",
+      "applies": "all outputs",
+      "rule": "Preserve contribution, ownership, metric basis, dates, constraints and publication permissions. New claims return to Core review."
+    },
+    {
+      "id": "instructions",
+      "category": "requirement",
+      "source": "market",
+      "applies": "all applications",
+      "rule": "Record employer instructions, user choices and inferred defaults separately. Specialized portal limits are not hardcoded without current verification."
+    },
+    {
+      "id": "formats",
+      "category": "requirement",
+      "source": "user",
+      "applies": "resume delivery",
+      "rule": "Deliver PDF, UTF-8 TXT and editable DOCX from identical shared content, with separate verification and failure reporting."
+    },
+    {
+      "id": "structure",
+      "category": "default",
+      "source": "structure",
+      "applies": "standard UK and US resumes",
+      "rule": "Use one text column, conventional headings, semantic paragraphs and lists, and transparent reverse chronology."
+    },
+    {
+      "id": "privacy",
+      "category": "default",
+      "source": "market",
+      "applies": "standard UK and US resumes",
+      "rule": "Omit photos, sensitive demographic details, full street addresses, referee contacts and immigration identifiers. Apply explicit anonymisation instructions."
+    },
+    {
+      "id": "space",
+      "category": "judgment",
+      "source": "achievement",
+      "applies": "all seniority levels",
+      "rule": "Allocate space by distinct contribution. Do not impose age-based role deletion, a fixed bullet count, a mandatory summary or a metric quota."
+    },
+    {
+      "id": "voice",
+      "category": "judgment",
+      "source": "achievement",
+      "applies": "all outputs",
+      "rule": "Use precise natural wording the person can explain in an interview. Preserve sourced context and calibrate attribution."
+    },
+    {
+      "id": "review",
+      "category": "requirement",
+      "source": "screening",
+      "applies": "quality assessment",
+      "rule": "Separate integrity, representation, relevance, readability and export checks. Label reviewer assumptions; do not predict hiring success or penalize gaps and lateral moves by default."
+    },
+    {
+      "id": "durable-review",
+      "category": "requirement",
+      "source": "user",
+      "applies": "planned resumes",
+      "rule": "Record exact-draft constraint and prominence checks, private strength comparisons, measured compression when shortening is requested, and categorized findings with derived revision usage. Generate handoffs from validated records; editorial budget exhaustion never waives integrity failures."
+    }
+  ]
+}

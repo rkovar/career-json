@@ -1,11 +1,11 @@
 ---
 name: review-selection
-description: "Use when the person requests an evidence preview or wants to choose achievements for an output. Explains a ranked recommendation with alternatives and records scoped choices. Optional before make-resume; never an unsolicited delivery checkpoint."
+description: "Use when the person requests an evidence preview or wants to choose achievements for an output. Explains a ranked recommendation with alternatives and records scoped choices. Supports the saved interactive review mode; automatic delivery curates without waiting."
 ---
 
 # Review the proposed evidence selection
 
-Read `docs/editorial-memory.md`. Use or create a durable output brief, then run
+Read `docs/editorial-memory.md` and `docs/resume-authoring.md`. Use or create a durable output brief, then run
 `editorial.py prepare`. The result is a candidate retrieval baseline, not a final
 editorial recommendation. Use `select_evidence.py --selection` for safe content;
 read the private pack and decisions only for planning, never copy private reasons
@@ -27,8 +27,10 @@ merely to fill the record.
 
 Report `unavailable_priorities` and `strength_readiness` privately; an inclusion
 preference cannot make evidence eligible. Present the recommendation and alternatives, offering acceptance of the whole
-set or corrections. Wait only because the person requested this review. In the
-normal make-resume path, make the selection autonomously and report it afterward.
+set or corrections. Wait when the person requested review or chose interactive mode. In automatic
+delivery, curate autonomously and report material choices afterward. Recommend a
+selection preview for first-time users without overriding an explicit automatic
+request. Use `resume_workflow.py review` for a readable private plan/selection page.
 
 Record the person's answer verbatim. Acceptance sets `review_status: accepted`
 and cites its person source; it does not confirm requirement-to-evidence links.
@@ -42,3 +44,17 @@ Use explicit supersession to change an old decision. System decisions cannot
 override user decisions. Rebuild the selection after changing applicable decisions,
 then validate. This workflow never rewrites factual evidence merely to make a
 preferred selection look supported.
+
+Inspect potential overlap groups: several atoms may describe one project or shared
+result. Explain whether examples combine, show distinct contributions, or duplicate
+proof. Never sum a shared metric twice. A ready plan allocates the selected evidence
+and records intended impressions, limitations and material tradeoffs.
+
+## Consequential omissions
+
+Use `docs/resume-quality.md` for role-sensitive ranking and complementary selection.
+Inspect eligible evidence beyond the initial shortlist, including relevant older
+work and alternatives that demonstrate a missing capability. Do not treat missing
+requirement links as missing career experience. Respect saved omit/reserve choices;
+ask for new facts only after inspecting the available evidence. The final draft's
+process review records omissions separately from revision losses.

@@ -95,7 +95,7 @@ def decision_context(brief):
     return [pin(p) for p, _ in applicable_decisions(brief)]
 
 
-def effective_decisions(brief):
+def effective_records(brief):
     groups = {}
     specificity = {'person': 0, 'role_family': 1, 'application': 2, 'output': 3}
     for _, r in applicable_decisions(brief):
@@ -110,8 +110,34 @@ def effective_decisions(brief):
         winners = [r for priority, r in rows if priority == highest]
         if len({r['action'] for r in winners}) > 1:
             raise ValueError(f'conflicting decisions for {key}; record an explicit supersession')
-        result[key] = winners[0]['action']
+        if key[0] == 'wording' and len({digest(r.get('wording')) for r in winners}) > 1:
+            raise ValueError(f'conflicting wording preferences for {key}; record an explicit supersession')
+        result[key] = winners[0]
     return result
+
+
+def effective_decisions(brief):
+    return {key: record['action'] for key, record in effective_records(brief).items()}
+
+
+def require_selection_review(selection, brief):
+    if (brief.get('application') or {}).get('review_mode') == 'interactive' and selection['review_status'] != 'accepted':
+        raise ValueError('interactive application requires an accepted person-sourced selection review before generation')
+
+
+def excerpt_supported(markdown, excerpt, evidence_ids):
+    """An exact visible passage and its evidence must belong to the same block."""
+    import re
+    from render import blocks, EVIDENCE
+    from resume_document import plain_inline
+    if not excerpt or not evidence_ids or '<!--' in excerpt:
+        return False
+    for _, text in blocks(markdown):
+        ids = set(re.findall(r'E_[A-Z0-9_]+', ' '.join(m.group(0) for m in EVIDENCE.finditer(text))))
+        visible_markdown = re.sub(r'<!--.*?-->', '', text, flags=re.S)
+        if set(evidence_ids) <= ids and (excerpt in visible_markdown or excerpt in plain_inline(text)):
+            return True
+    return False
 
 
 def validate_record(kind, record, path=None):
@@ -150,6 +176,8 @@ def validate_record(kind, record, path=None):
         except ValueError as exc:
             errors.append(str(exc))
     elif kind == 'brief':
+        from resume_workflow import application_errors
+        errors.extend(application_errors(record))
         for field, available in (
             ('strength_ids', {s['id'] for s in pack.get('strengths_profile', [])}),
             ('preference_ids', {s['id'] for s in pack.get('positioning_preferences', [])}),
@@ -167,8 +195,13 @@ def validate_record(kind, record, path=None):
         available = {'atom': set(atoms_by_id(pack)),
                      'strength': {s['id'] for s in pack.get('strengths_profile', [])},
                      'preference': {s['id'] for s in pack.get('positioning_preferences', [])}}
-        if target['id'] not in available[target['kind']]:
+        if target['kind'] == 'wording':
+            if not record.get('wording') or record['made_by'] != 'user':
+                errors.append('wording preferences need wording and a person-sourced user decision')
+        elif target['id'] not in available[target['kind']]:
             errors.append('decision subject does not resolve in current pack')
+        if target['kind'] != 'wording' and 'wording' in record:
+            errors.append('wording belongs only to a wording decision')
         if record['scope']['kind'] == 'person' and record['scope']['id'] != 'person':
             errors.append('person scope id must be person')
         if record['scope']['kind'] != 'person':
@@ -206,6 +239,27 @@ def validate_record(kind, record, path=None):
         from quantities import CITATION
         import re
         cited = set(re.findall(r'E_[A-Z0-9_]+', ' '.join(m.group(0) for m in CITATION.finditer(md))))
+        plan_pin = run['editorial_inputs'].get('plan')
+        if plan_pin:
+            from resume_workflow import checked_plan
+            plan = checked_plan(plan_pin['path'])
+            intended = {r['id']: r for r in plan['impressions']}
+            reviews = record.get('impressions', [])
+            if len({r['impression_id'] for r in reviews}) != len(reviews) or {r['impression_id'] for r in reviews} != set(intended):
+                errors.append('representation must account for every planned impression exactly once')
+            for row in reviews:
+                intent = intended.get(row['impression_id'], {})
+                if not set(row['evidence_ids']) <= set(intent.get('evidence_ids', [])):
+                    errors.append('impression review cites evidence outside its planned support')
+                if row['status'] == 'clearly_represented':
+                    if intent.get('basis') == 'gap' or not row['evidence_ids'] or not set(row['evidence_ids']) <= cited:
+                        errors.append('clear impression needs supported cited evidence; a gap cannot pass')
+                    if not row['artifact_excerpt'] or row['artifact_excerpt'] not in md:
+                        errors.append('impression review needs an exact artifact excerpt')
+                    if not excerpt_supported(md, row['artifact_excerpt'], row['evidence_ids']):
+                        errors.append('impression excerpt must be visible in a block citing its supporting evidence')
+                if row['status'] == 'intentionally_omitted' and row['impression_id'] not in {t['subject_id'] for t in plan['tradeoffs']}:
+                    errors.append('omitted impression needs an explicit plan tradeoff')
         for row in rows:
             support = set(strengths.get(row['strength_id'], {}).get('evidence_ids', []))
             if not set(row['evidence_ids']) <= support:
@@ -217,6 +271,8 @@ def validate_record(kind, record, path=None):
                     errors.append('clearly represented strength needs cited supporting evidence')
                 if not row['artifact_excerpt'] or row['artifact_excerpt'] not in md:
                     errors.append('representation excerpt is absent from the artifact')
+                if not excerpt_supported(md, row['artifact_excerpt'], row['evidence_ids']):
+                    errors.append('strength excerpt must be visible in a block citing its supporting evidence')
             if row['status'] == 'inadequately_represented':
                 warnings.append(f"{row['strength_id']}: inadequately represented; revise or document omission")
             if row['status'] == 'intentionally_omitted':
@@ -249,13 +305,21 @@ def context_for(pack, brief):
                    if p['id'] in brief['preference_ids'] and p['status'] == 'active'
                    and p.get('external_safe') is True
                    and actions.get(('preference', p['id'])) != 'omit']
+    wording = []
+    for decision in effective_records(brief).values():
+        subject = decision['subject']
+        if (subject['kind'] == 'wording' and decision.get('wording', {}).get('external_safe')
+                and actions.get(('wording', subject['id'])) == decision['action']
+                and decision['action'] in ('include', 'omit')):
+            wording.append({'example': decision['wording']['text'],
+                            'usage': 'prefer' if decision['action'] == 'include' else 'avoid'})
     return {'brief_id': brief['brief_id'], 'format': brief['format'], 'length': brief['length'],
             'instructions': brief['instructions'] if brief['external_safe'] else '',
-            'strengths': strengths, 'preferences': preferences}
+            'strengths': strengths, 'preferences': preferences, 'wording_preferences': wording}
 
 
 def prepare(brief_path, selection_id, limit=12):
-    from select_evidence import view, load_role
+    from select_evidence import view, load_role, complementary_shortlist
     brief = checked(brief_path, 'brief')
     pack_path = resolve()
     if not pack_path:
@@ -278,7 +342,7 @@ def prepare(brief_path, selection_id, limit=12):
             for aid in s['evidence_ids']:
                 contributions.setdefault(aid, []).append(s['id'])
     priority.update(sid for (kind, sid), action in actions.items() if kind == 'atom' and action == 'include')
-    candidate_ids = [a['id'] for a in all_view['atoms'][:limit]]
+    candidate_ids = [a['id'] for a in complementary_shortlist(all_view['atoms'], profile, limit)]
     candidate_ids += sorted((priority & available.keys()) - set(candidate_ids))
     recommendations = []
     for aid in candidate_ids:
@@ -287,6 +351,9 @@ def prepare(brief_path, selection_id, limit=12):
         reasons = available[aid].get('why_selected', [])
         contribution = ('Supports intended strengths: ' + ', '.join(contributions[aid])
                         if aid in contributions else 'Candidate for role coverage; assess distinct contribution during editorial review.')
+        dimensions = available[aid].get('role_contributions', [])
+        if dimensions:
+            contribution += ' ' + '; '.join(d['dimension'] + ': ' + d['requirement'] + ' (' + d['link_status'] + ' link)' for d in dimensions)
         recommendations.append({'evidence_id': aid, 'disposition': disposition,
                                 'reason': 'Recorded selection decision.' if action else '; '.join(reasons) or 'Eligible career evidence.',
                                 'contribution': contribution, 'limitations': available[aid].get('constraints', []), 'replaces': []})
@@ -307,7 +374,7 @@ def prepare(brief_path, selection_id, limit=12):
     return record
 
 
-def generation_view(selection_path):
+def generation_view(selection_path, *, for_review=False):
     from select_evidence import view, load_role
     selection = checked(selection_path, 'selection')
     _, warnings = validate_record('selection', selection)
@@ -315,6 +382,8 @@ def generation_view(selection_path):
         raise ValueError('; '.join(warnings))
     pack = read(selection['pack']['path'])
     brief = checked(selection['brief']['path'], 'brief')
+    if not for_review:
+        require_selection_review(selection, brief)
     if brief['audience'] == 'private':
         raise ValueError('private interview preparation reads the pack; it is not a sendable selection view')
     profile = load_role(brief['role_id']) if brief['role_id'] else None
@@ -348,11 +417,14 @@ def generation_view(selection_path):
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "start":
+        from resume_start import main as start_main
+        return start_main(argv[1:])
     if argv and argv[0] in ("status", "migrate", "bind-strength", "export"):
         from career_core import main as core_main
         return core_main(argv)
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0],
-                                     epilog="Core commands status, migrate, bind-strength and export are provided by career_core.py; old invocations still work.")
+                                     epilog="Use start for guided resume setup. Core commands status, migrate, bind-strength and export are provided by career_core.py; old invocations still work.")
     sub = parser.add_subparsers(dest='command', required=True)
     init = sub.add_parser('init-brief')
     init.add_argument('--id', required=True)
@@ -362,7 +434,9 @@ def main(argv=None):
     init.add_argument('--role-family')
     init.add_argument('--format', default='resume')
     init.add_argument('--audience', default='named_recipient')
-    init.add_argument('--length', default='two A4 pages')
+    init.add_argument('--length', default='concise; allocate space by relevant evidence')
+    init.add_argument('--market', choices=('UK', 'US', 'unspecified'), default='unspecified')
+    init.add_argument('--review-mode', choices=('automatic', 'interactive'), default='automatic')
     init.add_argument('--strength', action='append', default=[])
     init.add_argument('--preference', action='append', default=[])
     init.add_argument('--output', required=True)
@@ -383,6 +457,12 @@ def main(argv=None):
                       'role_family': args.role_family, 'format': args.format, 'audience': args.audience,
                       'length': args.length, 'strength_ids': args.strength, 'preference_ids': args.preference,
                       'priority_evidence_ids': [], 'instructions': '', 'external_safe': False, 'created_by': 'system'}
+            if args.format == 'resume':
+                from resume_workflow import default_application
+                record['application'] = default_application(args.market, args.review_mode, args.audience)
+                for flag, setting in (('--market', 'market'), ('--review-mode', 'review_mode')):
+                    if flag in argv:
+                        record['application']['setting_sources'][setting] = {'origin': 'user', 'reason': 'Explicit CLI option.'}
         elif args.command == 'prepare':
             if args.limit < 1:
                 raise ValueError('limit must be positive')

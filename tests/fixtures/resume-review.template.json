@@ -1,0 +1,36 @@
+{
+  "reviewer": null,
+  "review_context": "Read A and B before the pack, brief or coordinator mapping",
+  "A": {
+    "reader_impressions": [],
+    "supporting_passages": [],
+    "unclear_claims": []
+  },
+  "B": {
+    "reader_impressions": [],
+    "supporting_passages": [],
+    "unclear_claims": []
+  },
+  "after_reading_pack_and_brief": {
+    "factual_preservation": null,
+    "distinctive_strengths": null,
+    "ownership_and_scope": null,
+    "context_and_progression": null,
+    "repetition_and_double_counting": null,
+    "natural_voice": null,
+    "format_and_readability": null,
+    "preferred_document": null,
+    "reasons_with_passages": [],
+    "opening_identity": null,
+    "principal_achievement_per_bullet": null,
+    "metric_value_for_role": null,
+    "consequential_omissions": null,
+    "recent_work_evidence": null,
+    "rendered_page_allocation": null
+  },
+  "observed_user_questions": null,
+  "observed_user_time_minutes": null,
+  "generation_cost_usd": null,
+  "limitations": [],
+  "hiring_outcome": "not inferred"
+}

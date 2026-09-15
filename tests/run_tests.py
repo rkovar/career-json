@@ -248,7 +248,7 @@ def test_selection_view():
 
     order = [a["outcome_type"] for a in view["atoms"]]
     rank = {"business_outcome": 0, "output": 1, "activity": 2, None: 3}
-    check("outcomes sort before activity", order == sorted(order, key=lambda o: rank[o]))
+    check("selection preserves outcome categories for editorial judgment", set(order) <= set(rank))
 
     # Regression: --audience=public silently returned the FULL contact block,
     # so a privacy flag failed open on exactly the artefact meant to be published.
@@ -696,7 +696,7 @@ def test_employment():
     code, out, _ = artefact("Northwind Systems | Director of Platform Security | 2011 to present")
     check("a year outside the role's span fails", code == 1 and "matches no employment record" in out, out)
     code, out, _ = artefact("Northwind Systems | Director of Platform Security | 2017 to present")
-    check("a parent title may carry its promotion chain's years", code == 0, out)
+    check("a title cannot borrow its promotion chain's years", code != 0, out)
 
     hidden = sandbox()
     shutil.copy(COMPLEX, hidden / "data" / "packs" / "pack.json")
@@ -924,6 +924,40 @@ def test_pack_html():
     code, _, err = run("pack_html.py", "-o", target, workspace=Path(tempfile.mkdtemp()))
     check("it refuses when there is no pack", code == 1, err)
     shutil.rmtree(workspace, ignore_errors=True)
+
+
+def test_publications():
+    """Publications: talks, posts, books, podcasts, courses, committees. Added
+    2026-09-12 because one achievement saying "keynoted Black Hat and DEF CON"
+    could not list the talks, so a resume could not cite them. Held to the
+    education standard: a checkable fact with provenance, not a STAR story.
+    """
+    def pack_with(pub):
+        data = json.loads(COMPLEX.read_text())
+        data["publications"] = [pub]
+        path = Path(tempfile.mkdtemp()) / "p.json"
+        path.write_text(json.dumps(data))
+        return path
+    src = json.loads(COMPLEX.read_text())["source_records"][0]["source_id"]
+    good = {"publication_id": "PUB_TALK_1", "title": "A talk", "kind": "talk", "venue": "ExampleCon", "date": "2023-05",
+            "url": None, "role": "co_speaker", "collaborators": ["A. Peer"], "description": None, "employment_id": None,
+            "evidence_id": None, "source_refs": [{"source_id": src, "excerpt": "x"}], "evidence_status": "self_asserted",
+            "external_safe": True, "constraints": [], "notes": None}
+    code, out, _ = run("validate_pack.py", pack_with(good))
+    check("a pack with a publication validates", code == 0, out)
+    for mutate, why in (
+            (lambda d: d.pop("title"), "missing title"),
+            (lambda d: d.update({"kind": "tweet"}), "kind"),
+            (lambda d: d.update({"role": "hero"}), "role"),
+            (lambda d: d.update({"date": "May 2023"}), "date"),
+            (lambda d: d.update({"vennue": "typo"}), "unknown field"),
+            (lambda d: d.update({"employment_id": "EMP_NOPE"}), "unknown employment_id"),
+            (lambda d: d.update({"evidence_status": "externally_verified"}), "independent"),
+            (lambda d: d.update({"source_refs": [{"source_id": "SRC_NOPE"}]}), "unknown source_id")):
+        bad = dict(good)
+        mutate(bad)
+        code, out, _ = run("validate_pack.py", pack_with(bad))
+        check(f"publication {why} is an error", code == 1 and why.split()[-1] in out, out)
 
 
 def test_education():
@@ -1315,8 +1349,7 @@ def test_empty_role_heading():
 
 
 def test_outcome_warning_altitude():
-    """A pack with no business_outcome made every artefact warn forever. That is a
-    pack property reported per-document, so it taught nothing and got skipped."""
+    """Useful outputs and activities need no business-outcome quota."""
     workspace = sandbox()
     pack_path = workspace / "data" / "packs" / "pack.json"
     pack = json.loads(pack_path.read_text())
@@ -1326,8 +1359,8 @@ def test_outcome_warning_altitude():
     pack_path.write_text(json.dumps(pack))
 
     code, out, _ = run("validate_pack.py", pack_path, workspace=workspace)
-    check("a pack with no business outcome says so once, at pack level",
-          "no atom is typed business_outcome" in out, out)
+    check("a pack without business outcomes is not treated as deficient",
+          "no atom is typed business_outcome" not in out, out)
 
     md = workspace / "outputs" / "d-draft.md"
     md.write_text("# X\n\n## Role\n\n- A claim. <!-- Evidence: E_EXAMPLE_ONCALL_REDESIGN -->\n")
@@ -1421,9 +1454,6 @@ def test_view_carries_time_and_tags():
     atoms = view["atoms"]
     check("view exposes occurred", all("occurred" in a for a in atoms))
     check("view exposes tags", all("tags" in a for a in atoms))
-    rank = {"business_outcome": 0, "output": 1, "activity": 2, None: 3}
-    check("outcomes still sort first",
-          [rank[a["outcome_type"]] for a in atoms] == sorted(rank[a["outcome_type"]] for a in atoms))
     outputs = [a for a in atoms if a["outcome_type"] == "output"]
     # Import the real sort key rather than restating it. The test used to keep its
     # own copy, the two drifted, and the test then failed a correctly ordered view:
@@ -1431,6 +1461,8 @@ def test_view_carries_time_and_tags():
     # sorted as though it were undated.
     sys.path.insert(0, str(SCRIPTS))
     from select_evidence import recency  # noqa: E402
+    check("general browsing uses chronology across outcome categories",
+          [recency(a) for a in atoms] == sorted((recency(a) for a in atoms), reverse=True))
     ends = [recency(a) for a in outputs]
     check("within a tier, recent work sorts first", ends == sorted(ends, reverse=True), str(ends))
 
@@ -1556,22 +1588,22 @@ def test_resume_shape_checks():
     check("positioning reaches the view", view["positioning"]["why_this_role"].startswith("I want"), str(view.get("positioning")))
 
     head = "# Morgan Vale\n\nLondon · morgan.vale@example.invalid\n\n"
-    bad = (head + "A results-driven cross-functional leader. " + "word " * 80 + "\n\n## Experience\n\n"
+    bad = (head + "A results-driven cross-functional leader. " + "word " * 100 + "\n\n## Experience\n\n"
            "### Northwind Systems | Director of Platform Security | 2022-03 to present\n\n"
            + "".join(f"- Bullet number {i} about something. <!-- Evidence: E_CX_ONCALL -->\n" for i in range(7))
-           + "- " + "long " * 45 + "<!-- Evidence: E_CX_ONCALL -->\n\n"
+           + "- " + "long " * 60 + "<!-- Evidence: E_CX_ONCALL -->\n\n"
            "### Contoso Retail | Senior Systems Engineer | 2013-04 to 2016-12\n\n"
            "- Detection work here. <!-- Evidence: E_CX_DETECTION_PROGRAMME -->\n")
     md = root / "outputs" / "bad.md"
     md.write_text(bad)
     run("render.py", md, workspace=root)
     code, out, _ = run("validate_artifact.py", md, "--role", "head-of-detection", workspace=root)
-    check("too many bullets on the current role is warned", "has 8 bullets" in out, out[-900:])
-    check("an over-long bullet is warned", "words (limit 40)" in out, out[-900:])
-    check("an over-long summary is warned", "summary is" in out and "words (limit 75)" in out, out[-900:])
+    check("bullet counts do not force arbitrary deletion", "has 8 bullets" not in out, out[-900:])
+    check("an over-long bullet is warned", "long bullet (60 words)" in out, out[-900:])
+    check("an over-long summary is warned", "summary is" in out and "adds understanding" in out, out[-900:])
     check("cliches are warned", "results-driven" in out and "cross-functional leader" in out, out[-900:])
-    check("a missing target title in the headline is warned", "does not appear in the headline" in out, out[-900:])
-    check("proof of an essential below the fold is warned", "below the fold" in out, out[-900:])
+    check("exact target title matching is not required", "does not appear in the headline" not in out, out[-900:])
+    check("missing opening proof prompts a contextual review", "opening makes relevance clear" in out, out[-900:])
     check("shape findings are warnings, not errors", code == 0)
 
     good = (head + "Head of Detection who runs detection engineering as a function. <!-- Evidence: E_CX_DETECTION_PROGRAMME -->\n\n"
@@ -1592,13 +1624,13 @@ def test_resume_shape_checks():
         "H2 after contact": "London\n\n## Head of Detection\n\n",
     }.items():
         md3 = root / "outputs" / "long-summary.md"
-        md3.write_text("# Morgan Vale\n\n" + intro + "word " * 45 + "\n\n" +
+        md3.write_text("# Morgan Vale\n\n" + intro + "word " * 55 + "\n\n" +
                        "word " * 40 + "\n\n## Experience\n\n" +
                        good.split("## Experience\n\n", 1)[1])
         run("render.py", md3, workspace=root)
         _, summary_out, _ = run("validate_artifact.py", md3, workspace=root)
         check(f"summary length includes both paragraphs with {label}",
-              "summary is 85 words" in summary_out, summary_out[-600:])
+              "summary is 95 words" in summary_out, summary_out[-600:])
 
     code, out, _ = run("keyword_coverage.py", md2, "--role", "head-of-detection", "--json", workspace=root)
     cov = json.loads(out)
@@ -2225,14 +2257,11 @@ INVARIANTS = {
                      "capture.py", "dedupe.py", "--edit", "--delete"],
     "make-interview-brief": ["inverts that rule", "Never publish this", "whole pack",
                             "external_safe: false", "Never invent"],
-    "make-resume": ["Ask no questions", "never appears inside the artefact", "<role_id>-draft.md",
-                    "Scope on the role line", "Value opens the summary", "Bullet economics",
-                    "never invents intent", "keyword_coverage.py",
-                    "fresh context, never in this one",
-                    "at the end of the claim's own line",
-                    "business_outcome", "role_fit_notes", "recruiter-screen",
+    "make-resume": ["resume-authoring.md", "<role_id>-draft.md", "constraints",
+                    "never invents intent", "keyword_coverage.py", "fresh context",
+                    "at the end of the claim's own line", "recruiter-screen",
                     "Cover letter", "central_requirement", "employment", "career_span_years",
-                    "--role"],
+                    "resume_workflow.py", "export_resume.py", "PDF, TXT and DOCX"],
     "build-career-pack": ["private_profile", "business_outcome", "never how they are *asked*",
                           "validate_pack.py", "optional and off by default",
                           "employer_of_record", "annual write-up", "dedupe.py",
@@ -2263,7 +2292,7 @@ INVARIANTS = {
                                "employment", "employer_of_record",
                                # Source text is untrusted input to the ingesting model.
                                "data, not instructions", "never followed"],
-    "generate-resume": ["outcome_type", "role_fit_notes", "contact block", "constraints"],
+    "generate-resume": ["resume-authoring.md", "resume_workflow.py", "constraints"],
 }
 FORBIDDEN = ["user_asserted", "`verified`"]
 
@@ -2426,11 +2455,13 @@ def test_docs_match_reality():
     arch = (ROOT / "docs" / "architecture.md").read_text()
     found = len(list(SKILLS.glob("*/SKILL.md")))
     match = re.search(r"judgement: the (\w+) skills", arch)
-    check("architecture.md states a skill count", match is not None)
-    if match:
-        check("architecture.md skill count is current",
-              match.group(1) == NUMBER_WORDS.get(found),
-              f"doc says {match.group(1)!r}, workspace has {found} skills")
+    check("architecture.md does not state an outdated skill count",
+          match is None or match.group(1) == NUMBER_WORDS.get(found))
+    readme = (ROOT / "README.md").read_text()
+    for component in ("core", "resume"):
+        manifest = json.loads((ROOT / "components" / component / "component.json").read_text())
+        check(f"README names the current {component} version",
+              manifest["version"] in readme)
 
 
 def check_live_tree_untouched():
@@ -2446,15 +2477,12 @@ def check_live_tree_untouched():
 
 
 def check_documented_assertion_count():
-    """Last check to run: the documented total against the real one.
-
-    It counts itself, so the number in the doc is the number the suite prints.
-    """
+    """If prose names an assertion count, it must match; prefer stable descriptions."""
     arch = (ROOT / "docs" / "architecture.md").read_text()
     stated = {int(n) for n in re.findall(r"(\d+) assertions", arch)}
     total = len(RESULTS) + 1  # this check counts itself
-    check("architecture.md documents the real assertion count",
-          stated == {total},
+    check("architecture.md does not state an outdated assertion count",
+          not stated or stated == {total},
           f"doc states {sorted(stated) or 'nothing'}, suite has {total}")
 
 
@@ -2466,6 +2494,7 @@ def main():
                  test_employment, test_role_fit, test_shortlist_actually_curates,
                  test_metric_measurement_basis, test_open_questions,
                  test_conversation_is_a_source, test_complex_pack_shape, test_pack_html,
+                 test_publications,
                  test_education,
                  test_fit_policy, test_withheld_evidence_is_visible,
                  test_outcome_warning_altitude, test_empty_role_heading,

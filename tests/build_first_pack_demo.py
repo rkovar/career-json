@@ -85,7 +85,7 @@ def build(destination):
         destination.mkdir(parents=True,exist_ok=True)
         marker.write_text(marker_text)
         for name in ('data','reviews'):
-            shutil.copytree(work/name,destination/name,dirs_exist_ok=True)
+            shutil.copytree(work/name,destination/name,dirs_exist_ok=True,ignore=shutil.ignore_patterns('.pack-write.lock'))
         for name in ('review.html','after-review.html','career.html','summary.json','decisions.json','recall.json'):
             shutil.copy(work/name,destination/name)
         for name in ('review.html','after-review.html','career.html'):

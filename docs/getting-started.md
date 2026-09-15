@@ -1,5 +1,7 @@
 # Getting Started
 
+Need help choosing material? Say **“Help me start a career pack”** for the [guided start](guided-starts.md). It supports one source or a conversational account and remembers what you leave for later.
+
 A first session, end to end. Assumes you have cloned the repo and have Claude Code
 open in it.
 
@@ -70,9 +72,9 @@ against a title. Put a job description in `data/sources/` and ask Claude to buil
 one, or write it by hand into `data/roles/<role-id>.json` following
 [the schema](../schemas/role-profile.schema.json).
 
-The field that matters most is `central_requirement`: the one thing the role is
-actually hiring for. If your evidence cannot support it, that is a rejection and
-better to know now.
+The `central_requirement` captures the role's primary requirement. If the recorded
+evidence does not support it, the screen identifies the gap. That is a reason to
+review the evidence or targeting, not a prediction of an employer's decision.
 
 ```sh
 make fit            # which roles your evidence actually supports
@@ -84,12 +86,13 @@ make fit            # which roles your evidence actually supports
 Use make-resume for <role>
 ```
 
-You get three files in `outputs/`: the draft in Markdown, the same in HTML, and an
-evaluation record. Plus a recruiter screen with a verdict.
+If the target is unclear, the [resume wizard](resume-start.md) establishes the role
+and qualities to highlight, then saves a brief. You receive PDF, TXT and DOCX,
+alongside Markdown/HTML working drafts and private review records.
 
-Expect the first verdict to be unflattering. That is the point — it is cheaper
-here than in the market, and the screen tells you which weaknesses a rewrite can
-fix and which need new evidence.
+The screen distinguishes weaknesses that editing can address from missing evidence.
+Its verdict is a model opinion; assess the passages and reasoning yourself.
+A passing integrity check does not establish strong writing or a hiring outcome.
 
 ## 5. Keep capturing
 

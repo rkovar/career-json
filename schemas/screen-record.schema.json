@@ -125,7 +125,21 @@
         "fresh",
         "shared"
       ],
-      "description": "fresh: screened in a context that held only the artefact, the role profile and this skill. shared: screened in the context that generated the document, which is the model grading its own work. Decided 2026-09-06: a screen must be fresh."
+      "description": "fresh: read only artifact, role, safe application constraints and review instructions; shared: context already knew generation inputs."
+    },
+    "reader_impressions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     }
   },
   "additionalProperties": false

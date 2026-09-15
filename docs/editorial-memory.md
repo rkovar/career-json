@@ -213,7 +213,8 @@ Reports retain the temporary workspace path for inspecting the fictional artifac
 No real career pack is read or changed by these scenarios.
 
 Initial validation results, limits and exact tested skill hashes are recorded in
-[the fictional evaluation report](../tests/results/editorial-2026-09-08.json).
+`tests/results/editorial-2026-09-08.json` in the developer checkout. This historical
+report does not certify the current workflow and is not shipped in the add-on.
 
 
 ## Save reviews without copying provenance
@@ -246,3 +247,20 @@ and negative measurement statements without local explicit support. Name the
 specific metric using its recorded text beside the evidence citation; a false
 measurement flag for one metric does not describe every outcome in that atom. These
 conservative checks supplement semantic review; they do not prove every sentence.
+
+## Resume planning version 2
+
+[Resume authoring](resume-authoring.md) extends this workflow with typed application
+settings, immutable plans in `data/plans`, optional conversational selection review,
+wording decisions and required PDF/TXT/DOCX exports. Its review-mode instructions
+replace the earlier blanket no-questions default: explicit automatic delivery
+still proceeds, while requested interactive review waits for the person's answer.
+Plans and policy are pinned by manifests; export reports pin final submission
+files. Representation records for planned resumes also account for every plan
+impression, including when no strengths profile exists. New facts still return
+to Core. Existing briefs without application settings remain readable; new resume
+generation should save a version-2 brief and a ready plan.
+
+Planned resumes also preserve an exact-draft process review and derive handoffs
+from validated records. See [resume-process.md](resume-process.md) for constraint
+coverage, prominence, privacy comparisons, compression and revision history.

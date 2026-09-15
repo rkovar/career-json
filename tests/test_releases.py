@@ -50,6 +50,16 @@ class ReleaseTests(unittest.TestCase):
         self.command(workspace,sys.executable,'scripts/career_core.py','status')
         self.assertEqual(len(list((workspace/'.claude/skills').glob('*/SKILL.md'))),5)
 
+    def test_restored_core_archive_runs_on_its_own(self):
+        workspace=self.root/'portable-core';extract(self.core,workspace)
+        self.command(workspace,sys.executable,'scripts/career_core.py','backup','--output','backups/core.zip')
+        restored=self.root/'restored-core'
+        self.command(workspace,sys.executable,'scripts/career_core.py','restore','--input','backups/core.zip','--destination',str(restored))
+        self.command(restored,sys.executable,'scripts/check_components.py')
+        self.command(restored,sys.executable,'scripts/career_core.py','health')
+        self.assertTrue((restored/'scripts/extract_text.sh').stat().st_mode & 0o100)
+        self.assertFalse((restored/'scripts/editorial.py').exists())
+
     def test_addon_installs_without_replacing_core_and_passes_editorial_tests(self):
         workspace=self.root/'combined';extract(self.core,workspace)
         before={str(p.relative_to(workspace)):hashlib.sha256(p.read_bytes()).hexdigest() for p in workspace.rglob('*') if p.is_file()}

@@ -47,6 +47,7 @@ UNLOCK = {
     "recorded_question": 2.5,
     "link_confirmation": 4.0,
     "screen_gap": 3.5,
+    "publications": 3.0,
 }
 
 
@@ -219,6 +220,36 @@ def collect(pack, profiles, cited):
             f"({rec.get('start')} to {rec.get('end')}).",
             "empty_role", subject=eid,
             detail="Every resume from this pack renders the heading with nothing under it.")
+
+    # A body of public work named in an achievement with nothing itemised behind
+    # it. "Keynoted Black Hat, RSA and DEF CON" cannot be cited talk by talk, and
+    # a resume's publications section is generated only from publication records.
+    # Added 2026-09-12 after a pack with 47 achievements listed zero talks.
+    PUBLIC_WORK = re.compile(r"\b(public speaking|speaking|keynote[sd]?|writing|blog|publications?|published|podcasts?|"
+                             r"teaching|courses?|open[- ]source|thought leadership|media relations|conference|datasets?)\b")
+    covered = {p.get("evidence_id") for p in pack.get("publications", []) if p.get("evidence_id")}
+    for atom in atoms.values():
+        if atom.get("evidence_status") == "declined" or atom["id"] in covered:
+            continue
+        # "No publications: <why>" in constraints is the recorded answer that the
+        # public work has nothing to itemise (an event run, internal writing).
+        if any(c.lower().startswith("no publications") for c in atom.get("constraints") or []):
+            continue
+        words = " ".join([atom.get("title", "")] + list(atom.get("skills") or []) + list(atom.get("tags") or [])).lower()
+        if PUBLIC_WORK.search(words):
+            add("publications",
+                f"\"{atom['title']}\" describes public work, but no talk, post, book, podcast or course is itemised "
+                f"behind it. Which items are they? Each becomes a publication record a resume can cite by title, "
+                f"venue and date; a public listing page makes it independently verified.",
+                "publications", subject=atom["id"],
+                detail="Answer with titles, venues, dates and links, or a catalogue or author-archive URL; "
+                       "\"none, it was internal\" closes the question.")
+    if not pack.get("publications"):
+        add("publications",
+            "Have you given talks, or published articles, posts, books, podcasts or courses? None is recorded. "
+            "A resume cannot list what the pack does not itemise; \"none\" is a complete answer and closes this.",
+            "publications", subject=None,
+            detail="Point at a resume section, a catalogue, an author archive or a speaker profile and intake will extract each item.")
 
     # Employment is what a background check actually tests.
     for rec in pack.get("employment", []):

@@ -63,6 +63,51 @@
           },
           "note": {
             "type": "string"
+          },
+          "reassessment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "reason",
+              "source_refs"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "self_asserted",
+                  "corroborated",
+                  "externally_verified"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_refs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "source_id",
+                    "excerpt"
+                  ],
+                  "properties": {
+                    "source_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "excerpt": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }

@@ -27,7 +27,7 @@ Keep one durable, evidence-backed record of a career in `career.json`, and treat
 5. Distinguish `self_asserted`, `corroborated`, `externally_verified`, `unresolved`, and `declined` evidence. A claim repeated across the user's own resume, LinkedIn profile, and personal site is `self_asserted`. Repetition is not corroboration. `self_asserted` is the normal resting state: corroboration is an optional signal, never a requirement, and its absence is not a defect. Do not chase it unless the user asks.
 6. Do not publish evidence marked `external_safe: false`.
 7. Preserve conflicting source values. Do not silently choose a convenient number or date.
-8. Keep PII in the private profile section and never expose it in public artefacts unless the user explicitly requests it. A resume sent to a named recipient is not a public artefact and carries a full contact block; a website or published CV is, and carries name and location only.
+8. Keep PII in the private profile section and never expose it in public artefacts unless the user explicitly requests it. A resume sent to a named recipient is not a public artefact and carries a contact block appropriate to employer instructions (including anonymous applications); a website or published CV is, and carries name and location only.
 9. Never put draft status, publication warnings, or notes about withheld evidence inside an artefact. Status belongs in the evaluation record.
 10. Record what a claim is worth as well as whether it is true: whether it measures activity, output, or business outcome. Employers, titles, and dates must trace to an `employment` record, because those are what a background check tests.
 11. Run the evaluation skill, then the recruiter screen, before calling any artefact publishable. Integrity and shortlistability are different properties and both are required.
@@ -48,12 +48,12 @@ Create private working directories only when needed. Do not commit raw PII or ge
 
 ## Operating sequence
 
-1. Inspect source material and identify provenance.
+1. Reuse supplied context or run a resumable startup wizard, then inspect sources and provenance. Distinguish career evidence from job descriptions and writing references.
 2. Extract candidate evidence without upgrading its confidence.
 3. Ask Socratic questions for missing STAR fields, ownership, scope, timeframe, measurement, or corroboration.
 4. Record answers and unresolved gaps in `reviews/`.
-5. Produce or update a versioned datapack.
-6. Prepare or reuse a durable output brief and scoped selection; select evidence against the requested role, supported strengths, preferences and modifiers.
+5. Stage the proposal, present human review, and save only explicitly accepted items in a new datapack version.
+6. Prepare or reuse a durable output brief, scoped selection and resume plan; select complementary evidence for the role and supported strengths.
 7. Generate the requested artefact using STAR-grounded claims.
 8. Evaluate factual grounding, privacy, ATS coverage, length, and anti-slop quality.
 9. Screen the artefact as a recruiter and hiring manager would, and return a shortlist verdict.
@@ -61,13 +61,17 @@ Create private working directories only when needed. Do not commit raw PII or ge
 
 This sequence runs as two phases, and the difference between them is deliberate.
 
-- Setup, occasional: `build-career-pack` covers steps 1 to 5. Questions are
-  expected here and are batched at the end of the run.
-- Delivery, repeated: `make-resume` covers steps 6 to 10. It asks nothing. Thin
-  evidence narrows or drops a claim; it never produces a question in place of a
-  document.
+- Setup: `build-career-pack` covers guided intake, extraction and human review.
+  Show the overview first, present five decisions at a time, and preserve
+  corrections and deferred items. Evidence and strengths interviews ask focused
+  follow-up questions; the person can pause without losing progress.
+- Delivery: `make-resume` reuses the accepted pack and saved context. The resume
+  wizard fills missing targeting information. Honor automatic or interactive
+  review mode; requested review waits for the person's response. Automatic
+  delivery narrows thin evidence and reports gaps. New facts return through Core.
 
-Front-loading questions into setup is what keeps delivery quiet. Neither phase
+Do not repeat answered questions or infer approval from silence. A saved startup
+answer is neither factual acceptance nor external-use permission. Neither phase
 relaxes the evidence, privacy, or publication rules above.
 
 ## Claude behaviour
@@ -80,7 +84,10 @@ Use `docs/editorial-memory.md` for schema 1.4 strengths and preferences, resumab
 `review-strengths`, optional `review-selection`, and `review-representation`.
 Briefs and selections live in private data directories; decisions live in reviews.
 Generated documents are never new evidence merely because the system wrote them.
-Delivery remains quiet; evidence preview is a separately requested workflow.
+Resume generation follows `docs/resume-authoring.md`: create a typed application
+brief and ready plan, offer first-time selection/voice review, and honor explicit
+automatic delivery. Every resume requires verified PDF, TXT and DOCX exports
+from shared content before being called publishable.
 
 
 ## Human review of proposed data

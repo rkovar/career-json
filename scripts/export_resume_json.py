@@ -76,8 +76,8 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
     warnings = []
 
     work = []
-    for rec in sorted((r for r in pack.get("employment", [])
-                       if r.get("external_safe") and r.get("evidence_status") not in ("unresolved", "declined")),
+    safe_employment = [r for r in pack.get('employment', []) if eligible(r)[0]]
+    for rec in sorted(safe_employment,
                       key=lambda r: r["start"], reverse=True):
         if rec.get("parent_employment_id"):
             continue  # promotions collapse into the role they grew from
@@ -88,12 +88,12 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
             if atom.get("employment_id") == rec["employment_id"] or \
                any(e.get("parent_employment_id") == rec["employment_id"] and
                    e["employment_id"] == atom.get("employment_id")
-                   for e in pack.get("employment", [])):
+                   for e in safe_employment):
                 result = (atom.get("star") or {}).get("result")
                 highlights.append(result or atom["title"])
         # A collapsed role spans the whole chain. Taking the parent's own start
         # dated a nine-year tenure from its final promotion.
-        chain_start = min([rec["start"]] + [e["start"] for e in pack.get("employment", [])
+        chain_start = min([rec["start"]] + [e["start"] for e in safe_employment
                                             if e.get("parent_employment_id") == rec["employment_id"]])
         entry = {"name": rec["employer"], "position": rec["title"],
                  "startDate": iso(chain_start),

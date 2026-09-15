@@ -1,5 +1,24 @@
 # Career Evidence Core release notes
 
+## 0.1.0-alpha.5 — local release candidate
+
+- Add a resumable conversational wizard, private HTML setup summaries and a tested handoff into the existing workflow.
+- Keep five-item review navigation in view and preserve saved progress.
+- Add a private career reading page using only recorded pack content, safe links
+  and current strength-support states; remove person-specific source extraction.
+- Serialize decision recording with pack publication so concurrent operations
+  cannot lose decisions.
+- Audit startup source and session pins during backup and restore.
+- Reject cyclic employment parent relationships before acceptance.
+
+## 0.1.0-alpha.4
+
+Preserve current privacy decisions; require candidate-only strength reassessment and
+sourced status transitions. Verify excerpts across all career records before
+acceptance. Add connected review and save previews, workspace health, readable
+achievement history, reviewed merge/split/refresh, and verified private backup and
+restore. Add diverse lifecycle benchmarks and Linux/macOS CI.
+
 ## 0.1.0-alpha.3 — local release candidate, 2026-09-11
 
 - Strength refreshes link accepted history, never temporary first-import candidates.

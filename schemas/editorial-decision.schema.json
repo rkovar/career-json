@@ -36,7 +36,8 @@
           "enum": [
             "atom",
             "strength",
-            "preference"
+            "preference",
+            "wording"
           ]
         },
         "id": {
@@ -85,6 +86,23 @@
     "supersedes": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "wording": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external_safe": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "text",
+        "external_safe"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

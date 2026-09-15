@@ -2,8 +2,23 @@
 import json
 import os
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from current_pack import ROOT, sha256
+
+
+@contextmanager
+def workspace_lock(root=ROOT):
+    """Serialize accepted-pack transactions across CLI processes."""
+    import fcntl
+    path = local('reviews/.pack-write.lock', root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('a') as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
 
 def local(path, root=ROOT):
     path = (root / path).resolve()

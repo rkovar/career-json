@@ -1,5 +1,7 @@
 # Career Evidence Core — early access
 
+Say **“Help me start a career pack”** for the [guided source wizard](docs/guided-starts.md). It saves progress, supports a conversational account, and provides a private HTML summary.
+
 Own a durable, traceable record of your career. Capture work, import sources,
 review evidence, describe supported strengths, record future direction and export
 the full private pack. Resume generation is an optional, separately versioned
@@ -29,8 +31,13 @@ interview or unresolved claim does not prevent a useful pack.
 ```sh
 make coverage
 make strengths
+make career-page
 python3 scripts/career_core.py export --output data/private/career-export.json
 ```
+
+`make career-page` writes a private reading page from the saved pack, including
+withheld records and review-state labels. `make pack-html` offers a searchable
+overview. Neither view approves facts or reads raw sources to add claims.
 
 See `docs/core-workflow.md`, `docs/data-model.md`, and `docs/releases.md`. Schema versions 1.3 and 1.4 are supported;
 component versions are independent of the schema version.
@@ -44,3 +51,7 @@ network privacy guarantee.
 
 To add resume generation, use the matching Resume Application add-on as described
 in its release instructions. MIT licensed; see LICENSE.
+
+For health, readable achievement history, reviewed merge/split/refresh and complete
+private backup/restore, see [workspace maintenance](docs/workspace-maintenance.md).
+Run `python3 scripts/career_core.py health` for a useful next step.

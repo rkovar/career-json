@@ -1,5 +1,7 @@
 # Your first career pack
 
+Need help choosing material? Use the [guided start](guided-starts.md). A specific source request proceeds directly; setup does not delay the requested overview.
+
 Start with one existing resume. A target job, a complete archive and independently
 verified achievements are not prerequisites. Your goal is a small record you can
 inspect, correct and retrieve something from.
@@ -90,3 +92,7 @@ commands for manual operation; you do not need them for the conversational path.
 
 First-run duration and token use have not been benchmarked across source types.
 This is deliberately a bounded first exercise, not a promise about minutes or cost.
+
+See [workspace maintenance](workspace-maintenance.md) for connected achievement
+review, a save preview, explicit evidence reassessment, health, readable history,
+merge/split/refresh and portable private backup/restore.

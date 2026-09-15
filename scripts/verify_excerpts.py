@@ -53,7 +53,10 @@ def fragments(excerpt):
 def contains(source_text, excerpt):
     """Every fragment of the excerpt, in order, somewhere in the source."""
     position = 0
-    for fragment in fragments(excerpt):
+    parts = fragments(excerpt)
+    if not parts:
+        return False, 'excerpt contains no searchable text'
+    for fragment in parts:
         found = source_text.find(fragment, position)
         if found < 0:
             return False, fragment
@@ -77,9 +80,22 @@ def extract(path):
     return result.stdout
 
 
+def reference_records(pack):
+    """All career records carrying provenance, with stable review keys."""
+    identifiers = {'evidence_atoms': 'id', 'employment': 'employment_id',
+                   'education': 'education_id', 'publications': 'publication_id', 'strengths_profile': 'id',
+                   'positioning_preferences': 'id'}
+    for group, id_field in identifiers.items():
+        for row in pack.get(group, []):
+            yield group + '/' + row[id_field], row
+    for field, value in pack.items():
+        if isinstance(value, dict) and 'source_refs' in value:
+            yield 'field/' + field, value
+
+
 def verify(pack, root=ROOT):
     sources = {s["source_id"]: s for s in pack.get("source_records", [])}
-    texts, results, uncovered = {}, [], []
+    texts, results, uncovered, uncovered_records = {}, [], [], []
 
     def source_text(source):
         sid = source["source_id"]
@@ -120,17 +136,22 @@ def verify(pack, root=ROOT):
             texts[sid] = ("unverifiable", f"source_type {kind!r}")
         return texts[sid]
 
-    for atom in pack.get("evidence_atoms", []):
+    for key, atom in reference_records(pack):
         refs = [r for r in atom.get("source_refs") or [] if r.get("excerpt")]
         if not refs:
-            uncovered.append(atom["id"])
+            uncovered_records.append(key)
+            if key.startswith('evidence_atoms/'):
+                uncovered.append(atom['id'])
         for ref in refs:
             source = sources.get(ref.get("source_id"))
-            row = {"atom": atom["id"], "source": ref.get("source_id"), "excerpt": ref["excerpt"]}
+            row = {"atom": key.split('/', 1)[1], 'record': key, "source": ref.get("source_id"), "excerpt": ref["excerpt"]}
             if source is None:
                 row.update(status="mismatch", detail="unknown source")
             else:
-                state, payload = source_text(source)
+                try:
+                    state, payload = source_text(source)
+                except (OSError, UnicodeError, RuntimeError) as exc:
+                    state, payload = 'unverifiable', str(exc)
                 if state == "ok":
                     ok, missing = contains(payload, ref["excerpt"])
                     if ok:
@@ -145,16 +166,18 @@ def verify(pack, root=ROOT):
 
     counts = {k: sum(1 for r in results if r["status"] == k) for k in ("verified", "mismatch", "unverifiable")}
     return {"excerpts": results, "counts": counts, "atoms_without_excerpt": uncovered,
+            'records_without_excerpt': uncovered_records,
             "atoms": len(pack.get("evidence_atoms", []))}
 
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--json", action="store_true")
+    parser.add_argument('--pack', type=Path, help='verify a candidate before acceptance')
     parser.add_argument("--quiet", action="store_true", help="summary and failures only")
     args = parser.parse_args(argv[1:])
 
-    path = resolve()
+    path = args.pack or resolve()
     if path is None:
         print("no pack found; nothing to verify")
         return 0

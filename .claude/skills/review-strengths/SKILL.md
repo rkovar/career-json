@@ -48,3 +48,7 @@ truth or approval. Never bulk-refresh hashes to dismiss stale findings. Validate
 the candidate before review and the accepted version’s supersedes chain after
 explicit user decisions. Report remaining questions
 and readiness without turning completion of this interview into a prerequisite.
+
+Strength binding always writes a candidate under `data/candidates/`; it cannot
+publish a pack. Review the reassessed interpretation before acceptance. Use
+`career_core.py history <evidence-id>` to inspect changed supporting facts.

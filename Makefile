@@ -1,4 +1,4 @@
-# Dependency-free: everything here is stdlib Python or shell.
+# Python code uses stdlib. PDF export additionally needs Chrome/Chromium and a PDF extractor.
 .PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts links hooks clean
 
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "make coverage  - timeline, gaps, undated atoms, stale skills"
 	@echo "make questions - outstanding questions, ranked by what answering unlocks"
 	@echo "make pack-html - browsable private view of the whole pack"
+	@echo "make career-page - private reading page of the recorded career"
 	@echo "make resume-json - export a JSON Resume projection to outputs/resume.json"
 	@echo "make verdicts  - record screen verdicts and show the trend"
 	@echo "make hooks     - install the pre-commit hook"
@@ -43,10 +44,21 @@ excerpts:
 	@python3 scripts/verify_excerpts.py --quiet
 
 test:
+	@python3 tests/test_staged.py
+	@python3 tests/test_career_page.py
+	@python3 tests/test_resume_startup.py
+	@python3 tests/test_startup.py
 	@python3 tests/run_tests.py
 	@python3 tests/test_editorial.py
+	@python3 tests/test_resume_workflow.py
+	@python3 tests/test_resume_process.py
+	@python3 tests/test_pdf_links.py
+	@python3 tests/test_employer_layout.py
+	@python3 tests/test_resume_quality.py
 	@python3 tests/test_core.py
 	@python3 tests/test_pack_review.py
+	@python3 tests/test_workspace.py
+	@python3 tests/run_journeys.py
 	@python3 tests/test_releases.py
 
 corroboration:
@@ -81,6 +93,10 @@ coverage:
 # Private working view: includes withheld atoms. outputs/ is gitignored.
 pack-html:
 	@python3 scripts/pack_html.py
+
+.PHONY: career-page
+career-page:
+	@python3 scripts/career_page.py
 
 resume-json:
 	@python3 scripts/export_resume_json.py -o outputs/resume.json
@@ -129,11 +145,21 @@ artifacts:
 check-core: validate excerpts test-core
 	@python3 scripts/check_components.py --require core
 check-resume: records
+	@python3 tests/test_resume_startup.py
 	@python3 scripts/check_components.py --require resume
 	@python3 tests/test_editorial.py
+	@python3 tests/test_resume_workflow.py
+	@python3 tests/test_resume_process.py
+	@python3 tests/test_pdf_links.py
+	@python3 tests/test_employer_layout.py
+	@python3 tests/test_resume_quality.py
 test-core:
+	@python3 tests/test_career_page.py
+	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
 	@python3 tests/test_pack_review.py
+	@python3 tests/test_workspace.py
+	@python3 tests/run_journeys.py
 test-releases:
 	@python3 tests/test_releases.py
 release-core: check-core
@@ -142,3 +168,13 @@ release-resume: check-resume
 	@python3 scripts/build_release.py resume
 strengths:
 	@python3 scripts/career_core.py status
+
+.PHONY: health journeys
+health:
+	@python3 scripts/career_core.py health
+journeys:
+	@python3 tests/run_journeys.py
+
+.PHONY: export-resume
+export-resume:
+	@python3 scripts/export_resume.py "$(ARTEFACT)" --plan "$(PLAN)" --output "$(EXPORT_DIR)"

@@ -1,0 +1,16 @@
+{
+  "benchmark": "career-lifecycle-v1",
+  "persona": null,
+  "scenario": null,
+  "reviewer": null,
+  "source_pack": null,
+  "artifact": null,
+  "elapsed_minutes": null,
+  "unnecessary_questions": null,
+  "manual_file_moves": null,
+  "approval_controls_used": null,
+  "factual_retention": null,
+  "distinctive_strengths_preserved": null,
+  "recovery_success": null,
+  "findings": []
+}

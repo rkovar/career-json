@@ -49,11 +49,20 @@ source excerpts and wording-review status; it deliberately omits contact details
 
 ### What the person reviews
 
-The page starts with a career overview and recent contributions, then shows five
-review items at a time. Supporting records remain available in All career sections.
+The page shows five review items at a time. The career overview and instructions
+can be expanded when needed; **Continue review** jumps directly to the questions.
+The default queue covers all pending sections, including supporting records, and
+excludes previously accepted items. Answers do not disappear or move the remaining
+questions while you work through a batch.
 Filter by career section or change type, search, inspect previous values, and
 expand original source excerpts. Full stored fields and IDs remain available in
 details. Text comes directly from the pack; no extra model summary is generated.
+
+The persistent bottom bar shows the question range, answered/deferred/unanswered
+counts, and a batch selector with completion counts. **Save and next five** and
+**Previous five** move focus and scroll to the beginning of that batch.
+**Next unfinished** jumps to unanswered or deferred work. You can revisit any
+batch, skip questions, or pause without accepting the remaining items.
 
 **Looks accurate** accepts the wording. **Correct this** requires an explanation.
 **Not sure** and **Review later** leave the change pending. No choice is preselected.
@@ -74,10 +83,19 @@ is a self-paced review document, not a demand to answer every prompt.
 
 ### Save, resume and apply
 
-Enter your name and download **Save review decisions**. The page attempts to keep
-progress in browser storage, but the downloaded file is the portable record. It
+**Save and next five** saves a browser draft, not an accepted career pack.
+The page remembers the batch, filters, expanded details and scroll position for
+the same proposal and saved review state. Storage failures are shown explicitly.
+Enter your name under **How review and saving work**, then use **Save and pause**
+or **Download review decisions** to download a portable record. It
 can be loaded into the same proposal page on another browser. A changed proposal
 cannot reuse the file. Closing the page never accepts anything into the pack.
+
+The standalone page embeds its navigation script and works offline. Developers
+can run the optional 80-question browser regression with
+`node tests/test_review_navigation.mjs` (Chrome/Chromium and Node required;
+set `CAREER_BROWSER` to choose a browser executable). It tests navigation, narrow
+screens, draft recovery and the unchanged decision-file contract using fictional data.
 
 Move the downloaded decisions JSON into a private workspace folder, then ask the
 career tool to record it. The operator must use actual user-supplied decisions;
@@ -143,3 +161,7 @@ it later, use `career_core.py review handover --session <session-path>
 and contributions, saved/pending counts and a stopping point. Use this for the
 first-session response instead of adding technical status tables. A recall prompt
 appears when an accepted record exists.
+
+See [workspace maintenance](workspace-maintenance.md) for connected achievement
+review, a save preview, explicit evidence reassessment, health, readable history,
+merge/split/refresh and portable private backup/restore.

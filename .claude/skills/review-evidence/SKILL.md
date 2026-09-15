@@ -235,3 +235,8 @@ only through the explicit review checkpoint. Ask about omitted achievements and
 understated contribution as well as uncertain facts. Use actual user decisions;
 never infer approval from silence or successful validation. Deferred items and
 correction notes remain durable without becoming facts automatically.
+
+For an answered unresolved question, use the separate evidence reassessment
+decision described in `docs/workspace-maintenance.md`. Record the actual answer,
+propose the status and reasoning, and obtain that explicit decision separately
+from wording acceptance. Never treat confidence in an answer as corroboration.

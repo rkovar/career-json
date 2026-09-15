@@ -307,9 +307,9 @@ class EditorialTests(unittest.TestCase):
         self.pack['evidence_atoms'][0]['star']['action'] += ' Updated.'
         candidate = self.put('data/private/candidate.json', self.pack)
         out = self.cli('editorial.py', 'bind-strength', '--pack', candidate, '--strength', 'S_DEPTH',
-                       '--output', 'data/packs/v2.json')
+                       '--output', 'data/candidates/v2.json')
         self.assertEqual(out.returncode, 0, out.stderr)
-        saved = editorial.read('data/packs/v2.json')
+        saved = editorial.read('data/candidates/v2.json')
         self.assertEqual(saved['metadata']['supersedes'], 'data/packs/pack.json')
         self.assertEqual(saved['strengths_profile'][0]['status'], 'proposed')
         self.assertEqual(saved['evidence_atoms'], self.pack['evidence_atoms'])

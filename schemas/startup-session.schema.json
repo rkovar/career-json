@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "startup-session.schema.json",
+  "description": "Private workflow context only. Each component validates its question-specific values.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "flow": {
+      "type": "string",
+      "enum": [
+        "career",
+        "resume"
+      ]
+    },
+    "session_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "handed_off"
+      ]
+    },
+    "context": {
+      "type": "object"
+    },
+    "previous": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "handoff": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "answers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "answered",
+              "none",
+              "not_applicable",
+              "later",
+              "skipped"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "user",
+              "saved",
+              "inferred"
+            ]
+          },
+          "value": {},
+          "recorded_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "origin",
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "flow",
+    "session_id",
+    "revision",
+    "updated_at",
+    "status",
+    "context",
+    "previous",
+    "handoff",
+    "answers"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,644 @@
+{
+  "type": "object",
+  "properties": {
+    "process_version": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "block_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ownership",
+              "chronology",
+              "constraint"
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "pass",
+              "issue"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "artifact_excerpt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "block_id",
+          "kind",
+          "evidence_ids",
+          "source",
+          "status",
+          "reason",
+          "artifact_excerpt"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cold_read": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "string",
+          "enum": [
+            "fresh",
+            "shared"
+          ]
+        },
+        "impressions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "context",
+        "impressions"
+      ],
+      "additionalProperties": false
+    },
+    "prominence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "impression_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "block_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "observed": {
+            "type": "string",
+            "enum": [
+              "leading",
+              "supporting",
+              "missing"
+            ]
+          },
+          "reader_impression_indexes": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "pass",
+              "issue"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "impression_id",
+          "block_ids",
+          "observed",
+          "reader_impression_indexes",
+          "status",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "compression": {
+      "type": "object",
+      "properties": {
+        "requested": {
+          "type": "boolean"
+        },
+        "target": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_requested",
+            "pending",
+            "attempted"
+          ]
+        },
+        "baseline": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "candidate": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "assessment": {
+          "type": "string"
+        },
+        "meaning_review": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "enum": [
+                  "ownership",
+                  "context",
+                  "method",
+                  "timeframe",
+                  "scope",
+                  "strengths"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "issue"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "dimension",
+              "status",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "requested",
+        "target",
+        "status",
+        "assessment",
+        "meaning_review"
+      ],
+      "additionalProperties": false
+    },
+    "revision": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "budget_origin": {
+          "type": "string",
+          "enum": [
+            "default",
+            "user"
+          ]
+        },
+        "budget_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stop_reason": {
+          "type": "string",
+          "enum": [
+            "in_progress",
+            "complete",
+            "needs_user",
+            "needs_evidence",
+            "budget_exhausted"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {
+                "type": "string",
+                "enum": [
+                  "editing",
+                  "user_choice",
+                  "new_evidence"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "disposition": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "resolved",
+                  "deferred"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "category",
+              "description",
+              "disposition",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "limit",
+        "budget_origin",
+        "budget_reason",
+        "stop_reason",
+        "findings"
+      ],
+      "additionalProperties": false
+    },
+    "supersedes": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "review_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "quality": {
+      "type": "object",
+      "properties": {
+        "editorial": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "dimension": {
+                "type": "string"
+              },
+              "block_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "question": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "pass",
+                  "issue"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "passages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "block_id": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "block_id",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "dimension",
+              "block_ids",
+              "question",
+              "status",
+              "reason",
+              "passages"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "omissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "support_in_draft": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "candidate_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "availability": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "disposition": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "retain",
+                  "revise_selection",
+                  "needs_evidence"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "subject",
+              "support_in_draft",
+              "candidate_ids",
+              "availability",
+              "question",
+              "disposition",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "layout": {
+          "type": "object",
+          "properties": {
+            "exports": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "additionalProperties": false
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "reviewed"
+              ]
+            },
+            "observations": {
+              "type": "string"
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "block_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "pages": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "accepted",
+                      "issue"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "block_ids",
+                  "pages",
+                  "message",
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "exports",
+            "status",
+            "observations",
+            "findings"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "editorial",
+        "omissions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "process_version",
+    "artifact",
+    "plan",
+    "checks",
+    "cold_read",
+    "prominence",
+    "compression",
+    "revision"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Private resume process review"
+}

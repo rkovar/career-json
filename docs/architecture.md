@@ -37,7 +37,7 @@ than any instruction.
 ## Layout
 
 ```
-.claude/skills/     judgement: the twelve skills
+.claude/skills/     judgement: conversational workflows and reviews
 scripts/            decidable work, standard library only
 schemas/            contracts: datapack, role profile, evaluation, screen record
 tests/              regression, human-review and clean-install checks
@@ -48,6 +48,7 @@ data/               your private material, excluded from Git and release archive
   roles/              structured role profiles
   briefs/             durable output briefs
   selections/         immutable evidence selections and alternatives
+  plans/              pinned application plans and tradeoffs
   capture/            the append-only note log
   private/            pre-schema profiles
 outputs/            generated artefacts, evaluations, screens. Git ignored.
@@ -57,6 +58,7 @@ outputs/            generated artefacts, evaluations, screens. Git ignored.
 reviews/            source answers and review records. Git ignored
   pack-reviews/       proposal snapshots, sessions and immutable decision batches
   decisions/          scoped editorial decisions
+  startup/            resumable career/resume setup and private HTML summaries
 ```
 
 ## Scripts
@@ -66,6 +68,14 @@ reviews/            source answers and review records. Git ignored
 | `career_core.py` | Core maintenance, candidate strengths queues, private export and review commands |
 | `pack_review.py` | Stages proposals, records human decisions and saves accepted local versions |
 | `review_html.py` / `pack_html.py` | Offline guided proposal review and read-only current-pack overview |
+| `career_page.py` | Private reading view derived only from recorded pack content |
+| `startup.py` / `career_start.py` | Immutable, resumable Core intake sessions; no automatic factual acceptance |
+| `resume_start.py` | Targeting wizard and typed brief handoff; consumes shared startup primitives |
+| `workspace_tools.py` / `workspace_backup.py` | Health, history, reviewed maintenance and verified private backup/restore |
+| `resume_workflow.py` / `resume_employment.py` | Application plans, evidence tradeoffs and employer/position structure |
+| `resume_document.py` / `export_resume.py` / `resume_links.py` | Shared content, PDF/TXT/DOCX output and exact content/link verification |
+| `resume_process.py` / `resume_quality.py` / `resume_layout.py` | Durable claim/editorial reviews, omitted-evidence review and final PDF inspection records |
+| `check_staged.py` | Developer hook: reject private paths and test an isolated snapshot of the Git index |
 | `current_pack.py` | Resolves the current pack by supersedes chain, not by mtime. Refuses when ambiguous |
 | `select_evidence.py` | Emits only eligible evidence; `--role` ranks and shortlists against a profile |
 | `render.py` | Markdown to HTML through one template, so the two cannot drift |
@@ -94,7 +104,9 @@ reviews/            source answers and review records. Git ignored
 | `extract_text.sh` | Source text plus provenance fields |
 | `export_resume_json.py` | Lossy projection to JSON Resume (`resume.json`) |
 
-Every script honours `CAREER_WORKSPACE` so tests never touch live data.
+Workspace operations honor `CAREER_WORKSPACE` so fixtures do not touch live data.
+Developer build and component tools use their source checkout. The commit hook
+clears workspace overrides before testing its isolated staged snapshot.
 
 ## Versioning and provenance
 
@@ -110,10 +122,12 @@ problem is solved.
 
 ## Testing
 
-`make check` runs 585 assertions in the original suite and 35 editorial tests, 8 core tests, 25 human-review tests and 6 release installation tests: real tests over the scripts, plus a lint
-asserting each skill still states its load-bearing rules. That lint exists because
-prose regressions are invisible — during one refactor it caught a rewrite that had
-silently dropped two rules from a skill file.
+`make check` runs the original regression suite, editorial and core contracts,
+human review and workspace-maintenance tests, five complete fictional lifecycle
+journeys and clean-install/recovery tests. GitHub Actions repeats the deterministic
+checks on Linux and macOS. See [quality benchmarks](quality-benchmarks.md) for
+model-driven scenarios and the human observation rubric. Prose quality and hiring
+outcomes are not inferred from successful validation.
 
 The original suite runs against **two** fictional fixtures, and the second one matters.
 `career.example.json` is small and readable. `career.complex.example.json` has the
@@ -151,3 +165,33 @@ Immutable decision batches bind a person’s choices to the proposal fingerprint
 only explicitly accepted content and privacy restrictions enter a new pack.
 Human wording review is separate from evidence confidence and publication rights.
 Corrections and omissions remain follow-up notes until reviewed as new proposals.
+
+## Long-term workspace maintenance
+
+`workspace_tools.py` composes health, achievement history and candidate-only
+merge/split/refresh from the core contracts. `workspace_backup.py` packages private
+files and the installed runtime, checks relative references and verifies archive
+hashes before restoring a new workspace. `metadata.evidence_maintenance` retains
+original and replacement IDs; dependent strengths are never reassigned silently.
+
+Acceptance checks source excerpts across all career record types, preserves the
+latest privacy permission and requires a separate sourced decision for upward
+evidence-status transitions. Accepted writes, review-session creation, decision recording, migrations and
+backups share a workspace lock. Connected review and a non-mutating preview expose the same decisions before
+saving. See [workspace maintenance](workspace-maintenance.md).
+
+## Resume application planning and delivery
+
+Version-2 output briefs record application settings and their origins. Immutable
+plans in `data/plans` pin their selection and authoring policy, map intended
+impressions to approved evidence and explain section allocation and tradeoffs.
+Selection review HTML is a private conversational aid. Scoped wording decisions
+preserve user voice without becoming career facts.
+
+`resume_document.py` derives a small block structure from the final cited draft.
+`export_resume.py` produces PDF, TXT and DOCX with identical content. Submission
+files live under an export bundle's `files/`; internal provenance and reports
+live in `review/`. PDF is the only export with external rendering prerequisites.
+Exact plan, policy and export-file hashes join the existing manifest chain.
+The resume-workflow tests cover these contracts separately from prose quality.
+See [development](development.md) for staged-source checks and optional browser/PDF tests.

@@ -1,5 +1,35 @@
 # Resume Application release notes
 
+## 0.1.0-beta.6 — local release candidate
+
+- Add a resumable targeting wizard with saved strengths, constraints and review
+  preferences. Preserve prior answers and require employer instructions to be
+  reconsidered when the target changes.
+- Verify logical PDF hyperlinks across wrapped text and preserve distinct
+  position titles/dates within an employer tenure.
+
+- Rank evidence by role requirements and complementary contribution without fixed
+  outcome-category or age bonuses; preserve requirement coverage in brief creation.
+- Record explicit editorial and omission reviews in version 2 process records.
+- Locate blocks in exported PDFs, surface page diagnostics, and require a visual
+  review pinned to the final export bundle before publication.
+- Add five fictional quality cases and a runner separating deterministic checks
+  from recorded reader judgments. Existing personal artifacts are not rewritten.
+
+
+## 0.1.0-beta.5
+
+- Add versioned authoring policy, application context, durable resume plans and private selection previews.
+- Preserve context, progression and voice; inspect related outcomes and revision losses.
+- Deliver PDF, TXT and native DOCX from shared content with hash/content verification.
+- Pin plans, policy and exported files to review provenance; separate contextual review dimensions.
+- Add fictional planning/export regression tests and paired review tooling.
+
+## 0.1.0-beta.4
+
+Exclude withheld and unresolved promotion dates from JSON Resume exports. Require
+career-core 0.1.0-alpha.4 and exercise generation selection after career revisions.
+
 ## 0.1.0-beta.3 — local release candidate, 2026-09-11
 
 - Requires career-core 0.1.0-alpha.3. Resume generation remains optional after first-pack onboarding.

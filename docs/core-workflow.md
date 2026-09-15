@@ -67,6 +67,12 @@ pack and chain before finishing. Schema 1.3 remains readable without migration.
 
 ## Export and portability
 
+`make career-page` creates a private reading page from the recorded pack at
+`outputs/career-record.html`. It includes withheld work, preserves unknown dates
+and marks strengths whose support changed. `make pack-html` provides a searchable
+overview. Neither view adds facts from raw sources or records approval; use the
+human review workflow for changes and the JSON export for the complete data.
+
 ```sh
 python3 scripts/career_core.py export --output data/private/career-export.json
 ```
@@ -85,3 +91,7 @@ installing it. It owns briefs, selections, role profiles and scoped editorial
 decisions; those survive deleting generated outputs. Factual corrections discovered
 while writing return through core evidence review. See its `docs/resume-workflow.md`
 when installed. Building a career pack does not require installing the add-on.
+
+See [workspace maintenance](workspace-maintenance.md) for connected achievement
+review, a save preview, explicit evidence reassessment, health, readable history,
+merge/split/refresh and portable private backup/restore.

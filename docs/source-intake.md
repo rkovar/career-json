@@ -8,7 +8,7 @@ Add copies of the materials you want Claude to use under `data/sources/`. Keep r
 - LinkedIn export
 - End-of-year reviews and work writeups
 - Awards and recognition
-- Presentations and conference material
+- Presentations and conference material, and any catalogue of talks, publications, podcasts and courses (each item becomes a `publications` record)
 - Project notes and architecture documents
 - GitHub repository exports or selected repository files
 - Education, certifications, and training records
@@ -27,12 +27,14 @@ After adding the files, ask Claude:
 
 > Use `build-career-pack` on everything in `data/sources/`.
 
-That runs ingestion and evidence review in one go and ends with a single batch of
-questions plus a readiness statement. It does not stop between stages, and it does
-not generate a resume: that is `make-resume`, run separately once the pack exists.
+Claude inspects the requested scope, separates career evidence from job
+descriptions and writing advice, and prepares a proposed pack and readable review.
+Evidence questions are queued for review; they are not a giant questionnaire to
+answer at once. Contact details beyond name/location can wait until delivery.
 
-On a first run the batch will include your contact details, because a pack without
-them cannot produce a sendable document.
+For help deciding what to bring, say **“Help me start a career pack”**. The
+[guided start](guided-starts.md) offers a checklist or conversational account,
+saves deferrals, and works with one source. Resume generation is separate.
 
 ## Extraction
 

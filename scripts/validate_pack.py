@@ -31,7 +31,7 @@ def enums(schema):
     }
 
 
-def check(path, schema, strict=False):
+def check(path, schema, strict=False, root=ROOT):
     errors, warnings = [], []
     try:
         pack = json.loads(path.read_text())
@@ -39,7 +39,7 @@ def check(path, schema, strict=False):
         return [f"invalid JSON: {exc}"], []
 
     if pack.get("schema_version") == "1.3":
-        schema = json.loads((SCHEMA.parent / "archive" / "career-1.3.schema.json").read_text())
+        schema = json.loads((root / 'schemas/archive/career-1.3.schema.json').read_text())
         if 'strengths_profile' in pack or 'positioning_preferences' in pack:
             errors.append('strengths and preferences require schema 1.4; migrate the pack first')
     e = enums(schema)
@@ -51,7 +51,7 @@ def check(path, schema, strict=False):
     # typo here silently changed which pack every script resolved.
     supersedes = (pack.get("metadata") or {}).get("supersedes")
     if supersedes:
-        target = (ROOT / supersedes)
+        target = (root / supersedes)
         if target.resolve() == path.resolve():
             errors.append("metadata.supersedes points at this pack itself")
         elif not target.exists():
@@ -127,6 +127,18 @@ def check(path, schema, strict=False):
         parent = rec.get("parent_employment_id")
         if parent and parent not in employment_ids:
             errors.append(f"employment[{rec.get('employment_id')}]: unknown parent_employment_id {parent!r}")
+    parents = {rec.get('employment_id'): rec.get('parent_employment_id')
+               for rec in pack.get('employment', [])}
+    visited = set()
+    for eid in parents:
+        chain, cursor = set(), eid
+        while cursor in parents and cursor not in visited:
+            if cursor in chain:
+                errors.append(f"employment[{eid}]: cycle in parent_employment_id")
+                break
+            chain.add(cursor)
+            cursor = parents[cursor]
+        visited.update(chain)
     if not pack.get("employment"):
         errors.append("no employment records; every date and title in a generated artefact would be unsourced")
 
@@ -160,6 +172,46 @@ def check(path, schema, strict=False):
         for ref in rec.get("source_refs", []):
             if ref.get("source_id") not in source_ids:
                 errors.append(f"{where}: source_ref points at unknown source_id {ref.get('source_id')!r}")
+
+    # Publications: talks, articles, books, posts, podcasts, courses. Like
+    # education, facts with provenance rather than STAR claims, and the list a
+    # resume's publications section is generated from.
+    pub_schema = schema["$defs"].get("publicationRecord") or json.loads(SCHEMA.read_text())["$defs"]["publicationRecord"]
+    publication_ids = set()
+    independent_sources = {r["source_id"] for r in pack.get("source_records", []) if r.get("independent") is True}
+    for i, rec in enumerate(pack.get("publications", [])):
+        rid = rec.get("publication_id") or f"<index {i}>"
+        where = f"publications[{rid}]"
+        for field in pub_schema["required"]:
+            if rec.get(field) in (None, "") and field != "external_safe":
+                errors.append(f"{where}: missing {field}")
+        if rec.get("publication_id") in publication_ids:
+            errors.append(f"{where}: duplicate publication_id")
+        publication_ids.add(rec.get("publication_id"))
+        for field in set(rec) - set(pub_schema["properties"]):
+            errors.append(f"{where}: unknown field {field!r}")
+        if rec.get("kind") not in pub_schema["properties"]["kind"]["enum"]:
+            errors.append(f"{where}: kind {rec.get('kind')!r} not in {pub_schema['properties']['kind']['enum']}")
+        if rec.get("role") not in pub_schema["properties"]["role"]["enum"]:
+            errors.append(f"{where}: role {rec.get('role')!r} not recognised")
+        if rec.get("evidence_status") not in e["status"]:
+            errors.append(f"{where}: evidence_status {rec.get('evidence_status')!r} not in {sorted(e['status'])}")
+        if not isinstance(rec.get("external_safe"), bool):
+            errors.append(f"{where}: external_safe must be present and boolean")
+        if rec.get("date") is not None and not re.match(r"^\d{4}(-\d{2})?(-\d{2})?$", str(rec.get("date"))):
+            errors.append(f"{where}: date {rec.get('date')!r} must be YYYY, YYYY-MM or YYYY-MM-DD")
+        if rec.get("date") is None:
+            warnings.append(f"{where}: undated")
+        if rec.get("employment_id") and rec.get("employment_id") not in employment_ids:
+            errors.append(f"{where}: unknown employment_id {rec.get('employment_id')!r}")
+        if not rec.get("source_refs"):
+            warnings.append(f"{where}: no source_refs; the item traces to nothing")
+        for ref in rec.get("source_refs", []):
+            if ref.get("source_id") not in source_ids:
+                errors.append(f"{where}: source_ref points at unknown source_id {ref.get('source_id')!r}")
+        if rec.get("evidence_status") == "externally_verified" and not any(
+                ref.get("source_id") in independent_sources for ref in rec.get("source_refs", [])):
+            errors.append(f"{where}: externally_verified requires a source_ref to an independent source record")
 
     atoms = pack.get("evidence_atoms")
     if not atoms:
@@ -263,14 +315,8 @@ def check(path, schema, strict=False):
         if outcome is None and status != "unresolved":
             warnings.append(f"{where}: no outcome_type set")
 
-    # Said once, at the altitude where it is true. Generation ranks business
-    # outcomes first and evaluate-output checks for them, so a pack with none
-    # leaves both inert and makes every artefact warn forever.
-    if atoms and not any(a.get("outcome_type") == "business_outcome" for a in atoms):
-        warnings.append(
-            f"no atom is typed business_outcome ({len(atoms)} atoms); selection ranking and "
-            "artefact evaluation both key on it, so every document from this pack will "
-            "describe work rather than consequence")
+    # Outcome categories describe evidence, not career quality. A pack of
+    # useful outputs or activities need not contain a business-outcome label.
 
     profile = pack.get("private_profile")
     if profile is None:
@@ -283,6 +329,25 @@ def check(path, schema, strict=False):
     if pack.get("schema_version") == "1.4":
         from schema_tools import walk
         from career_profile import validate_profile
+        walk(pack.get('metadata', {}), schema['properties']['metadata'], schema, 'metadata', errors)
+        if not errors:
+            for event in (pack.get('metadata') or {}).get('evidence_maintenance', []):
+                origins, replacements = event['from_ids'], event['to_ids']
+                if not set(origins + replacements) <= seen:
+                    errors.append('maintenance relationships must preserve original and replacement evidence IDs')
+                if event['operation'] == 'refresh':
+                    if len(origins) != 1 or origins != replacements:
+                        errors.append('refresh must preserve one achievement ID')
+                else:
+                    if set(origins) & set(replacements):
+                        errors.append('merge/split replacements must use new IDs')
+                    if event['operation'] == 'merge' and (len(origins) < 2 or len(replacements) != 1):
+                        errors.append('merge requires multiple originals and one replacement')
+                    if event['operation'] == 'split' and (len(origins) != 1 or len(replacements) < 2):
+                        errors.append('split requires one original and multiple replacements')
+                    for atom in atoms or []:
+                        if atom.get('id') in origins and (atom.get('external_safe') or atom.get('evidence_status') != 'declined'):
+                            errors.append('replaced evidence must remain private and declined: ' + atom['id'])
         for field in ("strengths_profile", "positioning_preferences"):
             if field in pack:
                 walk(pack[field], schema["properties"][field], schema, field, errors)

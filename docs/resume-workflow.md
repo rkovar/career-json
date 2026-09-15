@@ -1,5 +1,7 @@
 # Resume Application workflow (beta)
 
+Use the [resume wizard](resume-start.md) when direction or preferences need clarification. Its existing-schema brief feeds this selection and planning workflow.
+
 Install Career Evidence Core first. Both components use the same workspace and
 versioned career schema; no import or conversion is needed when adding the app.
 The factual record, supported interpretations and preferences belong to the core.
@@ -9,7 +11,7 @@ See [Editorial memory](editorial-memory.md) for briefs, ranked selections, scope
 feedback and exact provenance. Generation uses the selected safe evidence view;
 private interview preparation deliberately reads the full private pack.
 
-The application owns `data/roles`, `data/briefs`, `data/selections`, and
+The application owns `data/roles`, `data/briefs`, `data/selections`, `data/plans`, and
 `reviews/decisions`. Its generated Markdown, exports and review sidecars belong
 under `outputs`. Deleting outputs must not erase selection choices or feedback.
 Application records reference stable core IDs and exact pack hashes. Schema 1.3
@@ -23,10 +25,13 @@ reassess affected interpretations. An application cannot upgrade an evidence
 status or silently turn its own prose into a source.
 
 Before delivering, run representation and integrity review, then a cold recruiter
-screen. Review exact final bytes; regenerate manifests after edits. Check PDF
-layout when export is requested. Report shortcomings independently: a faithful
+screen. Review exact final bytes; regenerate manifests after edits. Every resume requires PDF, TXT and DOCX exports. Check final PDF
+layout and verify recovered text across all three formats. Report shortcomings independently: a faithful
 resume may still be weak, and a well-written one may target an unsupported role.
 
 The add-on includes `Makefile.resume` for its deterministic checks. The developer
 checkout has `make check-resume` and `make test-releases` as well. Model scenarios
 are separate, consume tokens and require the locally configured Claude CLI.
+
+See [Resume authoring](resume-authoring.md) for the full planning and review flow
+and [Exports](resume-exports.md) for prerequisites and failure handling.

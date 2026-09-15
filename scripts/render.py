@@ -30,8 +30,10 @@ TEMPLATE = """<!doctype html>
     h1 {{ margin: 0; font-size: 26pt; }}
     h2 {{ margin: 18px 0 8px; border-bottom: 1px solid #a44d2f; color: #a44d2f; font-size: 11pt; letter-spacing: .08em; text-transform: uppercase; }}
     h3 {{ margin: 13px 0 4px; font-size: 10.5pt; }}
+    h4 {{ margin: 8px 0 4px; font-size: 10.5pt; }}
+    p.position {{ margin: 2px 0; font-size: 10pt; break-after: avoid; page-break-after: avoid; }}
     p, li {{ font-size: 10.5pt; line-height: 1.35; orphans: 2; widows: 2; }}
-    h2, h3 {{ break-after: avoid; page-break-after: avoid; }}
+    h2, h3, h4 {{ break-after: avoid; page-break-after: avoid; }}
     h3 + p, h3 + p + p {{ break-after: avoid; page-break-after: avoid; }}
     li {{ break-inside: avoid; page-break-inside: avoid; }}
     .role {{ margin: 4px 0 8px; border: 0; color: #17202a; font: bold 12pt Arial, sans-serif; letter-spacing: 0; text-transform: none; }}
@@ -129,6 +131,9 @@ def blocks(markdown):
             out.append(("li", line[2:].strip()))
         elif line[:1].isspace() and out and out[-1][0] == "li" and not para:
             out[-1] = ("li", out[-1][1] + " " + stripped)
+        elif line.startswith("#### "):
+            flush()
+            out.append(("h4", line[5:].strip()))
         elif line.startswith("### "):
             flush()
             out.append(("h3", line[4:].strip()))
@@ -154,7 +159,7 @@ def header(parts):
     """
     role, contact, paragraphs = None, None, []
     for index, (kind, text) in enumerate(parts):
-        if kind in ("h3", "li") or (kind == "h2" and is_section(text)):
+        if kind in ("h3", "h4", "li") or (kind == "h2" and is_section(text)):
             break
         if kind == "h2" and role is None:
             role = index
@@ -178,8 +183,12 @@ def render(markdown):
     out, in_list = [], False
     parts = blocks(markdown)
     role_index, contact_index, _ = header(parts)
-
+    employer_group = False
+    from resume_employment import date_range
     for index, (kind, text) in enumerate(parts):
+        fields = [field.strip() for field in text.split('|')]
+        if kind in ('h1', 'h2', 'h3'):
+            employer_group = kind == 'h3' and len(fields) >= 2 and date_range(fields[1]) is not None
         if kind == "li":
             if not in_list:
                 out.append("    <ul>")
@@ -198,6 +207,8 @@ def render(markdown):
             else:
                 body = inline(text)
             out.append(f"    <h3>{body}</h3>")
+        elif kind == "h4":
+            out.append(f"    <h4>{inline(text)}</h4>")
         elif kind == "h2":
             heading = EVIDENCE.sub("", text).strip()
             if index == role_index:
@@ -215,6 +226,8 @@ def render(markdown):
                 cls = ' class="contact"'
             elif text.count("|") > 6:
                 cls = ' class="skills"'
+            elif employer_group and len(fields) >= 2 and date_range(fields[1]):
+                cls = ' class="position"'
             else:
                 cls = ""
             out.append(f"    <p{cls}>{inline(text)}</p>")

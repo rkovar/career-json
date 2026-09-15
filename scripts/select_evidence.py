@@ -26,9 +26,7 @@ from evidence_rules import links, linked_ids, eligible, canonical, contains_term
 
 ROLES = ROOT / "data" / "roles"
 
-# Hiring managers discount workload metrics, so outcomes sort first.
-OUTCOME_RANK = {"business_outcome": 0, "output": 1, "activity": 2, None: 3}
-STATUS_RANK = {"externally_verified": 0, "corroborated": 1, "self_asserted": 2}
+# Outcome type and corroboration describe evidence; neither is a universal ranking.
 
 
 def role_score(atom, profile, canon):
@@ -42,7 +40,8 @@ def role_score(atom, profile, canon):
         if atom["id"] in linked_ids(req):
             weight = {"essential": 5.0, "important": 2.5, "nice_to_have": 1.0}[req["weight"]]
             score += weight
-            reasons.append(f"answers {req['weight']} requirement: {req['text'][:60]}")
+            status = "confirmed link" if atom["id"] in linked_ids(req, confirmed_only=True) else "proposed link; inspect support"
+            reasons.append(f"candidate for {req['weight']} {req.get('kind', 'other')} requirement ({status}): {req['text']}")
 
     have = {canon.get(s.lower(), s.lower()) for s in atom.get("skills", [])}
     wanted = {canon.get(k.lower(), k.lower()) for k in profile.get("ats_keywords", [])}
@@ -56,21 +55,11 @@ def role_score(atom, profile, canon):
         score += min(len(hits), 3) * 0.4
         reasons.append("mentions " + ", ".join(hits[:3]))
 
-    score += {"business_outcome": 2.0, "output": 1.0, "activity": 0.25, None: 0}[atom.get("outcome_type")]
-
-    occurred = atom.get("occurred") or {}
-    end = occurred.get("end") or occurred.get("start")
-    if end:
-        year = this_year() if end == "ongoing" else int(end[:4])
-        age = this_year() - year
-        if age <= 3:
-            score += 1.5
-            reasons.append("recent")
-        elif age <= 8:
-            score += 0.5
-        elif age > 15:
-            score -= 0.75
-            reasons.append(f"{age} years old")
+    # Date and outcome category remain visible context, without a blanket bonus
+    # that can displace older technical work or work with no financial measure.
+    if atom.get("occurred"):
+        reasons.append("timeframe: " + str(atom["occurred"].get("end") or atom["occurred"].get("start") or "unknown"))
+    reasons.append("outcome category: " + str(atom.get("outcome_type") or "unspecified") + "; assess value for this role")
 
     if atom.get("role_fit_notes"):
         # Whether a note counts against THIS role is judgement, so it is carried
@@ -102,6 +91,45 @@ def recency(atom):
     occurred = atom.get("occurred") or {}
     end = occurred.get("end") or occurred.get("start") or "0000"
     return f"{this_year()}-99" if end == "ongoing" else end
+
+
+DIMENSIONS = {"build": "technical delivery", "lead": "leadership and influence",
+              "domain": "domain expertise", "communicate": "communication and knowledge sharing",
+              "govern": "governance and risk", "other": "role-specific contribution"}
+
+
+def contributions(atom, profile):
+    return [{"requirement": req["text"], "dimension": DIMENSIONS.get(req.get("kind"), DIMENSIONS["other"]),
+             "link_status": "confirmed" if atom["id"] in linked_ids(req, True) else "proposed"}
+            for req in (profile or {}).get("requirements", []) if atom["id"] in linked_ids(req)]
+
+
+def complementary_shortlist(atoms, profile, limit):
+    """Preserve essential coverage; then prefer complementary requirement links.
+
+    Proposed links support retrieval, not a qualification verdict. Essential
+    coverage may exceed a requested shortlist size, as in the previous selector.
+    """
+    if limit < 1:
+        raise ValueError("shortlist limit must be positive")
+    requirements = (profile or {}).get("requirements", [])
+    kept, covered = [], set()
+    def coverage(atom):
+        return {i for i, req in enumerate(requirements) if atom["id"] in linked_ids(req)}
+    for index, req in enumerate(requirements):
+        if req.get("weight") == "essential" and index not in covered:
+            best = next((a for a in atoms if index in coverage(a)), None)
+            if best:
+                kept.append(best); covered.update(coverage(best))
+    while len(kept) < limit:
+        remaining = [a for a in atoms if a not in kept]
+        if not remaining: break
+        def gain(atom):
+            return sum({"essential": 5, "important": 2.5, "nice_to_have": 1}[requirements[i]["weight"]]
+                       for i in coverage(atom) - covered)
+        best = max(remaining, key=gain)  # stable tie: existing role ranking
+        kept.append(best); covered.update(coverage(best))
+    return kept
 
 
 def view(pack, audience="named_recipient", profile=None, limit=None):
@@ -136,12 +164,8 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
             "constraints": atom.get("constraints", []),
             "has_corroborator": bool(atom.get("corroborators")),
         })
-    # Outcomes first, then recent work: a hiring manager discounts both workload
-    # metrics and things you did twelve years ago.
-    atoms.sort(key=lambda a: (OUTCOME_RANK[a["outcome_type"]],
-                              STATUS_RANK.get(a["evidence_status"], 9)))
+    # Stable recency order is a browsing default, never a career-value score.
     atoms.sort(key=recency, reverse=True)
-    atoms.sort(key=lambda a: OUTCOME_RANK[a["outcome_type"]])
 
     dropped, coverage = [], []
     if profile:
@@ -153,24 +177,11 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
             score, reasons = role_score(atom, profile, canon)
             atom["role_score"] = score
             atom["why_selected"] = reasons
+            atom["role_contributions"] = contributions(atom, profile)
             scored.append(atom)
         scored.sort(key=lambda a: -a["role_score"])
         cap = limit or 30
-        # Essential coverage first. Taking the top N by score let two strong
-        # examples of one essential push out the only example of another, which
-        # is curation removing the thing the role hires for.
-        keep = []
-        for req in profile.get("requirements", []):
-            if req.get("weight") != "essential":
-                continue
-            best = next((a for a in scored if a["id"] in linked_ids(req)), None)
-            if best and best not in keep:
-                keep.append(best)
-        for atom in scored:
-            if len(keep) >= cap:
-                break
-            if atom not in keep:
-                keep.append(atom)
+        keep = complementary_shortlist(scored, profile, cap)
         keep.sort(key=lambda a: -a["role_score"])
         dropped = [{"id": a["id"], "title": a["title"], "role_score": a["role_score"]}
                    for a in scored if a not in keep]
@@ -195,15 +206,13 @@ def view(pack, audience="named_recipient", profile=None, limit=None):
 
     # Named `contact`, not `profile`: this function already takes a role profile,
     # and the collision silently overwrote it.
-    contact = dict(pack.get("private_profile") or {})
-    contact.pop("source_refs", None)
-    # Never in any artefact, so never in context either.
-    contact.pop("address", None)
-    contact.pop("photo_reference", None)
-    contact.pop("right_to_work", None)
-    if audience == "public":
-        for field in ("email", "phone", "personal_website"):
-            contact.pop(field, None)
+    profile_fields = pack.get("private_profile") or {}
+    contact_fields = ('name', 'location', 'linkedin')
+    if audience == 'named_recipient':
+        contact_fields += ('email', 'phone', 'personal_website')
+    # Profile extensions are private unless deliberately added to this allowlist.
+    contact = {key: profile_fields[key] for key in contact_fields if key in profile_fields}
+    contact.setdefault('name', pack.get('name'))
 
     # Projected through an allowlist. The whole record used to pass through,
     # carrying employer_of_record and operator notes that data-model.md says

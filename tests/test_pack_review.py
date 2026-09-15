@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Human review contracts in fictional workspaces, including partial acceptance."""
 import copy
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -67,6 +68,28 @@ class PackReviewTests(unittest.TestCase):
         self.assertEqual(list((self.root/'data/packs').glob('*.json')),[self.root/'data/packs/base.json'])
         self.assertEqual((self.root/'data/packs/base.json').read_bytes(),before)
         self.publish(success=False)
+
+    def test_record_waits_for_the_same_lock_as_publication(self):
+        self.start()
+        self.choices({'evidence_atoms/E_STORY_1': 'accept'})
+        lock_path = self.root/'reviews/.pack-write.lock'
+        with lock_path.open('a') as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            code = ("import sys; sys.path.insert(0, sys.argv[1]); "
+                    "from pack_review import record; from pack_io import read; "
+                    "print('ready', flush=True); "
+                    "record('reviews/pack-reviews/check/session.json', read('reviews/choices.json'))")
+            proc = subprocess.Popen([sys.executable, '-c', code, str(ROOT/'scripts')],
+                cwd=self.root, env={**os.environ, 'CAREER_WORKSPACE':str(self.root)},
+                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                self.assertEqual(proc.stdout.readline().strip(), 'ready')
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    proc.wait(timeout=.2)
+            finally:
+                fcntl.flock(handle, fcntl.LOCK_UN)
+                stdout, stderr = proc.communicate(timeout=10)
+            self.assertEqual(proc.returncode, 0, stdout+stderr)
 
     def test_acceptance_does_not_raise_confidence_or_grant_publication(self):
         self.proposed['evidence_atoms'][0]['evidence_status']='corroborated'
@@ -158,6 +181,22 @@ class PackReviewTests(unittest.TestCase):
         self.start();self.choices({'evidence_atoms/E_STORY_1':'later','evidence_atoms/E_STORY_2':'accept'})
         accepted=self.publish()
         self.assertIn('E_STORY_1',[a['id'] for a in accepted['evidence_atoms']])
+
+    def test_review_navigation_is_embedded_in_the_portable_page(self):
+        self.start()
+        self.cli('render', '--session', self.session, '--output', 'outputs/review.html')
+        text = (self.root / 'outputs/review.html').read_text()
+        self.assertIn('const batchSize = 5;', text)
+        self.assertIn('Save and next five', text)
+        self.assertIn('Jump to batch', text)
+        self.assertIn('Next unfinished', text)
+        self.assertIn('Show all pending records', text)
+        self.assertNotIn('<script src=', text)
+        self.assertNotIn('@@NAVIGATION@@', text)
+        # UI progress never changes the existing review-data/decisions contract.
+        embedded = json.loads(text.split('id="review-data">', 1)[1].split('</script>', 1)[0])
+        self.assertNotIn('navigation', embedded)
+        self.assertTrue(all(row['decision'] is None for row in embedded['items']))
 
     def test_reimport_is_idempotent_but_later_reconsideration_is_preserved(self):
         self.start()

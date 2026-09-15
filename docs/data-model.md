@@ -71,8 +71,9 @@ generation, so an unmeasured figure is visible before it reaches a page.
 
 **`outcome_type`** — `activity` (work done: engagements, throughput), `output`
 (things produced: patterns, courses), `business_outcome` (what changed for the
-organisation). Generation prefers outcomes, because hiring managers discount
-workload metrics.
+organisation). These describe what the evidence establishes; none is universally
+preferred. Resume selection judges the contribution against the target role,
+including useful outputs, prevention and work without financial measurements.
 
 **`external_safe`** — false excludes a claim from external document generation.
 Private career reviews and interview preparation may inspect withheld evidence;
@@ -139,6 +140,39 @@ Absent from the schema until 2026-09-06, which meant a degree could not be
 recorded at all and `export_resume_json.py` could never fill JSON Resume's
 education section. `external_safe: false` withholds a qualification from every
 external document exactly as it does an atom.
+
+## Publications
+
+Talks, keynotes, articles, books and book contributions, blog posts, reports,
+podcasts, videos, courses, software, datasets, and committee or board service.
+Recorded like education: a checkable fact with provenance, not a STAR story.
+
+```json
+{
+  "publication_id": "PUB_BLACKHAT_2019_ATTACK",
+  "title": "MITRE ATT&CK: The Play at Home Edition",
+  "kind": "talk",
+  "venue": "Black Hat USA",
+  "date": "2019-08",
+  "url": "https://attack.mitre.org/resources/...",
+  "role": "co_speaker",
+  "collaborators": ["Katie Nickels"],
+  "employment_id": "EMP_PRIOR",
+  "evidence_id": "E_CONFERENCE_SPEAKING",
+  "source_refs": [{"source_id": "SRC_MITRE_ARCHIVE", "excerpt": "..."}],
+  "evidence_status": "externally_verified",
+  "external_safe": true
+}
+```
+
+Added 2026-09-12 because a career page with "keynoted Black Hat, RSA and DEF CON"
+as one achievement could not list the talks, and a resume cannot cite what the
+pack does not itemise. `evidence_id` points at the achievement that summarises a
+group of items, so the two never drift apart. Intake extracts every item it can
+find in resumes, catalogues, author archives and programme pages; a public page
+that lists the item makes it `externally_verified`, a subject-supplied catalogue
+leaves it `self_asserted`. Roles use the same vocabulary as the record: a
+`foreword` is not an `author`, a `co_speaker` is not a `speaker`.
 
 ## Source records
 

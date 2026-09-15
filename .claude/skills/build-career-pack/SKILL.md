@@ -1,19 +1,33 @@
 ---
 name: build-career-pack
-description: "Build or extend a career datapack from source material, apply user-supplied review decisions, or continue a saved career-pack review. Handles first-pack onboarding and later imports without requiring a target job."
+description: "Build or extend a career datapack from source material, apply user-supplied review decisions, or continue a saved career-pack review. Also checks workspace health, explains achievement history, prepares reviewed merge/split/refresh proposals, and backs up or restores a career workspace. No target job is required."
 ---
 
 # Build Or Extend The Career Datapack
 
 ## Purpose
 
-The setup phase. Turn source material into a datapack that later resume requests
-can be answered from without further interrogation. Questions are the deliverable
-here, not an interruption. The goal is to front-load them so that
-`make-resume` never has to ask.
+Turn source material into a durable career record. Review evidence here so later
+applications can reuse it. Resume-specific direction and choices belong in their
+own brief.
 
 Run `ingest-career-materials`, finish the proposal and its readable overview, then
 hand over to `review-evidence`. Do not ask the user to operate the scripts.
+
+## Guided start
+
+For an uncertain first start, help gathering material, or a wizard request, follow
+`docs/guided-starts.md`. Inspect the workspace and relevant saved sessions;
+reuse supplied choices, ask at most five concise prompts, and save each answer
+with its readable summary. Offer existing material, a source checklist, or a
+conversational account. Keep none, not-applicable, later and skipped distinct.
+
+Honor explicit source scope without asking it again. Specific imports, quick
+capture, maintenance and existing evidence reviews keep their direct paths.
+Use the startup handoff's career-source list and user accounts for ingestion.
+Keep job descriptions and writing guides as context. Preserve category deferrals
+and restrictions when preparing later questions. Setup is not factual acceptance
+or permission for external use.
 
 ## First session and returning reviews
 
@@ -61,7 +75,7 @@ If the person wants to interview now, follow it with one answerable question.
 
 ## Inputs
 
-- new or changed source material (default: everything in `data/sources/`)
+- new or changed material within the explicit request or saved startup scope; inspect all `data/sources/` only when that broader scope is requested
 - the current pack, if one exists (resolve its supersedes chain with `current_pack.py`)
 
 ## Workflow
@@ -101,7 +115,14 @@ trace its claims back to source evidence before importing anything new.
 
 ## What the questions must cover
 
-Provenance alone is not enough. Every batch must reach for three things:
+Provenance alone is not enough. Every batch must reach for four things:
+
+0. **Public work, itemised.** If the sources describe speaking, writing, teaching
+   or publishing but yield no `publications` records, or the pack has none at
+   all, ask once for the items (or a catalogue, author archive or speaker
+   profile to extract them from). "None" is a complete answer: record it as a
+   `No publications: <why>` constraint on the achievement so the queue in
+   `open_questions.py`, which raises this on its own, stops asking.
 
 1. **Grounding.** Missing STAR fields, ownership, scope, timeframe, measurement.
 2. **Corroboration is optional and off by default.** Do not ask who would confirm
@@ -195,6 +216,9 @@ generation is an optional application; a target role is not required:
 - counts by `outcome_type`, called out plainly if no atom is `business_outcome`
 - employment records, and any with an unknown `end` or an unconfirmed
   `employer_of_record`
+- publications: how many items are recorded by kind, how many are independently
+  verified, and whether any body of work named in an achievement (talks, books,
+  posts) has no itemised records behind it
 - which unanswered questions would most improve a future resume
 
 Report these plainly. A pack of entirely `self_asserted` atoms is a normal,
@@ -213,7 +237,7 @@ remaining gaps will produce a narrower resume.
 ## Final report
 
 1. Sources ingested, and sources skipped as unchanged.
-2. Evidence added or changed, by ID.
+2. Evidence added or changed, by ID; publications added, by kind and count.
 3. Conflicts preserved, by ID.
 4. Files written.
 5. The question batch.
@@ -233,3 +257,21 @@ usable; a first import stays a proposal until sufficient items are accepted.
 Never label `self_asserted` extraction as user-reviewed. Accepting wording does not
 increase evidence confidence or grant permission for external use. Preserve
 corrections, uncertain answers, deferred items and omission feedback across turns.
+
+## Maintain an existing workspace
+
+For health, achievement history, merge/split/refresh, or backup/restore, use
+`docs/workspace-maintenance.md`. These are core operations. Use `health` to explain
+integrity separately from completeness. Render `history` when the person asks why
+an achievement changed or where it came from. Maintenance creates candidates and
+retains historical IDs; never invent replacement prose or retarget strength support
+automatically. Backups contain private sources and decisions; restore into a new
+directory and continue the saved session.
+
+Use the connected achievement/source controls and save preview during review.
+Before applying supplied decisions, run `review preview` against the exact file
+to explain dependency or source problems. Missing files are distinct from known
+excerpt mismatches. Never change a quote to pass validation without source support.
+A status promotion needs the person's separate sourced reassessment decision;
+wording acceptance alone cannot resolve an evidence question or establish
+corroboration. Bind strengths only into `data/candidates/`, then use review.

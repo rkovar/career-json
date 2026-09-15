@@ -108,6 +108,124 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+$",
       "description": "Stable logical output across brief versions. Older records fall back to brief_id."
+    },
+    "application": {
+      "type": "object",
+      "properties": {
+        "workflow_version": {
+          "const": 2,
+          "type": "integer"
+        },
+        "market": {
+          "type": "string",
+          "enum": [
+            "UK",
+            "US",
+            "unspecified"
+          ]
+        },
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "standard_resume",
+            "standard_cv",
+            "employer_specific"
+          ]
+        },
+        "submission_channel": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "portal",
+            "public",
+            "unspecified"
+          ]
+        },
+        "contact_mode": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "anonymous",
+            "public"
+          ]
+        },
+        "paper_size": {
+          "type": "string",
+          "enum": [
+            "A4",
+            "Letter"
+          ]
+        },
+        "page_limit": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "required_exports": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "pdf",
+              "txt",
+              "docx"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "review_mode": {
+          "type": "string",
+          "enum": [
+            "automatic",
+            "interactive"
+          ]
+        },
+        "employer_instructions": {
+          "type": "string"
+        },
+        "setting_sources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "employer",
+                  "user",
+                  "inferred"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "origin",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "workflow_version",
+        "market",
+        "document_type",
+        "submission_channel",
+        "contact_mode",
+        "paper_size",
+        "page_limit",
+        "required_exports",
+        "review_mode",
+        "employer_instructions",
+        "setting_sources"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

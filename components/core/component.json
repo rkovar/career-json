@@ -1,6 +1,6 @@
 {
   "name": "career-core",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.5",
   "channel": "early-access",
   "career_schema_versions": [
     "1.3",
@@ -26,8 +26,10 @@
     "docs/first-session.md": "docs/first-session.md",
     "docs/linkedin.md": "docs/linkedin.md",
     "docs/pack-review.md": "docs/pack-review.md",
+    "docs/quality-benchmarks.md": "docs/quality-benchmarks.md",
     "docs/releases.md": "docs/releases.md",
     "docs/source-intake.md": "docs/source-intake.md",
+    "docs/workspace-maintenance.md": "docs/workspace-maintenance.md",
     "examples/career.complex.example.json": "examples/career.complex.example.json",
     "examples/career.example.json": "examples/career.example.json",
     "examples/first-pack/FICTIONAL_DEMO.txt": "examples/first-pack/FICTIONAL_DEMO.txt",
@@ -68,10 +70,25 @@
     "scripts/schema_tools.py": "scripts/schema_tools.py",
     "scripts/validate_pack.py": "scripts/validate_pack.py",
     "scripts/verify_excerpts.py": "scripts/verify_excerpts.py",
+    "scripts/workspace_backup.py": "scripts/workspace_backup.py",
+    "scripts/workspace_tools.py": "scripts/workspace_tools.py",
     "tests/build_first_pack_demo.py": "tests/build_first_pack_demo.py",
     "tests/editorial_fixture.py": "tests/editorial_fixture.py",
     "tests/fixtures/editorial-personas.json": "tests/fixtures/editorial-personas.json",
+    "tests/fixtures/journey-observation.template.json": "tests/fixtures/journey-observation.template.json",
+    "tests/run_journeys.py": "tests/run_journeys.py",
     "tests/test_core.py": "tests/test_core.py",
-    "tests/test_pack_review.py": "tests/test_pack_review.py"
+    "tests/test_pack_review.py": "tests/test_pack_review.py",
+    "tests/test_workspace.py": "tests/test_workspace.py",
+    "scripts/review_navigation.js": "scripts/review_navigation.js",
+    "tests/build_review_navigation_fixture.py": "tests/build_review_navigation_fixture.py",
+    "tests/test_review_navigation.mjs": "tests/test_review_navigation.mjs",
+    "scripts/startup.py": "scripts/startup.py",
+    "scripts/career_start.py": "scripts/career_start.py",
+    "schemas/startup-session.schema.json": "schemas/startup-session.schema.json",
+    "docs/guided-starts.md": "docs/guided-starts.md",
+    "tests/test_startup.py": "tests/test_startup.py",
+    "scripts/career_page.py": "scripts/career_page.py",
+    "tests/test_career_page.py": "tests/test_career_page.py"
   }
 }

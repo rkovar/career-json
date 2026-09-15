@@ -1,224 +1,183 @@
 ---
 name: make-resume
-description: "Use when the user asks for a resume, CV, or cover letter for a specific role from the existing career datapack. Triggers on requests such as I need a resume for this job, build me a CV for this role, tailor my resume to this job description, or make a one-pager for X. Runs generation, evaluation, and a recruiter screen in one invocation and asks no questions."
+description: "Create or tailor a resume, CV, or cover letter from the approved career pack. Plans evidence, supports optional person review, generates the document, evaluates it, and delivers PDF, TXT and DOCX for resumes."
 ---
 
-# Make A Resume From The Existing Pack
+# Make a resume from the approved pack
 
-The delivery phase. Answer a resume request from the pack `build-career-pack`
-produced, and return a finished document with a verdict on it.
+Read `docs/resume-authoring.md`, `docs/resume-process.md` and `docs/editorial-memory.md`. The former owns
+resume planning, authoring policy and PDF/TXT/DOCX delivery; the latter owns
+immutable briefs, selection, scoped decisions and review provenance. Existing
+career facts remain in Core. Never create a stronger fact through resume editing.
 
-## The rule that defines this skill
+## Guided start
 
-**Ask no questions.** Not about missing evidence, not about format, not to
-confirm an intermediate result. Resolve every ambiguity by inference or by
-narrowing the claim, and state the inferences in the report. A question that
-genuinely needs answering goes in the report, after the draft, never in place of
-one.
+For a first resume request with unclear direction, or a requested wizard, follow
+`docs/resume-start.md`. Reuse supplied targets and applicable saved choices;
+a complete request can proceed without a questionnaire. Save the target, desired
+impression, inclusion/de-emphasis preferences, application constraints and review
+mode. Offer suggestions grounded in the pack; support skip, pause and edits.
 
-The user came here for a document. Produce the document.
+Keep the brief while routing someone without an accepted pack through Core.
+Resume the same setup after acceptance. Use the handoff's exact brief for selection
+and carry its private preferences into the plan. Desired qualities are not facts;
+wizard completion grants no selection or publication approval.
 
-The single exception: if no target role can be found in the request, in
-`data/sources/`, or in the most recent artefact, ask for the role and nothing
-else. Without it there is no work to do.
+## Establish context and plan
 
-## Preserve editorial context through delivery
+Use the target supplied by the user or the applicable saved role profile. Ask for
+the role only if it cannot be established. Reuse applicable preferences and record
+employer requirements, user choices and inferred defaults in the brief. A standard
+UK or US resume is supported; specialized applications need verified, recorded
+instructions rather than presumed portal rules. All resumes require PDF, TXT and
+DOCX even if the employer accepts just one of them.
 
-Follow `docs/editorial-memory.md` for every new generation or material revision.
-Reuse the applicable durable brief or create one autonomously, even for a legacy
-pack with no strengths profile. Use only relevant supported strengths; do not
-invent a career narrative to fill an empty profile. Record output-specific
-instructions and length in the brief. Reuse only decisions whose scope applies.
+Create/update a version-2 brief, run `editorial.py prepare`, and curate candidates
+using `review-selection`. Ranking is retrieval, not career value. Read candidates
+and select a complementary set: requirement coverage, distinct strengths,
+ownership, context, technical judgment, people development and supported results.
+`business_outcome`, output, activity, recency and corroboration are contextual
+signals; none justifies discarding the only proof of a relevant strength.
 
-Run `editorial.py prepare`, then curate its candidates using the whole-set
-judgment described in `review-selection`. Do not invoke its interactive checkpoint
-unless the user requested it. Save the final selection under `data/selections/`
-and generate from `select_evidence.py --selection <path>`. A stale selection must
-be rebuilt. Recommendations are editorial choices, not factual approval or
-confirmed requirement links. Keep safe interpretation wording tied to its atoms;
-preferences guide emphasis and cannot supply achievement claims.
+Use `resume_workflow.py prepare`, curate a ready plan and save an immutable
+revision. Explain intended reader impressions, direct/transferable/gap evidence,
+section allocation, overlapping achievements, alternatives and omissions. Account
+for every intended strength and role requirement. Distinguish missing evidence
+from a document that communicates existing evidence poorly.
 
-The outcome ordering and bullet limits above are editing defaults. Allocate space
-by contribution to this brief: preserve distinctive technical, people, creative,
-or other relevant evidence when it supplies something the rest of the document
-lacks. Do not mechanically prefer recent metrics over the sole proof of a strength.
+Recommend selection and own-voice checkpoints for a first-time user. Honor the
+brief's review mode and explicit user instructions: automatic delivery proceeds
+without intermediate approval; interactive delivery waits for the requested
+review. Do not label a proposed system selection accepted by the person. The
+private HTML review page supports conversational feedback. Ask focused questions
+only when answers materially change the document; never repeatedly ask for facts
+already recorded or force a numerical result. Route new answers through Core.
 
-Run `review-representation` during evaluation, then retain the cold recruiter
-screen. Save scoped decisions for material inclusion/omission changes, especially
-when a revision removes the sole example of an intended strength. If feedback
-conflicts with a prior decision, resolve and record the tradeoff instead of
-oscillating between reviewers. User decisions take precedence over system choices;
-publication and evidence constraints always govern eligibility.
+## Draft from safe evidence
 
-Use `manifest.py --selection <path> --artifact <path>` for the final evaluation,
-representation review and screen. Record available generation settings without
-credentials. Keep reviews aligned with the final brief, selection and artifact.
-Report representation, integrity, role coverage and reader quality separately;
-never collapse them into an overall career score. Normal delivery still asks no
-questions and finishes even when it must report limitations.
+Generate from `resume_workflow.py view --plan <path>`, which uses the validated
+selection view. Private plan explanations, operator notes and review reasons do
+not become external prose. Read safe strengths and evidence to realize the plan.
+For other artifact types, use `select_evidence.py --selection <path>`.
 
-## Run
+Name the Markdown `outputs/<role_id>-draft.md` (cover letters use
+`outputs/<role_id>-cover-letter.md`) so indexing and existing tools find it.
+Take employer, title, dates and scope from eligible `employment` records; use
+`career_span_years` for span claims. Preserve promotions, actual titles, sourced
+context and chronology. A target headline must not imply the person held that
+title. Explain unfamiliar names only from approved facts. The resume never
+invents intent or a reason for a career transition.
 
-```sh
-python3 scripts/select_evidence.py --role <role_id>   # ranked shortlist for the role
-python3 scripts/select_evidence.py                 # everything eligible, unranked
-python3 scripts/select_evidence.py --excluded      # what was withheld, and why
-python3 scripts/render.py outputs/<role_id>-draft.md        # HTML, never hand-written
-python3 scripts/validate_artifact.py outputs/<role_id>-draft.md
-python3 scripts/select_evidence.py --selection data/selections/<id>-selection.json
-python3 scripts/manifest.py "<target role>" --selection data/selections/<id>-selection.json --artifact outputs/<role_id>-draft.md
-```
+For multiple positions within one employer tenure, use the derived
+`resume_plan.employment_groups` and the structure in `docs/resume-employment.md`.
+Show the employer and overall tenure once, followed by compact title/date rows
+in reverse chronology. Put shared achievements under an explicit Career highlights
+subsection. Use dated role subsections only when they have dedicated content;
+never leave empty role headings or give one title the whole employer tenure.
+Preserve separate return stints. Position changes alone do not establish promotion.
 
-**Name the file `outputs/<role_id>-draft.md`** (a cover letter:
-`outputs/<role_id>-cover-letter.md`). The index, `make artifacts`, the question
-queue and the evaluation record all find artefacts by that suffix; a draft named
-anything else is invisible to every one of them. The first behavioural eval of
-this skill produced `head-of-detection-resume.md` and nothing could see it.
+Write experience first: personal action, concrete work, useful method/context,
+and defensible result or scope. Respect `constraints`, metric basis, shared
+ownership and `occurred`. Supported output, prevention, service and technical
+judgment can be valuable without financial metrics. `role_fit_notes` describe
+contextual concerns, not universal exclusion rules. Avoid double-counting one
+project through several atoms or summing shared outcomes.
 
-Generate from the selection view, not from the raw pack. Pass `--role` whenever a
-profile exists in `data/roles/`: it ranks and shortlists against that role's
-requirements and explains each choice in `why_selected`, which keeps curation
-sharp as the pack grows past what anyone can read. Without a profile you get the
-whole eligible pack and must curate it yourself. Ineligible atoms are
-absent from it by construction, so the exclusion rule needs no policing. Use
-`--audience public` for a website or published CV; the default is a document sent
-to a named recipient.
+Allocate space by contribution to the brief. Preserve relevant older work; no
+fixed bullet counts, age cutoff or required summary. Write the summary last if
+it adds understanding, backed by evidence in the body. Retain enough context for
+claims to be credible and interviewable. Use precise natural wording and safe
+person-sourced voice preferences. Run `keyword_coverage.py` only as a diagnostic;
+use terms where the selected evidence supports them.
 
-## Artefact types
+Use `# Name` (or neutral applicant label for an anonymous application), optional
+clearly labeled target headline, contact paragraph when appropriate, and ordinary
+sections. Standard contact details are for a named recipient; public and anonymous
+instructions change the contact block. Do not place draft status, gaps, private
+notes or publication warnings inside the artifact. Draft status never appears
+inside the artefact. Missing contact is a delivery problem only when the actual
+submission context requires it.
 
-The same evidence, selection, and evaluation path serves several documents. Say
-which was produced, and apply its shape.
+Keep `<!-- Evidence: E_X -->` at the end of the claim's own line or directly on
+an **indented continuation line** without a blank line. An unindented comment
+after a bullet is an orphan citation and must be fixed in the Markdown. Never add unsupported causation, comparisons,
+motives, negative assertions, metrics or scope. Cite recorded URLs for public
+work; do not infer URLs. STAR is evidence, not a sentence template.
 
-- **Resume or CV**, the default. Bullets from STAR, outcomes first.
-- **Cover letter.** Three or four short paragraphs against the role profile's
-  `central_requirement`. One claim per paragraph, each still carrying an evidence
-  ID. No restating the resume, and no enthusiasm the evidence does not support.
-- **LinkedIn About or headline.** First person, `--audience public`, so the
-  contact block is name and location only. Nothing `external_safe: false`, and no
-  employer-internal framing.
+## Review, revise and export
 
-Interview preparation is `make-interview-brief`, which reads the whole pack
-rather than the selection view because a brief must cover what the artefacts hide.
+Run `evaluate-output` and `review-representation`, then `recruiter-screen` in a
+fresh context when available. Pass only artifact, role and safe application
+constraints to the screen, without the plan's intended impressions. If a fresh
+context is unavailable, label the screen `"context": "shared"`. The cold reader
+first states what they understood; then compare this with the plan.
 
-## Role profile
+Resolve actionable findings within existing facts and publication choices. Track cycles and categorized findings in the pinned process record. Use the
+default limit of two editorial revision cycles unless the user explicitly changes it; never manufacture evidence
+to obtain a favorable verdict. After shortening or retargeting, run
+`resume_workflow.py compare`, inspect changed claims for loss of ownership,
+context, method, timeframe and strength support, and save material tradeoffs.
+Rebuild stale selections/plans and re-review the final text.
 
-If `data/roles/` holds a profile for this role, use it: `central_requirement`
-drives selection, `negative_signals` drive demotion, and `ats_keywords` drive
-phrasing. A requirement with an empty `evidenced_by` is a gap to report, not one
-to write around.
+Render internal HTML with `render.py`, validate with `validate_artifact.py --plan`,
+and export all three formats with `export_resume.py --plan`; read
+`docs/resume-exports.md`. Inspect final PDF page breaks, typography and recovered
+text. Report Word pagination or accessibility checks as unverified unless actually
+performed. Export failures complete with explicit limitations, never false success.
 
-## Writing the document
+Use `manifest.py --selection --plan --artifact --exports --process` with actual paths.
+Save representation and evaluation through `save_review.py` with the same exact
+manifest. A planned resume cannot be marked publishable without all three verified
+exports. Changed input or export bytes invalidate prior approval. Regenerate the
+artifact index, and return links to PDF, TXT and DOCX plus separate integrity,
+representation, relevance, reader-quality and delivery findings. Explain material
+omissions, inferences and remaining questions privately. No hiring probability or
+ATS-pass claim is supported by these checks.
 
-Shape rules first, because the screens keep failing drafts on them:
+## Preserve the review across drafts
 
-- **Scope on the role line.** Select the `scope` facts that help prove this role,
-  in one short line under the employment heading. Leadership applications usually
-  benefit from remit and team scale; hands-on applications benefit from technical
-  remit. Headcount and budget are not mandatory on every version. Preserve explicit
-  publication choices. These are record facts and need no evidence comment.
-- **Value opens the summary.** Lead with demonstrated capability and one or two
-  relevant achievements. Treat `positioning` as context for selection, not a
-  mandatory opening sentence. Explain a title or transition only when it helps
-  the reader understand the application. The summary never invents intent; if
-  intent is unknown, state what the evidence shows. Cite any personal motivation
-  or level-story claim to its recorded person source.
-- **Bullet economics.** At most five bullets on the current role, three on the
-  previous one, one line for a role that ended more than twelve years ago, one
-  principal achievement per bullet. Aim for 20–30 words per bullet and a summary
-  of 35–55 words; approved wording may need more space. Never combine unrelated
-  achievements to evade a bullet limit. Word counts are editing guides, not
-  measurements of rendered lines or pages. Check the final layout separately.
-- **Document header.** Use `# Name`, then `## Target role`, then the audience's
-  contact paragraph and the summary. Reserve later H2 headings for sections.
-- **Top third.** The target title in the headline, and a confirmed atom for an
-  essential requirement cited in the summary or the first role block.
-  `validate_artifact.py` warns when either is missing.
-- **No cliches.** `validate_artifact.py` lists the phrases recruiters discount.
-- Run `python3 scripts/keyword_coverage.py <draft> --role <role_id>` and phrase
-  bullets with the missing terms only where a confirmed atom carries them.
+Follow `docs/resume-process.md`. Before drafting, record each impression's intended
+prominence and compare it with restricted strengths, including impressions with
+empty `strength_ids`. Review the exact guidance fingerprint after those checks.
 
-1. Take the smallest set of evidence that answers the role. The view is ordered
-   `business_outcome`, then `output`, then `activity`: use that as an initial
-   retrieval order. Choose the final set by contribution to the brief. A recent
-   outcome must not displace the sole proof of a relevant strength merely because
-   it has a number; activity counts alone do not explain consequence.
-2. Demote or drop evidence whose `role_fit_notes` mark it as a negative signal
-   for this role, even where it is eligible and impressive.
-3. Take every employer, job title, and date from the `employment` records in the
-   view. Never write one from memory or from source text: they are the facts a
-   background check tests, and an unsourced date breaks rule 1. Use `employer` as
-   written; if `employer_of_record` differs, that is interview and reference
-   material, not artefact text. Derive any span claim such as "N years of
-   experience" from `career_span_years`, never by hand.
-4. Use STAR as evidence, not a sentence template: write the decisive action and
-   supported result, with only the context needed to understand them. Preserve
-   the Result's meaning. Never add an outcome, metric, date, or scope the evidence lacks.
-   Obey every entry in the atom's `constraints`: "prototype only" means the
-   bullet says so, "do not imply sole ownership" means it does not.
-   Check `occurred` when choosing tense: historical maintenance or research must
-   not become a current activity in the summary. Use implied first person
-   consistently. Name and link selected public work where a recorded public URL
-   is available; do not infer a URL or expose private source references.
-5. Carry claim-to-evidence IDs as `<!-- Evidence: E_X -->` comments. The renderer
-   turns them into hidden spans so both formats stay in step. Put the comment
-   **at the end of the claim's own line**, or on the line directly after it. Both
-   placements are supported and nothing else is: a comment separated from its
-   claim by a blank line binds to nothing, and `scripts/quantities.py` will then
-   compare that claim against no evidence at all.
-6. Draft status never appears inside the artefact: no banner, no "not
-   publishable" notice, no bracketed note about withheld or pending evidence.
-   That language reaches a hiring manager the first time the file is forwarded.
-   Status belongs in the evaluation record and the report.
-7. Open with the contact block from the view. If it carries no email and no
-   phone, still produce the draft, then open the report by saying it is
-   unsendable until `build-career-pack` collects contact details.
+For each version, use `resume_process.py prepare` and `packet`; complete the
+per-claim ownership, chronology and individual source-constraint checks. Capture
+reader observations before comparing with the plan, then assess prominence. These
+are assistant review tasks, not a mandatory person questionnaire. Never auto-pass
+a generated checklist or treat mechanical coverage as proof of meaning.
 
-When evidence is thin: make the narrower claim, then drop the claim and record
-the omission. Never substitute a different metric to fill the space, and never
-return questions instead of a document.
+When shortening is requested or length remains a finding, attempt and measure an
+equivalent-content compression before proposing evidence removal. Record the
+candidate and semantic preservation review. Carry outstanding findings through
+`--previous` and preserve immutable draft snapshots. Use the derived cycle count;
+never claim the budget is exhausted while cycles remain. An unresolved editing
+finding prevents publication even after the budget is spent.
 
-## Then evaluate and screen
+Pin the completed process in the final manifest. Import actionable screen findings
+into its next revision and re-evaluate changed text. Generate continuation notes
+with `resume_process.py handoff`, linking the matching evaluation when available.
+Do not author mandatory career claims, timeline gaps or remaining-cycle totals
+from memory. Explain optional decisions as decisions, not policy.
 
-Run `evaluate-output` for integrity, then `recruiter-screen` for shortlistability.
-Never skip the screen because the evaluation passed: a document can be faithful,
-safe, and unshortlistable, and only the screen will say so. Write the evaluation
-record through `scripts/save_review.py --kind evaluation`, passing the saved
-manifest file and a review body without `run`; see `docs/editorial-memory.md`.
+## Other formats
 
-**The screen runs in a fresh context, never in this one.** This context wrote
-the document and cannot read it cold. Delegate to a subagent whose prompt
-contains only the artefact path, the role profile path if one exists, and an
-instruction to follow `recruiter-screen`; pass nothing else, not the pack, not
-the selection view, not this conversation. The subagent writes the screen and
-its sidecar with `"context": "fresh"`. If delegation is impossible, run the
-screen here and record `"context": "shared"`: an honest weaker verdict beats a
-flattering one dressed as independent.
+**Cover letter:** three or four concise paragraphs addressing `central_requirement`,
+with evidence references and accurate motivation. Avoid repeating the resume.
+**LinkedIn:** first person with public audience constraints. These formats reuse
+durable selection and review, but do not require a resume plan or three exports.
+**Interview preparation:** use `make-interview-brief`, whose private view includes
+evidence unavailable for publication. It is a separate workflow.
 
-`publishable: true` requires a clean evaluation. It is a status, not a stop: a run
-ending `publishable: false` completes normally and names the blockers.
+## Editorial quality and omitted evidence
 
-## Revise before delivery
+Follow `docs/resume-quality.md`. Rank examples for their contribution to this role,
+then inspect the combined set and the eligible alternatives in the process packet.
+Complete version 2 opening, language, focus, contribution and metric-value reviews
+with reasons and located passages. Inspect recent work without imposing a recency
+quota. Distinguish unselected evidence from an actual evidence gap before asking
+optional questions; respect saved omissions and keep new facts in Core review.
 
-Resolve actionable editorial findings from the screen before handing over the
-document. Revise wording, selection and layout within the existing evidence and
-publication constraints, then re-render, re-evaluate and obtain a fresh screen
-of the revised text. Normally one revision is enough; allow at most two editorial
-cycles. Do not chase an `advance` verdict by inventing evidence or relaxing the
-role's requirements. Record why any remaining suggestion was not applied,
-distinguishing missing evidence, publication choices and reviewer assumptions.
-
-For a requested page count, inspect a PDF from the final HTML and check extracted
-text for reading order and internal IDs. Do not claim print layout or ATS parsing
-has been verified from word counts or valid HTML. If export cannot be checked,
-report that limitation explicitly. Keep evaluation and screen hashes aligned
-with the final Markdown, and regenerate the artifact index.
-
-## Final report
-
-1. The `recruiter-screen` verdict, in its own words, and the reason. This leads
-   even when the evaluation is clean.
-2. Publishable or not, and the blockers.
-3. Claims narrowed or omitted, with evidence IDs.
-4. Inferences made about audience, length, format, and keywords.
-5. What the document rests on: counts by `evidence_status`, and whether any claim
-   is a business outcome. Do not editorialise about corroboration.
+After export, use `resume_process.py layout` to attach the exact bundle. Inspect
+the PDF, record actual visual observations, and resolve or explain each page
+diagnostic. Pin the completed process for publication. Preparation and successful
+export never substitute for editorial or visual judgment.

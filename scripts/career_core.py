@@ -23,12 +23,22 @@ def validate_candidate(record, destination):
         raise ValueError('; '.join(errors))
 
 
-def main(argv=None):
+def main(argv=None, _locked=False):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'migrate' and not _locked:
+        from pack_io import workspace_lock
+        with workspace_lock():
+            return main(argv, _locked=True)
+    if argv and argv[0] == "start":
+        from career_start import main as start_main
+        return start_main(argv[1:])
     if argv and argv[0] == "review":
         from pack_review import main as review_main
         return review_main(argv[1:])
-    parser = argparse.ArgumentParser(description=__doc__, epilog="Use career_core.py review --help for proposed changes and human review.")
+    if argv and argv[0] in ('health', 'history', 'maintain', 'backup', 'restore'):
+        from workspace_tools import main as workspace_main
+        return workspace_main(argv)
+    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: start, review, health, history, maintain, backup and restore. Use <command> --help for details.")
     sub = parser.add_subparsers(dest='command', required=True)
     status = sub.add_parser('status', help='private strengths interview queue')
     status.add_argument('--pack', help='inspect a proposal before its first acceptance')
@@ -65,6 +75,8 @@ def main(argv=None):
         else:
             if destination.parent not in (local('data/packs'), local('data/candidates')):
                 raise ValueError('new pack versions belong in data/candidates or data/packs')
+            if args.command == 'bind-strength' and destination.parent != local('data/candidates'):
+                raise ValueError('strength reassessment must produce a candidate; accept it through human review')
             if record['schema_version'] not in ('1.3', '1.4'):
                 raise ValueError('unsupported source schema version')
             record['schema_version'] = '1.4'
@@ -73,7 +85,7 @@ def main(argv=None):
             metadata = record.setdefault('metadata', {})
             if args.command == 'migrate':
                 metadata['supersedes'] = str(path.relative_to(ROOT.resolve()))
-            elif not metadata.get('supersedes'):
+            elif path.parent == local('data/packs') or not metadata.get('supersedes'):
                 # Working candidates are not pack history. A first import has
                 # no predecessor; later candidates refer to the accepted head.
                 previous = resolve()

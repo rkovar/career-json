@@ -19,8 +19,9 @@ organised around the subject's evidence rather than around a stranger's attentio
 A screen written by the context that generated the document is the model
 grading its own work, and the posture below is then an instruction with nothing
 behind it. Decided 2026-09-06: **the screen runs in a fresh context** that holds
-only three things: the artefact, the role profile from `data/roles/` if one
-exists, and this skill. Not the pack, not the selection view, not the
+only the artefact, the role profile from `data/roles/` if one
+exists, safe application constraints (market, contact mode, channel and requirements),
+and this skill. Not the pack, not the selection view, not the
 conversation that produced the draft, not the evaluation record. Passes 1 to 3
 need nothing else; pass 4 may run `role_fit.py` and read the pack because it
 sorts wording from evidence, and by then the verdict is already formed.
@@ -47,19 +48,24 @@ You are not the candidate's advocate, editor, or encourager.
 Read the artefact itself. Consult the pack only in pass 4, to sort what can be
 fixed in the writing from what needs new evidence.
 
-## Pass 1: the thirty-second screen
+## Pass 1: the first read
 
 Read only what a first pass sees: the top third, the job titles, the employers,
 the dates. Then answer, before reading further:
 
-- Can I contact this person? No contact route is an immediate bin.
-- Does the headline match the role I am filling, or must I infer the connection?
-- Do the titles and dates make sense at a glance, in order, without gaps I have
-  to ask about?
+- Does contact information satisfy this submission context? Anonymous processes
+  and portals may not require contact on the document; report a delivery issue
+  only when contact is actually required.
+- Is relevance understandable without relying on exact title matching?
+- Are actual roles, dates and progression understandable? A gap or lateral move
+  is not a weakness by default; do not invent its explanation.
 - What is the single claim my eye lands on, and does it make me want the next
   paragraph?
 
-State the pass 1 outcome plainly: **advance, or bin, and why.**
+First record what you understood about the person, their contribution and their
+distinctive strengths, without seeing the plan. Then state a diagnostic first-read
+outcome, with assumptions and actual requirements separated. Scan-time labels are
+heuristics, not empirical predictions.
 
 ## Pass 2: the hiring manager read
 
@@ -69,12 +75,15 @@ Assume the screen passed. Now read as the person who owns the vacancy.
   that proves it, or say that no line does. Where `data/roles/` holds a profile,
   take `central_requirement` from it rather than inferring one, so the same role
   is judged the same way twice.
-- Are the achievements outcomes, or workload? Engagement counts, throughput
-  percentages, and headcount are activity. What changed for the business?
+- Does each achievement explain contribution and significance for this role?
+  Technical judgment, useful outputs, prevention, service, scope and coaching can
+  be strong evidence without financial metrics. Are several bullets one project
+  or a shared result presented repeatedly?
 - Whose work was this? Where does the document blur the team's results into the
   candidate's ownership?
-- Level: does the seniority story move in one direction, and is any apparent step
-  down or sideways explained?
+- Is responsibility accurately conveyed through scope and contribution? Career
+  progression need not move in one direction. Preserve promotions without assuming
+  management is superior to specialist work.
 - What does the document conspicuously not say, given the role?
 
 ## Pass 3: interview and reference exposure
@@ -87,14 +96,16 @@ Assume the screen passed. Now read as the person who owns the vacancy.
   finding.
 - What in the employment history could a background check contradict: employer of
   record versus client, title inflation, overlapping or rounded dates?
-- Is there anything here the candidate would struggle to discuss for ten minutes?
+- Can the candidate explain the action, context, timeframe and ownership in a
+  reasonable follow-up? Do not impose a fixed discussion duration on every claim.
 
 ## Pass 4: competitive position and routing
 
 - Against the supplied requirements, what differentiates the candidate and what
   remains unproven? Comparisons with a hypothetical pool are assumptions, not
   measured rankings or automatic rejection criteria.
-- If this role is a poor fit, name the roles the same evidence would win. Run
+- If this role is a poor fit, identify related role families where the evidence
+  appears relevant, without predicting success. Run
   `python3 scripts/role_fit.py --markdown` for the scored comparison across every
   profile in `data/roles/`, rather than guessing at the alternatives.
 - Check the employment record for background-check exposure: an `employer_of_record`
@@ -110,10 +121,10 @@ Then split every weakness into two lists, because they have different owners:
 
 ## Verdict
 
-Give one, unhedged:
+Give one diagnostic verdict, recording uncertainty and assumptions:
 
 - `advance`: would move to a call.
-- `borderline`: would advance only in a thin pool, and name what tips it.
+- `borderline`: the document leaves material uncertainty; explain what is unclear.
 - `reject`: would not call, with the specific reason.
 
 Then the three changes that would most improve the outcome, ranked by effect on
@@ -133,3 +144,13 @@ verdict and the three changes to the user directly.
 
 A `reject` verdict is a successful run of this skill. It is cheaper here than in
 the market.
+
+Record `reader_impressions` and `assumptions` in the sidecar. These judgments do
+not measure interview probability, ATS success or a real applicant ranking.
+
+For planned resumes, the coordinator carries actionable findings into the process
+ledger described in `docs/resume-process.md`. Classify writing improvements as
+editing, genuine choices as user_choice, and missing facts as new_evidence. Do not
+infer that the revision budget is spent; it is derived from saved draft history.
+Judge whether distinctive strengths are salient, not just present. State what you
+noticed before consulting the plan; the coordinator performs that comparison.

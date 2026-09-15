@@ -28,6 +28,8 @@ def walk(node, spec, schema, where, errors):
     return schema_walk(node, spec, schema, where, errors, loader=load)
 
 KINDS = {
+    "process": (re.compile(r"-process\.json$"), "resume-process.schema.json"),
+    "plan": (re.compile(r"-plan\.json$"), "resume-plan.schema.json"),
     "brief": (re.compile(r"-brief\.json$"), "output-brief.schema.json"),
     "decision": (re.compile(r"-decision\.json$"), "editorial-decision.schema.json"),
     "selection": (re.compile(r"-selection\.json$"), "selection-record.schema.json"),
@@ -43,7 +45,7 @@ def load(name):
 
 
 def kind_of(path):
-    directories = {"briefs": "brief", "decisions": "decision", "selections": "selection"}
+    directories = {"briefs": "brief", "decisions": "decision", "selections": "selection", "plans": "plan"}
     if path.parent.name in directories:
         kind = directories[path.parent.name]
         return kind, KINDS[kind][1]
@@ -71,6 +73,16 @@ def check(path):
     walk(record, schema, schema, "", errors)
     if errors:
         return kind, errors, warnings
+    if kind == 'process':
+        from resume_process import process_errors
+        # Draft records may be incomplete. Publication checks require final=True.
+        errors.extend(process_errors(record, final=False))
+        if not errors:
+            warnings.extend(process_errors(record, final=True))
+        return kind, errors, warnings
+    if kind == 'plan':
+        from resume_workflow import plan_errors
+        return kind, plan_errors(record), warnings
     if kind in ("brief", "decision", "selection", "representation"):
         from editorial import validate_record
         more_errors, more_warnings = validate_record(kind, record, path)
@@ -78,9 +90,31 @@ def check(path):
 
     # Cross-record consistency the schema cannot express.
     if kind == "evaluation":
+        planned = record.get('run', {}).get('editorial_inputs', {}).get('plan')
+        process_pin = record.get('run', {}).get('process')
+        if planned and record.get('publishable'):
+            if not process_pin:
+                errors.append('a planned resume needs a pinned process review before publishable is true; historical reviews are not upgraded automatically')
+            else:
+                from editorial import pin_errors, read
+                from resume_process import process_errors
+                problems = pin_errors(process_pin)
+                errors.extend(problems)
+                if not problems:
+                    process = read(process_pin['path'])
+                    process_problems = process_errors(process, final=True)
+                    errors.extend(process_problems)
+                    if not process_problems:
+                        from resume_quality import delivery_quality_errors
+                        errors.extend(delivery_quality_errors(process, record['run'].get('exports')))
+                    if not process_problems and (process['plan'] != planned or process['artifact']['sha256'] != record['run'].get('artifact_sha256')
+                            or process['artifact']['path'] not in record['artifacts']):
+                        errors.append('evaluation must match the process review artifact and plan')
         blockers = [f for f in record.get("findings", []) if f.get("severity") == "blocker"]
         if blockers and record.get("publishable"):
             errors.append("publishable is true while blocker findings are recorded")
+        if record.get('publishable') and record.get('run', {}).get('editorial_inputs', {}).get('plan') and not record['run'].get('exports'):
+            errors.append('a planned resume needs verified PDF, TXT, and DOCX exports before publishable is true')
         for artefact in record.get("artifacts", []):
             if not (ROOT / artefact).exists():
                 errors.append(f"artifact {artefact} does not exist")
@@ -100,7 +134,7 @@ def check(path):
                     rep = json.loads(representation.read_text())
                     if rep.get('run') != record['run']:
                         errors.append('representation and evaluation must pin the same run')
-                    if record.get('publishable') and (any(r.get('status') == 'inadequately_represented' for r in rep.get('strengths', []))
+                    if record.get('publishable') and (any(r.get('status') == 'inadequately_represented' for r in rep.get('strengths', []) + rep.get('impressions', []))
                                                     or any(f.get('severity') == 'blocker' for f in rep.get('findings', []))):
                         errors.append('publishable is true with unresolved representation findings')
     if kind == "role":
@@ -164,7 +198,7 @@ def main(argv):
         # a resume.json there that then failed `make records` as an unknown
         # record type. An explicit path is still checked whatever it is called.
         found = sorted(ROOT.glob("outputs/*.json")) + sorted(ROOT.glob("data/roles/*.json"))
-        for folder in ("data/briefs", "data/selections", "reviews/decisions"):
+        for folder in ("data/briefs", "data/selections", "data/plans", "reviews/decisions"):
             found += sorted(ROOT.glob(folder + "/*.json"))
         targets = [p for p in found if kind_of(p)[0] is not None]
     if not targets:

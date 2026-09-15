@@ -1,5 +1,7 @@
 # Resume Application — beta companion
 
+Say **“Help me make a resume”** for the [guided resume wizard](../../docs/resume-start.md). It records the target, qualities, examples and constraints, then hands the brief to selection and planning.
+
 Turn a Career Evidence Core pack into a targeted resume, biography, cover letter
 or private interview brief. Selection, tailoring, representation review, integrity
 review, rendering and the cold recruiter screen belong to this component.
@@ -16,7 +18,9 @@ make -f Makefile.resume check
 ```
 
 Open the workspace in Claude Code and ask: `Use make-resume for this job description`.
-See `docs/resume-workflow.md` and `docs/editorial-memory.md` for the full process.
+See `docs/resume-authoring.md` for planning, optional selection review, voice
+preferences and revision checks. `docs/resume-exports.md` describes required PDF,
+TXT and DOCX delivery. `docs/editorial-memory.md` explains durable decisions.
 
 Beta means factual validation and editorial safeguards are tested, while writing
 quality still requires review across careers and roles. Integrity, representation,
@@ -26,3 +30,14 @@ not a hiring-outcome guarantee.
 The pack is consumed as ground truth. New factual information returns through
 core review and a new pack version; generated wording never updates facts by itself.
 Scoped editorial decisions persist separately from disposable documents.
+
+Resume export uses a shared document to preserve content across PDF, UTF-8 TXT
+and editable DOCX. TXT/DOCX need standard-library Python; PDF additionally needs
+Chrome/Chromium plus Poppler or macOS Swift/PDFKit for verification. Missing tools
+are reported as incomplete delivery, never successful verification. No model
+calls are made by deterministic checks or export scripts.
+
+The [process review](../../docs/resume-process.md) preserves per-claim checks,
+reader prominence, privacy comparisons, compression attempts and revision history.
+Use `resume_process.py handoff` to generate continuation notes from validated
+records. Existing reviews are retained and are not automatically upgraded.

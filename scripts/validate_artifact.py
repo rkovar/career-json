@@ -62,12 +62,9 @@ CLICHES = ["results-driven", "results driven", "proven track record", "passionat
            "dynamic team player", "team player", "self-starter", "go-getter", "synergy",
            "leverage", "leveraged", "thought leader", "cross-functional leader", "detail-oriented",
            "hard-working", "hardworking", "responsible for", "seasoned", "guru", "ninja", "rockstar"]
-# Bullet economics. A recruiter's first pass is seconds; these are the limits the
-# screens kept asking for, as warnings until their rate is measured.
-MAX_BULLETS = {"current": 5, "recent": 3, "old": 1}
-OLD_AFTER_YEARS = 12
-MAX_BULLET_WORDS = 40
-MAX_SUMMARY_WORDS = 75
+# Length diagnostics are editorial prompts, never age-based deletion rules.
+MAX_BULLET_WORDS = 55
+MAX_SUMMARY_WORDS = 90
 
 LEAKS = ["not publishable", "draft status", "publication warning", "withheld pending",
          "pending confirmation", "self_asserted", "user_asserted", "evidence_status",
@@ -103,34 +100,14 @@ def visible_text(markdown):
 
 
 def economics(md, records):
-    """Bullets per role block against the role's age, bullet length, summary length."""
+    """Contextual readability prompts; no role-age or fixed bullet-count limits."""
     out = []
-    by_key = {(r["employer"], r["title"]): r for r in records}
-    blocks = re.split(r"^(?=###\s)", md, flags=re.M)
-    for block in blocks:
-        head = block.splitlines()[0] if block.strip() else ""
-        if not head.startswith("### "):
+    for kind, text in render.blocks(md):
+        if kind != 'li':
             continue
-        parts = [p.strip() for p in head[4:].split("|")]
-        if len(parts) < 3:
-            continue
-        rec = by_key.get((parts[0], parts[1]))
-        bullets = re.findall(r"^\s*[-*]\s+(.+)$", block, re.M)
-        if rec:
-            end = rec.get("end")
-            if end == "present":
-                kind = "current"
-            else:
-                ended = int((end or rec["start"])[:4])
-                kind = "old" if this_year() - ended > OLD_AFTER_YEARS else "recent"
-            limit = MAX_BULLETS[kind]
-            if len(bullets) > limit:
-                out.append(f"{parts[0]!r} ({kind} role) has {len(bullets)} bullets; a recruiter's first pass "
-                           f"gives it {limit}. Cut to the ones that prove the role's requirements")
-        for b in bullets:
-            words = len(re.sub(r"<!--.*?-->", "", b).split())
-            if words > MAX_BULLET_WORDS:
-                out.append(f"bullet of {words} words (limit {MAX_BULLET_WORDS}): {b[:60]!r}")
+        words = len(visible_text(text).split())
+        if words > MAX_BULLET_WORDS:
+            out.append(f"long bullet ({words} words): inspect rendered density while preserving ownership and context")
     # Count every summary paragraph, excluding the role and contact regardless
     # of their order. A paragraph headline used to make us count the contact;
     # an H2 headline made us stop before the summary even began.
@@ -139,7 +116,7 @@ def economics(md, records):
     if summary:
         words = len(visible_text(" ".join(parts[i][1] for i in summary)).split())
         if words > MAX_SUMMARY_WORDS:
-            out.append(f"summary is {words} words (limit {MAX_SUMMARY_WORDS}); shorten it and check the rendered layout")
+            out.append(f"summary is {words} words; check whether it adds understanding beyond the experience section")
     return out
 
 
@@ -149,12 +126,6 @@ def top_third(md, profile, pack):
     for first, and what the AI Security draft buried under an architect title."""
     from select_evidence import linked_ids
     out = []
-    before_roles = md.split("\n### ")[0]
-    headline = "\n".join(before_roles.splitlines()[:8]).lower()
-    title = (profile.get("title") or "").lower()
-    if title and title not in headline and not all(w in headline for w in title.split()):
-        out.append(f"the target title {profile.get('title')!r} does not appear in the headline or summary; "
-                   "a recruiter matching titles will not find it")
     top = md.split("\n### ", 2)
     top_text = top[0] + ("\n### " + top[1] if len(top) > 1 else "")
     cited_top = set(EVIDENCE_ID.findall(top_text))
@@ -162,11 +133,11 @@ def top_third(md, profile, pack):
     proven = [req for req in essentials if set(linked_ids(req, confirmed_only=True)) & cited_top]
     if essentials and not proven:
         out.append("no confirmed evidence for an essential requirement is cited in the summary or first role "
-                   "block; the proof of the central requirement sits below the fold")
+                   "block; inspect whether the opening makes relevance clear without assuming a keyword or title is proof")
     return out
 
 
-def check(md_path, html_path, pack, private=False, strict=False, audience="named_recipient", role=None):
+def check(md_path, html_path, pack, private=False, strict=False, audience="named_recipient", role=None, application=None):
     """private: an interview brief. It is prepared from the whole pack on purpose,
     including atoms no artefact may cite, so eligibility and contact rules invert.
 
@@ -224,12 +195,18 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
         return value in seen
 
     has_contact = any(present(field) for field in ("email", "phone"))
-    if audience == "public" and not private:
+    if (application or {}).get('contact_mode') == 'anonymous' and not private:
+        if pack.get('name') and pack['name'] in seen and not present('name'):
+            errors.append('canonical name appears in an anonymous application')
+        for field in ('name', 'email', 'phone', 'location', 'personal_website'):
+            if present(field):
+                errors.append(f'{field} appears in an anonymous application; inspect employer anonymisation instructions')
+    elif audience == "public" and not private:
         for field in ("email", "phone", "personal_website"):
             if present(field):
                 errors.append(f"{field} appears in a public artefact; a public document carries "
                               "name and location only")
-    elif not has_contact and not private:
+    elif not has_contact and not private and (application or {}).get('submission_channel') != 'portal':
         warnings.append("no email or phone in the visible text; sendable only if this is a public artefact")
     if private and has_contact:
         warnings.append("a private brief does not need contact details")
@@ -267,14 +244,6 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
         records = [r for r in all_records if r.get("external_safe")
                    and r.get("evidence_status") not in ("unresolved", "declined")]
         withheld_employers = {r["employer"] for r in all_records} - {r["employer"] for r in records}
-
-        def chain_of(rec):
-            """A record plus the promotion chain it belongs to. Generation collapses
-            a progression into its parent's heading, so the parent's title may
-            legitimately carry the whole chain's years."""
-            head = rec.get("parent_employment_id") or rec["employment_id"]
-            return [r for r in records
-                    if r["employment_id"] == head or r.get("parent_employment_id") == head]
 
         def year_span(recs):
             starts = [int(r["start"][:4]) for r in recs]
@@ -316,6 +285,9 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
         global_span = year_span(records) if records else None
         for heading in re.findall(r"^###\s+(.+)$", md, re.M):
             parts = [p.strip() for p in heading.split("|")]
+            from resume_employment import date_range
+            if len(parts) >= 2 and date_range(parts[1]):
+                continue  # Employer-level headings are checked with their nested positions below.
             if len(parts) < 3:
                 continue
             employer, title, dates = parts[0], parts[1], parts[2]
@@ -335,15 +307,31 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
                             errors.append(f"year {year} in {employer!r} dates matches no employment record")
                 continue
             matched = [r for r in same_employer if r["title"] == title]
+            if title == 'Career highlights':
+                # An explicitly labeled employer-wide grouping is not a claim
+                # that this was a held title. Literal role headings stay below.
+                matched = same_employer
             if not matched:
                 errors.append(f"title {title!r} does not match any employment record verbatim "
                               f"for {employer!r}; it belongs to no record of that employer")
                 continue
-            low, high = year_span([r for rec in matched for r in chain_of(rec)])
+            low, high = year_span(matched)
             for year in re.findall(r"(?:19|20)\d{2}", dates):
                 if not low <= int(year) <= high:
                     errors.append(f"year {year} in {employer!r} dates matches no employment record "
                                   f"for that role ({low} to {high})")
+
+        # A grouped employer heading is not a historical title. Validate its
+        # complete progression and the distinct scope of each subsection.
+        from resume_employment import chronology_errors, date_range
+        grouped = any(len(parts := [p.strip() for p in h.split('|')]) >= 2 and date_range(parts[1])
+                      for h in re.findall(r'^###\s+(.+)$', md, re.M))
+        if grouped or re.search(r'^####\s+', md, re.M):
+            from resume_document import document_from_markdown
+            try:
+                errors.extend(chronology_errors(document_from_markdown(md), pack))
+            except ValueError as exc:
+                errors.append(str(exc))
 
         # Every bullet must cite. The document-wide check that some evidence id
         # exists let an invented bullet ride on a neighbour's citation.
@@ -409,22 +397,13 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
                 f"{', '.join(row['cites']) or 'the cited evidence'} does not carry "
                 f"({carried}): {row['bullet'][:60]}")
 
-    # Only a finding about *this document* when the pack held a business outcome
-    # and the document did not use it. A pack with none makes every artefact fail
-    # this check forever, which is a pack-level property reported at the wrong
-    # altitude: validate_pack.py says it once instead.
-    outcomes = [atoms[a].get("outcome_type") for a in cited if a in atoms]
-    pack_has_outcome = any(a.get("outcome_type") == "business_outcome"
-                           for a in pack.get("evidence_atoms", []))
-    if outcomes and pack_has_outcome and not any(o == "business_outcome" for o in outcomes):
-        warnings.append("no cited atom is a business_outcome, though the pack holds one; "
-                        "the document describes work, not consequence")
     return errors, warnings
 
 
 def evaluation_record(md_path):
     """The evaluation record beside an artefact, if there is one."""
-    for candidate in (md_path.with_name(md_path.stem.replace("-draft", "") + "-evaluation.json"),
+    for candidate in (md_path.with_name(md_path.stem + "-evaluation.json"),
+                      md_path.with_name(md_path.stem.removesuffix("-draft") + "-evaluation.json"),
                       md_path.with_suffix(".evaluation.json")):
         if not candidate.exists():
             continue
@@ -472,6 +451,7 @@ def main(argv):
                         help="defaults to the evaluation record's audience, else named_recipient")
     parser.add_argument("--role", help="role_id in data/roles/; defaults to the profile whose title matches "
                                        "the evaluation record's target_role, if any")
+    parser.add_argument('--plan', help='ready plan supplying exact pack and application constraints')
     args = parser.parse_args(argv[1:])
 
     md_path = args.markdown
@@ -487,9 +467,25 @@ def main(argv):
         print("no pack found", file=sys.stderr)
         return 1
     pack = json.loads(pack_path.read_text())
+    application = None
+    planned_audience = None
+    if args.plan:
+        from resume_workflow import checked_plan
+        from editorial import read
+        try:
+            planned = checked_plan(args.plan)
+            selected = read(planned['selection']['path'])
+            brief = read(selected['brief']['path'])
+            application = brief.get('application')
+            planned_audience = brief['audience']
+            pack_path = ROOT / selected['pack']['path']
+            pack = read(selected['pack']['path'])
+        except (OSError, ValueError, KeyError) as exc:
+            print('error: ' + str(exc), file=sys.stderr)
+            return 1
 
     record = evaluation_record(md_path) or {}
-    audience = args.audience or record.get("audience") or "named_recipient"
+    audience = planned_audience or args.audience or record.get("audience") or "named_recipient"
     profile = None
     roles = ROOT / "data" / "roles"
     if args.role and (roles / f"{args.role}.json").exists():
@@ -500,7 +496,7 @@ def main(argv):
             if candidate.get("title", "").lower() == record["target_role"].lower():
                 profile = candidate
     errors, warnings = check(md_path, html_path, pack, private=args.private, strict=args.strict,
-                             audience=audience, role=profile)
+                             audience=audience, role=profile, application=application)
     if note:
         warnings.insert(0, note)
     pinned_artifact = (record.get("run") or {}).get("artifact_sha256")

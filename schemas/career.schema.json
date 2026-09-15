@@ -143,7 +143,59 @@
       }
     },
     "metadata": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "evidence_maintenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operation",
+              "from_ids",
+              "to_ids",
+              "reason",
+              "created"
+            ],
+            "properties": {
+              "operation": {
+                "enum": [
+                  "merge",
+                  "split",
+                  "refresh"
+                ],
+                "type": "string"
+              },
+              "from_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^E_[A-Z0-9_]+$"
+                }
+              },
+              "to_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^E_[A-Z0-9_]+$"
+                }
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "created": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
     },
     "education": {
       "type": "array",
@@ -167,6 +219,13 @@
       },
       "minItems": 0,
       "uniqueItems": true
+    },
+    "publications": {
+      "type": "array",
+      "description": "Talks, articles, books and book contributions, blog posts, podcasts, videos, courses, software and datasets. Recorded like education: checkable facts with provenance, not STAR stories. A resume cites them by publication_id; an achievement may summarise them but never replaces the list.",
+      "items": {
+        "$ref": "#/$defs/publicationRecord"
+      }
     }
   },
   "additionalProperties": true,
@@ -474,7 +533,7 @@
             "business_outcome",
             null
           ],
-          "description": "activity: how much work happened (engagements run, tasks defined). output: what was produced (patterns, artefacts, courses). business_outcome: what changed for the organisation (risk reduced, revenue, time-to-market, incidents avoided). Hiring managers discount activity metrics; prefer business_outcome when selecting evidence."
+          "description": "activity: how much work happened (engagements run, tasks defined). output: what was produced (patterns, artefacts, courses). business_outcome: what changed for the organisation (risk reduced, revenue, time-to-market, incidents avoided). These categories describe evidence, not its universal value. Selection depends on role relevance, distinct contribution and the supported strengths."
         },
         "role_fit_notes": {
           "type": [
@@ -968,6 +1027,145 @@
         "source_refs"
       ],
       "additionalProperties": false
+    },
+    "publicationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publication_id",
+        "title",
+        "kind",
+        "evidence_status",
+        "external_safe"
+      ],
+      "properties": {
+        "publication_id": {
+          "type": "string",
+          "pattern": "^PUB_[A-Z0-9_]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "talk",
+            "keynote",
+            "article",
+            "book",
+            "book_contribution",
+            "blog_post",
+            "report",
+            "paper",
+            "podcast",
+            "video",
+            "course",
+            "software",
+            "dataset",
+            "committee",
+            "other"
+          ]
+        },
+        "venue": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Conference, publisher, platform or series."
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}(-\\d{2})?(-\\d{2})?$"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "role": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "author",
+            "co_author",
+            "speaker",
+            "co_speaker",
+            "host",
+            "co_host",
+            "guest",
+            "foreword",
+            "editor",
+            "instructor",
+            "maintainer",
+            "member",
+            "other",
+            null
+          ]
+        },
+        "collaborators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "employment_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "An achievement that summarises this item, if any."
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "self_asserted",
+            "corroborated",
+            "externally_verified",
+            "unresolved",
+            "declined"
+          ]
+        },
+        "external_safe": {
+          "type": "boolean"
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
     }
   }
 }

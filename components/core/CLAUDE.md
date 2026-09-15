@@ -35,3 +35,7 @@ Present the private readable review and save only explicit user decisions. Exact
 wording acceptance, evidence confidence and external-use permission are separate.
 The review helper saves accepted local pack versions and preserves deferred items,
 correction notes and omission feedback. Never fill in approvals for the person.
+
+When Resume Application is installed, follow its `docs/resume-authoring.md` for
+application context, optional review, durable plans and PDF/TXT/DOCX delivery.
+Resume-specific instructions remain in that component.
