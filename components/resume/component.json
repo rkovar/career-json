@@ -76,6 +76,8 @@
     "tests/test_resume_workflow.py": "tests/test_resume_workflow.py",
     "scripts/resume_start.py": "scripts/resume_start.py",
     "docs/resume-start.md": "docs/resume-start.md",
-    "tests/test_resume_startup.py": "tests/test_resume_startup.py"
+    "tests/test_resume_startup.py": "tests/test_resume_startup.py",
+    "docs/operators/resume-start.md": "docs/operators/resume-start.md",
+    "docs/resume-reference.md": "docs/resume-reference.md"
   }
 }

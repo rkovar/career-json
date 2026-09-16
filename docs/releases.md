@@ -65,11 +65,14 @@ ZIP files with per-file SHA-256 inventories in `dist/`. Data, outputs, review
 answers, repository metadata and local caches are excluded. Archives never
 contain someone's career pack, even if one exists in the developer checkout.
 
-For a new installation, unzip the core into an empty directory. Run `make check`,
-then open it in Claude Code for onboarding. To add resume generation, unzip the
-matching add-on into the same directory and run `make -f Makefile.resume check`.
-The add-on has no file overlap with the core and carries no private workspace
-content. Component manifests and release inventories live under `components/`.
+For a new installation, unzip the core into an empty directory. Run `make check`
+to verify the installation, then `make start` and choose **Build my career pack**.
+Follow [Your first session](getting-started.md) for the conversational walkthrough.
+To add resume generation, unzip the matching add-on into the same directory and
+run `make -f Makefile.resume check`. Run `make start` again and choose **Create a
+resume**. The add-on has no file overlap with the core and carries no private
+workspace content. Component manifests and release inventories live under
+`components/`.
 
 Keep `data/`, `reviews/` and any generated documents when upgrading, and review
 local code changes before replacing release files. Existing output reviews may

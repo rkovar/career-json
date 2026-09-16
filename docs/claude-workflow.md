@@ -1,4 +1,4 @@
-# Claude Workflow
+# Claude workflow: operator reference
 
 How to operate the workspace once it exists. For the shape of the system see the
 [README](../README.md), for the schema see [data-model.md](data-model.md), and for
@@ -11,9 +11,10 @@ Application beta. See [core workflow](core-workflow.md) and [releases](releases.
 
 ## The normal path
 
-`build-career-pack` when you have material to add, `make-resume` when you need a
-document. Both are described in the [README](../README.md#skills). Two operating
-rules matter and are easy to miss:
+The person starts with `make start` or a conversational request, as explained in
+[Your first session](getting-started.md). The assistant uses `build-career-pack`
+for career material and `make-resume` for document creation. These are workflow
+names, not extra terminal commands the person must learn. Two operating rules matter:
 
 **Answer what you like during setup.** Unanswered questions leave a claim
 `unresolved` rather than blocking anything. The claim is simply left out of

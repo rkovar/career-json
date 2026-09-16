@@ -1,140 +1,107 @@
-# Start here
+# Your first session
 
-Run `make start` from the project directory:
+Start with a role and a few achievements you can read, correct and find again.
+You can add the rest of your career over time.
 
-```text
-What would you like to do?
+## 1. Open the tool
 
-1. Build my career pack
-2. Create a resume
-3. Continue saved work
-```
+You need Claude Code installed and configured, Git, Python 3.9+, `make`, and
+macOS or Linux. Source files and review pages live in your workspace. Material
+you ask Claude to read is processed by your configured model service.
 
-The launcher opens Claude Code with the chosen wizard prompt. Answer in that
-conversation. Resume creation appears only with the compatible add-on installed;
-Continue saved work appears when saved setups or career reviews exist. Menu
-numbers follow the available choices.
-
-**Unsure? Start with your career pack. One old resume is enough.**
-
-Already in Claude Code? Say **“Walk me through the career-pack wizard”** or
-**“Walk me through the resume wizard.”** You can say “later”, “skip”, “go back”
-or “pause”. Each summary shows what is saved, what happens next and one prompt
-you can copy to continue the named setup. No JSON editing or file hunting is needed.
-
-For a resumed setup, use its latest summary or choose its name under
-**Continue saved work**. Finished setups retain a prompt for continuing into
-career-pack preparation or resume creation. Existing answers are reused.
-
-See [Build my career pack](guided-starts.md) or [Create a resume](resume-start.md).
-The walkthrough below covers importing a source directly when you already know
-what to use.
-
-## 1. Add source material
-
-Copy whatever you already have into `data/sources/`. That directory is Git
-ignored and excluded from release archives. Material you ask Claude to read is
-processed by your configured model service; Git ignore rules do not prevent that.
-
-Start with **one resume**. Follow [your first session](first-session.md) for the
-short conversational path, or [preview the fictional result](../examples/first-pack/README.md).
-Add LinkedIn exports, annual reviews and public work after you have a useful first record.
-
-## 2. Build the pack
-
-```
-Build my first career pack from data/sources/my-resume.pdf. Keep it private.
-Show me the overview before asking questions.
-```
-
-It runs ingestion without stopping, queues the questions the evidence raises,
-and gives you a readiness statement. The questions are then asked one at a time
-by `review-evidence`, which records each answer as you give it. Contact details
-beyond the recorded name and location can wait until you want a document to send.
-
-Answer what you can. **Unanswered questions are not a blocker**: they mark the
-claim `unresolved` and it is simply left out of documents until you come back to
-it.
-
-Open the private career review page produced by the tool. It shows your timeline,
-achievements, source excerpts, strengths and future direction in small batches.
-Accept accurate wording, request corrections, or leave items for later; choose
-external-use permission separately. Download your decisions and give the file
-back to the tool to save the accepted items. It preserves the rest as pending.
-See [review your career record](pack-review.md) for the complete flow.
-
-Check the accepted record (the tool validates proposals separately):
+For a new checkout, run this in your terminal:
 
 ```sh
-make check          # the pack validates
-make coverage       # where the record is thin
+git clone https://github.com/rkovar/career-json.git
+cd career-json
+make start
 ```
 
-## 3. Keep or export your career pack
+If you already cloned or unzipped the project, skip cloning and run from its directory
+`make start`. It opens a menu and launches Claude Code for your choice. The full
+checkout includes both **Build my career pack** and **Create a resume**.
+A Core-only archive offers career-pack tools until you install the resume add-on.
+**Continue saved work** appears when there are saved setups or career reviews.
 
-You can finish onboarding here without generating a document. Review strengths
-with `review-strengths`, then resume or export the accepted record:
+Choose **Build my career pack** for the first exercise below. If you need a
+resume now, choose **Create a resume**: your target is saved while the assistant
+helps you build a pack.
 
-```sh
-python3 scripts/career_core.py status
-python3 scripts/career_core.py export --output data/private/career-export.json
-```
+**Already in Claude Code?** Ask “Walk me through the career-pack wizard” or
+“Walk me through the resume wizard.” These are alternatives to opening the launcher.
 
-The export is a lossless private JSON copy. While the first pack is still a
-proposal, use `status --pack <candidate-path>` instead. Back up `data/` and
-`reviews/` together so source files and review decisions stay with the record.
-See [core workflow](core-workflow.md) for details.
+For PDF sources, macOS can use Swift/PDFKit; Linux needs Poppler. See
+[PDF source setup](extraction.md#what-it-uses) if extraction tools are missing.
+You can also start with text, a Word document, or your own account.
 
-## 4. Optionally add the Resume Application (beta)
+## 2. Bring what you have
 
-The combined checkout includes it. Core archive users can install the matching
-add-on using [release instructions](releases.md). The following steps need it.
+The wizard asks whether you want to use documents, gather material, or describe
+your work. One old resume is enough. Several sources are welcome if you already
+have them ready; you do not need to collect your whole archive.
 
-### Describe a role
+Put documents in `data/sources/` and tell the assistant which to use. It can help
+identify resumes, project notes, talks and other useful material. Job descriptions
+and writing advice guide the work but do not become facts about your career.
 
-Selection and screening work much better against a structured role profile than
-against a title. Put a job description in `data/sources/` and ask Claude to build
-one, or write it by hand into `data/roles/<role-id>.json` following
-[the schema](../schemas/role-profile.schema.json).
+Answer in ordinary language. “Later”, “none”, “not applicable” and “skip” are
+valid answers. Setup choices are saved in a readable summary. The assistant then
+prepares a proposed career record for you to review.
 
-The `central_requirement` captures the role's primary requirement. If the recorded
-evidence does not support it, the screen identifies the gap. That is a reason to
-review the evidence or targeting, not a prediction of an employer's decision.
+## 3. Review a useful amount
 
-```sh
-make fit            # which roles your evidence actually supports
-```
+Read the timeline, achievements and original source excerpts. Check who did what,
+the dates, and whether anything important is missing or understated.
 
-### Make something
+You can give decisions in conversation:
 
-```
-Use make-resume for <role>
-```
+> The rehearsal example is accurate. Keep it private. The mentoring example
+> needs a correction: the engineers developed the approach together.
 
-If the target is unclear, the [resume wizard](resume-start.md) establishes the role
-and qualities to highlight, then saves a brief. You receive PDF, TXT and DOCX,
-alongside Markdown/HTML working drafts and private review records.
+Or use the browser review, which shows five items at a time. **Save and next five**
+keeps your place in the browser. To apply those choices to your pack, use
+**Download review decisions**, then tell the assistant where that file is:
 
-The screen distinguishes weaknesses that editing can address from missing evidence.
-Its verdict is a model opinion; assess the passages and reasoning yourself.
-A passing integrity check does not establish strong writing or a hiring outcome.
+> Apply my saved review decisions and show me what remains. The file is at
+> [the location of my downloaded file].
 
-## 5. Keep capturing
+The assistant saves accepted items and preserves corrections and unfinished work.
+It may show related role or source information that needs your review too.
+Confirming accurate wording and allowing external use are separate choices;
+new information stays private unless you allow it externally.
 
-This is the habit that makes the rest worth having.
+You can stop after a role and a few useful achievements. Unanswered factual
+questions remain visible, and claims needing clarification stay out of resumes.
+There is no need to finish every question or a strengths interview now.
 
-```
-Remember that I <thing you just did>
-```
+## 4. Get something back
 
-Takes seconds, asks nothing, and never touches the pack. Then once a year, when
-you write your self-review, import it with `build-career-pack` and promote the
-notes at the same time — you are already in a remembering frame of mind, which is
-the cheapest moment all year to do it.
+Ask:
 
-## What good looks like after a year
+> Show me one recorded achievement and its original source.
 
-- Your capture log has a few dozen notes, most promoted into atoms.
-- `make coverage` shows no multi-year gaps.
-- `make fit` scores at least one target role as well supported.
-- Generating a tailored resume for a new role takes one message.
+Then try a topic from your own work:
+
+> Find an example of how I helped another team solve a problem.
+
+The answer should show the recorded contribution and its source, including any
+uncertainty. You now have a record you can reuse and improve.
+
+## 5. Come back when something changes
+
+Say “pause” when you want to stop. Later, use `make start` and choose
+**Continue saved work**, or copy the continuation prompt from your setup summary.
+The assistant resumes the named work with your earlier answers available.
+
+Between reviews, save a quick note:
+
+> Remember that I helped the operations team rehearse the migration.
+
+Notes are saved for later review, so you can capture a detail without organizing
+your whole career at that moment. See [Keep your career pack current](keep-current.md)
+for bringing those notes into your reviewed record.
+
+First-run time and token use depend on the material and model; there is no
+reliable general estimate yet. Start with a small amount you can review.
+
+For resume creation, exports and technical help, use the [documentation index](README.md).

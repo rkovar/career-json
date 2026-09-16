@@ -18,7 +18,7 @@ answers or completed handoff. At a pause/handoff, show what is saved, the next
 step and the exact `continue_prompt` from the startup report with the summary link.
 
 For a first resume request with unclear direction, or a requested wizard, follow
-`docs/resume-start.md`. Reuse supplied targets and applicable saved choices;
+`docs/operators/resume-start.md`. Reuse supplied targets and applicable saved choices;
 a complete request can proceed without a questionnaire. Save the target, desired
 impression, inclusion/de-emphasis preferences, application constraints and review
 mode. Offer suggestions grounded in the pack; support skip, pause and edits.

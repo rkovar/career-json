@@ -91,6 +91,11 @@
     "scripts/career_page.py": "scripts/career_page.py",
     "tests/test_career_page.py": "tests/test_career_page.py",
     "scripts/start.py": "scripts/start.py",
-    "tests/test_start_launcher.py": "tests/test_start_launcher.py"
+    "tests/test_start_launcher.py": "tests/test_start_launcher.py",
+    "docs/getting-started.md": "docs/getting-started.md",
+    "docs/keep-current.md": "docs/keep-current.md",
+    "docs/operators/career-start.md": "docs/operators/career-start.md",
+    "docs/operators/first-pack.md": "docs/operators/first-pack.md",
+    "docs/README.md": "components/core/DOCS.md"
   }
 }

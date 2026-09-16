@@ -8,7 +8,7 @@ description: "Called by `build-career-pack`, which is the normal entry point. Us
 ## Startup scope
 
 When called from a guided start, read its exact saved handoff and
-`docs/guided-starts.md`. Extract career evidence only from its career sources
+`docs/operators/career-start.md`. Extract career evidence only from its career sources
 and recorded user accounts. Keep job descriptions, writing advice and deferred
 files outside factual extraction. Preserve restrictions and category deferrals.
 A direct explicit source request can bypass setup.

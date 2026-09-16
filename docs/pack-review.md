@@ -8,7 +8,7 @@ usable and are labelled **not yet reviewed** rather than automatically approved.
 
 ## The conversational path
 
-For your first pack, follow [your first session](first-session.md). Bring one
+For your first pack, follow [your first session](getting-started.md). Bring one
 source and let the assistant handle the commands below. Review the overview,
 then the exact items you want to accept or correct. Newly accepted content can
 stay private; publication choices can wait.

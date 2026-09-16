@@ -62,7 +62,7 @@ strength or add a richer coaching example.
 
 ## Build your own
 
-Follow [your first session](../../docs/first-session.md), using one actual resume.
+Follow [your first session](../../docs/getting-started.md), using one actual resume.
 Keep these fictional records out of your personal pack.
 
 Developers can regenerate the demonstration with

@@ -1,52 +1,41 @@
-# Resume Application — beta companion
+# Resume Application
+
+**Turn your reviewed career record into a resume for the next opportunity.**
+
+This optional beta add-on uses the Career Evidence Core pack. If you cloned the
+full repository, both workflows are already included. For an archive installation,
+follow [release instructions](../../docs/releases.md) to add the matching version
+to your Core workspace.
 
 ## Start here
 
-Run `make start` from your combined workspace and choose **Create a resume**.
-The launcher opens Claude Code with the [resume wizard](../../docs/resume-start.md).
-Already in the conversation? Say **“Walk me through the resume wizard.”**
-
-The wizard records your target, qualities, examples and constraints, then hands
-the brief to selection and planning. If you need a career pack first, your target
-is saved while you build one. Choose **Continue saved work** to return to a named
-setup; its summary includes a prompt for continuing.
-
-Turn a Career Evidence Core pack into a targeted resume, biography, cover letter
-or private interview brief. Selection, tailoring, representation review, integrity
-review, rendering and the cold recruiter screen belong to this component.
-
-This add-on requires the exact core version declared in `component.json`. It
-shares that workspace and reads career schema 1.3 or 1.4. It does not include or
-replace the core's factual records. Install the core archive first, then unpack
-this add-on at the same root. Its file paths are disjoint from the core archive;
-it supplies no `data/`, `reviews/` or `outputs/` content. Test a fresh installation
-before upgrading an existing workspace; do not blindly overwrite local code.
+From the shared project directory, run:
 
 ```sh
-make -f Makefile.resume check
+make start
 ```
 
-Open the workspace in Claude Code and ask: `Use make-resume for this job description`.
-See `docs/resume-authoring.md` for planning, optional selection review, voice
-preferences and revision checks. `docs/resume-exports.md` describes required PDF,
-TXT and DOCX delivery. `docs/editorial-memory.md` explains durable decisions.
+Choose **Create a resume**. The launcher opens Claude Code with the resume wizard.
+Bring a job description, name a type of role, or ask for help choosing a direction.
 
-Beta means factual validation and editorial safeguards are tested, while writing
-quality still requires review across careers and roles. Integrity, representation,
-shortlistability and PDF layout are separate judgments. A passing test suite is
-not a hiring-outcome guarantee.
+You can review ranked achievements and their selection reasons before writing.
+The assistant keeps your preferences, prepares PDF, TXT and DOCX, and reports
+remaining work. If your career pack needs building first, the target is saved
+while you do that.
 
-The pack is consumed as ground truth. New factual information returns through
-core review and a new pack version; generated wording never updates facts by itself.
-Scoped editorial decisions persist separately from disposable documents.
+Follow [Create a resume](../../docs/resume-start.md) for the complete user guide,
+including PDF prerequisites. Use **Continue saved work** in the launcher to return
+to a named setup.
 
-Resume export uses a shared document to preserve content across PDF, UTF-8 TXT
-and editable DOCX. TXT/DOCX need standard-library Python; PDF additionally needs
-Chrome/Chromium plus Poppler or macOS Swift/PDFKit for verification. Missing tools
-are reported as incomplete delivery, never successful verification. No model
-calls are made by deterministic checks or export scripts.
+## Your record remains reusable
 
-The [process review](../../docs/resume-process.md) preserves per-claim checks,
-reader prominence, privacy comparisons, compression attempts and revision history.
-Use `resume_process.py handoff` to generate continuation notes from validated
-records. Existing reviews are retained and are not automatically upgraded.
+New facts and corrections go through career-pack review. Resume wording does not
+automatically change your history. Later applications can reuse the same reviewed
+record and applicable preferences.
+
+The workflow is beta. Read the final documents and review findings; automated
+checks do not predict hiring outcomes. Working drafts, reviews and setup records
+contain private information.
+
+For planning, validation, export commands and component contracts, see the
+[resume technical reference](../../docs/resume-reference.md).

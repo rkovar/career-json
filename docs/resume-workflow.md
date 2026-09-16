@@ -1,6 +1,8 @@
-# Resume Application workflow (beta)
+# Resume workflow: operator reference (beta)
 
-Use the [resume wizard](resume-start.md) when direction or preferences need clarification. Its existing-schema brief feeds this selection and planning workflow.
+People use [Create a resume](resume-start.md). The assistant follows the
+[resume setup contract](operators/resume-start.md) when direction or preferences
+need clarification. Its saved brief feeds selection and planning below.
 
 Install Career Evidence Core first. Both components use the same workspace and
 versioned career schema; no import or conversion is needed when adding the app.
@@ -35,3 +37,18 @@ are separate, consume tokens and require the locally configured Claude CLI.
 
 See [Resume authoring](resume-authoring.md) for the full planning and review flow
 and [Exports](resume-exports.md) for prerequisites and failure handling.
+
+## JSON Resume projection
+
+The private career pack can be projected into the separate JSON Resume
+presentation format:
+
+```sh
+python3 scripts/export_resume_json.py --audience public -o outputs/resume.json
+```
+
+This lossy export omits ineligible material, retains separate position rows for
+promotions, converts recorded dates and records its canonical source. It does
+not replace evidence, sources or review history in the career pack. Third-party
+themes need their own layout checks. Use Core's private JSON export for a lossless
+copy of the accepted pack.

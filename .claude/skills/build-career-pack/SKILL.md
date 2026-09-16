@@ -22,7 +22,7 @@ answers or completed handoff. At a pause/handoff, show what is saved, the next
 step and the exact `continue_prompt` from the startup report with the summary link.
 
 For an uncertain first start, help gathering material, or a wizard request, follow
-`docs/guided-starts.md`. Inspect the workspace and relevant saved sessions;
+`docs/operators/career-start.md`. Inspect the workspace and relevant saved sessions;
 reuse supplied choices, ask at most five concise prompts, and save each answer
 with its readable summary. Offer existing material, a source checklist, or a
 conversational account. Keep none, not-applicable, later and skipped distinct.
@@ -36,7 +36,7 @@ or permission for external use.
 
 ## First session and returning reviews
 
-Follow `docs/first-session.md` for the short conversational path. With no existing
+Follow `docs/operators/first-pack.md` for the short conversational path. With no existing
 pack, start from the one source the person supplied; do not request their full
 archive or a target job. If they explicitly supplied a larger scope, honor it.
 Keep the first pack private. Extract name/location when present; defer requests
