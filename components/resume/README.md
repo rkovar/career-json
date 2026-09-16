@@ -1,6 +1,15 @@
 # Resume Application — beta companion
 
-Say **“Help me make a resume”** for the [guided resume wizard](../../docs/resume-start.md). It records the target, qualities, examples and constraints, then hands the brief to selection and planning.
+## Start here
+
+Run `make start` from your combined workspace and choose **Create a resume**.
+The launcher opens Claude Code with the [resume wizard](../../docs/resume-start.md).
+Already in the conversation? Say **“Walk me through the resume wizard.”**
+
+The wizard records your target, qualities, examples and constraints, then hands
+the brief to selection and planning. If you need a career pack first, your target
+is saved while you build one. Choose **Continue saved work** to return to a named
+setup; its summary includes a prompt for continuing.
 
 Turn a Career Evidence Core pack into a targeted resume, biography, cover letter
 or private interview brief. Selection, tailoring, representation review, integrity

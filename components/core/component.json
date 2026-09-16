@@ -89,6 +89,8 @@
     "docs/guided-starts.md": "docs/guided-starts.md",
     "tests/test_startup.py": "tests/test_startup.py",
     "scripts/career_page.py": "scripts/career_page.py",
-    "tests/test_career_page.py": "tests/test_career_page.py"
+    "tests/test_career_page.py": "tests/test_career_page.py",
+    "scripts/start.py": "scripts/start.py",
+    "tests/test_start_launcher.py": "tests/test_start_launcher.py"
   }
 }

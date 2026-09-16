@@ -447,7 +447,7 @@ def handover(path, page):
                   + count(summary['pending_items'], 'review item') + ' still to review, including ' + count(summary['corrections'], 'correction request') + '.',
                   '', summary['stopping_point'], '',
                   'To save browser choices, say **“Apply my saved review decisions”** and give the downloaded file location. '
-                  'To return, say **“Continue my career-pack review.”**'])
+                  'To return, say **“Continue my career-pack review named ' + json.dumps(state['session']['review_id']) + '.”**'])
     if summary['recall_prompt']:
         lines.extend(['', 'Try your saved record: **“' + summary['recall_prompt'] + '”**'])
     return '\n'.join(lines) + '\n'

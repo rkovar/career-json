@@ -2,6 +2,8 @@
 
 ## 0.1.0-beta.6 — local release candidate
 
+- Expose Create a resume through the shared launcher and add clear continuation prompts to setup summaries.
+
 - Add a resumable targeting wizard with saved strengths, constraints and review
   preferences. Preserve prior answers and require employer instructions to be
   reconsidered when the target changes.

@@ -27,6 +27,13 @@ class ResumeStartupTests(StartupCase):
         self.assertEqual(row['questions'], [])
         finished = self.handoff(row)
         self.assertEqual(finished['handoff']['action'], 'build_pack_then_resume')
+        self.assertEqual(row['continue_prompt'], 'Continue my resume setup named "first".')
+        self.assertEqual(finished['continue_prompt'], 'Continue creating my resume from saved setup named "first".')
+        self.assertIn('brief', finished['saved'])
+        import html
+        page = html.unescape((self.root/finished['summary']).read_text())
+        self.assertIn(finished['continue_prompt'], page)
+        self.assertIn('<h1>Create a resume</h1>', page)
         brief = json.loads((self.root/finished['handoff']['brief']['path']).read_text())
         self.assertEqual(brief['application']['required_exports'], ['pdf', 'txt', 'docx'])
         self.assertEqual(brief['application']['paper_size'], 'A4')

@@ -1,6 +1,17 @@
 # Career Evidence Core — early access
 
-Say **“Help me start a career pack”** for the [guided source wizard](docs/guided-starts.md). It saves progress, supports a conversational account, and provides a private HTML summary.
+## Start here
+
+Run `make start` and choose **Build my career pack**. The launcher opens Claude Code
+with the [career-pack wizard](docs/guided-starts.md). Already in the conversation?
+Say **“Walk me through the career-pack wizard.”**
+
+**Unsure what to bring? One old resume is enough.** You can also start by
+describing your work. **Continue saved work** appears when setups or reviews exist.
+Each summary explains what is saved, what comes next and how to return.
+
+After installing the matching Resume Application add-on, the same launcher also
+offers **Create a resume**. See [release instructions](docs/releases.md).
 
 Own a durable, traceable record of your career. Capture work, import sources,
 review evidence, describe supported strengths, record future direction and export
@@ -17,7 +28,7 @@ Unzip the core archive into a new directory and open that directory in Claude Co
 
 ```sh
 make check
-mkdir -p data/sources
+make start
 ```
 
 Add one resume, then ask: **Build my first career pack from data/sources/my-resume.pdf.

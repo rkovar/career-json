@@ -7,6 +7,30 @@ Review the facts once, improve them over time, and reuse them for different role
 and document formats. The career pack is the ground truth; generated resumes are
 disposable outputs.
 
+## Start here
+
+| What would you like to do? | What you will get | Say this in Claude Code |
+| --- | --- | --- |
+| **[Build my career pack](#build-my-career-pack)** | A private, reviewed record of your experience and strengths | “Walk me through the career-pack wizard.” |
+| **[Create a resume](#create-a-resume)** | A targeted resume in PDF, TXT and DOCX | “Walk me through the resume wizard.” |
+
+**Unsure? Start with your career pack. One old resume is enough.**
+
+From the project directory, run:
+
+```sh
+make start
+```
+
+Choose a path and the launcher opens Claude Code with its wizard prompt. You
+answer in the conversation; the HTML page is a saved summary. **Continue saved
+work** appears when setups or career reviews exist, with names to choose from.
+If you are already talking to the assistant, use one of the prompts above.
+
+Resume creation appears when the compatible add-on is installed. It can save
+your target first and guide you through building a pack if you do not have one.
+The combined checkout includes both paths. Installation requirements are below.
+
 [See a complete fictional first pack](examples/first-pack/README.md) before installing.
 
 You can start with one resume, several sources, or a conversation about your work.
@@ -14,7 +38,7 @@ You do not need a target job or a complete career history. The tool runs through
 Claude Code and local scripts. Career Evidence Core works independently; resume
 generation is an optional application.
 
-## Start your career pack
+## Build my career pack
 
 You need Claude Code with access to a configured model, Python 3.9+, `make`, and
 macOS or Linux. Python scripts use the standard library. PDF intake uses macOS
@@ -25,11 +49,12 @@ consume tokens; duration and cost depend on the material and model.
 git clone https://github.com/rkovar/career-json.git
 cd career-json
 make check
+make start
 ```
 
 Open the directory in Claude Code and say:
 
-> Help me start a career pack.
+> Walk me through the career-pack wizard.
 
 The [guided start](docs/guided-starts.md) asks what material you have: old resumes,
 LinkedIn exports, performance reviews, speaking engagements, publications, project
@@ -111,12 +136,12 @@ runtime. Restore checks the archive and references, and requires a new directory
 Backups contain private data and are not encrypted.
 See [workspace maintenance](docs/workspace-maintenance.md).
 
-## Make a resume from the pack
+## Create a resume
 
 In this combined checkout the Resume Application is already present. Core-only
 archive users install the matching add-on first.
 
-> Help me make a resume.
+> Walk me through the resume wizard.
 
 The [resume wizard](docs/resume-start.md) establishes whether you have a job
 description, want a general resume or are exploring roles. It records the qualities
@@ -177,6 +202,7 @@ See [release and installation instructions](docs/releases.md).
 
 | Command | Purpose |
 | --- | --- |
+| `make start` | Choose a wizard or continue named saved work in Claude Code |
 | `make check` | Validate local packs, reviews and excerpts, then run deterministic tests |
 | `make test` | Run tests in fictional workspaces without auditing your historical outputs |
 | `make check-core` / `make check-resume` | Check component contracts independently |

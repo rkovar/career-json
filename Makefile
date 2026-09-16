@@ -2,6 +2,7 @@
 .PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts links hooks clean
 
 help:
+	@echo "make start     - build my career pack, create a resume, or continue saved work"
 	@echo "make check-core / check-resume - independent component checks"
 	@echo "make test-releases - test clean core and add-on installations"
 	@echo "make release-core / release-resume - build local archives in dist/"
@@ -44,6 +45,7 @@ excerpts:
 	@python3 scripts/verify_excerpts.py --quiet
 
 test:
+	@python3 tests/test_start_launcher.py
 	@python3 tests/test_staged.py
 	@python3 tests/test_career_page.py
 	@python3 tests/test_resume_startup.py
@@ -154,6 +156,7 @@ check-resume: records
 	@python3 tests/test_employer_layout.py
 	@python3 tests/test_resume_quality.py
 test-core:
+	@python3 tests/test_start_launcher.py
 	@python3 tests/test_career_page.py
 	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
@@ -178,3 +181,7 @@ journeys:
 .PHONY: export-resume
 export-resume:
 	@python3 scripts/export_resume.py "$(ARTEFACT)" --plan "$(PLAN)" --output "$(EXPORT_DIR)"
+
+.PHONY: start
+start:
+	@python3 scripts/start.py

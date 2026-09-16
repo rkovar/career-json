@@ -47,6 +47,9 @@ class ReleaseTests(unittest.TestCase):
         self.assertFalse((workspace/'scripts/select_evidence.py').exists())
         self.assertFalse((workspace/'.claude/skills/make-resume').exists())
         self.command(workspace,'make','check')
+        menu = self.command(workspace,'make','start').stdout
+        self.assertIn('Walk me through the career-pack wizard.', menu)
+        self.assertNotIn('Walk me through the resume wizard.', menu)
         self.command(workspace,sys.executable,'scripts/career_core.py','status')
         self.assertEqual(len(list((workspace/'.claude/skills').glob('*/SKILL.md'))),5)
 
@@ -68,6 +71,8 @@ class ReleaseTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256((workspace/name).read_bytes()).hexdigest(),digest,name)
         self.command(workspace,sys.executable,'scripts/check_components.py','--require','resume')
         self.command(workspace,'make','-f','Makefile.resume','check')
+        menu = self.command(workspace,'make','start').stdout
+        self.assertIn('Walk me through the resume wizard.', menu)
 
     def test_archives_are_reproducible_and_exclude_private_paths(self):
         for component,archive in [('core',self.core),('resume',self.resume)]:

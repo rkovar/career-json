@@ -1,6 +1,6 @@
-# Guided starts
+# Build my career pack
 
-Say **“Help me start a career pack”**. Claude inspects the workspace, saves your
+Run `make start` and choose **Build my career pack**, or say **“Walk me through the career-pack wizard.”** Claude inspects the workspace, saves your
 choices, and asks only what it still needs. Use existing material, get a source
 checklist, or start by describing a role and a contribution. One source is enough;
 a target job and contact details are not required for private career capture.
@@ -15,6 +15,13 @@ or **“pause”**. Say **“continue my career pack setup”** to resume. Each 
 creates a saved revision and a readable private HTML summary showing your choices
 and the next step. File details are available on demand. This is a snapshot;
 answer in conversation and use the updated link.
+
+## Pause and continue
+
+Every new summary explains what was saved, the next step, and an exact prompt for
+continuing that named setup. Copy the prompt into the conversation, or run
+`make start` and choose **Continue saved work**. The HTML is a private snapshot;
+use the newest summary after an edit.
 
 ## Assistant operation
 
@@ -113,3 +120,10 @@ Reuse saved category answers in later evidence/strength interviews. Do not re-as
 a settled absence merely because no publication record was generated. New career
 claims still go through source and human review. A handoff completes setup, not
 the career pack.
+
+At a pause or handoff, show the report's `saved`, `next` and `continue_prompt`
+alongside the summary link. When the person names a saved setup, resolve that
+name through `start list` and read its latest revision. For active/paused setup,
+continue with the existing answers. For handed-off setup, use its recorded handoff
+to continue downstream work; do not call `resume` on a completed setup or create a
+duplicate brief. Refresh only when the inputs or choices need to change.

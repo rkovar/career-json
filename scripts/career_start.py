@@ -4,7 +4,7 @@ import startup as flow
 from pack_io import pin, pin_errors
 
 FLOW = 'career'
-TITLE = 'Career pack'
+TITLE = flow.FLOW_LABELS['career']
 PURPOSES = ('career_evidence', 'job_context', 'writing_reference', 'defer')
 CATEGORIES = {
     'resumes': 'Current and older resumes',

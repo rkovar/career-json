@@ -1,5 +1,6 @@
 .PHONY: help check validate excerpts test coverage questions strengths notes pack-html
 help:
+	@echo "make start     - build my career pack, create a resume, or continue saved work"
 	@echo "Career Evidence Core (early access): check, validate, excerpts, test, coverage, questions, strengths, notes, pack-html, career-page"
 check: compatibility validate excerpts test
 compatibility:
@@ -9,6 +10,7 @@ validate:
 excerpts:
 	@python3 scripts/verify_excerpts.py --quiet
 test:
+	@python3 tests/test_start_launcher.py
 	@python3 tests/test_career_page.py
 	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
@@ -35,3 +37,7 @@ health:
 	@python3 scripts/career_core.py health
 journeys:
 	@python3 tests/run_journeys.py
+
+.PHONY: start
+start:
+	@python3 scripts/start.py

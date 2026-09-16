@@ -2,6 +2,8 @@
 
 ## 0.1.0-alpha.5 — local release candidate
 
+- Add `make start` with named continuation of saved setups and reviews; make the two starting paths prominent in onboarding docs.
+
 - Add a resumable conversational wizard, private HTML setup summaries and a tested handoff into the existing workflow.
 - Keep five-item review navigation in view and preserve saved progress.
 - Add a private career reading page using only recorded pack content, safe links

@@ -3,7 +3,7 @@ name: make-resume
 description: "Create or tailor a resume, CV, or cover letter from the approved career pack. Plans evidence, supports optional person review, generates the document, evaluates it, and delivers PDF, TXT and DOCX for resumes."
 ---
 
-# Make a resume from the approved pack
+# Create a resume
 
 Read `docs/resume-authoring.md`, `docs/resume-process.md` and `docs/editorial-memory.md`. The former owns
 resume planning, authoring policy and PDF/TXT/DOCX delivery; the latter owns
@@ -11,6 +11,11 @@ immutable briefs, selection, scoped decisions and review provenance. Existing
 career facts remain in Core. Never create a stronger fact through resume editing.
 
 ## Guided start
+
+Use **Create a resume** as the user-facing path label. The `make start` launcher
+routes here. For a named saved setup, resolve its latest revision and reuse its
+answers or completed handoff. At a pause/handoff, show what is saved, the next
+step and the exact `continue_prompt` from the startup report with the summary link.
 
 For a first resume request with unclear direction, or a requested wizard, follow
 `docs/resume-start.md`. Reuse supplied targets and applicable saved choices;

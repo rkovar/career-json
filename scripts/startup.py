@@ -13,6 +13,7 @@ from schema_tools import load, walk
 
 STATES = ('answered', 'none', 'not_applicable', 'later', 'skipped')
 ORIGINS = ('user', 'saved', 'inferred')
+FLOW_LABELS = {'career': 'Build my career pack', 'resume': 'Create a resume'}
 
 
 def identifier(value):
@@ -132,10 +133,28 @@ def questions(session, adapter):
             if q not in session['answers']][:5]
 
 
+def continue_prompt(session):
+    name = json.dumps(session['session_id'], ensure_ascii=False)
+    if session['status'] == 'handed_off':
+        action = 'building my career pack' if session['flow'] == 'career' else 'creating my resume'
+        return 'Continue {} from saved setup named {}.'.format(action, name)
+    target = 'career pack' if session['flow'] == 'career' else 'resume'
+    return 'Continue my {} setup named {}.'.format(target, name)
+
+
+def saved_summary(session):
+    if (session.get('handoff') or {}).get('brief'):
+        return 'Your resume brief and setup choices are saved for the next stage.'
+    if session['answers']:
+        return 'Your setup choices are saved, including answers and anything you left for later.'
+    return 'Your setup session is saved. No questions have been answered yet.'
+
+
 def report(session, adapter):
     return {**session, 'session': str(path_for(session).relative_to(ROOT.resolve())),
             'summary': str(path_for(session).with_suffix('.html').relative_to(ROOT.resolve())),
-            'questions': questions(session, adapter), 'next': adapter.next_step(session)}
+            'questions': questions(session, adapter), 'next': adapter.next_step(session),
+            'saved': saved_summary(session), 'continue_prompt': continue_prompt(session)}
 
 
 def render(session, adapter):
@@ -148,19 +167,21 @@ def render(session, adapter):
             esc(adapter.QUESTIONS[key]['label']), esc(content), esc(origin)))
     remaining = ''.join('<li>{}</li>'.format(esc(q['prompt'])) for q in questions(session, adapter))
     return """<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>{title} setup</title><style>
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>{title}</title><style>
 body{{margin:0;background:#f4f6f7;color:#172b37;font:17px/1.55 system-ui,sans-serif}}
 main{{max-width:760px;margin:auto;padding:28px 20px 60px}}h1{{font-size:2rem;line-height:1.2}}
 h2{{font-size:1.1rem;margin:0 0 8px}}section,.next{{background:#fff;padding:18px;margin:16px 0;border:1px solid #d3dce0;border-radius:10px}}
 .answer,pre{{white-space:pre-wrap;overflow-wrap:anywhere}}small{{color:#4e626e}}pre{{font-size:.8rem}}li{{margin:12px 0}}
 </style></head><body><main><p>Private setup summary · {status}</p><h1>{title}</h1>
 <p>These choices guide the work. Career facts and permission to use them externally are reviewed separately.</p>
-<div class="next"><h2>What happens next</h2><p>{next}</p></div>{rows}{remaining}
-<p>Say “continue my {title_lower} setup” to resume, or “change my answer” to edit. Your answers are saved after each turn.</p>
+<div class="next"><h2>What is saved</h2><p>{saved}</p><h2>What happens next</h2><p>{next}</p>
+<h2>Continue when you are ready</h2><p>Copy this into your conversation in this project:</p><pre class="answer">{continue_prompt}</pre>
+<p>You can also run <code>make start</code> and choose <strong>Continue saved work</strong>.</p></div>{rows}{remaining}
+<p>Answer in the conversation. You can say “change my answer”, “later” or “pause”. Use the newest summary after an edit.</p>
 <details><summary>Source inventory and saved file references</summary><pre>{details}</pre></details>
 <small>Session {sid} · revision {revision}. This is a private snapshot; use the newest link after an edit.</small>
 </main></body></html>""".format(
-        title=esc(adapter.TITLE), title_lower=esc(adapter.TITLE.lower()),
+        title=esc(adapter.TITLE), saved=esc(saved_summary(session)), continue_prompt=esc(continue_prompt(session)),
         status={'active': 'In progress', 'paused': 'Paused', 'handed_off': 'Setup complete'}[session['status']],
         next=esc(adapter.next_step(session)), rows=''.join(rows),
         remaining='<h2>Still open</h2><ul>'+remaining+'</ul>' if remaining else '',

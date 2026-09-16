@@ -44,6 +44,20 @@ checks just to make a source commit pass.
 
 ## Browser and export tests
 
+The launcher can be inspected without opening a model session:
+
+```sh
+python3 scripts/start.py --flow career --print-prompt
+python3 scripts/start.py --flow resume --print-prompt
+python3 scripts/start.py --flow continue --print-prompt
+```
+
+The resume path needs the matching add-on; continuation needs saved work.
+`make start` opens the interactive Claude CLI only from a terminal. Piped input
+and an existing Claude Code conversation receive copyable prompts instead.
+If the CLI is missing, the selected prompt remains available. Launcher tests use
+a fake executable to check arguments, workspace and exit status without a model call.
+
 Normal tests cover parsers, content equivalence, failure handling, link matching,
 review navigation structure, input staleness, privacy and publication rules.
 Real PDF/browser checks are optional because they need installed external tools.

@@ -102,12 +102,20 @@ class CareerStartupTests(StartupCase):
         row = self.create(values)
         paused = self.command('pause', '--session', row['session'])
         self.assertEqual(paused['questions'], [])
+        self.assertEqual(paused['continue_prompt'], 'Continue my career pack setup named "first".')
+        self.assertIn('saved', paused['saved'])
+        import html
+        page = html.unescape((self.root/paused['summary']).read_text())
+        self.assertIn(paused['continue_prompt'], page)
+        self.assertIn('<h1>Build my career pack</h1>', page)
         resumed = self.command('resume')
         self.assertEqual(resumed['answers'], values)
         self.assertEqual(resumed['questions'], [])
         finished = self.command('handoff')
         self.assertEqual(finished['handoff']['action'], 'gather_sources')
         self.assertEqual(finished['handoff']['materials'], values['materials'])
+        self.assertEqual(finished['continue_prompt'], 'Continue building my career pack from saved setup named "first".')
+        self.assertNotEqual(finished['continue_prompt'], paused['continue_prompt'])
 
     def test_back_reopens_only_requested_question_and_keeps_history(self):
         row = self.create({'route': answered('gather'), 'missing_work': empty('skipped'),

@@ -8,7 +8,7 @@ from schema_tools import load, walk
 from resume_workflow import default_application
 
 FLOW = 'resume'
-TITLE = 'Resume'
+TITLE = flow.FLOW_LABELS['resume']
 QUESTIONS = {
     'target': {'label': 'Target', 'prompt': 'Do you have a job description, a type of role in mind, or would you like help choosing a direction?',
                'choices': ['job_description', 'role', 'explore']},
@@ -193,7 +193,7 @@ def next_step(session):
         return 'Paused. Your target and preferences are saved.'
     if session['handoff']:
         if session['handoff']['action'] == 'build_pack_then_resume':
-            return 'The resume brief is saved. Build and review the career pack, then refresh this setup to continue with the same target.'
+            return 'Build and review your career pack, then continue with your saved target and preferences.'
         return 'Rank evidence with reasons and alternatives, prepare a resume plan, and follow the chosen review mode. Deliver PDF, TXT and DOCX.'
     if flow.answer(session, 'target', {}).get('mode') == 'explore':
         return 'Suggest a few directions from available career evidence, explain support and gaps, then save the chosen direction before drafting.'

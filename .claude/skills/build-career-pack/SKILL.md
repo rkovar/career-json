@@ -3,7 +3,7 @@ name: build-career-pack
 description: "Build or extend a career datapack from source material, apply user-supplied review decisions, or continue a saved career-pack review. Also checks workspace health, explains achievement history, prepares reviewed merge/split/refresh proposals, and backs up or restores a career workspace. No target job is required."
 ---
 
-# Build Or Extend The Career Datapack
+# Build my career pack
 
 ## Purpose
 
@@ -15,6 +15,11 @@ Run `ingest-career-materials`, finish the proposal and its readable overview, th
 hand over to `review-evidence`. Do not ask the user to operate the scripts.
 
 ## Guided start
+
+Use **Build my career pack** as the user-facing path label. The `make start` launcher
+routes here. For a named saved setup, resolve its latest revision and reuse its
+answers or completed handoff. At a pause/handoff, show what is saved, the next
+step and the exact `continue_prompt` from the startup report with the summary link.
 
 For an uncertain first start, help gathering material, or a wizard request, follow
 `docs/guided-starts.md`. Inspect the workspace and relevant saved sessions;

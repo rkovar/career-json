@@ -1,9 +1,34 @@
-# Getting Started
+# Start here
 
-Need help choosing material? Say **“Help me start a career pack”** for the [guided start](guided-starts.md). It supports one source or a conversational account and remembers what you leave for later.
+Run `make start` from the project directory:
 
-A first session, end to end. Assumes you have cloned the repo and have Claude Code
-open in it.
+```text
+What would you like to do?
+
+1. Build my career pack
+2. Create a resume
+3. Continue saved work
+```
+
+The launcher opens Claude Code with the chosen wizard prompt. Answer in that
+conversation. Resume creation appears only with the compatible add-on installed;
+Continue saved work appears when saved setups or career reviews exist. Menu
+numbers follow the available choices.
+
+**Unsure? Start with your career pack. One old resume is enough.**
+
+Already in Claude Code? Say **“Walk me through the career-pack wizard”** or
+**“Walk me through the resume wizard.”** You can say “later”, “skip”, “go back”
+or “pause”. Each summary shows what is saved, what happens next and one prompt
+you can copy to continue the named setup. No JSON editing or file hunting is needed.
+
+For a resumed setup, use its latest summary or choose its name under
+**Continue saved work**. Finished setups retain a prompt for continuing into
+career-pack preparation or resume creation. Existing answers are reused.
+
+See [Build my career pack](guided-starts.md) or [Create a resume](resume-start.md).
+The walkthrough below covers importing a source directly when you already know
+what to use.
 
 ## 1. Add source material
 

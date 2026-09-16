@@ -1,6 +1,6 @@
-# Guided resume setup
+# Create a resume
 
-Say **“Help me make a resume”**. Start from a job description, a general role,
+Run `make start` and choose **Create a resume**, or say **“Walk me through the resume wizard.”** Start from a job description, a general role,
 or help choosing a direction. Name the qualities and achievements to highlight,
 or ask for suggestions grounded in your pack. The proposed selection explains
 why each example matters and what it leaves out.
@@ -11,6 +11,13 @@ required; there is no additional format question.
 
 Without an accepted pack, your target and preferences stay saved while Claude
 helps build and review the pack. Desired qualities are preferences, not facts.
+
+## Pause and continue
+
+Every new summary explains what was saved, the next step, and an exact prompt for
+continuing that named setup. Copy the prompt into the conversation, or run
+`make start` and choose **Continue saved work**. The HTML is a private snapshot;
+use the newest summary after an edit.
 
 ## Assistant workflow
 
@@ -90,3 +97,10 @@ evidence and the reviewed plan.
 Interactive mode waits for actual selection feedback. Automatic mode proceeds
 through assistant review. Setup completion supplies no factual, selection or
 publication approval. Existing evaluation, process and export checks still apply.
+
+At a pause or handoff, show the report's `saved`, `next` and `continue_prompt`
+alongside the summary link. When the person names a saved setup, resolve that
+name through `start list` and read its latest revision. For active/paused setup,
+continue with the existing answers. For handed-off setup, use its recorded handoff
+to continue downstream work; do not call `resume` on a completed setup or create a
+duplicate brief. Refresh only when the inputs or choices need to change.
