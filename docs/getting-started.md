@@ -3,6 +3,10 @@
 Start with a role and a few achievements you can read, correct and find again.
 You can add the rest of your career over time.
 
+Want to see the result first? [Explore Jules's fictional career](../examples/first-pack/README.md),
+including multiple roles, review corrections and a later update. You can start
+with much less material.
+
 ## 1. Open the tool
 
 You need Claude Code installed and configured, Git, Python 3.9+, `make`, and

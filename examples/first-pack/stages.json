@@ -1,0 +1,92 @@
+{
+  "initial": {
+    "current_pack": "data/packs/accepted.json",
+    "saved_roles": 4,
+    "saved_achievements": 9,
+    "reviewed_items": 22,
+    "pending_items": 6,
+    "corrections": 3,
+    "questions": 2,
+    "next_items": [
+      {
+        "key": "evidence_atoms/E_QUEUE_DUPLICATE",
+        "action": "correct"
+      },
+      {
+        "key": "evidence_atoms/E_REVIEW_SPEED",
+        "action": "unsure"
+      },
+      {
+        "key": "evidence_atoms/E_STORY_2",
+        "action": "correct"
+      },
+      {
+        "key": "strengths_profile/S_DISTINCTIVE",
+        "action": "later"
+      },
+      {
+        "key": "strengths_profile/S_ENTERPRISE",
+        "action": "correct"
+      },
+      {
+        "key": "strengths_profile/S_TRANSLATION",
+        "action": "later"
+      }
+    ],
+    "stopping_point": "Your saved career record is available for recall. You can stop here and return to pending items later.",
+    "resume_prompt": "Continue my career-pack review.",
+    "recall_prompt": "Show me one recorded achievement and its original source."
+  },
+  "correction": {
+    "current_pack": "data/packs/corrected.json",
+    "saved_roles": 4,
+    "saved_achievements": 10,
+    "reviewed_items": 26,
+    "pending_items": 3,
+    "corrections": 1,
+    "questions": 2,
+    "next_items": [
+      {
+        "key": "evidence_atoms/E_REVIEW_SPEED",
+        "action": "unsure"
+      },
+      {
+        "key": "strengths_profile/S_ENTERPRISE",
+        "action": "correct"
+      },
+      {
+        "key": "strengths_profile/S_TRANSLATION",
+        "action": "later"
+      }
+    ],
+    "stopping_point": "Your saved career record is available for recall. You can stop here and return to pending items later.",
+    "resume_prompt": "Continue my career-pack review.",
+    "recall_prompt": "Show me one recorded achievement and its original source."
+  },
+  "update": {
+    "current_pack": "data/packs/updated.json",
+    "saved_roles": 4,
+    "saved_achievements": 11,
+    "reviewed_items": 29,
+    "pending_items": 3,
+    "corrections": 1,
+    "questions": 2,
+    "next_items": [
+      {
+        "key": "evidence_atoms/E_REVIEW_SPEED",
+        "action": "unsure"
+      },
+      {
+        "key": "strengths_profile/S_ENTERPRISE",
+        "action": "correct"
+      },
+      {
+        "key": "strengths_profile/S_TRANSLATION",
+        "action": "later"
+      }
+    ],
+    "stopping_point": "Your saved career record is available for recall. You can stop here and return to pending items later.",
+    "resume_prompt": "Continue my career-pack review.",
+    "recall_prompt": "Show me one recorded achievement and its original source."
+  }
+}

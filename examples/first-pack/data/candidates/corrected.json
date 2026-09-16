@@ -294,6 +294,10 @@
         {
           "source_id": "SRC_SUBJECT",
           "excerpt": "2016-03: Service teams could not distinguish a quiet queue from a stalled consumer. Expose queue age and ownership without replacing the messaging platform. Designed a queue-age dashboard and paired with service owners to set alert thresholds. Five services adopted the dashboard and ownership alerts."
+        },
+        {
+          "source_id": "SRC_NOTES",
+          "excerpt": "The March 2016 queue-age dashboard and the \"service health dashboard\" in the resume are the same project. Jules designed the dashboard and worked with the five service owners on alert thresholds. This is not a second delivery."
         }
       ],
       "evidence_status": "self_asserted",
@@ -397,6 +401,83 @@
       "outcome_type": "output",
       "corroborators": [],
       "constraints": []
+    },
+    {
+      "id": "E_STORY_2",
+      "title": "Built an engineering practice",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2025-02",
+        "end": "2025-02",
+        "inferred": false
+      },
+      "star": {
+        "situation": "The group was trying a shared approach to design reviews.",
+        "task": "Help engineers learn from each other.",
+        "action": "Sponsored the peer design-review pilot and coached three engineering managers; Mara Vale and Theo Reed designed the format, and the managers shared hiring responsibility.",
+        "result": "The engineering group adopted peer design reviews."
+      },
+      "metrics": [],
+      "skills": [
+        "coaching",
+        "engineering leadership"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "In February 2025 I hired and coached engineers while introducing peer design reviews. The engineering group adopted peer design reviews."
+        },
+        {
+          "source_id": "SRC_MANAGER",
+          "excerpt": "Jules sponsored the peer design-review pilot and coached three engineering managers. Engineers Mara Vale and Theo Reed designed the review format together. Hiring was shared with the managers. The engineering group adopted peer design reviews; we have not collected feedback about which coaching was most useful."
+        },
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "I sponsored the peer design-review pilot and coached three managers. Mara and Theo designed the format, and the managers shared hiring responsibility. Please keep that division of work explicit. I still cannot say which part of my coaching helped most."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "open_questions": [
+        "What part of coaching was most useful to the engineers?"
+      ]
+    },
+    {
+      "id": "E_REVIEW_SPEED",
+      "title": "Shortened design-review queues by 35%",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2025-02",
+        "end": "2025-02",
+        "inferred": false
+      },
+      "star": {
+        "situation": "The group wanted to reduce waiting for design reviews.",
+        "task": "Understand the effect of the new review practice.",
+        "action": "Compared review queues informally.",
+        "result": "Estimated that review queues became 35% shorter."
+      },
+      "metrics": [],
+      "skills": [
+        "engineering leadership"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_NOTES",
+          "excerpt": "A draft February 2025 review estimated that design-review queues became 35% shorter. The original baseline and measurement period were not retained. The percentage must not be treated as an established outcome."
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "open_questions": [
+        "Can the baseline and measurement period be recovered?"
+      ]
     }
   ],
   "name": "Jules Elm",
@@ -461,6 +542,15 @@
       "independent": true,
       "sha256": "b70ba5456fff724e9fffc49df7a13bcf47ffe5e9270eb1ca0fb777b8ea9602ff",
       "character_count": 277
+    },
+    {
+      "source_id": "SRC_ANSWERS",
+      "source_type": "person",
+      "path": "data/sources/review-answers.md",
+      "independent": false,
+      "sha256": "3606cdb284e946a27dc3dd57847cdb47a44f01e276ca2fe73726af448b0433f7",
+      "character_count": 760,
+      "retrieved": "2026-09-16"
     }
   ],
   "metadata": {
@@ -699,5 +789,93 @@
       ],
       "accepted_at": "2026-09-16T10:17:47.289140+00:00"
     }
-  }
+  },
+  "positioning_preferences": [
+    {
+      "id": "P_DIRECTION",
+      "kind": "direction",
+      "text": "I want technical leadership work that keeps me close to system design and helps other engineers develop. I am open to Staff Engineer or engineering leadership roles; a larger reporting organization is not my main goal.",
+      "status": "active",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "I want technical leadership work that keeps me close to system design and helps other engineers develop. I am open to Staff Engineer or engineering leadership roles; a larger reporting organization is not my main goal."
+        }
+      ]
+    }
+  ],
+  "strengths_profile": [
+    {
+      "id": "S_DISTINCTIVE",
+      "interpretation": "Helps teams adopt practical engineering approaches",
+      "evidence_ids": [
+        "E_STORY_1",
+        "E_STORY_2"
+      ],
+      "evidence_fingerprints": {
+        "E_STORY_1": "0c1e99191b3e2486f0bfd73f8efa84a6cf76c6ba950bbfa299a38243a42440ee",
+        "E_STORY_2": "5c8747a9141ce7a600d0efaf2f3dc79be825161858c6c262fedc6d3797090bef"
+      },
+      "status": "confirmed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "Shared ownership is explicit; the coaching benefit has not been measured."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "Yes: helping teams adopt practical engineering approaches describes my contribution. It includes coaching and creating space for engineers to design the solution; it does not mean I built everything myself. Keep this interpretation private for now."
+        }
+      ],
+      "question_status": "answered",
+      "review_question": "Does this describe your contribution?"
+    },
+    {
+      "id": "S_TRANSLATION",
+      "interpretation": "Makes technical tradeoffs understandable across teams",
+      "evidence_ids": [
+        "E_SERVICE_BOUNDARIES",
+        "E_PLATFORM_ADOPTION"
+      ],
+      "evidence_fingerprints": {
+        "E_PLATFORM_ADOPTION": "168d76dbad2bd8cad6e49c0c1e52ef2b45987c6080eef19d9f5392881993296a",
+        "E_SERVICE_BOUNDARIES": "d50b2452132d3abb16e56dfc1d1dbbf692efa73f09fcb4261eb8966d40c9fe2a"
+      },
+      "status": "proposed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "These examples show planning and agreement, not measured commercial outcomes."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [],
+      "question_status": "open",
+      "review_question": "Does this describe your contribution?"
+    },
+    {
+      "id": "S_ENTERPRISE",
+      "interpretation": "Transforms engineering organizations at enterprise scale",
+      "evidence_ids": [
+        "E_PLATFORM_ADOPTION",
+        "E_STORY_2"
+      ],
+      "evidence_fingerprints": {
+        "E_PLATFORM_ADOPTION": "168d76dbad2bd8cad6e49c0c1e52ef2b45987c6080eef19d9f5392881993296a",
+        "E_STORY_2": "5c8747a9141ce7a600d0efaf2f3dc79be825161858c6c262fedc6d3797090bef"
+      },
+      "status": "proposed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "Deliberately overbroad proposed interpretation: the record covers a focused engineering group."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [],
+      "question_status": "open",
+      "review_question": "Does this describe your contribution?"
+    }
+  ]
 }

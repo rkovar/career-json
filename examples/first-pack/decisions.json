@@ -1,29 +1,132 @@
 {
   "review_id": "fictional-first-pack",
-  "proposal_sha256": "5c4d4335299ff3def4bbff95a6fdb608bbe439ac6384afb19adeddba82e35f04",
+  "proposal_sha256": "8a085c6fa40b5d78544d7132bee6f5a67f269720491c1aa8fc13b9bacda2f54e",
   "reviewed_by": "Jules Elm (scripted fictional example)",
-  "omissions": [],
+  "omissions": [
+    {
+      "prompt": "What important work is missing?",
+      "answer": "I also help product and operations make migration decisions. I will add a concrete example later."
+    }
+  ],
   "decisions": [
     {
+      "key": "education/EDU_BSC",
+      "fingerprint": "f1728d17fda35ac440a9176fadfc69b2e65dede87df5581dbb371335078432bb",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "employment/EMP_CIVIC",
+      "fingerprint": "cac5ad7727949ae1cca7132240e717047d06a73ed6a07b9b6c027c9bc628a803",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
       "key": "employment/EMP_CURRENT",
-      "fingerprint": "6f526c58b9fcef8f964aa16b821ba87b87dcdd15086c1908232b70de99d61172",
+      "fingerprint": "3535c42a6340c0d7e971fc5f6a6a262e1fc3a300a51198c77ef23e478796c009",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "employment/EMP_NORTH",
+      "fingerprint": "e8935ce009ca70434688fd7928cebdb91af5282ac5cf46de1c0996dfc8037867",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "employment/EMP_STAFF",
+      "fingerprint": "4cafaf6e503109ce7fdc49b5e85cc8e87cc1e0c18480945b32b0578ab8a4d9c5",
+      "action": "accept",
+      "publication": "external",
+      "note": "Allow my Staff Engineer title and dates externally."
+    },
+    {
+      "key": "evidence_atoms/E_IMPORT_VALIDATION",
+      "fingerprint": "407257d8392b66bbc7da34e364b1602bfe9d4046336365468c969389b71c2a6a",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_INCIDENT_EXERCISES",
+      "fingerprint": "007fbe977904accbe9e6f63b1a9dd9a2814b93f1f6cd34dcef57a8f88a21477e",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_OPERATIONS_RUNBOOK",
+      "fingerprint": "bd8656c10e3b86a4daeb8f3a41337761b9aaae60d935619577ef3bf8547afe6e",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_PLATFORM_ADOPTION",
+      "fingerprint": "386e8239ecd5a23fc1ba37d7ee300a0c4c659e9e6ddf88fc416db35415b3a605",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_PRIVATE_REVIEW",
+      "fingerprint": "897be38294dfceef695a14ada58a47b90986b1a31f48447eedc85fb71009b5f4",
+      "action": "accept",
+      "publication": "private",
+      "note": "Accurate, but keep this supplier review private."
+    },
+    {
+      "key": "evidence_atoms/E_QUEUE_DUPLICATE",
+      "fingerprint": "845394b262d46ca514b569d037a9a0a83e605b942372a6359aaecdf05bc7ae06",
+      "action": "correct",
+      "publication": "private",
+      "note": "This is the same March 2016 dashboard. Combine the accounts; do not count it twice."
+    },
+    {
+      "key": "evidence_atoms/E_QUEUE_VISIBILITY",
+      "fingerprint": "47295d08a26bfa190ffdb9a6102299b22de3def3846d6699ba701b5999328bac",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_REVIEW_SPEED",
+      "fingerprint": "43fa9716f0640bd4cdcb1023da9b6a4ae4b962d5e9f92b4f91ac6a9bdc8c4c22",
+      "action": "unsure",
+      "publication": "private",
+      "note": "I cannot recover the baseline or period. Keep the 35% estimate out of the accepted record."
+    },
+    {
+      "key": "evidence_atoms/E_SERVICE_BOUNDARIES",
+      "fingerprint": "77a98c21eaea1690dc04063507e4b6ccfc188d9896a4032be35728ecaeb88fdf",
       "action": "accept",
       "publication": "unchanged",
       "note": ""
     },
     {
       "key": "evidence_atoms/E_STORY_1",
-      "fingerprint": "3b85df3b9b8436dbf5dddd979485c4ea7932f154170a0ee5a080d2ec7662cb55",
+      "fingerprint": "d10452b77f6ada6309831059214f33ac08457d08e2d00a19a76d8dfb1d2c165f",
       "action": "accept",
       "publication": "unchanged",
       "note": ""
     },
     {
       "key": "evidence_atoms/E_STORY_2",
-      "fingerprint": "f788b0bee7ebe1a6f7e99ce9f806653b0dfe9aaadced5615906d802864e398da",
+      "fingerprint": "de0f03fb9b4f27dcb388d6c0854ab85bbd63b0ebb1aa6c853eba90496cf597b9",
+      "action": "correct",
+      "publication": "private",
+      "note": "I sponsored the peer design-review pilot and coached three managers. Mara and Theo designed the format, and the managers shared hiring responsibility. Please keep that division of work explicit. I still cannot say which part of my coaching helped most."
+    },
+    {
+      "key": "evidence_atoms/E_TALK",
+      "fingerprint": "a4a40f340ad10497b375baa285c15ee1f5f297e19d34fe0978b33fba41ead369",
       "action": "accept",
-      "publication": "unchanged",
-      "note": ""
+      "publication": "external",
+      "note": "Allow this exact co-presenter wording externally; no audience-impact claim."
     },
     {
       "key": "field/name",
@@ -41,24 +144,66 @@
     },
     {
       "key": "field/purpose",
-      "fingerprint": "9d0f89e3e11083d53e5c2075ca4199b6a9c7d578cb8afdbae4e8f86dda5e555c",
+      "fingerprint": "84ea82a25842ff6554fd44ce22332b4d2a0b28ee7ca61eb60eded640b03f3f19",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "publications/PUB_DEPLOYMENT_TALK",
+      "fingerprint": "c54ae630d37eb39c272b9436c435e943ee5113fab065042df128b10fdc0be3ff",
+      "action": "accept",
+      "publication": "external",
+      "note": "Allow the matching talk listing with shared speaker credit."
+    },
+    {
+      "key": "source_records/SRC_MANAGER",
+      "fingerprint": "94c5c86cf9bb6c797492b258c97e106770d1c9906715fe31a5260f07b266f48f",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_NOTES",
+      "fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
       "action": "accept",
       "publication": "unchanged",
       "note": ""
     },
     {
       "key": "source_records/SRC_SUBJECT",
-      "fingerprint": "2a84e0f5933c22034628bb773a724f5d874f8117a12cbef3cdced0fbf4a4dbcc",
+      "fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_TALK",
+      "fingerprint": "837eef43d09c98b7123d00127d1b8ec63ed04f53b915265e0623cda09163ca85",
       "action": "accept",
       "publication": "unchanged",
       "note": ""
     },
     {
       "key": "strengths_profile/S_DISTINCTIVE",
-      "fingerprint": "d985fdfb6afdfb7c571535c667304a3d9a4039bf2f3516ef02b585474c2577b9",
+      "fingerprint": "6425a9e9ffd253bc14159dba1b6d2cef2110df5bee5081e49ed94ecceda375ab",
+      "action": "later",
+      "publication": "private",
+      "note": "Correct the coaching example before we discuss this interpretation."
+    },
+    {
+      "key": "strengths_profile/S_ENTERPRISE",
+      "fingerprint": "0cc6f812747463c812413372db16c37ec72b04ff5915c12eb78c8f430673f08f",
+      "action": "correct",
+      "publication": "private",
+      "note": "Enterprise-scale transformation overstates my remit. I lead a focused group and work through others."
+    },
+    {
+      "key": "strengths_profile/S_TRANSLATION",
+      "fingerprint": "68d0cf05c042c639e99513792bfc534bffaa0a276ac188f98521cc3e701fee15",
       "action": "later",
       "publication": "unchanged",
-      "note": ""
+      "note": "I want to revisit the wording after reading the examples."
     }
   ]
 }

@@ -9,7 +9,10 @@ when useful.
 
 - [Build my career pack](guided-starts.md): choosing material or starting with your own account
 - [Source suggestions](source-intake.md): resumes, reviews, talks and other useful inputs
-- [Jules's fictional walkthrough](../examples/first-pack/README.md): see a reviewed record and recall example
+- [Jules's fictional walkthrough](../examples/first-pack/README.md): four roles, review decisions, corrections and a later update
+
+[Open Jules's browser walkthrough](../examples/first-pack/index.html) locally to
+compare the proposed and saved records, inspect sources and try the review controls.
 
 Resume creation is optional. After installing the matching add-on, use
 **Create a resume** in `make start`. Its user guide is `docs/resume-start.md`.

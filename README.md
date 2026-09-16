@@ -22,7 +22,7 @@ together. Months later, Jules can ask:
 > Find the deployment rehearsal example and show me its source.
 
 That reviewed example can support a review, interview or resume. [Follow Jules's complete walkthrough](examples/first-pack/README.md)
-to see the proposed record, corrections and saved result.
+to explore a fuller career, review corrections and add new work later.
 
 ## Start here
 

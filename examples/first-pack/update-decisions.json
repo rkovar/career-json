@@ -1,0 +1,50 @@
+{
+  "review_id": "fictional-update",
+  "proposal_sha256": "06fa59055cc688e3b5b02eae3621234d421ea876faf29cf4253910e4377a0025",
+  "reviewed_by": "Jules Elm (scripted fictional example)",
+  "omissions": [],
+  "decisions": [
+    {
+      "key": "evidence_atoms/E_MIGRATION_PLANNING",
+      "fingerprint": "4da3dd258aa0ef897201c050c4917620a9bfa126005fe3c862c28414136148cd",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "evidence_atoms/E_REVIEW_SPEED",
+      "fingerprint": "43fa9716f0640bd4cdcb1023da9b6a4ae4b962d5e9f92b4f91ac6a9bdc8c4c22",
+      "action": "unsure",
+      "publication": "private",
+      "note": "I cannot recover the baseline or period. Keep the 35% estimate out of the accepted record."
+    },
+    {
+      "key": "source_records/SRC_CAPTURE",
+      "fingerprint": "2b639b1840b5b36ccd9587feca0d7c2631945e800ac1b72198ec381c741a3ce3",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_UPDATE",
+      "fingerprint": "6052a00cd2e9b551c0d1b7772396338fd7cbb701caf286016869fbd238fe9499",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "strengths_profile/S_ENTERPRISE",
+      "fingerprint": "55d88c968dba170f67bcb3b4409494402cf25ff277a6935bc396a1b72dd8a30f",
+      "action": "correct",
+      "publication": "private",
+      "note": "Enterprise-scale transformation overstates my remit. I lead a focused group and work through others."
+    },
+    {
+      "key": "strengths_profile/S_TRANSLATION",
+      "fingerprint": "68d0cf05c042c639e99513792bfc534bffaa0a276ac188f98521cc3e701fee15",
+      "action": "later",
+      "publication": "unchanged",
+      "note": "I want to revisit the wording after reading the examples."
+    }
+  ]
+}

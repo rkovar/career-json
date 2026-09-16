@@ -1,0 +1,169 @@
+{
+  "rehearsal": {
+    "query": "deployment rehearsal",
+    "results": [
+      {
+        "id": "E_STORY_1",
+        "title": "Created a deployment rehearsal tool",
+        "employment_id": "EMP_STAFF",
+        "occurred": {
+          "start": "2019-03",
+          "end": "2019-03",
+          "inferred": false
+        },
+        "star": {
+          "situation": "Product teams needed to test deployment steps before changing production.",
+          "task": "Make deployment practice repeatable without taking delivery ownership from the teams.",
+          "action": "Designed the rehearsal format and co-built its runner with engineers.",
+          "result": "Two teams adopted rehearsals before deployment."
+        },
+        "metrics": [],
+        "skills": [
+          "platform engineering",
+          "cross-team collaboration"
+        ],
+        "source_refs": [
+          {
+            "source_id": "SRC_SUBJECT",
+            "excerpt": "In March 2019 I designed a deployment rehearsal format and co-built its runner with engineers. Two teams adopted rehearsals before deployment."
+          }
+        ],
+        "evidence_status": "self_asserted",
+        "external_safe": false,
+        "outcome_type": "output",
+        "corroborators": [],
+        "constraints": []
+      }
+    ]
+  },
+  "coaching": {
+    "query": "coached",
+    "results": [
+      {
+        "id": "E_STORY_2",
+        "title": "Built an engineering practice",
+        "employment_id": "EMP_CURRENT",
+        "occurred": {
+          "start": "2025-02",
+          "end": "2025-02",
+          "inferred": false
+        },
+        "star": {
+          "situation": "The group was trying a shared approach to design reviews.",
+          "task": "Help engineers learn from each other.",
+          "action": "Sponsored the peer design-review pilot and coached three engineering managers; Mara Vale and Theo Reed designed the format, and the managers shared hiring responsibility.",
+          "result": "The engineering group adopted peer design reviews."
+        },
+        "metrics": [],
+        "skills": [
+          "coaching",
+          "engineering leadership"
+        ],
+        "source_refs": [
+          {
+            "source_id": "SRC_SUBJECT",
+            "excerpt": "In February 2025 I hired and coached engineers while introducing peer design reviews. The engineering group adopted peer design reviews."
+          },
+          {
+            "source_id": "SRC_MANAGER",
+            "excerpt": "Jules sponsored the peer design-review pilot and coached three engineering managers. Engineers Mara Vale and Theo Reed designed the review format together. Hiring was shared with the managers. The engineering group adopted peer design reviews; we have not collected feedback about which coaching was most useful."
+          },
+          {
+            "source_id": "SRC_ANSWERS",
+            "excerpt": "I sponsored the peer design-review pilot and coached three managers. Mara and Theo designed the format, and the managers shared hiring responsibility. Please keep that division of work explicit. I still cannot say which part of my coaching helped most."
+          }
+        ],
+        "evidence_status": "self_asserted",
+        "external_safe": false,
+        "outcome_type": "output",
+        "corroborators": [],
+        "constraints": [],
+        "open_questions": [
+          "What part of coaching was most useful to the engineers?"
+        ]
+      }
+    ]
+  },
+  "architecture": {
+    "query": "service separation",
+    "results": [
+      {
+        "id": "E_SERVICE_BOUNDARIES",
+        "title": "Agreed a gradual service separation",
+        "employment_id": "EMP_STAFF",
+        "occurred": {
+          "start": "2021-02",
+          "end": "2021-02",
+          "inferred": false
+        },
+        "star": {
+          "situation": "Product and operations disagreed about replacing a shared service in one release.",
+          "task": "Make the migration tradeoffs explicit and agree a sequence the teams could support.",
+          "action": "Mapped failure boundaries with both groups and authored a staged separation proposal.",
+          "result": "The teams chose a staged separation and retained a rollback path; product teams implemented the changes."
+        },
+        "metrics": [],
+        "skills": [
+          "software architecture",
+          "stakeholder communication"
+        ],
+        "source_refs": [
+          {
+            "source_id": "SRC_SUBJECT",
+            "excerpt": "2021-02: Product and operations disagreed about replacing a shared service in one release. Make the migration tradeoffs explicit and agree a sequence the teams could support. Mapped failure boundaries with both groups and authored a staged separation proposal. The teams chose a staged separation and retained a rollback path; product teams implemented the changes."
+          }
+        ],
+        "evidence_status": "self_asserted",
+        "external_safe": false,
+        "outcome_type": "output",
+        "corroborators": [],
+        "constraints": []
+      }
+    ]
+  },
+  "migration": {
+    "query": "customer-data migration",
+    "results": [
+      {
+        "id": "E_MIGRATION_PLANNING",
+        "title": "Agreed a phased customer-data migration",
+        "employment_id": "EMP_CURRENT",
+        "occurred": {
+          "start": "2026-08",
+          "end": "2026-08",
+          "inferred": false
+        },
+        "star": {
+          "situation": "Product wanted a single migration while operations wanted a rehearsed fallback.",
+          "task": "Help both groups agree a migration sequence and decision points.",
+          "action": "Facilitated the planning discussion and wrote a rollback decision guide; operations ran the rehearsal.",
+          "result": "Product owners agreed to migrate in phases. The migration had not yet run."
+        },
+        "metrics": [],
+        "skills": [
+          "stakeholder communication",
+          "software architecture"
+        ],
+        "source_refs": [
+          {
+            "source_id": "SRC_CAPTURE",
+            "excerpt": "Helped operations and product agree a phased customer-data migration. I wrote the rollback decision guide; operations ran the rehearsal. Capture this for my next review."
+          },
+          {
+            "source_id": "SRC_UPDATE",
+            "excerpt": "August 2026: product wanted a single customer-data migration while operations wanted a rehearsed fallback. Jules facilitated the planning discussion and wrote a rollback decision guide. Operations ran the rehearsal, and product owners agreed to migrate in phases. The migration had not yet run; no claim about a successful launch, time saved or reduced incidents is established."
+          }
+        ],
+        "evidence_status": "self_asserted",
+        "external_safe": false,
+        "outcome_type": "output",
+        "corroborators": [],
+        "constraints": [],
+        "capture": {
+          "method": "note",
+          "note_id": "N0001"
+        }
+      }
+    ]
+  }
+}

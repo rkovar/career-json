@@ -1,0 +1,13 @@
+{
+  "review_id": "fictional-update",
+  "created": "2026-09-16T10:17:47.948701+00:00",
+  "proposal": {
+    "path": "reviews/pack-reviews/fictional-update/proposal.json",
+    "sha256": "06fa59055cc688e3b5b02eae3621234d421ea876faf29cf4253910e4377a0025"
+  },
+  "base": {
+    "path": "data/packs/corrected.json",
+    "sha256": "ba20e1c411993f9ec05d380a4221e1a88e67239aca0debf1e637a445aa561c8b"
+  },
+  "validation_warnings": []
+}

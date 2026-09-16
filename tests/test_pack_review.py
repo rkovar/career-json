@@ -2,6 +2,8 @@
 """Human review contracts in fictional workspaces, including partial acceptance."""
 import copy
 import fcntl
+import hashlib
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path
@@ -306,11 +308,65 @@ class PackReviewTests(unittest.TestCase):
                               capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)
         summary=json.loads((destination/'summary.json').read_text())
-        self.assertEqual(summary['saved_achievements'],2)
-        self.assertEqual(summary['pending_items'],1)
+        self.assertEqual(summary['saved_roles'],4)
+        self.assertEqual(summary['saved_achievements'],9)
+        self.assertEqual(summary['pending_items'],6)
         recalled=json.loads((destination/'recall.json').read_text())
         self.assertEqual([r['id'] for r in recalled],['E_STORY_1'])
         self.assertIn('Fictional demonstration',(destination/'review.html').read_text())
+        # The richer example must exercise corrections and capture, not merely
+        # change the page's descriptive counts or approve all generated content.
+        first=json.loads((destination/'data/packs/accepted.json').read_text())
+        corrected=json.loads((destination/'data/packs/corrected.json').read_text())
+        final=json.loads((destination/'data/packs/updated.json').read_text())
+        initial_ids={a['id'] for a in first['evidence_atoms']}
+        self.assertNotIn('E_STORY_2',initial_ids)
+        self.assertNotIn('E_MIGRATION_PLANNING',initial_ids)
+        self.assertEqual(len(corrected['evidence_atoms']),10)
+        self.assertEqual(len(final['evidence_atoms']),11)
+        atoms={a['id']:a for a in final['evidence_atoms']}
+        for saved in (first,corrected,final):
+            self.assertFalse({'E_QUEUE_DUPLICATE','E_REVIEW_SPEED'} & {a['id'] for a in saved['evidence_atoms']})
+            self.assertTrue(all(a['evidence_status']=='self_asserted' for a in saved['evidence_atoms']))
+        self.assertIn('Mara Vale and Theo Reed designed',atoms['E_STORY_2']['star']['action'])
+        self.assertTrue(atoms['E_STORY_2']['open_questions'])
+        self.assertEqual({r['source_id'] for r in atoms['E_QUEUE_VISIBILITY']['source_refs']},{'SRC_SUBJECT','SRC_NOTES'})
+        self.assertFalse(atoms['E_PRIVATE_REVIEW']['external_safe'])
+        self.assertEqual({a['id'] for a in final['evidence_atoms'] if a['external_safe']},{'E_TALK'})
+        roles={r['employment_id']:r for r in final['employment']}
+        self.assertEqual(roles['EMP_CURRENT']['parent_employment_id'],'EMP_STAFF')
+        self.assertEqual(roles['EMP_CURRENT']['start'],'2022-07')
+        self.assertEqual(len({r['employer'] for r in roles.values()}),3)
+        self.assertEqual(final['strengths_profile'][0]['status'],'confirmed')
+        self.assertEqual(final['strengths_profile'][0]['source_refs'][0]['source_id'],'SRC_ANSWERS')
+        capture=json.loads((destination/'capture-before-review.json').read_text())
+        self.assertIsNone(capture['notes'][0]['promoted_to'])
+        self.assertEqual(capture['accepted_pack_sha256'],hashlib.sha256((destination/'data/packs/corrected.json').read_bytes()).hexdigest())
+        self.assertNotIn('E_MIGRATION_PLANNING',{a['id'] for a in corrected['evidence_atoms']})
+        note=json.loads((destination/'data/capture/notes.jsonl').read_text().strip())
+        self.assertEqual(note['promoted_to'],'E_MIGRATION_PLANNING')
+        self.assertEqual(atoms['E_MIGRATION_PLANNING']['capture']['note_id'],note['note_id'])
+        self.assertIn('had not yet run',atoms['E_MIGRATION_PLANNING']['star']['result'])
+        stages=json.loads((destination/'stages.json').read_text())
+        self.assertEqual(stages['update']['pending_items'],3)
+        self.assertEqual({i['key'] for i in stages['update']['next_items']},
+                         {'evidence_atoms/E_REVIEW_SPEED','strengths_profile/S_ENTERPRISE','strengths_profile/S_TRANSLATION'})
+        self.assertEqual(final['metadata']['supersedes'],'data/packs/corrected.json')
+        self.assertEqual(corrected['metadata']['supersedes'],'data/packs/accepted.json')
+        for saved in (first,corrected,final):
+            for source in saved['source_records']:
+                self.assertEqual(hashlib.sha256((destination/source['path']).read_bytes()).hexdigest(),source['sha256'])
+            review=saved['metadata']['human_review']
+            for pin in [review['session'],*review['applied_batches']]:
+                self.assertEqual(hashlib.sha256((destination/pin['path']).read_bytes()).hexdigest(),pin['sha256'])
+        # Freshly generated browser entry points must keep their local targets.
+        class Links(HTMLParser):
+            def handle_starttag(inner,tag,attrs):
+                if tag=='a' and dict(attrs).get('href'):
+                    href=dict(attrs)['href'].split('#')[0]
+                    if href and href!='README.md':
+                        self.assertTrue((destination/href).is_file(),href)
+        Links().feed((destination/'index.html').read_text())
 
     def test_demo_refuses_to_replace_an_existing_career_workspace(self):
         before=(self.root/'data/packs/base.json').read_bytes()

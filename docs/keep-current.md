@@ -16,6 +16,10 @@ what happened, your contribution, who else was involved and when it happened.
 
 Capture notes wait for review before becoming part of the accepted career pack.
 
+[See Jules capture and review a migration-planning note](../examples/first-pack/README.md#see-the-ongoing-habit).
+The example preserves the earlier pack, adds context, and saves only the reviewed
+contribution; it leaves the unfinished migration's outcome open.
+
 ## Review notes when convenient
 
 > Review my recent notes with me and update my career pack.
@@ -26,6 +30,9 @@ ownership. Explain missing context in your own words.
 
 Accept useful items and leave the rest for later. A changed statement needs a
 fresh review; an old approval does not cover new wording.
+
+[Inspect Jules's proposed update](../examples/first-pack/update-review.html) and
+[the saved result](../examples/first-pack/after-update.html) in your browser.
 
 ## Bring in a new document
 

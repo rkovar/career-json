@@ -294,6 +294,10 @@
         {
           "source_id": "SRC_SUBJECT",
           "excerpt": "2016-03: Service teams could not distinguish a quiet queue from a stalled consumer. Expose queue age and ownership without replacing the messaging platform. Designed a queue-age dashboard and paired with service owners to set alert thresholds. Five services adopted the dashboard and ownership alerts."
+        },
+        {
+          "source_id": "SRC_NOTES",
+          "excerpt": "The March 2016 queue-age dashboard and the \"service health dashboard\" in the resume are the same project. Jules designed the dashboard and worked with the five service owners on alert thresholds. This is not a second delivery."
         }
       ],
       "evidence_status": "self_asserted",
@@ -397,6 +401,123 @@
       "outcome_type": "output",
       "corroborators": [],
       "constraints": []
+    },
+    {
+      "id": "E_STORY_2",
+      "title": "Built an engineering practice",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2025-02",
+        "end": "2025-02",
+        "inferred": false
+      },
+      "star": {
+        "situation": "The group was trying a shared approach to design reviews.",
+        "task": "Help engineers learn from each other.",
+        "action": "Sponsored the peer design-review pilot and coached three engineering managers; Mara Vale and Theo Reed designed the format, and the managers shared hiring responsibility.",
+        "result": "The engineering group adopted peer design reviews."
+      },
+      "metrics": [],
+      "skills": [
+        "coaching",
+        "engineering leadership"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "In February 2025 I hired and coached engineers while introducing peer design reviews. The engineering group adopted peer design reviews."
+        },
+        {
+          "source_id": "SRC_MANAGER",
+          "excerpt": "Jules sponsored the peer design-review pilot and coached three engineering managers. Engineers Mara Vale and Theo Reed designed the review format together. Hiring was shared with the managers. The engineering group adopted peer design reviews; we have not collected feedback about which coaching was most useful."
+        },
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "I sponsored the peer design-review pilot and coached three managers. Mara and Theo designed the format, and the managers shared hiring responsibility. Please keep that division of work explicit. I still cannot say which part of my coaching helped most."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "open_questions": [
+        "What part of coaching was most useful to the engineers?"
+      ]
+    },
+    {
+      "id": "E_MIGRATION_PLANNING",
+      "title": "Agreed a phased customer-data migration",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2026-08",
+        "end": "2026-08",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Product wanted a single migration while operations wanted a rehearsed fallback.",
+        "task": "Help both groups agree a migration sequence and decision points.",
+        "action": "Facilitated the planning discussion and wrote a rollback decision guide; operations ran the rehearsal.",
+        "result": "Product owners agreed to migrate in phases. The migration had not yet run."
+      },
+      "metrics": [],
+      "skills": [
+        "stakeholder communication",
+        "software architecture"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_CAPTURE",
+          "excerpt": "Helped operations and product agree a phased customer-data migration. I wrote the rollback decision guide; operations ran the rehearsal. Capture this for my next review."
+        },
+        {
+          "source_id": "SRC_UPDATE",
+          "excerpt": "August 2026: product wanted a single customer-data migration while operations wanted a rehearsed fallback. Jules facilitated the planning discussion and wrote a rollback decision guide. Operations ran the rehearsal, and product owners agreed to migrate in phases. The migration had not yet run; no claim about a successful launch, time saved or reduced incidents is established."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "capture": {
+        "method": "note",
+        "note_id": "N0001"
+      }
+    },
+    {
+      "id": "E_REVIEW_SPEED",
+      "title": "Shortened design-review queues by 35%",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2025-02",
+        "end": "2025-02",
+        "inferred": false
+      },
+      "star": {
+        "situation": "The group wanted to reduce waiting for design reviews.",
+        "task": "Understand the effect of the new review practice.",
+        "action": "Compared review queues informally.",
+        "result": "Estimated that review queues became 35% shorter."
+      },
+      "metrics": [],
+      "skills": [
+        "engineering leadership"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_NOTES",
+          "excerpt": "A draft February 2025 review estimated that design-review queues became 35% shorter. The original baseline and measurement period were not retained. The percentage must not be treated as an established outcome."
+        }
+      ],
+      "evidence_status": "unresolved",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "open_questions": [
+        "Can the baseline and measurement period be recovered?"
+      ]
     }
   ],
   "name": "Jules Elm",
@@ -461,13 +582,38 @@
       "independent": true,
       "sha256": "b70ba5456fff724e9fffc49df7a13bcf47ffe5e9270eb1ca0fb777b8ea9602ff",
       "character_count": 277
+    },
+    {
+      "source_id": "SRC_ANSWERS",
+      "source_type": "person",
+      "path": "data/sources/review-answers.md",
+      "independent": false,
+      "sha256": "3606cdb284e946a27dc3dd57847cdb47a44f01e276ca2fe73726af448b0433f7",
+      "character_count": 760,
+      "retrieved": "2026-09-16"
+    },
+    {
+      "source_id": "SRC_CAPTURE",
+      "source_type": "json",
+      "path": "data/sources/captured-note.json",
+      "independent": false,
+      "sha256": "4983aaa7685b1ba590a994944a09fe6e8e3cdeaff47fb151823a0ceaf84d0498",
+      "character_count": 368
+    },
+    {
+      "source_id": "SRC_UPDATE",
+      "source_type": "markdown",
+      "path": "data/sources/update-2026.md",
+      "independent": false,
+      "sha256": "b52b5e7f5aedbd4a6201077323860726704ef4d8390cf71a46750f2999112ddb",
+      "character_count": 424
     }
   ],
   "metadata": {
     "human_review": {
       "session": {
-        "path": "reviews/pack-reviews/fictional-first-pack/session.json",
-        "sha256": "f52924c8a7deb267943355968058845c221dfb121cfe41b33b52bc7bb5857494"
+        "path": "reviews/pack-reviews/fictional-correction/session.json",
+        "sha256": "5af01c803d892ae9d44e24ff6b7f36f9e46df6ee178963115c1deace8ce52a40"
       },
       "items": {
         "education/EDU_BSC": {
@@ -571,13 +717,13 @@
           }
         },
         "evidence_atoms/E_QUEUE_VISIBILITY": {
-          "fingerprint": "47295d08a26bfa190ffdb9a6102299b22de3def3846d6699ba701b5999328bac",
-          "reviewed_fingerprint": "47295d08a26bfa190ffdb9a6102299b22de3def3846d6699ba701b5999328bac",
+          "fingerprint": "9a902ef1c5985c7ea7b9f8ea3dd84bc5f24ef6f7b03f8dd1d0e8a83680873d40",
+          "reviewed_fingerprint": "9a902ef1c5985c7ea7b9f8ea3dd84bc5f24ef6f7b03f8dd1d0e8a83680873d40",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-16T10:17:47.646343+00:00",
           "batch": {
-            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "1371d4e87fc0d7cd7b2b39b9ed64fbacf0d59d2a1ea413389418f908a19901a9"
           }
         },
         "evidence_atoms/E_SERVICE_BOUNDARIES": {
@@ -689,15 +835,144 @@
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
             "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
           }
+        },
+        "evidence_atoms/E_STORY_2": {
+          "fingerprint": "7a52bf05e90140af0fa5243a23bb6b5c3a30f272fc932c2b805bda54724e6dec",
+          "reviewed_fingerprint": "7a52bf05e90140af0fa5243a23bb6b5c3a30f272fc932c2b805bda54724e6dec",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-16T10:17:47.646343+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "1371d4e87fc0d7cd7b2b39b9ed64fbacf0d59d2a1ea413389418f908a19901a9"
+          }
+        },
+        "positioning_preferences/P_DIRECTION": {
+          "fingerprint": "498016121bf82a983b0faf1ab47fd6611b5c0a536e30ce4cd243cf9076910095",
+          "reviewed_fingerprint": "498016121bf82a983b0faf1ab47fd6611b5c0a536e30ce4cd243cf9076910095",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-16T10:17:47.646343+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "1371d4e87fc0d7cd7b2b39b9ed64fbacf0d59d2a1ea413389418f908a19901a9"
+          }
+        },
+        "source_records/SRC_ANSWERS": {
+          "fingerprint": "803a53796cc02891aac03ce78a627f8ccb61ce7b8872b2000347e848546c4797",
+          "reviewed_fingerprint": "803a53796cc02891aac03ce78a627f8ccb61ce7b8872b2000347e848546c4797",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-16T10:17:47.646343+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "1371d4e87fc0d7cd7b2b39b9ed64fbacf0d59d2a1ea413389418f908a19901a9"
+          }
+        },
+        "strengths_profile/S_DISTINCTIVE": {
+          "fingerprint": "b8477fdb7caa9af66a55e1deda62f750f65bd7ce36fc59f94232d06083d392fb",
+          "reviewed_fingerprint": "b8477fdb7caa9af66a55e1deda62f750f65bd7ce36fc59f94232d06083d392fb",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-16T10:17:47.646343+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "1371d4e87fc0d7cd7b2b39b9ed64fbacf0d59d2a1ea413389418f908a19901a9"
+          }
         }
       },
       "applied_batches": [
         {
-          "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-          "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+          "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+          "sha256": "1371d4e87fc0d7cd7b2b39b9ed64fbacf0d59d2a1ea413389418f908a19901a9"
         }
       ],
-      "accepted_at": "2026-09-16T10:17:47.289140+00:00"
+      "accepted_at": "2026-09-16T10:17:47.651891+00:00"
+    },
+    "supersedes": "data/packs/accepted.json"
+  },
+  "positioning_preferences": [
+    {
+      "id": "P_DIRECTION",
+      "kind": "direction",
+      "text": "I want technical leadership work that keeps me close to system design and helps other engineers develop. I am open to Staff Engineer or engineering leadership roles; a larger reporting organization is not my main goal.",
+      "status": "active",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "I want technical leadership work that keeps me close to system design and helps other engineers develop. I am open to Staff Engineer or engineering leadership roles; a larger reporting organization is not my main goal."
+        }
+      ]
     }
-  }
+  ],
+  "strengths_profile": [
+    {
+      "id": "S_DISTINCTIVE",
+      "interpretation": "Helps teams adopt practical engineering approaches",
+      "evidence_ids": [
+        "E_STORY_1",
+        "E_STORY_2"
+      ],
+      "evidence_fingerprints": {
+        "E_STORY_1": "0c1e99191b3e2486f0bfd73f8efa84a6cf76c6ba950bbfa299a38243a42440ee",
+        "E_STORY_2": "5c8747a9141ce7a600d0efaf2f3dc79be825161858c6c262fedc6d3797090bef"
+      },
+      "status": "confirmed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "Shared ownership is explicit; the coaching benefit has not been measured."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "Yes: helping teams adopt practical engineering approaches describes my contribution. It includes coaching and creating space for engineers to design the solution; it does not mean I built everything myself. Keep this interpretation private for now."
+        }
+      ],
+      "question_status": "answered",
+      "review_question": "Does this describe your contribution?"
+    },
+    {
+      "id": "S_TRANSLATION",
+      "interpretation": "Makes technical tradeoffs understandable across teams",
+      "evidence_ids": [
+        "E_SERVICE_BOUNDARIES",
+        "E_PLATFORM_ADOPTION"
+      ],
+      "evidence_fingerprints": {
+        "E_PLATFORM_ADOPTION": "168d76dbad2bd8cad6e49c0c1e52ef2b45987c6080eef19d9f5392881993296a",
+        "E_SERVICE_BOUNDARIES": "d50b2452132d3abb16e56dfc1d1dbbf692efa73f09fcb4261eb8966d40c9fe2a"
+      },
+      "status": "proposed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "These examples show planning and agreement, not measured commercial outcomes."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [],
+      "question_status": "open",
+      "review_question": "Does this describe your contribution?"
+    },
+    {
+      "id": "S_ENTERPRISE",
+      "interpretation": "Transforms engineering organizations at enterprise scale",
+      "evidence_ids": [
+        "E_PLATFORM_ADOPTION",
+        "E_STORY_2"
+      ],
+      "evidence_fingerprints": {
+        "E_PLATFORM_ADOPTION": "168d76dbad2bd8cad6e49c0c1e52ef2b45987c6080eef19d9f5392881993296a",
+        "E_STORY_2": "5c8747a9141ce7a600d0efaf2f3dc79be825161858c6c262fedc6d3797090bef"
+      },
+      "status": "proposed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "Deliberately overbroad proposed interpretation: the record covers a focused engineering group."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [],
+      "question_status": "open",
+      "review_question": "Does this describe your contribution?"
+    }
+  ]
 }

@@ -30,6 +30,13 @@ are observations, not career-completeness or hiring-success scores.
 and macOS with fictional workspaces, plus clean core/add-on installation tests.
 Model calls are never part of the automatic CI job.
 
+The [expanded Jules walkthrough](../examples/first-pack/README.md) provides a
+browsable example of partial acceptance, ownership corrections, duplicate accounts,
+private work, strengths interpretation and later note promotion. Its sources,
+proposals and decisions are authored fixtures. The builder runs the actual tools;
+`tests/test_pack_review.py` checks the saved history and acceptance boundaries.
+This demonstrates the process without measuring extraction or interview quality.
+
 ## Model-driven checks
 
 From the developer checkout, after changes to onboarding or maintenance instructions, run bounded scenarios (the runner builds an isolated core installation when requested):

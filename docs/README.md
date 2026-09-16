@@ -9,8 +9,13 @@ opening the tool to saving and retrieving a useful piece of your career.
 | --- | --- |
 | Choose material for my first pack | [Build my career pack](guided-starts.md) |
 | Capture new work or update existing information | [Keep your career pack current](keep-current.md) |
-| See an example before starting | [Jules's fictional walkthrough](../examples/first-pack/README.md) |
+| Explore a career through review and later updates | [Jules's fictional walkthrough](../examples/first-pack/README.md) |
 | Decide which documents to bring | [Source suggestions](source-intake.md) |
+
+The [Jules browser walkthrough](../examples/first-pack/index.html) follows sixteen
+years across four roles. Compare proposals, ownership corrections, duplicate
+accounts and a later captured note with the saved career record. Open the HTML
+locally; the walkthrough needs no installation or server.
 
 ## Creating documents
 
