@@ -331,9 +331,11 @@ def completed(payload):
 
 def runtime_hashes(root):
     from hashlib import sha256
-    return {str(p.relative_to(root)): sha256(p.read_bytes()).hexdigest()
+    files = [p
             for folder in ('scripts', 'schemas', '.claude', 'docs')
-            for p in sorted((root / folder).rglob('*')) if p.is_file() and '__pycache__' not in p.parts}
+            for p in sorted((root / folder).rglob('*')) if p.is_file() and '__pycache__' not in p.parts]
+    files += [root / name for name in ('CLAUDE.md', 'Makefile') if (root / name).is_file()]
+    return {str(p.relative_to(root)): sha256(p.read_bytes()).hexdigest() for p in files}
 
 
 def run_model(cmd, root, timeout=900):
@@ -390,6 +392,7 @@ def main():
            '--allowedTools', 'Read,Write,Edit,Glob,Grep,Bash(python3 scripts/*),Bash(python3 data/candidates/*),Bash(scripts/extract_text.sh *),Bash(bash scripts/extract_text.sh *)',
            '--max-budget-usd', str(args.budget)]
     snapshot = runtime_hashes(root)
+    provided_sources = source_hashes(root)
     started = time.monotonic()
     payload, diagnostics = run_model(cmd, root)
     recovery = None
@@ -402,6 +405,10 @@ def main():
         result = checks(root, args.scenario, payload)
     except (RuntimeError, ValueError, OSError, KeyError, TypeError) as exc:
         result = [{'check': 'evaluation_completed', 'passed': False, 'detail': str(exc)}]
+    result.append({'check': 'runtime_unchanged', 'passed': runtime_hashes(root) == snapshot})
+    after_sources = source_hashes(root)
+    result.append({'check': 'provided_sources_unchanged',
+                   'passed': all(after_sources.get(path) == digest for path, digest in provided_sources.items())})
     if args.scenario not in ('interview', 'first-pack', *SOURCE_CASES):
         result.append({'check': 'source_pack_unchanged', 'passed': (root / 'data/packs/pack.json').read_bytes() == original_pack})
     if original_artifact is not None:
@@ -412,7 +419,7 @@ def main():
               'permission_denials': payload.get('permission_denials', []), 'diagnostics': diagnostics,
               'termination_subtype': payload.get('subtype'), 'errors': payload.get('errors', []),
               'model_completed': completed(payload), 'recovery': recovery,
-              'prompt': cmd[2], 'runtime_sha256': snapshot,
+              'prompt': cmd[2], 'runtime_sha256': snapshot, 'provided_source_sha256': provided_sources,
               'budget_usd': args.budget, 'source_hashes': source_hashes(root)}
     if args.scenario in SOURCE_CASES:
         expected = json.loads((FIXTURES / SOURCE_CASES[args.scenario] / 'expected.json').read_text())
