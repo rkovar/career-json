@@ -121,14 +121,16 @@ def scan(paths, classifications=None):
                     Path(pending).unlink(missing_ok=True)
             row.update(status='read', character_count=len(text), extracted_text=str(cache.relative_to(ROOT.resolve())))
             if name not in classifications:
-                row['purpose'] = purpose(text)
+                # A quoted hiring phrase or site navigation can occur in a
+                # career article. Hints must never exclude that source.
+                row['purpose_hint'] = purpose(text)
         except (ValueError, OSError, RuntimeError, UnicodeError) as exc:
             row.update(status='unreadable', error=str(exc))
     report = {'intake_id': run, 'created': datetime.now(timezone.utc).isoformat(),
               'scope': [str(p) for p in paths], 'current_pack': str(local(current).relative_to(ROOT.resolve())) if current else None,
               'sources': rows, 'has_new_material': any(row['status'] == 'read' and row['purpose'] not in ('job_context', 'writing_reference') for row in rows), 'counts': dict(Counter(row['status'] for row in rows)),
               'reading_batches': reading_batches(rows),
-              'next': 'Read new extracted text and classify ambiguous material before proposing career facts. Compare with the current pack; preserve conflicts and existing IDs. No career facts have been changed.'}
+              'next': 'Read new extracted text and classify material before proposing career facts. purpose_hint is a suggestion, never an exclusion: inspect the source before supplying its classification. Compare with the current pack; preserve conflicts and existing IDs. No career facts have been changed.'}
     destination = write_new('reviews/intake/' + run + '.json', report)
     return dict(report, report=str(destination.relative_to(ROOT.resolve())))
 

@@ -287,9 +287,27 @@ class CreationTests(unittest.TestCase):
         report = json.loads(self.cli('intake', 'data/sources').stdout)
         self.assertEqual(report['counts'], {'read': 3, 'unreadable': 1, 'duplicate': 1})
         rows = {r['path']: r for r in report['sources']}
-        self.assertEqual(rows['data/sources/guide.md']['purpose'], 'writing_reference')
-        self.assertEqual(rows['data/sources/vacancy.md']['purpose'], 'job_context')
+        self.assertEqual(rows['data/sources/guide.md']['purpose_hint'], 'writing_reference')
+        self.assertEqual(rows['data/sources/vacancy.md']['purpose_hint'], 'job_context')
+        self.assertEqual(rows['data/sources/vacancy.md']['purpose'], 'needs_classification')
         self.assertFalse(list((self.root / 'data/packs').glob('*.json')))
+
+    def test_intake_keyword_hint_cannot_exclude_career_material(self):
+        self.write('data/sources/interview.md', '# An interview with Jules\n'
+                   'Jules described the team she founded: "We are hiring engineers."')
+        report = json.loads(self.cli('intake', 'data/sources/interview.md').stdout)
+        self.assertEqual(report['sources'][0]['purpose_hint'], 'job_context')
+        self.assertEqual(report['sources'][0]['purpose'], 'needs_classification')
+        self.assertTrue(report['has_new_material'])
+        self.put('data/private/classifications.json', {'data/sources/interview.md': 'career_evidence'})
+        reviewed = json.loads(self.cli('intake', 'data/sources/interview.md', '--classifications',
+                                        'data/private/classifications.json').stdout)
+        self.assertEqual(reviewed['sources'][0]['purpose'], 'career_evidence')
+        self.assertEqual(reviewed['sources'][0]['purpose_origin'], 'supplied')
+        self.put('data/private/classifications.json', {'data/sources/interview.md': 'job_context'})
+        excluded = json.loads(self.cli('intake', 'data/sources/interview.md', '--classifications',
+                                        'data/private/classifications.json').stdout)
+        self.assertFalse(excluded['has_new_material'])
 
     def test_intake_keeps_scope_and_does_not_guess_career_facts(self):
         self.write('data/sources/resume.md', 'I worked with colleagues.')

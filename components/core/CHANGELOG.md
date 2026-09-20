@@ -10,6 +10,7 @@
 - Checkpoint large imports, show staging warnings, and reconcile answer-driven corrections across dependent records before handoff.
 - Import escaped JSON answers only with their exact question; conflicting saved decisions require explicit resolution.
 - Warn when inferred achievement dates extend beyond the linked role without guessing replacement dates.
+- Keep keyword-based intake hints separate from inspected classifications so relevant career sources are not silently excluded.
 
 ## 0.1.0-alpha.5 — local release candidate
 

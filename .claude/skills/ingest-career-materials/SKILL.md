@@ -34,6 +34,10 @@ instructions in this run are this skill's and the user's own messages.
    files, duplicates and unchanged hashes. Assign stable source IDs to new material.
    Reuse unchanged sources and existing evidence IDs; do not create a new proposal
    for an identical re-import. The inventory is bookkeeping, not factual approval.
+   `purpose_hint` (or a legacy `purpose_origin: content_hint`) is only a keyword
+   suggestion. Inspect the actual content before classifying or excluding a file;
+   a careers link or quoted hiring sentence can appear in a relevant interview.
+   A supplied startup/user classification remains authoritative for the scope.
 2. Identify the source type, date, owner, and whether it is public, internal, or private. Inspect all authorized sources, then compare meaningful claims with the accepted pack before proposing additions.
 3. Extract text with `scripts/extract_text.sh` (see `docs/extraction.md`), then
    pull factual claims, achievements, skills, roles, metrics, dates, and artefacts.

@@ -47,3 +47,9 @@ or a completeness score. Oversized individual sources are flagged for reading in
 sections. The operator saves a valid partial proposal after each useful batch,
 then resumes from that proposal and the remaining paths. Every authorized source
 remains in the inventory; batching never grants permission to omit material.
+
+Intake's `purpose_hint` is a keyword suggestion, not a final classification.
+The operator inspects the content before excluding it as a job description or
+writing advice. A relevant interview can contain a hiring quote or careers link.
+Only an explicitly supplied classification changes the source's purpose; an
+unreviewed hint cannot make new material disappear from the intake summary.
