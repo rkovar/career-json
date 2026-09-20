@@ -6,6 +6,10 @@ Do not copy real material into tests or examples.
 
 ## Routine checks
 
+The optional public website has a separate build and checks. See
+[website development and publishing](website.md); its Node.js dependency is not
+required for the career tools or their tests.
+
 ```sh
 make test
 make check

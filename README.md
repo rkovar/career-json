@@ -24,7 +24,7 @@ pack holds employment history, achievements, qualifications, publications and
 source references, with optional strengths and preferences. You can build it
 before choosing a target job.
 
-[Start here](#start-here) · [See an example](#see-an-example) · [All guides](docs/README.md)
+[Project website](https://rkovar.github.io/career-json/) · [Start here](#start-here) · [See an example](#see-an-example) · [All guides](docs/README.md)
 
 ## Start here
 

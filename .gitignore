@@ -43,3 +43,6 @@ backups/
 resume_information/
 archive/
 archives/
+
+# Build dependencies for the optional public website.
+site/node_modules/

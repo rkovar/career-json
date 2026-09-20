@@ -1,0 +1,12 @@
+{
+  "name": "career-json-website",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node --test build.test.mjs && npm run build && python3 check_site.py ../dist/site",
+    "preview": "python3 -m http.server 8000 --bind 127.0.0.1 --directory ../dist/site"
+  },
+  "devDependencies": { "markdown-it": "15.0.2" }
+}
