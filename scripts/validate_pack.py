@@ -20,6 +20,14 @@ SCHEMA = ROOT / "schemas" / "career.schema.json"
 SHA256 = re.compile(r"^[a-f0-9]{64}$")
 
 
+def month_bounds(value):
+    """Conservative bounds: a year-only value may mean any month that year."""
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}(?:-(?:0[1-9]|1[0-2]))?", value):
+        return None
+    year, _, month = value.partition('-')
+    return (int(year) * 12 + int(month),) * 2 if month else (int(year) * 12 + 1, int(year) * 12 + 12)
+
+
 def enums(schema):
     atom = schema["$defs"]["evidenceAtom"]["properties"]
     src = schema["$defs"]["sourceRecord"]["properties"]
@@ -92,6 +100,7 @@ def check(path, schema, strict=False, root=ROOT):
 
     # Employment: the facts a background check actually verifies.
     employment_ids = set()
+    employment_by_id = {r.get('employment_id'): r for r in pack.get('employment', [])}
     emp_schema = schema["$defs"]["employmentRecord"]
     for i, rec in enumerate(pack.get("employment", [])):
         eid = rec.get("employment_id") or f"<index {i}>"
@@ -285,6 +294,17 @@ def check(path, schema, strict=False, root=ROOT):
                         continue
                     if not re.match(r"^\d{4}(-\d{2})?$", str(value)):
                         errors.append(f"{where}: occurred.{field} {value!r} must be YYYY or YYYY-MM")
+                # Inherited dates can become stale when a role is corrected.
+                # Warn, never silently rewrite: an event may span several roles.
+                role = employment_by_id.get(eid, {})
+                if occurred.get('inferred') is True and role:
+                    start, end = month_bounds(occurred.get('start')), month_bounds(occurred.get('end'))
+                    role_start, role_end = month_bounds(role.get('start')), month_bounds(role.get('end'))
+                    before = start and role_start and start[1] < role_start[0]
+                    after = role_end and (occurred.get('end') == 'ongoing' or (end and end[0] > role_end[1]))
+                    if before or after:
+                        warnings.append(f"{where}: inferred occurred dates extend outside linked employment {eid}; "
+                                        "reconcile dates or the role link using sources before handoff")
         elif atom.get("evidence_status") != "declined":
             warnings.append(f"{where}: no occurred date, so it cannot be placed in time")
 

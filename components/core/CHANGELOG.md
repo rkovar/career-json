@@ -7,6 +7,9 @@
 - Share current-work and question counts, hide completed work, report repair states, and regenerate saved reading views atomically.
 - Recover interrupted reviews; keep source annotations separate from approval and preserve date uncertainty.
 - Expand fictional source evaluations and PDF/DOCX intake coverage. No accepted pack migration is required.
+- Checkpoint large imports, show staging warnings, and reconcile answer-driven corrections across dependent records before handoff.
+- Import escaped JSON answers only with their exact question; conflicting saved decisions require explicit resolution.
+- Warn when inferred achievement dates extend beyond the linked role without guessing replacement dates.
 
 ## 0.1.0-alpha.5 — local release candidate
 

@@ -62,9 +62,48 @@ approved. Reapplying the same mapping leaves the existing answer in place.
 For JSON ledgers, `question` and `answer` must belong to the same object; escaped
 quotes, Unicode and newlines are decoded before exact comparison. An answer from
 another question is not a match, even if both strings appear elsewhere in the file.
+If that question already has a different answer or a deferred/declined decision,
+the import reports a conflict. Inspect the current revision and its context, then
+use `respond` for an explicitly supplied change; importing does not overwrite it
+or pretend the conflicting answer was saved.
 
 Preserve original markdown logs as history. Resolve short/bulk answers using the
 actual displayed proposal, never the final reference pack as extraction input.
+
+## Reconcile answers before handoff
+
+After each answer-driven update, inspect the affected records together. Before
+the final handoff, review the complete candidate against the supplied answers
+and sources once more. Excerpt verification establishes that quoted text exists;
+it does not establish that the resulting claim means the same thing.
+
+- Apply a correction everywhere it appears: title, STAR wording, metric value
+  and basis, dates, constraints, notes, linked achievements and strengths. A
+  corrected measurement basis does not repair a contradictory result sentence.
+- Recheck inherited achievement dates when a role's dates change. Preserve
+  explicit event dates and their precision; do not replace them with a whole
+  employment window. Split or relink work that spans roles when the sources
+  support it. Validator warnings identify some inferred date conflicts, not
+  every chronology problem.
+- Treat a clear answer to the exact disputed claim as its correction. Preserve
+  the old source and explain the decision, but remove the resolved question.
+  Keep a conflict open only when the answer leaves a real ambiguity. Declined
+  details and optional corroboration are not unresolved factual obligations.
+- Keep preferences within the question's scope. A choice about one publication
+  count is not permission to impose the same presentation choice on all metrics.
+  Store explicit career direction in `positioning_preferences`.
+- Preserve the positive contribution when narrowing ownership, scope or impact.
+  A warning against overclaiming is not a replacement for the supported work.
+  Do not add expansions, causality or STAR details absent from the evidence.
+- Keep historical approvals tied to their exact displayed content. If that
+  context is unavailable, record the gap; never approve reconstructed wording.
+
+Save a compact reconciliation note beside the review: answer/question revision,
+affected record keys, correction applied, and any remaining ambiguity or missing
+context. Review only changed records at each checkpoint; the final pass also
+checks their dependencies. This is an operator assessment, not a new approval
+layer or proof of correctness. Show unresolved accuracy issues in the ordinary
+human review; do not ask the person to repeat answers already available.
 
 ## Reassess strengths after evidence changes
 

@@ -142,6 +142,19 @@ class ProcessTests(unittest.TestCase):
             self.assertEqual(questions.import_answers(mapping, apply, self.root)['entries'][0]['status'], 'needs_mapping')
             self.assertFalse((self.root / 'reviews/questions').exists())
 
+    def test_import_does_not_report_a_conflicting_answer_as_imported(self):
+        row = self.ask('Who delivered it?')
+        questions.respond(row['id'], 1, 'answered', 'The team.', 'Fictional owner', root=self.root)
+        source = self.write('reviews/later.json', [{'question': 'Who delivered it?', 'answer': 'I did it alone.'}])
+        mapping = self.write('data/private/mapping.json', {'answers': [{'question': 'Who delivered it?',
+            'answer': 'I did it alone.', 'targets': [self.target], 'by': 'Fictional owner', 'source': pin(source, self.root)}]})
+        for apply in (False, True):
+            result = questions.import_answers(mapping, apply, self.root)['entries'][0]
+            self.assertEqual(result['status'], 'needs_mapping')
+            self.assertIn('different answer or decision', result['reason'])
+            current, _ = questions.load(row['id'], root=self.root)
+            self.assertEqual((current['revision'], current['answer']), (2, 'The team.'))
+
     def test_invalid_legacy_mapping_is_rejected_in_preview_without_partial_question(self):
         source = self.write('reviews/old.md', 'Who? Team.')
         mapping = self.write('data/private/mapping.json', {'answers': [{'question': 'Who?', 'answer': 'Team.',

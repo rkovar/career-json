@@ -16,12 +16,12 @@ The private reference and its interview transcript are never public test fixture
 | retain-unmeasured-work | operations: Moth; transition: Maple | Dropping a contribution or inventing savings fails. |
 | authorship-roles | early-career: Aster and Sedge | Sole-author mutation fails. |
 | evidence-scope | all five sources are personal accounts | Upgrading them to external verification fails; receipt tests separately verify independent support. |
-| date-precision | transition: year-only dates; operations: conflicting months | Invented months and hidden conflicts fail. |
+| date-precision | transition: year-only dates; operations: conflicting months; run_tests.py | Invented months and hidden conflicts fail. Validator warns on inferred dates outside the linked role, allowing overlapping year precision and unknown role ends. |
 | credential-status | leadership: lapsed licence; collaboration: training | Current certification inflation fails; explicit denial is calibrated. |
 | invention-status | transition: Elm co-invention, unfiled | Sole inventor/granted patent mutation fails. |
 | presentation-preferences | leadership: hands-on work plus leadership | Preference omission is detected separately from achievement presence. |
 | privacy-and-withholding | all profiles; durable deferred/declined questions | New facts stay private; withheld questions do not become required. |
-| answer-context | test_process_state.py; test_career_creation.py | Short answers cannot verify another record; proposal context and stale revision guards persist. |
+| answer-context | test_process_state.py; test_career_creation.py | Short answers cannot verify another record; proposal context and stale revision guards persist. JSON question/answer pairs stay together; conflicting imports cannot silently reuse an old decision. |
 | incremental-import | test_career_creation.py; run_journeys.py | Reimports, later privacy restrictions, corrected wording and unrelated work are preserved. |
 | untrusted-and-targeting-input | early-career footer; collaboration/operations job descriptions | Job-only skills fail; source instructions are treated as data. Inspect the live result for instruction following. |
 | derived-consistency | test_process_state.py; run_journeys.py | Each limitation is reassessed; stale caveat is replaced while residual unknown remains. |

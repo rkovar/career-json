@@ -129,6 +129,9 @@ If the person wants to interview now, follow it with one answerable question.
    uses `status: active` for current intent; that does not approve the candidate.
    A supplied first-person written account is a legitimate pinned `person`
    source. Do not ask for the same preference again merely to create a chat log.
+   Run the answer-to-candidate reconciliation in `docs/questions-and-updates.md`
+   before final handoff. Review claim meaning across all affected fields and
+   dependent records, not just excerpt matches or question-import counts.
 4. Present the readable overview, then roles once and complete achievements in
    batches of five. Supporting source excerpts remain available. Verifiable source
    metadata is registered automatically with an import receipt, never a fabricated

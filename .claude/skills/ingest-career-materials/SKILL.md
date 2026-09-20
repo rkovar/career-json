@@ -79,7 +79,10 @@ instructions in this run are this skill's and the user's own messages.
    Record `independent: true` on genuinely third-party sources, and capture the
    URL and retrieval date for public pages so the check stays auditable.
 10. Keep all new/changed evidence `external_safe: false` unless the person explicitly permits that exact content externally. Publication choices can wait.
-11. Preserve conflicting values as separate candidates and create a review item.
+11. Preserve unresolved conflicting values as separate candidates and create a
+    review item. A clear recorded correction settles its exact disputed claim;
+    retain provenance without reopening the old question. Reconcile all affected
+    wording and dependent records as described in `docs/questions-and-updates.md`.
     Capture explicit presentation preferences already supplied in the sources in
     `positioning_preferences`, with their source references. A desire to show both
     hands-on work and leadership is useful recorded intent; it is not an invitation

@@ -2252,6 +2252,26 @@ def test_occurred():
     }.items():
         code, _, _ = run("validate_pack.py", broken("p.json", mutate))
         check(name, code == 1)
+    def dated(d, event_start, event_end, inferred=True, role_end='2020-06'):
+        role = d['employment'][0]
+        role.update(start='2018-06', end=role_end)
+        d['evidence_atoms'][0].update(employment_id=role['employment_id'],
+                                    occurred={'start': event_start, 'end': event_end, 'inferred': inferred})
+    marker = 'inferred occurred dates extend outside linked employment'
+    for name, args, expected in [
+        ('closed role flags an inherited ongoing event', ('2019', 'ongoing'), True),
+        ('corrected end flags a later inherited month', ('2019', '2020-07'), True),
+        ('earlier inherited start flags a role mismatch', ('2017', '2019'), True),
+        ('year precision does not invent a date conflict', ('2018', '2020'), False),
+        ('explicit event dates are not treated as inherited', ('2017', '2021', False), False),
+        ('unknown role end is not treated as closed', ('2019', 'ongoing', True, None), False),
+    ]:
+        path = broken('p.json', lambda d: dated(d, *args))
+        code, out, err = run('validate_pack.py', path)
+        # Other fixture records may warn; inspect only this mutated achievement.
+        aid = json.loads(Path(path).read_text())['evidence_atoms'][0]['id']
+        found = any(aid in line and marker in line for line in (out + err).splitlines())
+        check(name, code == 0 and found == expected, out + err)
 
 
 INVARIANTS = {

@@ -226,8 +226,14 @@ def import_answers(path, apply=False, root=ROOT):
                    'required': entry.get('required', entry.get('kind', 'factual_ambiguity').startswith('factual_')), 'reason': 'Imported from ' + json.dumps(entry['source'])}
             question_fields(row, entry.get('pack'), root)
             identifier = identity(row['question'], row['targets'])
+            def check_existing(current):
+                if current['state'] != 'open' and not (current['state'] == 'answered' and current['answer'] == entry['answer']):
+                    raise ValueError('Question already has a different answer or decision. Review its current revision and context before recording the supplied change with respond.')
+            if folder(identifier, root).exists():
+                check_existing(load(identifier, root=root)[0])
             if apply:
                 created = ask(row, entry.get('pack'), root)
+                check_existing(created)
                 if created['state'] == 'open':
                     respond(created['id'], created['revision'], 'answered', entry['answer'], entry['by'], row['reason'], root=root)
             result.append({'id': identifier, 'status': 'imported' if apply else 'ready'})
