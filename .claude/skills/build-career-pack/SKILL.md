@@ -101,6 +101,11 @@ If the person wants to interview now, follow it with one answerable question.
    conversation memory until the end. These checkpoints are proposals, never
    accepted packs; finish the authorized inventory before presenting final review.
    Follow the intake report's `reading_batches`; read oversized sources in sections.
+   Keep writes bounded too: derive the next candidate from the saved proposal and
+   apply a small coherent set of record changes, using targeted edits or a short
+   helper script. Do not re-emit every unchanged record in one large model write.
+   Validate and stage each useful batch before continuing. A larger time budget
+   does not replace these checkpoints; resume from the last valid saved batch.
    These are reading limits, not permission to omit later material. Continue from
    the saved proposal and remaining source paths after each checkpoint.
 2. Compare with the current pack; preserve IDs, facts, unknowns and conflicts.
