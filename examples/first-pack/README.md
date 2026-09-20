@@ -85,6 +85,19 @@ The earlier pack versions, original source material and decision files remain
 available. The 35% claim and two unresolved strengths interpretations also remain
 visible in the latest review.
 
+## Return without repeating the interview
+
+The [saved process example](process-habits.json) records an answered coaching
+question and a deferred request for the old speed baseline. Both keep their exact
+question, answer or deferral, and affected records. These are scripted examples.
+
+The follow-up adds qualitative feedback from three managers. The
+[reassessed strength candidate](data/candidates/coaching-reassessed.json) updates
+its caveat while preserving shared ownership and the missing numerical outcome.
+It remains proposed; the accepted career record is unchanged. Repeating intake
+reports unchanged files without another factual approval. The [recovered handoff](outputs/career-handoff.md)
+opens saved work after a simulated interrupted conversation.
+
 ## Reuse the record
 
 The [browser walkthrough](index.html) shows readable results from actual searches:

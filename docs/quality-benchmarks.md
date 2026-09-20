@@ -42,13 +42,15 @@ This demonstrates the process without measuring extraction or interview quality.
 From the developer checkout, after changes to onboarding or maintenance instructions, run bounded scenarios (the runner builds an isolated core installation when requested):
 
 ```sh
-python3 tests/run_editorial_scenarios.py --scenario first-pack --installation core --budget 2 --report /tmp/first-pack.json
-python3 tests/run_editorial_scenarios.py --scenario maintenance --installation core --budget 2 --report /tmp/maintenance.json
-python3 tests/run_editorial_scenarios.py --scenario representation --budget 2 --report /tmp/representation.json
+python3 tests/run_editorial_scenarios.py --scenario first-pack --installation core --budget 6 --report /tmp/first-pack.json
+python3 tests/run_editorial_scenarios.py --scenario maintenance --installation core --budget 6 --report /tmp/maintenance.json
+python3 tests/run_editorial_scenarios.py --scenario representation --budget 6 --report /tmp/representation.json
 ```
 
 Reports retain model usage, cost, permission denials, elapsed time, question count,
-checks, and the response for inspection. A question mark count is a rough diagnostic,
+checks, exact prompt, runtime file hashes, source hashes, completion and the response
+for inspection. Exit status, stderr, termination subtype and partial output survive
+model failure. A recoverable proposal does not make an incomplete run complete. A question mark count is a rough diagnostic,
 not a reliable measure of interview quality. A fixed source pack must remain
 unchanged when the request asks only for a proposal or representation review.
 
@@ -68,6 +70,46 @@ source and final artifact before reading the generator's self-evaluation. Treat
 subjective disagreements as findings to inspect, not numbers to average into a
 claim that a resume will succeed. Automated preservation checks and observed prose
 quality remain separate evidence.
+
+## Source-to-pack preservation
+
+The deterministic journeys start with prepared packs. They test review, persistence
+and recovery; they do not establish that AI extraction preserved the original career.
+From the developer checkout, the separate source scenarios begin with raw fictional
+text documents and no career pack. Separate `test_source_formats.py` fixtures test real PDF, DOCX and saved HTML
+extraction, plus unreadable and empty sources. No OCR service is assumed.
+Expected facts remain outside the workspace seen by the model.
+
+```sh
+python3 tests/test_source_pack_evaluation.py
+python3 tests/run_editorial_scenarios.py --scenario source-collaboration --installation core --budget 6 --report /tmp/source-collaboration.json
+python3 tests/run_editorial_scenarios.py --scenario source-operations --installation core --budget 6 --report /tmp/source-operations.json
+```
+
+The first command is included in `make check` and makes no model calls. It tests
+that the evaluator accepts paraphrases and rejects deliberate factual errors.
+The other commands call the configured Claude service, send the fictional source
+workspace and project instructions, and use configurable $6 headroom in these examples. They are
+opt-in and excluded from CI. A budget or tool failure is a failed run, not evidence
+that ingestion passed.
+
+Five raw-source families cover an individual contributor, operations, an early-career
+researcher, a career transition and senior leadership. They cover shared implementation credit, multiple roles at one employer,
+role dates and achievement links, training versus certification, mentoring,
+prevention without measured savings, employer versus client, conflicting dates,
+duplicate resumes, and job descriptions that must not become personal facts.
+Checks inspect the proposal pinned by the active review, validate its structure
+and excerpts, and verify privacy and expected facts. Readable-page checks use HTML
+structure rather than button labels, and are exercised against the real renderer.
+
+These are bounded pattern and field checks, not a universal semantic judge.
+They may flag valid unfamiliar phrasing or miss an unsupported implication. Each
+report leaves human review questions unanswered: read the actual sources and
+proposal, record a verdict with examples, and resolve disagreements before calling
+a run successful. Passing evaluator calibration is not a live extraction result.
+To add a case, add raw files and independent expectations under
+`tests/fixtures/source-to-pack/`, the runner discovers it automatically. Add both a
+reasonable candidate and deliberate factual mutations to the calibration tests.
 
 ## Resume planning and export comparisons
 
@@ -113,3 +155,14 @@ checkout or matching Resume Application installation. See the add-on's
 `docs/resume-quality.md`, under "Repeatable fictional evaluation set", for
 actual candidate generation, recorded reader judgments and comparison commands.
 The deterministic tests leave unobserved prose quality unmeasured.
+
+## Preservation contract coverage
+
+See [the 20-case coverage map](process-regressions.md) for fictional checks and
+their limits. Calibration accepts supported paraphrases and split claims, and
+rejects deliberately changed scope, ownership, dates and qualifications.
+Run representative live cases three times after instruction changes and retain
+failures as well as passes. These are stability observations, not universal proof.
+Private source-plus-answer reconstruction and exact review replay are separate
+opt-in tests; neither private reference packs nor expected answers enter the
+extraction workspace. Keep private evidence out of public fixtures and commits.

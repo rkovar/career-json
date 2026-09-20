@@ -2,14 +2,14 @@
 
 Career Evidence Core and Resume Application have separate promises, versions and
 release gates. The current local release candidates are **career-core
-0.1.0-alpha.5** (early access) and **career-resume 0.1.0-beta.6** (beta companion).
+0.1.0-alpha.6** (early access) and **career-resume 0.1.0-beta.7** (beta companion).
 These names describe prepared artifacts, not an announcement of publication.
 
 | Responsibility | Career Evidence Core | Resume Application |
 | --- | --- | --- |
 | Durable truth | Sources, STAR atoms, employment, education, evidence status, disclosure rules | References core IDs and exact pack hashes |
 | Career interpretation | Supported strengths, rejected interpretations, future preferences, source answers | Chooses relevant strengths for a document |
-| Workflow | Capture, staged intake, offline human review, recall, correction, versioning, lossless private export | Role analysis, ranking, briefs, selection decisions, tailoring, reviews, rendering |
+| Workflow | Capture, source inventory, grouped human review, local browser saving, recall, correction, versioning, private export | Role analysis, ranking, briefs, selection decisions, tailoring, reviews, rendering |
 | Success | A person can retrieve, understand, correct and reuse their career record | A reader understands the person's relevant, distinctive contribution |
 | Evaluation | Data preservation, provenance, privacy boundaries, usable onboarding across different careers | Grounding, representation, reader assessment and final document layout |
 

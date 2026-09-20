@@ -1,13 +1,13 @@
 {
   "name": "career-resume",
-  "version": "0.1.0-beta.6",
+  "version": "0.1.0-beta.7",
   "channel": "beta",
   "career_schema_versions": [
     "1.3",
     "1.4"
   ],
   "requires": {
-    "career-core": "0.1.0-alpha.5"
+    "career-core": "0.1.0-alpha.6"
   },
   "files": {
     ".claude/skills/evaluate-output/SKILL.md": ".claude/skills/evaluate-output/SKILL.md",
@@ -78,6 +78,26 @@
     "docs/resume-start.md": "docs/resume-start.md",
     "tests/test_resume_startup.py": "tests/test_resume_startup.py",
     "docs/operators/resume-start.md": "docs/operators/resume-start.md",
-    "docs/resume-reference.md": "docs/resume-reference.md"
+    "docs/resume-reference.md": "docs/resume-reference.md",
+    "tests/source_pack_evaluation.py": "tests/source_pack_evaluation.py",
+    "tests/test_source_pack_evaluation.py": "tests/test_source_pack_evaluation.py",
+    "tests/fixtures/source-to-pack/collaboration/expected.json": "tests/fixtures/source-to-pack/collaboration/expected.json",
+    "tests/fixtures/source-to-pack/collaboration/sources/resume-copy.md": "tests/fixtures/source-to-pack/collaboration/sources/resume-copy.md",
+    "tests/fixtures/source-to-pack/collaboration/sources/resume.md": "tests/fixtures/source-to-pack/collaboration/sources/resume.md",
+    "tests/fixtures/source-to-pack/collaboration/sources/role-description.md": "tests/fixtures/source-to-pack/collaboration/sources/role-description.md",
+    "tests/fixtures/source-to-pack/operations/expected.json": "tests/fixtures/source-to-pack/operations/expected.json",
+    "tests/fixtures/source-to-pack/operations/sources/contract-note.md": "tests/fixtures/source-to-pack/operations/sources/contract-note.md",
+    "tests/fixtures/source-to-pack/operations/sources/job-description.md": "tests/fixtures/source-to-pack/operations/sources/job-description.md",
+    "tests/fixtures/source-to-pack/operations/sources/resume-copy.md": "tests/fixtures/source-to-pack/operations/sources/resume-copy.md",
+    "tests/fixtures/source-to-pack/operations/sources/resume.md": "tests/fixtures/source-to-pack/operations/sources/resume.md",
+    "tests/fixtures/source-to-pack/transition/expected.json": "tests/fixtures/source-to-pack/transition/expected.json",
+    "tests/fixtures/source-to-pack/transition/calibration.json": "tests/fixtures/source-to-pack/transition/calibration.json",
+    "tests/fixtures/source-to-pack/transition/sources/career-account.md": "tests/fixtures/source-to-pack/transition/sources/career-account.md",
+    "tests/fixtures/source-to-pack/early-career/expected.json": "tests/fixtures/source-to-pack/early-career/expected.json",
+    "tests/fixtures/source-to-pack/early-career/calibration.json": "tests/fixtures/source-to-pack/early-career/calibration.json",
+    "tests/fixtures/source-to-pack/early-career/sources/career-account.md": "tests/fixtures/source-to-pack/early-career/sources/career-account.md",
+    "tests/fixtures/source-to-pack/leadership/expected.json": "tests/fixtures/source-to-pack/leadership/expected.json",
+    "tests/fixtures/source-to-pack/leadership/calibration.json": "tests/fixtures/source-to-pack/leadership/calibration.json",
+    "tests/fixtures/source-to-pack/leadership/sources/career-account.md": "tests/fixtures/source-to-pack/leadership/sources/career-account.md"
   }
 }

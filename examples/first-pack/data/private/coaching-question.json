@@ -1,0 +1,8 @@
+{
+  "question": "What evidence supports the coaching benefit?",
+  "targets": [
+    "evidence_atoms/E_STORY_2"
+  ],
+  "kind": "enrichment",
+  "required": false
+}

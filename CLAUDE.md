@@ -50,7 +50,7 @@ Create private working directories only when needed. Do not commit raw PII or ge
 
 1. Reuse supplied context or run a resumable startup wizard, then inspect sources and provenance. Distinguish career evidence from job descriptions and writing references.
 2. Extract candidate evidence without upgrading its confidence.
-3. Ask Socratic questions for missing STAR fields, ownership, scope, timeframe, measurement, or corroboration.
+3. Show the proposed record, then ask focused questions only where accuracy or conflicting claims need clarification. Leave optional enrichment for later.
 4. Record answers and unresolved gaps in `reviews/`.
 5. Stage the proposal, present human review, and save only explicitly accepted items in a new datapack version.
 6. Prepare or reuse a durable output brief, scoped selection and resume plan; select complementary evidence for the role and supported strengths.
@@ -98,3 +98,32 @@ Present the private readable review and save only explicit user decisions. Exact
 wording acceptance, evidence confidence and external-use permission are separate.
 The review helper saves accepted local pack versions and preserves deferred items,
 correction notes and omission feedback. Never fill in approvals for the person.
+
+## Career creation and maintenance defaults
+
+Honor the requested source scope; use `career_core.py intake` to inventory it.
+Skip byte-identical sources and compare new material with stable existing IDs.
+Show the full readable proposed career before follow-up questions. Review roles
+once and complete achievements in batches of five, with supporting detail available.
+Use `review open` for the temporary local browser connection, or conversation
+choices through `review apply`. Offline decisions remain supported.
+
+This stdlib loopback review connection is supported; do not add a hosted web app,
+database, model-provider integration or new Python dependency without a request.
+Literal corrections use `review correct`; structural corrections use recorded
+answers and `review revise`. Show revised wording before acceptance and carry
+unchanged approvals. Source registration is never human factual approval.
+
+A useful saved private record is the first milestone. Contact details, strengths,
+publication permissions, richer outcomes and corroboration are optional later work.
+Prioritize factual accuracy and conflicts. `open_questions.py` defaults to that
+queue; use `--optional` for enrichment or `--application` for resume diagnostics.
+Quick capture saves supplied notes without an interview. Keep recurring updates
+short: only review meaningful changes, then show the saved reading view.
+
+
+Use `docs/questions-and-updates.md` for durable scoped questions, strength
+reassessment, shared summary and recovery. Record questions before asking and
+answers before proposing changes. Saved answers are evidence, never automatic
+wording acceptance. Use `career_core.py health --summary --json` for a quick state
+view, `view` for the saved career record and `recover` after interruption.

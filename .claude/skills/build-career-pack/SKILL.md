@@ -12,7 +12,8 @@ applications can reuse it. Resume-specific direction and choices belong in their
 own brief.
 
 Run `ingest-career-materials`, finish the proposal and its readable overview, then
-hand over to `review-evidence`. Do not ask the user to operate the scripts.
+help the person confirm useful work. Use `review-evidence` for specific factual
+uncertainties, not a compulsory interview before the first save. Do not ask the user to operate the scripts.
 
 ## Guided start
 
@@ -50,16 +51,21 @@ prevention or mentoring can be valuable without a fabricated financial outcome.
 
 When the person says “apply my saved review decisions,” use the exact file they
 supplied. Copy it into `data/private/` if needed, then run `career_core.py review
-apply --input <file> --output <new-pack-path>`. The file identifies its session.
+apply --input <file>`. The file identifies its session.
 Never fill in supporting-record approvals yourself. If acceptance is blocked,
-show the relevant role/source/profile records for review, preserve the decisions
+show the relevant unresolved supporting records for review, preserve the decisions
 and explain what remains. Rerender the page after applying decisions.
 
 For “continue my career-pack review,” run `career_core.py review resume`. Use the
 session named in the conversation, or the sole unfinished session. If several
 are plausible, ask which one; do not create another proposal merely to resume.
-Corrections go through recorded answers and a revised candidate with exact wording
-shown again. Reuse unchanged accepted facts and prior answers.
+Use `review open --session <session> --open` for a temporary connected review.
+The page saves directly into the pack and refreshes its readable view. Keep the
+connection alive while the person reviews; offline downloads remain available.
+Literal role/achievement edits use `review correct`; structural corrections use
+recorded answers and `review revise`. Show exact revised wording for confirmation.
+Reuse unchanged decisions with their original receipts and prior answers.
+See `docs/pack-review.md` for these shared browser/conversation operations.
 
 End with the saved roles/achievements, pending corrections/questions and a clear
 stopping point from the review summary. Counts do not establish completeness.
@@ -85,62 +91,75 @@ If the person wants to interview now, follow it with one answerable question.
 
 ## Workflow
 
-1. Run `ingest-career-materials` on sources whose `sha256` does not already match
-   a record in the current pack. Report which sources were skipped as unchanged.
-   Use `scripts/extract_text.sh --record <file>` for text and provenance fields;
-   see `docs/extraction.md`. Do not improvise an extractor, and do not record a
-   file's byte size as its `character_count`.
-2. Identify review questions for every atom that is new, incomplete, vague,
-   inflated, or consequential. Include atoms carried over from earlier runs whose
-   questions are still unanswered. Finish extraction before asking them.
-3. Write the proposed pack to `data/candidates/` and the review record to
-   `reviews/`. Follow `docs/pack-review.md`: stage the candidate and render its
-   offline review page. Never edit a previous pack or make unreviewed extraction
-   current. An accepted version later sets `metadata.supersedes` to its predecessor.
-4. Run `python3 scripts/validate_pack.py <candidate-path>` and fix every error before reporting.
-   When an accepted pack exists, confirm its chain with `python3 scripts/current_pack.py`.
-   Report the warnings; they are the pack's honest weaknesses, not noise.
-5. Collect every question into the queue (`python3 scripts/open_questions.py --pack <candidate-path>`
-   holds it) and do not wait for an answer mid-run: ingestion must finish with
-   the proposed pack written. Then hand over to `review-evidence`, which asks them one at
-   a time. The batch is how questions are *collected*; it is never how they are
-   *asked*.
+1. Run `career_core.py intake <authorized-path>` and `ingest-career-materials`.
+   Inspect all authorized new material before starting review. Report duplicates,
+   unchanged sources and extraction failures. Classify ambiguous text by content;
+   advice and job context never become career facts. Use existing extraction tools.
+   For a large archive, save a valid partial candidate and staged review after the
+   first useful source, then revise it as subsequent batches are inspected. State
+   which sources remain in the handoff. Do not hold the entire reconstruction in
+   conversation memory until the end. These checkpoints are proposals, never
+   accepted packs; finish the authorized inventory before presenting final review.
+2. Compare with the current pack; preserve IDs, facts, unknowns and conflicts.
+   Include supplied presentation preferences in `positioning_preferences`; optional
+   strengths discovery does not mean discarding intent the person already gave.
+   Do not create another proposal when nothing meaningful changed. New notes may
+   remain quick captures until the person wants to review them.
+3. Write the complete proposed pack to `data/candidates/`, validate with
+   `python3 scripts/validate_pack.py <candidate-path>`, and create a default grouped
+   review. Never edit historical packs or make unreviewed extraction current.
+   Before staging, check that every explicit direction, presentation preference
+   and privacy boundary supplied by the person is retained in the appropriate
+   record, not only in metadata or a chat summary. `positioning_preferences`
+   uses `status: active` for current intent; that does not approve the candidate.
+   A supplied first-person written account is a legitimate pinned `person`
+   source. Do not ask for the same preference again merely to create a chat log.
+4. Present the readable overview, then roles once and complete achievements in
+   batches of five. Supporting source excerpts remain available. Verifiable source
+   metadata is registered automatically with an import receipt, never a fabricated
+   user decision. Other source changes remain reviewable.
+5. Save the actual supplied choices and show what is saved versus pending. Source
+   integrity and factual support still matter; optional enrichment must not delay a
+   useful private pack. Accepted versions preserve `metadata.supersedes`.
+6. `python3 scripts/open_questions.py --pack <candidate-path>` collects accuracy
+   questions. Start with consequential uncertainty, conflicts and ownership; allow
+   unknowns and deferrals. The queue is how questions are *collected*, never how they are *asked*.
+   Ask one answerable follow-up at a time only when it helps the requested review.
+   Do not fill atom `open_questions` with optional dates, extra outcomes, metrics
+   or coaching prompts. Store those as `kind: enrichment, required: false` in
+   question history only when useful. Honest unknowns and approximate dates do
+   not need another interview before saving. An explicit presentation preference
+   can be retained as a preference without asking whether it is a factual claim.
 
 ## Durable strengths and direction
 
-After staging the evidence proposal, follow `review-strengths` to prepare supported
-interpretations and their resumable question queue. Ingestion still finishes
-before the interview starts. Offer the strengths interview as normal onboarding;
-a user can pause or skip it and generate from the available evidence. Read
+After saving useful career facts, offer `review-strengths` as an optional later
+conversation. It can prepare supported interpretations and a resumable queue.
+Do not start it automatically or require it before accepting a career record. Read
 `docs/core-workflow.md` for schema 1.4 migration and storage. Preserve existing
 strengths, preferences, rejected interpretations and answer references in every
 new pack version. Changed supporting atoms make interpretations stale until
 reassessed. Never recover factual authority from a previously generated document;
 trace its claims back to source evidence before importing anything new.
 
-## What the questions must cover
+## Accuracy first; enrichment later
 
-Provenance alone is not enough. Every batch must reach for four things:
+Ask about ambiguous ownership, conflicting dates or numbers, and unsupported
+assertions that affect the accuracy of the recorded claim. Distinguish the client
+from the employer_of_record when sources make that ambiguous. Preserve source-grounded
+facts with honest limits. An unknown or unmeasured outcome need not invalidate the
+known contribution. A role can remain a timeline entry with no achievements yet.
 
-0. **Public work, itemised.** If the sources describe speaking, writing, teaching
-   or publishing but yield no `publications` records, or the pack has none at
-   all, ask once for the items (or a catalogue, author archive or speaker
-   profile to extract them from). "None" is a complete answer: record it as a
-   `No publications: <why>` constraint on the achievement so the queue in
-   `open_questions.py`, which raises this on its own, stops asking.
+Use `open_questions.py --optional` only for a requested enrichment pass: additional
+outcomes, missing dates, richer scope, or itemising public work. Extract public-work
+items already present in authorized sources; do not demand an extra catalogue.
+Use `--application` only for target-role or resume questions.
 
-1. **Grounding.** Missing STAR fields, ownership, scope, timeframe, measurement.
-2. **Corroboration is optional and off by default.** Do not ask who would confirm
-   a claim unless the user asks for a corroboration pass. `self_asserted` is the
-   normal resting state for career evidence and is not a defect. Record
-   `corroborators` if the user volunteers one.
-3. **Commercial consequence.** What changed for the organisation beyond the work
-   being done. Set `outcome_type` to `activity`, `output`, or `business_outcome`.
-   Never invent a number to reach `business_outcome`.
-
-Also record `role_fit_notes` where evidence cuts both ways. Reach and speaking
-metrics can establish technical influence, but their relevance depends on the
-target and the rest of the selection. Record context, not a universal penalty.
+**Corroboration is optional and off by default.** `self_asserted` is normal.
+Record volunteered support; do not seek third-party confirmation unless requested.
+Classify known outcomes as activity, output or business_outcome without inventing
+metrics. Commercial consequence, publication permission and role_fit_notes are
+useful when relevant, never first-pack completion requirements.
 
 ## Importing an annual write-up
 
@@ -160,8 +179,8 @@ properties a generic document import does not.
    gives you something better: an inferred nine-year span is barely a date.
 4. **Default `external_safe` to false.** A self-review is written for an employer
    and is full of internal system names, ratings, and org detail. Ask which claims
-   may be used externally rather than assuming, and keep the internal framing out
-   of the atom text.
+   may be used externally only when external use is requested. Preserve useful
+   private details in the pack and keep them out of external projections.
 5. **Sweep the capture notes at the same time.** Run
    `scripts/capture.py --list`: the user is already in a remembering frame of
    mind, which is the cheapest moment all year to promote notes.
@@ -171,8 +190,8 @@ properties a generic document import does not.
 
 ## Contact details
 
-A pack without `private_profile` cannot produce a sendable resume, because
-`make-resume` has no contact block to build. Creating it is part of setup.
+`private_profile` is optional for career capture. Contact details may be needed
+for a later sendable resume; they are not required for saving career facts.
 
 On the first run, extract what the source contains into `private_profile` without
 inventing missing values. Name/location are enough for private career capture;
@@ -185,23 +204,13 @@ document sent to a named recipient, name and location only on anything public.
 
 ## Question policy
 
-- Collect questions once, at the end, into the queue; report how many there are
-  and the top three by what they unlock, then hand over to `review-evidence` to
-  ask them one at a time. Never present the whole list as a numbered batch to
-  be answered.
-- Order by how much each answer would improve future resumes, and say for each
-  question which claim it would unlock and what status that claim has now.
-- Never ask about anything already answered in the pack or a prior review record.
-- Never invent an answer, and never soften a question so a weak claim passes.
-- An unanswered question is not a failure. Record it, set the atom to
-  `unresolved`, and finish the run.
-
-Collecting is right **here** and asking is wrong here. Ingestion must not
-block, so the questions are queued at the end. Working through them is a
-different activity: hand over to `review-evidence`, which asks them one at a
-time, adapts each question to the last answer, and records each answer as it is
-given. Do not attempt that inside this run. `python3 scripts/open_questions.py`
-holds the queue, so nothing is lost between the two.
+- Finish ingestion and the readable proposal before follow-up questions.
+- Prioritize accuracy and conflicts; describe the fact a question would clarify.
+- Never re-ask settled answers or deferrals from the pack or review history.
+- Never invent an answer or soften a question so an unsupported claim passes.
+- Unknown facts can remain open. Mark genuinely uncertain claims `unresolved`;
+  optional missing detail alone does not make known facts false.
+- Stop when useful work has been saved or whenever asked. Preserve pending work.
 
 ## Answering
 
@@ -211,43 +220,16 @@ as `self_asserted`, regardless of how confidently they were given. Promotion to
 `corroborated` needs a named third party or public artefact; promotion to
 `externally_verified` needs that source recorded, per `review-evidence`.
 
-## Readiness
+## Readiness and final report
 
-End every run by stating how ready the career record is for reuse. Resume
-generation is an optional application; a target role is not required:
+End with what was saved, what changed, what remains uncertain and the reading-page
+link. Offer one recall example with its original source. A private pack containing
+self_asserted achievements is useful; no target job, complete profile, financial
+metric, publication permission or strength interpretation is required.
 
-- counts by `evidence_status`
-- how many are `external_safe: true`
-- counts by `outcome_type`, called out plainly if no atom is `business_outcome`
-- employment records, and any with an unknown `end` or an unconfirmed
-  `employer_of_record`
-- publications: how many items are recorded by kind, how many are independently
-  verified, and whether any body of work named in an achievement (talks, books,
-  posts) has no itemised records behind it
-- which unanswered questions would most improve a future resume
-
-Report these plainly. A pack of entirely `self_asserted` atoms is a normal,
-usable pack: say what it contains and move on. Do not editorialise about
-corroboration, and do not run `corroboration_plan.py` unless the user asks for a
-corroboration pass.
-
-The exception is employment. Employers, titles, and dates are what a background
-check actually tests, so flag a missing `end` date or an unconfirmed
-`employer_of_record` even though corroboration generally is optional.
-
-A pack with open questions is usable; describe its limits. When the Resume
-Application is installed, also say whether it is usable for `make-resume` now;
-remaining gaps will produce a narrower resume.
-
-## Final report
-
-1. Sources ingested, and sources skipped as unchanged.
-2. Evidence added or changed, by ID; publications added, by kind and count.
-3. Conflicts preserved, by ID.
-4. Files written.
-5. The question batch.
-6. The readiness statement.
-
+For a broad import, keep the source inventory and detailed validation in the review
+record. Explain actual conflicts and save blockers in conversation. Optional gaps
+can wait. Do not assess resume readiness unless the person requests that output.
 
 ## Human review checkpoint
 
@@ -280,3 +262,13 @@ excerpt mismatches. Never change a quote to pass validation without source suppo
 A status promotion needs the person's separate sourced reassessment decision;
 wording acceptance alone cannot resolve an evidence question or establish
 corroboration. Bind strengths only into `data/candidates/`, then use review.
+
+
+## Durable questions and updates
+
+Follow `docs/questions-and-updates.md` for the shared question, reassessment and
+recovery contract. Save scoped questions before asking and exact answers before
+changing a candidate. Answered, deferred and declined work stays settled; optional
+enrichment does not block saving. Use `health --summary --json` for current work,
+and `career_core.py recover` after interruption. Reassess affected strengths with
+`bind-strength --assessment`; never renew fingerprints alone.

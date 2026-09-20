@@ -50,3 +50,5 @@ commands and safeguards for preserving your choices.
 - [Resume setup](operators/resume-start.md)
 
 For evaluation methods and limits, see [Quality benchmarks](quality-benchmarks.md).
+
+Operator reference: [Questions, saved answers and dependable updates](questions-and-updates.md).

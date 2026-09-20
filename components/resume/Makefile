@@ -7,6 +7,7 @@ records:
 test:
 	@python3 tests/test_resume_startup.py
 	@python3 tests/test_editorial.py
+	@python3 tests/test_source_pack_evaluation.py
 	@python3 tests/test_resume_workflow.py
 	@python3 tests/test_resume_process.py
 	@python3 tests/test_pdf_links.py

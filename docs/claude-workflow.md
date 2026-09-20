@@ -39,10 +39,10 @@ files exclude the internal citations retained in the editable draft and sidecars
 
 ## Review before changes become current
 
-Onboarding writes proposed changes under `data/candidates/` and presents an offline
-HTML review page. The person reviews exact wording and original excerpts, requests
+Onboarding writes proposed changes under `data/candidates/` and presents a readable
+HTML review page, connected locally for direct saves or exported as an offline file. The person reviews exact wording and original excerpts, requests
 corrections, and separately chooses publication permissions. The page shows five
-items at a time, saves portable decisions, and asks about missing or understated
+items at a time, saves confirmed changes and offers portable decisions, and asks about missing or understated
 work. See [the review workflow](pack-review.md) for the complete command sequence.
 
 Import only decisions the person actually supplied. Acceptance creates a new

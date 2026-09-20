@@ -186,8 +186,10 @@ def test_pack_validation():
     code, _, _ = run("validate_pack.py", EXAMPLE)
     check("example pack validates", code == 0)
 
+    code, _, _ = run("validate_pack.py", broken("p.json", lambda d: d.pop("private_profile")))
+    check("career pack can be saved without resume contact details", code == 0)
+
     cases = {
-        "missing private_profile is an error": lambda d: d.pop("private_profile"),
         "missing external_safe is an error": lambda d: d["evidence_atoms"][0].pop("external_safe"),
         "unknown atom field is an error": lambda d: d["evidence_atoms"][0].update({"evidence_stauts": "x"}),
         "bad status enum is an error": lambda d: d["evidence_atoms"][0].update({"evidence_status": "verified"}),
@@ -1643,7 +1645,7 @@ def test_resume_shape_checks():
     screen.update({"artifact": "outputs/good.md", "target_role": "Head of Detection", "verdict": "borderline",
                    "needs_new_evidence": ["A budget figure for the function"], "context": "fresh"})
     (root / "outputs" / "good-screen.json").write_text(json.dumps(screen))
-    code, out, _ = run("open_questions.py", workspace=root)
+    code, out, _ = run("open_questions.py", "--application", workspace=root)
     qs = json.loads(out)["questions"]
     check("a screen's needs-new-evidence entry becomes a queued question",
           any(q["kind"] == "screen_gap" and "budget figure" in q["question"] for q in qs), str([q["kind"] for q in qs]))
@@ -1674,7 +1676,7 @@ def test_link_provenance():
           json.loads(out)["proposed_links_awaiting_confirmation"][0]["id"] == "E_CX_FRAUD_LOSS")
     code, out, _ = run("validate_records.py", role, workspace=root)
     check("validate_records warns on an unconfirmed link", code == 0 and "proposed, not confirmed" in out, out)
-    code, out, _ = run("open_questions.py", workspace=root)
+    code, out, _ = run("open_questions.py", "--application", workspace=root)
     kinds = [q["kind"] for q in json.loads(out)["questions"]]
     check("confirming the link is a queued question", "proposed_link" in kinds, str(kinds))
 
@@ -2367,7 +2369,7 @@ def test_pdf_extraction_failure():
         path.write_text("#!/bin/sh\n" + body + "\n")
         path.chmod(0o755)
     # Deliberately omit pdftotext, independently of what the host has installed.
-    for name in ("mktemp", "cat", "rm"):
+    for name in ("mktemp", "cat", "rm", "mkdir"):
         (root / name).symlink_to(shutil.which(name))
     pdf = root / "source.pdf"
     pdf.write_bytes(b"%PDF-1.4\n")

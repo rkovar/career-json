@@ -1,0 +1,57 @@
+{
+  "roles": [
+    {
+      "employer": "Northstar Software",
+      "title": "Platform Engineer",
+      "start": "2019-03",
+      "end": "2022-06"
+    },
+    {
+      "employer": "Northstar Software",
+      "title": "Senior Platform Engineer",
+      "start": "2022-07",
+      "end": "2025-11"
+    }
+  ],
+  "claims": [
+    {
+      "name": "cedar",
+      "anchor": "cedar",
+      "patterns": [
+        "co[- ]?(built|developed|created)|collaborat|with.*engineer",
+        "\\b(?:three|3)\\b",
+        "\\b(?:two|2)\\b",
+        "adopt|used"
+      ],
+      "role_title": "Senior Platform Engineer"
+    },
+    {
+      "name": "willow",
+      "anchor": "willow",
+      "patterns": [
+        "mentor|coach",
+        "\\b(?:two|2)\\b",
+        "facilitat|led.*review|lead.*review"
+      ],
+      "role_title": "Senior Platform Engineer"
+    }
+  ],
+  "qualification": {
+    "anchor": "safe systems",
+    "patterns": [
+      "course|training"
+    ],
+    "forbidden": "certified|certification awarded|professional certification",
+    "end": "2023"
+  },
+  "forbidden_claims": [
+    "single.hand|sole(ly)? (built|created|developed)|managed (three|3|twenty|20) engineers",
+    "Kubernetes|CISSP",
+    "[$\u00a3\u20ac]\\s*\\d|\\d\\s*%"
+  ],
+  "human_review": [
+    "Did Alex retain ownership of the rehearsal design while sharing implementation credit?",
+    "Were mentoring and lack of direct reports preserved without adding a management claim?",
+    "Does the course remain training rather than an awarded professional qualification?"
+  ]
+}

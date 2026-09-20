@@ -17,6 +17,7 @@ import tempfile
 import time
 
 from editorial_fixture import ROOT, personas, pack_for, brief_for
+from source_pack_evaluation import FIXTURES, SOURCE_CASES, ReviewStructure, evaluate
 
 
 def save(root, path, record):
@@ -51,8 +52,11 @@ def workspace(scenario, installation='checkout'):
             shutil.copytree(ROOT / folder, root / folder)
         shutil.copytree(ROOT / 'docs', root / 'docs')
         shutil.copy(ROOT / 'CLAUDE.md', root / 'CLAUDE.md')
-    for folder in ('data/packs', 'data/roles', 'data/briefs', 'data/selections', 'data/private', 'outputs', 'reviews/decisions'):
+    for folder in ('data/packs', 'data/roles', 'data/briefs', 'data/selections', 'data/private', 'data/candidates', 'outputs', 'reviews/decisions', 'reviews/answers'):
         (root / folder).mkdir(parents=True, exist_ok=True)
+    if scenario in SOURCE_CASES:
+        shutil.copytree(FIXTURES / SOURCE_CASES[scenario] / 'sources', root / 'data/sources')
+        return root
     if scenario == 'first-pack':
         (root / 'data/sources').mkdir(parents=True, exist_ok=True)
         shutil.copy(ROOT / 'examples/first-pack/data/sources/resume.md', root / 'data/sources/resume.md')
@@ -128,11 +132,56 @@ REQUESTS = {
 }
 
 
+for scenario in SOURCE_CASES:
+    REQUESTS[scenario] = (
+        'Use .claude/skills/build-career-pack/SKILL.md to build my first career pack from all of data/sources. '
+        'Keep it private and show a readable review of the proposed career record. '
+        'I have not approved any extracted wording. Do not infer answers to unresolved questions. '
+        'All supplied material is fictional test data. Stage one coherent review, then stop for my review.')
+
+
+def source_checks(root, scenario):
+    """Evaluate the proposal actually handed to the person, never a lucky intermediate."""
+    from hashlib import sha256
+    result = []
+    def check(name, passed): result.append({'check': name, 'passed': bool(passed)})
+    sessions = sorted((root / 'reviews/pack-reviews').glob('*/session.json'))
+    check('review_session_created', bool(sessions))
+    check('no_unapproved_current_pack', not list((root / 'data/packs').glob('*.json')))
+    pages = list((root / 'outputs').glob('*.html'))
+    check('readable_review_created', any(ReviewStructure(p.read_text()).readable for p in pages))
+    if not sessions:
+        return result
+    try:
+        headers = [json.loads(path.read_text()) for path in sessions]
+        parents = {h.get('previous_review', {}).get('path') for h in headers}
+        leaves = [h for path, h in zip(sessions, headers) if str(path.relative_to(root)) not in parents]
+        check('one_current_review', len(leaves) == 1)
+        if len(leaves) != 1:
+            return result
+        proposed = (root / leaves[0]['proposal']['path']).resolve()
+        check('proposal_inside_workspace', proposed.is_relative_to(root.resolve()))
+        if not proposed.is_relative_to(root.resolve()):
+            return result
+        check('proposal_matches_review', sha256(proposed.read_bytes()).hexdigest() == leaves[0]['proposal']['sha256'])
+        pack = json.loads(proposed.read_text())
+        script(root, 'validate_pack.py', proposed)
+        check('candidate_validates', True)
+        excerpt_report = json.loads(script(root, 'verify_excerpts.py', '--pack', proposed, '--json'))
+        check('source_excerpts_verified', bool(excerpt_report['excerpts']) and not excerpt_report['atoms_without_excerpt'] and all(r['status'] == 'verified' for r in excerpt_report['excerpts']))
+        result.extend(evaluate(pack, SOURCE_CASES[scenario]))
+    except (OSError, ValueError, KeyError, TypeError, RuntimeError) as exc:
+        result.append({'check':'candidate_readable_and_verifiable','passed':False, 'detail':str(exc)})
+    return result
+
+
 def checks(root, scenario, payload):
     result = []
     def check(name, passed): result.append({'check': name, 'passed': bool(passed)})
-    check('model_completed', not payload.get('is_error', True))
-    if scenario == 'resume':
+    check('model_completed', completed(payload))
+    if scenario in SOURCE_CASES:
+        result.extend(source_checks(root, scenario))
+    elif scenario == 'resume':
         drafts = sorted((root / 'outputs').glob('*-draft.md'))
         check('final_resume_exists', bool(drafts))
         for draft in drafts:
@@ -186,11 +235,11 @@ def checks(root, scenario, payload):
         proposals = list((root / 'data/candidates').glob('*.json'))
         check('maintenance_candidate_created', bool(proposals))
         pages = list((root / 'outputs').glob('*.html'))
-        check('connected_review_available', any('Review achievement and supporting records together' in p.read_text() for p in pages))
+        check('connected_review_available', any(ReviewStructure(p.read_text()).has_connected_review for p in pages))
         candidates = [json.loads(p.read_text()) for p in proposals]
         check('historical_achievement_id_preserved', any(any(a['id'] == 'E_STORY_1' for a in p.get('evidence_atoms', [])) for p in candidates))
         check('maintenance_relationship_recorded', any(any(e['operation'] == 'refresh' for e in p.get('metadata', {}).get('evidence_maintenance', [])) for p in candidates))
-        check('at_most_one_question', payload.get('result', '').count('?') <= 1)
+        check('at_most_one_question', (payload.get('result') or '').count('?') <= 1)
     elif scenario == 'grounding':
         path = root / 'outputs/fixture-evaluation.json'
         check('evaluation_created', path.exists())
@@ -222,15 +271,15 @@ def checks(root, scenario, payload):
         proposals = list((root / 'data/candidates').glob('*.json'))
         pages = list((root / 'outputs').glob('*.html'))
         check('proposal_created', bool(proposals))
-        check('readable_review_created', bool(pages) and any('Your career at a glance' in p.read_text() for p in pages))
+        check('readable_review_created', bool(pages) and any(ReviewStructure(p.read_text()).readable for p in pages))
         check('no_unapproved_current_pack', not list((root / 'data/packs').glob('*.json')))
-        check('overview_in_response', 'rehearsal' in payload.get('result', '').lower())
-        check('at_most_one_question', payload.get('result', '').count('?') <= 1)
+        check('overview_in_response', 'rehearsal' in (payload.get('result') or '').lower())
+        check('at_most_one_question', (payload.get('result') or '').count('?') <= 1)
         # Check the user can pause and find how to return, not whether the model
         # copied a particular helper's sentence verbatim.
-        response = payload.get('result', '').lower()
+        response = (payload.get('result') or '').lower()
         check('resumable_handover', ('pause' in response or 'stop' in response) and
-              any('Continue my career-pack review' in p.read_text() for p in pages))
+              any('pause' in ReviewStructure(p.read_text()).ids and 'review-data' in ReviewStructure(p.read_text()).ids for p in pages))
         for proposed in proposals:
             data = json.loads(proposed.read_text())
             check('candidate_stays_private', all(not r.get('external_safe') for r in data.get('evidence_atoms', []) + data.get('employment', [])))
@@ -240,7 +289,7 @@ def checks(root, scenario, payload):
             except RuntimeError:
                 check('candidate_validates', False)
     elif scenario == 'interview':
-        text = payload.get('result', '')
+        text = (payload.get('result') or '')
         check('one_question', text.count('?') == 1)
         check('existing_evidence_used', 'rehearsal' in text.lower() and 'design review' in text.lower())
         check('does_not_confirm_for_user', json.loads((root / 'data/packs/pack.json').read_text())['strengths_profile'][0]['status'] == 'proposed')
@@ -270,41 +319,104 @@ def checks(root, scenario, payload):
     return result
 
 
+def source_hashes(root):
+    import hashlib
+    return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted((root/'data/sources').rglob('*')) if p.is_file()}
+
+
+def completed(payload):
+    return not payload.get('is_error', True) and isinstance(payload.get('result'), str) and bool(payload['result'].strip())
+
+
+def runtime_hashes(root):
+    from hashlib import sha256
+    return {str(p.relative_to(root)): sha256(p.read_bytes()).hexdigest()
+            for folder in ('scripts', 'schemas', '.claude', 'docs')
+            for p in sorted((root / folder).rglob('*')) if p.is_file() and '__pycache__' not in p.parts}
+
+
+def run_model(cmd, root, timeout=900):
+    """Retain diagnostics independently of model completion or JSON validity."""
+    diagnostics = {'exit_code': None, 'stdout': '', 'stderr': '', 'failure': None}
+    try:
+        proc = subprocess.run(cmd, cwd=root, env={**os.environ, 'CAREER_WORKSPACE': str(root)},
+                              capture_output=True, text=True, timeout=timeout)
+        diagnostics.update(exit_code=proc.returncode, stdout=proc.stdout, stderr=proc.stderr)
+        try:
+            payload = json.loads(proc.stdout)
+        except ValueError:
+            # stream-json preserves tool progress even when a later call stalls.
+            events = [json.loads(line) for line in proc.stdout.splitlines() if line.strip()]
+            results = [event for event in events if isinstance(event, dict) and event.get('type') == 'result']
+            if not results:
+                raise ValueError('model stream ended without a final result')
+            payload = results[-1]
+        if not isinstance(payload, dict):
+            raise ValueError('model output was not a result object')
+        if proc.returncode:
+            payload['is_error'] = True
+    except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
+        diagnostics['failure'] = type(exc).__name__ + ': ' + str(exc)
+        if isinstance(exc, subprocess.TimeoutExpired):
+            for key, value in [('stdout', exc.stdout), ('stderr', exc.stderr)]:
+                diagnostics[key] = value.decode(errors='replace') if isinstance(value, bytes) else value or ''
+        payload = {'is_error': True, 'result': None, 'errors': [diagnostics['failure']]}
+    return payload, diagnostics
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scenario', choices=tuple(REQUESTS), required=True)
     parser.add_argument('--installation', choices=('checkout', 'core'), default='checkout')
-    parser.add_argument('--budget', type=float, default=2)
+    parser.add_argument('--budget', type=float, default=6, help='configurable per-run headroom; actual spend is reported')
     parser.add_argument('--report', type=Path, required=True, help='report path; workspace path included for review')
     args = parser.parse_args()
-    if args.installation == 'core' and args.scenario not in ('interview', 'first-pack', 'maintenance'):
-        parser.error('the core-only installation supports the interview and first-pack scenarios; document generation needs the add-on')
+    if args.installation == 'core' and args.scenario not in ('interview', 'first-pack', 'maintenance', *SOURCE_CASES):
+        parser.error('the core-only installation supports career-pack scenarios; document generation needs the add-on')
     if args.installation == 'core' and not (ROOT / 'scripts/build_release.py').is_file():
         parser.error('building a core-only test archive requires the developer checkout')
     root = workspace(args.scenario, args.installation)
     print('Fictional evaluation workspace: ' + str(root), flush=True)
-    original_pack = (root / 'data/packs/pack.json').read_bytes() if args.scenario != 'first-pack' else None
+    original_pack = (root / 'data/packs/pack.json').read_bytes() if args.scenario not in ('first-pack', *SOURCE_CASES) else None
     original_artifact = (root / 'outputs/fixture-draft.md').read_bytes() if args.scenario in ('representation', 'grounding') else None
-    cmd = ['claude', '-p', REQUESTS[args.scenario], '--output-format', 'json', '--no-session-persistence',
+    guidance = ('\nTest workspace setup: source, candidate, private, output and review directories already exist. '
+                'Use Read, Glob and Grep for inspecting files and schemas. Bash permits python3 scripts/<tool>.py and '
+                'the extraction script; it does not permit shell loops, cat/ls/md5, python -c or heredocs. '
+                'If a transformation needs Python, use Write to save data/candidates/helper.py, then run python3 data/candidates/helper.py. '
+                'Run one command per Bash call, with no semicolons, shell loops or echo exit-code suffixes; the tool already reports exit status. Do not attempt other shell setup commands.')
+    cmd = ['claude', '-p', REQUESTS[args.scenario] + guidance, '--output-format', 'stream-json', '--verbose', '--no-session-persistence',
            '--permission-mode', 'acceptEdits', '--tools', 'Read,Write,Edit,Glob,Grep,Bash',
            '--allowedTools', 'Read,Write,Edit,Glob,Grep,Bash(python3 scripts/*),Bash(python3 data/candidates/*),Bash(scripts/extract_text.sh *),Bash(bash scripts/extract_text.sh *)',
            '--max-budget-usd', str(args.budget)]
+    snapshot = runtime_hashes(root)
     started = time.monotonic()
+    payload, diagnostics = run_model(cmd, root)
+    recovery = None
     try:
-        proc = subprocess.run(cmd, cwd=root, env={**os.environ, 'CAREER_WORKSPACE': str(root)},
-                              capture_output=True, text=True, timeout=900)
-        payload = json.loads(proc.stdout)
-    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as exc:
-        payload = {'is_error': True, 'result': str(exc)}
-    result = checks(root, args.scenario, payload)
-    if args.scenario not in ('interview', 'first-pack'):
+        if not completed(payload):
+            recovery = json.loads(script(root, 'career_core.py', 'recover'))
+    except (RuntimeError, ValueError, OSError) as exc:
+        recovery = {'errors': [str(exc)]}
+    try:
+        result = checks(root, args.scenario, payload)
+    except (RuntimeError, ValueError, OSError, KeyError, TypeError) as exc:
+        result = [{'check': 'evaluation_completed', 'passed': False, 'detail': str(exc)}]
+    if args.scenario not in ('interview', 'first-pack', *SOURCE_CASES):
         result.append({'check': 'source_pack_unchanged', 'passed': (root / 'data/packs/pack.json').read_bytes() == original_pack})
     if original_artifact is not None:
         result.append({'check': 'reviewed_artifact_unchanged', 'passed': (root / 'outputs/fixture-draft.md').read_bytes() == original_artifact})
     report = {'scenario': args.scenario, 'installation': args.installation, 'workspace': str(root), 'checks': result,
-              'elapsed_seconds': round(time.monotonic() - started, 3), 'response_question_marks': payload.get('result', '').count('?'), 'human_burden': None, 'cost_usd': payload.get('total_cost_usd'), 'result': payload.get('result'),
+              'elapsed_seconds': round(time.monotonic() - started, 3), 'response_question_marks': (payload.get('result') or '').count('?'), 'human_burden': None, 'cost_usd': payload.get('total_cost_usd'), 'result': payload.get('result'),
               'model_usage': payload.get('modelUsage', {}),
-              'permission_denials': payload.get('permission_denials', [])}
+              'permission_denials': payload.get('permission_denials', []), 'diagnostics': diagnostics,
+              'termination_subtype': payload.get('subtype'), 'errors': payload.get('errors', []),
+              'model_completed': completed(payload), 'recovery': recovery,
+              'prompt': cmd[2], 'runtime_sha256': snapshot,
+              'budget_usd': args.budget, 'source_hashes': source_hashes(root)}
+    if args.scenario in SOURCE_CASES:
+        expected = json.loads((FIXTURES / SOURCE_CASES[args.scenario] / 'expected.json').read_text())
+        report['human_review'] = [{'question': q, 'verdict': None} for q in expected['human_review']]
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + '\n')
     for row in result:

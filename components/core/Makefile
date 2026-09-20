@@ -14,7 +14,11 @@ test:
 	@python3 tests/test_career_page.py
 	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
+	@python3 tests/test_process_state.py
+	@python3 tests/test_source_formats.py
 	@python3 tests/test_pack_review.py
+	@python3 tests/test_career_creation.py
+	@python3 tests/test_review_server.py
 	@python3 tests/test_workspace.py
 	@python3 tests/run_journeys.py
 coverage:

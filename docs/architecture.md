@@ -67,7 +67,10 @@ reviews/            source answers and review records. Git ignored
 | --- | --- |
 | `career_core.py` | Core maintenance, candidate strengths queues, private export and review commands |
 | `pack_review.py` | Stages proposals, records human decisions and saves accepted local versions |
-| `review_html.py` / `pack_html.py` | Offline guided proposal review and read-only current-pack overview |
+| `career_intake.py` | Authorized source inventory, hash deduplication and cached text extraction |
+| `career_review.py` / `review_server.py` | Shared save/correction operations and temporary local browser connection |
+| `workspace_setup.py` | New personal workspace from public component allowlists; never copies private data |
+| `review_html.py` / `pack_html.py` | Grouped proposal review (connected or offline) and read-only current-pack overview |
 | `career_page.py` | Private reading view derived only from recorded pack content |
 | `startup.py` / `career_start.py` | Immutable, resumable Core intake sessions; no automatic factual acceptance |
 | `resume_start.py` | Targeting wizard and typed brief handoff; consumes shared startup primitives |
@@ -97,7 +100,7 @@ reviews/            source answers and review records. Git ignored
 | `coverage.py` | Timeline, gaps, undated atoms, stale skills |
 | `role_fit.py` | Coverage against every role profile; corroboration beside it, never gating; names withheld and unresolved evidence |
 | `pack_html.py` | Browsable private view of the whole pack, withheld atoms included. Never sendable |
-| `open_questions.py` | Every outstanding question, ranked by what answering unlocks. `--delta` reports movement resting on no source |
+| `open_questions.py` | Accuracy questions by default; `--optional` adds enrichment, `--application` adds output questions; `--delta` audits source grounding |
 | `corroboration_plan.py` | Optional: what is worth corroborating |
 | `verdict_log.py` | Screen verdicts over time |
 | `artifact_index.py`, `diff_artifact.py` | What exists, and what changed between versions |
@@ -160,7 +163,11 @@ isolated fixture workspace; they are separate from `make check`.
 ## Human review of career data
 
 See [pack review](pack-review.md). Proposed packs stay outside the current-pack
-chain. An offline document presents exact values, sources and before/after changes.
+chain. The review document presents exact values, sources and before/after changes.
+The optional temporary loopback connection calls the same locked save/correction
+operations as the CLI, with origin/token checks and exact-state stale-write protection.
+Literal corrections become person sources and pending proposals; automatic source
+metadata imports carry separate receipts. The default queue groups achievements by role.
 Immutable decision batches bind a person’s choices to the proposal fingerprint;
 only explicitly accepted content and privacy restrictions enter a new pack.
 Human wording review is separate from evidence confidence and publication rights.

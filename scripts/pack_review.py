@@ -31,7 +31,7 @@ def units(pack):
         if field == 'schema_version':
             continue
         if field == 'metadata':
-            value = {k: v for k, v in value.items() if k not in ('supersedes', 'human_review')}
+            value = {k: v for k, v in value.items() if k not in ('supersedes', 'human_review', 'source_imports', 'strength_reassessments')}
             if not value:
                 continue
         if field in COLLECTIONS:
@@ -104,13 +104,13 @@ def validate_pack_object(pack, allow_schema_errors=False):
     return errors
 
 
-def start(candidate_path, review_id):
+def start(candidate_path, review_id, grouped=False):
     from pack_io import workspace_lock
     with workspace_lock():
-        return _start(candidate_path, review_id)
+        return _start(candidate_path, review_id, grouped=grouped)
 
 
-def _start(candidate_path, review_id):
+def _start(candidate_path, review_id, grouped=False):
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', review_id):
         raise ValueError('review id must use letters, numbers, hyphens or underscores')
     candidate_path = local(candidate_path)
@@ -118,6 +118,19 @@ def _start(candidate_path, review_id):
     if local('data/packs') in candidate_path.parents and (base_path is None or candidate_path != local(base_path)):
         raise ValueError('stage proposed packs outside data/packs; that directory is for current/history only')
     proposed = read(candidate_path)
+    if base_path:
+        from career_profile import profile_state
+        base_strengths = {s['id']: s for s in read(base_path).get('strengths_profile', [])}
+        for strength in proposed.get('strengths_profile', []):
+            previous = base_strengths.get(strength['id'])
+            if (previous and profile_state(previous, proposed) in ('stale', 'unsupported') and profile_state(strength, proposed) == 'confirmed'):
+                receipt = proposed.get('metadata', {}).get('strength_reassessments', {}).get(strength['id'], {})
+                if receipt.get('result_sha256') != digest(strength) or pin_errors(receipt.get('assessment', {})):
+                    raise ValueError('Supporting facts changed: reassess the interpretation and limitations with bind-strength before confirming ' + strength['id'])
+    annotations = {}
+    if grouped:
+        from career_review import source_annotations
+        annotations = source_annotations(proposed, read(base_path) if base_path else {})
     warnings = validate_pack_object(proposed, allow_schema_errors=bool(base_path and candidate_path == local(base_path)))
     from verify_excerpts import verify
     source_report = verify(proposed)
@@ -128,6 +141,12 @@ def _start(candidate_path, review_id):
     proposal = write_new(folder / 'proposal.json', proposed)
     session = {'review_id': review_id, 'created': now(), 'proposal': pin(proposal),
                'base': pin(base_path) if base_path else None, 'validation_warnings': warnings}
+    if annotations:
+        session['source_annotations'] = annotations
+    if grouped:
+        from career_review import registered_sources
+        session['review_version'] = 2
+        session['source_imports'] = registered_sources(proposed, read(base_path) if base_path else {})
     return write_new(folder / 'session.json', session)
 
 
@@ -161,13 +180,95 @@ def batches(path):
     return sorted(local(path).parent.glob('decisions/*.json'))
 
 
-def decisions(path):
+def decisions(path, _seen=None):
+    path = local(path)
+    seen = set() if _seen is None else _seen
+    if str(path) in seen:
+        raise ValueError('review history contains a cycle')
+    seen.add(str(path))
+    session, proposed, base = load_session(path)
     result = {}
+    if session.get('previous_review'):
+        errors = pin_errors(session['previous_review'])
+        if errors:
+            raise ValueError('; '.join(errors))
+        inherited = decisions(session['previous_review']['path'], seen)
+        current = set(units(proposed)) | set(units(base))
+        _, _, previous_base = load_session(session['previous_review']['path'])
+        for key, row in inherited.items():
+            if key not in current or row['fingerprint'] != fingerprint(key, proposed):
+                continue
+            receipt = records(base).get(key, {})
+            already_applied = (receipt.get('batch') == row['batch']
+                               and receipt.get('reviewed_fingerprint', receipt.get('fingerprint')) == row['fingerprint']
+                               and receipt.get('fingerprint') == fingerprint(key, base))
+            # Rebase pending choices only when their factual and review baseline
+            # is intact. Receipts catch add-then-remove and privacy-only changes.
+            unchanged_base = (fingerprint(key, base) == fingerprint(key, previous_base)
+                              and units(base).get(key) == units(previous_base).get(key)
+                              and records(base).get(key) == records(previous_base).get(key))
+            if already_applied or unchanged_base:
+                result[key] = row
     for batch_path in batches(path):
         batch = read(batch_path)
         for row in batch['decisions']:
+            prior = result.get(row['key'], {})
+            if prior.get('reviewed_by') == batch['reviewed_by'] and {k: v for k, v in prior.items() if k not in ('reviewed_by', 'recorded', 'batch')} == row:
+                continue  # A repeated browser selection keeps its original approval receipt.
             result[row['key']] = dict(row, reviewed_by=batch['reviewed_by'], recorded=batch['recorded'], batch=pin(batch_path))
     return result
+
+
+def omissions(path, _seen=None):
+    path = local(path)
+    seen = set() if _seen is None else _seen
+    if str(path) in seen:
+        raise ValueError('review history contains a cycle')
+    seen.add(str(path))
+    session, _, _ = load_session(path)
+    result = []
+    if session.get('previous_review'):
+        errors = pin_errors(session['previous_review'])
+        if errors:
+            raise ValueError('; '.join(errors))
+        result = omissions(session['previous_review']['path'], seen)
+    for batch in batches(path):
+        for item in read(batch)['omissions']:
+            if item not in result:
+                result.append(item)
+    return result
+
+
+def publication_warnings(payload, proposed):
+    """Accepting changed content with publication 'unchanged' revokes external use.
+
+    The review page says so on the control itself ("Keep existing permission;
+    changed content stays private"). The JSON contract carries no such label, so
+    an operator recording decisions conversationally gets no warning at all. The
+    basis here must match _publish: it compares against the current pack, not the
+    session base, because that is what acceptance actually reads.
+    """
+    current = resolve()
+    if not current:
+        return []
+    pack = read(current)
+    latest = units(pack)
+    notes = []
+    for row in payload['decisions']:
+        key = row['key']
+        if row['action'] != 'accept' or row['publication'] != 'unchanged':
+            continue
+        before = latest.get(key)
+        if not isinstance(before, dict) or before.get('external_safe') is not True:
+            continue
+        # Mirrors the `unchanged` test in _publish: identical content keeps its
+        # permission, so only a real content change can revoke it.
+        if fingerprint(key, proposed) == fingerprint(key, pack):
+            continue
+        notes.append(key + ' is permitted externally in your current pack, but its content changed. '
+                     "Accepting with publication 'unchanged' keeps the changed content private. "
+                     "Pass publication 'external' to preserve the permission.")
+    return notes
 
 
 def record(path, payload, dry_run=False):
@@ -206,6 +307,8 @@ def _record(path, payload, dry_run=False):
             raise ValueError('this item has no publication permission: ' + key)
     if not payload['reviewed_by'].strip():
         raise ValueError('a reviewer name is required')
+    for note in publication_warnings(payload, proposed):
+        print('warning: ' + note, file=sys.stderr)
     if dry_run:
         return payload
     for previous in batches(path)[-1:]:
@@ -283,6 +386,8 @@ def _publish(path, output=None, preview=False, payload=None):
     latest = read(current) if current else {}
     result = copy.deepcopy(latest)
     result['schema_version'] = proposed['schema_version']
+    if session.get('review_version') == 2:
+        result.setdefault('evidence_atoms', [])
     all_decisions = decisions(path)
     if payload is not None:
         record(path, payload, dry_run=True)
@@ -297,7 +402,8 @@ def _publish(path, output=None, preview=False, payload=None):
             raise ValueError('previously accepted decisions changed; restore the original review record')
     applied_keys = []
     for key, choice in all_decisions.items():
-        if choice['batch'] in applied_before:
+        receipt = records(latest).get(key, {})
+        if (session.get('review_version') != 2 and choice['batch'] in applied_before) or (receipt.get('batch') == choice['batch'] and receipt.get('reviewed_fingerprint', receipt.get('fingerprint')) == choice['fingerprint']):
             continue
         if choice['fingerprint'] != fingerprint(key, proposed):
             raise ValueError('stale acceptance: ' + key)
@@ -321,7 +427,7 @@ def _publish(path, output=None, preview=False, payload=None):
             put_unit(result, key, value, present)
             accepted[key] = choice
             applied_keys.append(key)
-        elif choice['publication'] == 'private' and key in units(result):
+        elif choice['publication'] == 'private' and key in units(result) and units(result)[key].get('external_safe') is not False:
             value = copy.deepcopy(units(result)[key])
             value['external_safe'] = False
             put_unit(result, key, value, True)
@@ -330,6 +436,32 @@ def _publish(path, output=None, preview=False, payload=None):
             raise ValueError('external use requires acceptance of the exact proposed content')
     if not applied_keys:
         raise ValueError('no new accepted changes or privacy restrictions; review progress is already saved')
+    # Register only the source metadata actually needed by accepted facts. The
+    # receipt describes an import, never a human approval or corroboration.
+    if session.get('review_version') == 2:
+        imports = session.get('source_imports', {})
+        for key in accepted:
+            for dep in dependencies(key, proposed):
+                if dep in imports and dep not in units(result):
+                    errors = pin_errors(imports[dep])
+                    if errors:
+                        raise ValueError('; '.join(errors))
+                    put_unit(result, dep, proposed_units[dep], True)
+                    result.setdefault('metadata', {}).setdefault('source_imports', {})[dep] = {
+                        'kind': 'source_registration', 'file': imports[dep], 'session': pin(path)}
+    if session.get('review_version') == 2:
+        # Leave unsupported selections pending while saving unrelated reviewed
+        # work. Iterate because an achievement may depend on a deferred role.
+        while True:
+            blocked = [key for key in accepted if dependencies(key, proposed) != dependencies(key, result)]
+            if not blocked:
+                break
+            for key in blocked:
+                put_unit(result, key, units(latest).get(key), key in units(latest))
+                del accepted[key]
+                applied_keys.remove(key)
+        if not applied_keys:
+            raise ValueError('accept the supporting sources/roles/evidence first; your choices are saved and remain pending')
     old_events = (base.get('metadata') or {}).get('evidence_maintenance', [])
     for event in (proposed.get('metadata') or {}).get('evidence_maintenance', []):
         if event in old_events:
@@ -346,6 +478,12 @@ def _publish(path, output=None, preview=False, payload=None):
         if not key.startswith('strengths_profile/') and key in units(result) and key not in accepted and dependencies(key, latest) != dependencies(key, result):
             raise ValueError('support changed; review the affected item before accepting its source: ' + key)
     metadata = result.setdefault('metadata', {})
+    for key in accepted:
+        if key.startswith('strengths_profile/'):
+            sid = key.split('/', 1)[1]
+            assessment = proposed.get('metadata', {}).get('strength_reassessments', {}).get(sid)
+            if assessment:
+                metadata.setdefault('strength_reassessments', {})[sid] = assessment
     if current:
         metadata['supersedes'] = str(local(current).relative_to(ROOT.resolve()))
     else:
@@ -355,7 +493,7 @@ def _publish(path, output=None, preview=False, payload=None):
         receipts[key] = {'fingerprint': fingerprint(key, result), 'reviewed_fingerprint': choice['fingerprint'],
                          'reviewed_by': choice['reviewed_by'], 'recorded': choice['recorded'], 'batch': choice['batch']}
     metadata['human_review'] = {'session': pin(path), 'items': receipts,
-                                'applied_batches': [pin(p) for p in batches(path)], 'accepted_at': now()}
+                                'applied_batches': list({r['path']: r for r in applied_before + [c['batch'] for c in all_decisions.values()]}.values()), 'accepted_at': now()}
     validate_pack_object(result)
     from verify_excerpts import verify
     verification = verify(result)
@@ -380,18 +518,26 @@ def status(path):
         if row['key'] in choices:
             choice = choices[row['key']]
             row['decision'] = choice
-            if choice['action'] == 'accept' and choice['batch'] in applied:
+            receipt = records(read(current)).get(row['key'], {}) if current else {}
+            if choice['action'] == 'accept' and receipt.get('batch') == choice['batch'] and receipt.get('reviewed_fingerprint', receipt.get('fingerprint')) == choice['fingerprint']:
                 row['review_status'] = review_status(row['key'], read(current))
-    feedback = [item for p in batches(path) for item in read(p)['omissions']]
+    feedback = omissions(path)
     latest = read(current) if current else {}
-    pending = [r for r in rows if r['review_status'] != 'accepted']
+    for row in rows:
+        row['source_registration'] = row['key'] in session.get('source_imports', {})
+        if row['source_registration'] and units(latest).get(row['key']) == row['after']:
+            row['review_status'] = 'registered'
+    pending = [r for r in rows if r['review_status'] not in ('accepted', 'registered') and not r['source_registration']]
+    from career_state import question_summary
+    questions = question_summary(proposed)
     summary = {
         'current_pack': str(local(current).relative_to(ROOT.resolve())) if current else None,
         'saved_roles': len(latest.get('employment', [])),
         'saved_achievements': len(latest.get('evidence_atoms', [])),
-        'reviewed_items': len(rows) - len(pending), 'pending_items': len(pending),
+        'reviewed_items': sum(r['review_status'] == 'accepted' for r in rows), 'pending_items': len(pending),
         'corrections': sum(r.get('decision', {}).get('action') == 'correct' for r in pending),
-        'questions': sum(len(a.get('open_questions') or []) for a in proposed.get('evidence_atoms', [])),
+        'questions': questions['required'], 'optional_questions': questions['optional'],
+        'deferred_questions': questions['deferred'], 'question_state': questions,
         'next_items': [{'key': r['key'], 'action': r.get('decision', {}).get('action', 'review')} for r in pending],
         'stopping_point': ('Your saved career record is available for recall. You can stop here and return to pending items later.'
                            if latest.get('evidence_atoms') else
@@ -408,24 +554,67 @@ def status(path):
     return {'session': session, 'items': rows, 'omissions': feedback, 'summary': summary, 'groups': groups}
 
 
-def resume(path=None):
-    """Discover sessions without guessing which pending decisions to apply."""
+def session_catalog(root=ROOT):
+    """Discover review lineages; follow only intact, canonical parent pins."""
+    root = Path(root).resolve()
+    rows = {}
+    for path in sorted((root / 'reviews/pack-reviews').glob('*/session.json')):
+        relative = str(path.relative_to(root))
+        try:
+            session = read(path, root)
+            rid = session['review_id']
+            if rid != path.parent.name or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', rid):
+                raise ValueError('invalid review name')
+            rows[relative] = {'path': relative, 'review_id': rid, 'created': session.get('created', ''),
+                              'label': rid, 'previous_review': session.get('previous_review'), 'superseded_by': []}
+        except (ValueError, KeyError, TypeError, OSError) as exc:
+            rows[relative] = {'path': relative, 'created': '', 'error': str(exc), 'superseded_by': []}
+    for row in rows.values():
+        chain, cursor = [], row
+        try:
+            while cursor.get('previous_review'):
+                previous = cursor['previous_review']
+                if pin_errors(previous, root) or previous['path'] not in rows:
+                    raise ValueError('review history has a missing or changed predecessor')
+                parent = rows[previous['path']]
+                if parent is row or parent['path'] in chain or 'error' in parent:
+                    raise ValueError('review history is invalid or cyclic')
+                chain.append(parent['path'])
+                cursor = parent
+            if chain:
+                row['label'] = cursor['review_id']
+        except (ValueError, KeyError, TypeError, OSError) as exc:
+            row['error'] = str(exc)
+    for row in rows.values():
+        if row.get('previous_review') and 'error' not in row:
+            rows[row['previous_review']['path']]['superseded_by'].append(row['review_id'])
+    leaves = [r for r in rows.values() if not r['superseded_by'] and 'error' not in r]
+    label_counts = {row['label']: sum(other['label'] == row['label'] for other in leaves) for row in leaves}
+    for row in leaves:
+        if label_counts[row['label']] > 1:
+            row['label'] += ' (' + row['review_id'] + ')'
+    return sorted(rows.values(), key=lambda row: row['created'], reverse=True)
+
+
+def resume(path=None, history=False):
+    """Offer current revisions while keeping older proposals discoverable."""
     if path:
         return status(path)
     sessions = []
-    for candidate in local('reviews/pack-reviews').glob('*/session.json'):
+    for row in session_catalog():
+        if row['superseded_by'] and not history:
+            continue
         try:
-            state = status(candidate)
-            sessions.append({'path': str(candidate.relative_to(ROOT.resolve())),
-                             'review_id': state['session']['review_id'],
-                             'created': state['session']['created'], 'summary': state['summary']})
+            if 'error' not in row:
+                row['summary'] = status(row['path'])['summary']
         except (ValueError, KeyError, OSError) as exc:
-            sessions.append({'path': str(candidate.relative_to(ROOT.resolve())), 'error': str(exc), 'created': ''})
-    return {'sessions': sorted(sessions, key=lambda row: row['created'], reverse=True),
-            'instruction': 'Resume the session named in the conversation. If several are pending and the intent is unclear, ask which one; never infer approval.'}
+            row['error'] = str(exc)
+        sessions.append(row)
+    return {'sessions': sessions,
+            'instruction': 'Resume the named current review. Use --history to inspect earlier revisions. If several independent reviews are pending, ask which one; never infer approval.'}
 
 
-def handover(path, page):
+def handover(path, page, connected=False):
     """Give the conversational operator a concise, directly grounded handover."""
     state = status(path)
     page = local(page)
@@ -438,7 +627,8 @@ def handover(path, page):
     roles = [r['after'] for r in state['items'] if r['key'].startswith('employment/') and r['after']]
     atoms = [r['after'] for r in state['items'] if r['key'].startswith('evidence_atoms/') and r['after']]
     for role in sorted(roles, key=lambda r: r.get('start') or '', reverse=True)[:2]:
-        lines.append(f"- **{role['title']} — {role['employer']}**: {role.get('start') or 'start not recorded'} to {role.get('end') or 'end not recorded'}.")
+        from career_state import dates
+        lines.append(f"- **{role['title']} — {role['employer']}**: {dates(role)}.")
     for atom in atoms[:2]:
         star = atom.get('star') or {}
         lines.append(f"- **{atom['title']}**: {star.get('action') or 'Contribution needs clarification.'} {star.get('result') or 'Outcome not yet recorded.'}")
@@ -446,8 +636,9 @@ def handover(path, page):
     lines.extend(['', 'Your current pack contains ' + count(summary['saved_roles'], 'role') + ' and ' + count(summary['saved_achievements'], 'achievement') + '. '
                   + count(summary['pending_items'], 'review item') + ' still to review, including ' + count(summary['corrections'], 'correction request') + '.',
                   '', summary['stopping_point'], '',
-                  'To save browser choices, say **“Apply my saved review decisions”** and give the downloaded file location. '
-                  'To return, say **“Continue my career-pack review named ' + json.dumps(state['session']['review_id']) + '.”**'])
+                  ('Use **Save reviewed changes** in the connected review. ' if connected else
+                   'This is an offline review: download decisions, then say **“Apply my saved review decisions”** and give the downloaded file location. ')
+                  + 'To return, say **“Continue my career-pack review named ' + json.dumps(state['session']['review_id']) + '.”**'])
     if summary['recall_prompt']:
         lines.extend(['', 'Try your saved record: **“' + summary['recall_prompt'] + '”**'])
     return '\n'.join(lines) + '\n'
@@ -460,34 +651,40 @@ def apply_decisions(input_path, output):
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', review_id):
         raise ValueError('invalid review id in decisions file')
     path = local('reviews/pack-reviews/' + review_id + '/session.json')
-    record(path, payload)
-    saved = None
-    blocked = None
-    try:
-        saved = publish(path, output)
-    except ValueError as exc:
-        if not str(exc).startswith('no new accepted changes or privacy restrictions'):
-            blocked = str(exc)
-    state = status(path)
-    state['saved_pack'] = str(saved.relative_to(ROOT.resolve())) if saved else None
-    state['save_blocked'] = blocked
-    return state
+    from career_review import save
+    return save(path, payload, output=output)
 
 
 def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'open':
+        from review_server import main as open_review
+        return open_review(argv[1:])
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('open', help='open a temporary local browser review with direct saving')
     begin = commands.add_parser('start')
     begin.add_argument('--candidate', required=True)
     begin.add_argument('--id', required=True)
+    begin.add_argument('--grouped', action='store_true', default=True, help='achievement review with automatic verified source registration (default)')
+    begin.add_argument('--records', dest='grouped', action='store_false', help='legacy record-by-record review')
+    revision = commands.add_parser('revise', help='stage corrected wording and keep unchanged decisions')
+    revision.add_argument('--session', required=True)
+    revision.add_argument('--candidate', required=True)
+    revision.add_argument('--id', required=True)
+    correction = commands.add_parser('correct', help='stage exact user edits for confirmation; never accepts them')
+    correction.add_argument('--session', required=True)
+    correction.add_argument('--input', required=True, help='JSON with decisions and edits supplied by the person')
     continuation = commands.add_parser('resume', help='find saved reviews or show a named review')
     continuation.add_argument('--session')
+    continuation.add_argument('--history', action='store_true', help='include superseded review revisions')
     handoff = commands.add_parser('handover', help='short readable first-session or return summary')
     handoff.add_argument('--session', required=True)
     handoff.add_argument('--page', required=True)
+    handoff.add_argument('--connected', action='store_true', help='use only while the local review connection is running')
     apply = commands.add_parser('apply', help='import user decisions and save accepted items locally')
     apply.add_argument('--input', required=True)
-    apply.add_argument('--output', required=True)
+    apply.add_argument('--output')
     for name in ('status', 'record', 'publish', 'accept', 'render', 'preview'):
         sub = commands.add_parser(name)
         sub.add_argument('--session', required=True)
@@ -500,7 +697,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.command == 'start':
-            result = start(args.candidate, args.id)
+            result = start(args.candidate, args.id, grouped=args.grouped)
+        elif args.command == 'revise':
+            from career_review import revise
+            result = revise(args.session, args.candidate, args.id)
+        elif args.command == 'correct':
+            from career_review import correct
+            payload = read(args.input)
+            result = correct(args.session, payload['decisions'], payload['edits'])
         elif args.command == 'record':
             result = record(args.session, read(args.input))
         elif args.command in ('publish', 'accept'):
@@ -509,10 +713,10 @@ def main(argv=None):
             print(json.dumps(publish(args.session, preview=True, payload=read(args.input) if args.input else None), indent=2))
             return 0
         elif args.command == 'resume':
-            print(json.dumps(resume(args.session), indent=2))
+            print(json.dumps(resume(args.session, history=args.history), indent=2))
             return 0
         elif args.command == 'handover':
-            print(handover(args.session, args.page), end='')
+            print(handover(args.session, args.page, connected=args.connected), end='')
             return 0
         elif args.command == 'apply':
             result = apply_decisions(args.input, args.output)
@@ -521,14 +725,17 @@ def main(argv=None):
         elif args.command == 'render':
             from review_html import render_review
             result = local(args.output)
-            result.parent.mkdir(parents=True, exist_ok=True)
-            result.write_text(render_review(status(args.session)), encoding='utf-8')
+            from pack_io import write_view
+            write_view(result, render_review(status(args.session)))
         else:
             print(json.dumps(status(args.session), indent=2))
             return 0
         print(str(result.relative_to(ROOT.resolve())))
         if args.command == 'render':
-            print(handover(args.session, result), end='')
+            handoff = handover(args.session, result)
+            from pack_io import write_view
+            write_view(result.with_name(result.stem + '-handoff.md'), handoff)
+            print(handoff, end='')
         return 0
     except (ValueError, KeyError, OSError) as exc:
         print('error: ' + str(exc), file=sys.stderr)

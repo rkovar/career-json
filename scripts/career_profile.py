@@ -11,6 +11,41 @@ def atoms_by_id(pack):
     return {a['id']: a for a in pack.get('evidence_atoms', [])}
 
 
+def reassess_strength(strength, pack, assessment):
+    """Require a concrete narrative reassessment, not a fingerprint-only refresh.
+
+    This records the operator's reasoning; it does not prove prose entailment or
+    confer human approval. The resulting proposal still needs ordinary review.
+    """
+    atoms = atoms_by_id(pack)
+    support = {i: digest(atoms[i]) for i in strength['evidence_ids']}
+    if assessment.get('strength_sha256') != digest(strength) or assessment.get('support') != support:
+        raise ValueError('reassessment does not match the current strength and supporting facts')
+    if not isinstance(assessment.get('interpretation'), str) or not assessment['interpretation'].strip() or not assessment.get('reason', '').strip():
+        raise ValueError('reassessment needs the resulting interpretation and its reason')
+    originals = strength.get('limitations', [])
+    covered, limitations = set(), []
+    for row in assessment.get('limitations', []):
+        index, action = row.get('index'), row.get('action')
+        if not row.get('reason', '').strip() or action not in ('retain', 'remove', 'replace', 'add'):
+            raise ValueError('explain whether each limitation is retained, removed, replaced or added')
+        if action != 'add':
+            if type(index) is not int or not 0 <= index < len(originals) or index in covered:
+                raise ValueError('reassessment has a missing, repeated or invalid limitation index')
+            covered.add(index)
+        elif index is not None:
+            raise ValueError('new limitations have no previous index')
+        if action == 'retain': limitations.append(originals[index])
+        elif action in ('replace', 'add'):
+            if not isinstance(row.get('text'), str) or not row['text'].strip():
+                raise ValueError('supply the resulting limitation wording')
+            limitations.append(row['text'])
+    if covered != set(range(len(originals))):
+        raise ValueError('reassess every prior limitation; do not silently drop one')
+    strength.update(interpretation=assessment['interpretation'], limitations=limitations, evidence_fingerprints=support)
+    return {'result_sha256': digest(strength), 'support': support, 'reason': assessment['reason']}
+
+
 def profile_state(strength, pack):
     atoms = atoms_by_id(pack)
     ids = strength.get('evidence_ids', [])

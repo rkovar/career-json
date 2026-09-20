@@ -37,6 +37,7 @@ class PackReviewTests(unittest.TestCase):
         p=self.root/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(value));return p
 
     def cli(self,*args,success=True):
+        if args and args[0] == 'start': args = (*args, '--records')
         r=subprocess.run([sys.executable,str(ROOT/'scripts/pack_review.py'),*args],cwd=self.root,
                          env={**os.environ,'CAREER_WORKSPACE':str(self.root)},text=True,capture_output=True)
         if success:self.assertEqual(r.returncode,0,r.stdout+r.stderr)
@@ -62,6 +63,62 @@ class PackReviewTests(unittest.TestCase):
     def publish(self,name='accepted',success=True):
         self.cli('publish','--session',self.session,'--output',f'data/packs/{name}.json',success=success)
         return json.loads((self.root/f'data/packs/{name}.json').read_text()) if success else None
+
+    def permit_first_atom(self):
+        """The current pack already allows this atom externally; the proposal changes its wording."""
+        self.pack['evidence_atoms'][0]['external_safe']=True
+        self.put('data/packs/base.json',self.pack)
+        self.proposed['evidence_atoms'][0]['external_safe']=True
+
+    def test_accepting_changed_content_unchanged_revokes_external_use_and_warns(self):
+        self.permit_first_atom()
+        self.start()
+        s=json.loads((self.root/self.session).read_text())
+        payload={'review_id':'check','proposal_sha256':s['proposal']['sha256'],'reviewed_by':'Fictional Person',
+                 'decisions':[{'key':'evidence_atoms/E_STORY_1','fingerprint':fingerprint('evidence_atoms/E_STORY_1',self.proposed),
+                               'action':'accept','publication':'unchanged','note':''}],'omissions':[]}
+        self.put('reviews/choices.json',payload)
+        result=self.cli('record','--session',self.session,'--input','reviews/choices.json')
+        self.assertIn('evidence_atoms/E_STORY_1',result.stderr)
+        self.assertIn("publication 'unchanged'",result.stderr)
+        self.assertIn("'external' to preserve",result.stderr)
+        # The warning describes real behaviour: the permission is genuinely lost.
+        self.assertFalse(self.publish()['evidence_atoms'][0]['external_safe'])
+
+    def test_explicit_external_preserves_permission_without_warning(self):
+        self.permit_first_atom()
+        self.start()
+        s=json.loads((self.root/self.session).read_text())
+        payload={'review_id':'check','proposal_sha256':s['proposal']['sha256'],'reviewed_by':'Fictional Person',
+                 'decisions':[{'key':'evidence_atoms/E_STORY_1','fingerprint':fingerprint('evidence_atoms/E_STORY_1',self.proposed),
+                               'action':'accept','publication':'external','note':''}],'omissions':[]}
+        self.put('reviews/choices.json',payload)
+        result=self.cli('record','--session',self.session,'--input','reviews/choices.json')
+        self.assertNotIn('warning:',result.stderr)
+        self.assertTrue(self.publish()['evidence_atoms'][0]['external_safe'])
+
+    def test_unpermitted_item_does_not_warn(self):
+        """E_PRIVATE is external_safe False, so there is no permission to lose."""
+        self.proposed['evidence_atoms'][2]['star']['action']+='; clarified scope'
+        self.start()
+        s=json.loads((self.root/self.session).read_text())
+        payload={'review_id':'check','proposal_sha256':s['proposal']['sha256'],'reviewed_by':'Fictional Person',
+                 'decisions':[{'key':'evidence_atoms/E_PRIVATE','fingerprint':fingerprint('evidence_atoms/E_PRIVATE',self.proposed),
+                               'action':'accept','publication':'unchanged','note':''}],'omissions':[]}
+        self.put('reviews/choices.json',payload)
+        self.assertNotIn('warning:',self.cli('record','--session',self.session,'--input','reviews/choices.json').stderr)
+
+    def test_unchanged_content_keeps_permission_without_warning(self):
+        """Identical content keeps its permission, so nothing is revoked and nothing is flagged."""
+        self.proposed['evidence_atoms'][0]['star']=copy.deepcopy(self.pack['evidence_atoms'][0]['star'])
+        self.proposed['evidence_atoms'][1]['star']['action']+='; unrelated edit'
+        self.start()
+        s=json.loads((self.root/self.session).read_text())
+        payload={'review_id':'check','proposal_sha256':s['proposal']['sha256'],'reviewed_by':'Fictional Person',
+                 'decisions':[{'key':'evidence_atoms/E_STORY_2','fingerprint':fingerprint('evidence_atoms/E_STORY_2',self.proposed),
+                               'action':'accept','publication':'external','note':''}],'omissions':[]}
+        self.put('reviews/choices.json',payload)
+        self.assertNotIn('warning:',self.cli('record','--session',self.session,'--input','reviews/choices.json').stderr)
 
     def test_staging_never_changes_current_pack(self):
         before=(self.root/'data/packs/base.json').read_bytes()
@@ -296,7 +353,7 @@ class PackReviewTests(unittest.TestCase):
     def test_overview_precedes_decisions_and_contributions_precede_metadata(self):
         self.start();self.cli('render','--session',self.session,'--output','outputs/review.html')
         text=(self.root/'outputs/review.html').read_text()
-        self.assertLess(text.index('Your career at a glance'),text.index('What your choices mean'))
+        self.assertLess(text.index('Your proposed career record'),text.index('What your choices mean'))
         self.assertLess(text.index('data-group="evidence_atoms"'),text.index('data-group="field"'))
         for value in ('A useful place to stop','Save my review and pause','Continue my career-pack review',
                       'All career sections','External use (optional'):

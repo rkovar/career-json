@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "q-ebd6d2dabcbbf078fb1e",
+  "revision": 2,
+  "previous": {
+    "path": "reviews/questions/q-ebd6d2dabcbbf078fb1e/000001.json",
+    "sha256": "c86051599559b8831f10bfa10517cef38dedf46789cd85439dc50f7c3d6f831b"
+  },
+  "question": "Can we recover the baseline for the old speed estimate?",
+  "targets": [
+    "evidence_atoms/E_REVIEW_SPEED"
+  ],
+  "kind": "enrichment",
+  "required": false,
+  "state": "deferred",
+  "context": {
+    "pack": {
+      "path": "reviews/questions/q-ebd6d2dabcbbf078fb1e/context.json",
+      "sha256": "8dca094786ea080443cb2128451e25aa3b4031a3448c2c112c84d86eaa5a1332"
+    },
+    "fingerprints": {
+      "evidence_atoms/E_REVIEW_SPEED": "43fa9716f0640bd4cdcb1023da9b6a4ae4b962d5e9f92b4f91ac6a9bdc8c4c22"
+    },
+    "original_pack_path": "data/candidates/update.json"
+  },
+  "answer": null,
+  "by": "Jules Elm (scripted example)",
+  "reason": "Do not ask again without new source material.",
+  "revisit_when": "The original measurement record becomes available.",
+  "recorded_at": "2026-09-20T11:10:18.719581+00:00"
+}

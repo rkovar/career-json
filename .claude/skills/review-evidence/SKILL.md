@@ -7,13 +7,15 @@ description: "Called by `build-career-pack`, which is the normal entry point. Us
 
 ## Goal
 
-Improve the truth and the commercial usefulness of a claim without supplying
-invented answers. A claim that is true but unpersuasive has failed, and so has a
-claim that is persuasive but cannot be defended in an interview.
+Improve the accuracy and retrievability of the career record without supplying
+invented answers. A useful private record preserves contributions, shared ownership,
+source support and unknowns. Persuasiveness for an application is a later concern.
 
 ## Questions
 
-Ask only the questions needed to resolve the claim.
+Ask only questions needed to resolve consequential factual uncertainty. Show the
+readable proposed record first and save useful confirmed work before offering
+optional enrichment. Missing contact details or a financial outcome do not block capture.
 
 ### Grounding
 
@@ -32,15 +34,14 @@ questions in a normal review, and never treat an empty `corroborators` array as 
 finding. Most claims will stay `self_asserted`, and that is the expected resting
 state, not a deficiency.
 
-Ask only when the user requests a corroboration pass, or when a claim is both
-consequential and cheap to check:
+Ask only when the user requests a corroboration pass:
 
 - Is there a public artefact, record, or system that already shows this?
 - Who, by role, would confirm it, if you happen to know?
 
 Record answers in `corroborators` when they arrive. Never chase them.
 
-### Commercial consequence
+### Commercial consequence (optional enrichment)
 
 - What changed for the organisation, beyond the work being done?
 - Did this reduce risk, cost, or time, or enable revenue or delivery? By how much?
@@ -91,8 +92,9 @@ decided 2026-09-06:
 - Do not promote status because the subject answered confidently. Status is a
   property of the sources, not of the answer.
 - Record unanswered questions as `unresolved` and declined answers as `declined`.
-- Approval requires complete STAR fields and provenance. Publication safety is a
-  separate decision.
+- Approval requires accurately displayed wording and traceable provenance. Unknown
+  STAR details may remain unknown; factual uncertainty must remain explicit.
+  Publication safety is a separate decision.
 - **A re-typing only holds if the specific change can be written into
   `star.result`.** If the sentence cannot be written from what the subject
   actually said, the atom keeps the type it had. This single test is what stands
@@ -114,8 +116,10 @@ because the interesting questions only exist once an earlier one is answered.
 
 Run `python3 scripts/open_questions.py --json` for the queue. When reviewing
 a staged proposal, add `--pack <candidate-path>` (also for `--delta`); an initial
-import does not have an accepted pack yet. It ranks by what
-answering unlocks rather than by pack order, so work from the top.
+import does not have an accepted pack yet. The default queue prioritizes factual
+uncertainty and conflicts. `--optional` adds enrichment; `--application` includes
+resume and role questions only when that output is requested. Do not turn an
+optional detail into a required accuracy interview.
 
 1. **Ask one question. Wait. Then ask the next.** Never present a list. The
    follow-up is usually worth more than the original: "is there a budget?" answered
@@ -129,11 +133,11 @@ answering unlocks rather than by pack order, so work from the top.
    neutrally as the others. Without it the questions lead, and a review that only
    ever ratchets upwards is producing claims the subject cannot defend.
 4. **Record the answer at the moment it is given, in the subject's words.**
-   `scripts/answer.py <review record> --atom E_X --question "..." --answer "..."`
-   appends it verbatim to the session's review record and prints the
-   `source_ref` to attach to the atom, so the record the atom cites actually
-   contains what was said. Three atoms were once found citing a record that held
-   none of their answers; the transcript had them and the workspace did not.
+   Save the exact question and affected record keys with `career_core.py questions
+   ask` before asking it, then `questions respond` with the returned ID/revision.
+   Cite its immutable answer revision using the returned source and excerpt.
+   See `docs/questions-and-updates.md`. Existing markdown logs remain readable;
+   `answer.py` is a compatibility tool, not the new question-state store.
    Then apply the answer to a candidate atom and say what it proposes to change *in the record*:
    the field written, the status, the constraint.
    **Do not re-run `role_fit.py` between questions.** Reading the score after
@@ -155,9 +159,10 @@ answering unlocks rather than by pack order, so work from the top.
    lives in the pack, so a session is resumable by construction. Say so, so that
    stopping does not feel like abandoning.
 
-## Scope and positioning
+## Scope and positioning (optional application work)
 
-Two things every cold screen asks for that atoms cannot hold:
+Skip this in ordinary career-pack creation unless the person asks for it.
+Two details that may help a requested application:
 
 - **Scope facts** on the employment record: team size, direct reports, budget
   owned, organisation size, geography. Ask for the current and previous role
@@ -206,7 +211,7 @@ corroborators identified, conflicts, and approval decision. Include a concise
 recommendation for the next action.
 
 End an iterative session with `python3 scripts/open_questions.py --delta`.
-When the Resume Application is installed and role profiles exist, also run
+When the person requested an application review and role profiles exist, also run
 `python3 scripts/role_fit.py --markdown` once. It
 reports what the pack version changed and how much of that movement rests on
 atoms citing no source. **A questioning process that reliably improves a score is
@@ -240,3 +245,21 @@ For an answered unresolved question, use the separate evidence reassessment
 decision described in `docs/workspace-maintenance.md`. Record the actual answer,
 propose the status and reasoning, and obtain that explicit decision separately
 from wording acceptance. Never treat confidence in an answer as corroboration.
+
+For literal role or achievement wording corrections use `career_core.py review
+correct`; it records the exact edit as a person source and returns a revised
+proposal. For structural corrections, record the answer, edit the full candidate,
+and use `review revise` to carry unchanged decisions. Show changed wording for
+fresh confirmation. `review open` provides the connected local page; conversation
+and offline decisions use `review apply`. Never confuse saved notes with accepted
+facts or local saves with GitHub backup. See `docs/pack-review.md`.
+
+
+## Durable questions and updates
+
+Follow `docs/questions-and-updates.md` for the shared question, reassessment and
+recovery contract. Save scoped questions before asking and exact answers before
+changing a candidate. Answered, deferred and declined work stays settled; optional
+enrichment does not block saving. Use `health --summary --json` for current work,
+and `career_core.py recover` after interruption. Reassess affected strengths with
+`bind-strength --assessment`; never renew fingerprints alone.

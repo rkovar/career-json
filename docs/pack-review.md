@@ -1,167 +1,169 @@
 # Review your career record
 
-The core finishes an import with a reviewable proposal. Proposed information lives
-in `data/candidates/`; it is not the current career pack. The person can compare
-it with their previous version, correct it, defer it or accept exact items. The
-accepted pack remains available while review is unfinished. Existing packs remain
-usable and are labelled **not yet reviewed** rather than automatically approved.
+Start with [Your first session](getting-started.md). The assistant proposes a
+readable career record. You confirm accurate information, correct wording or
+leave items for later. Only confirmed facts enter your accepted pack; previous
+versions and sources remain available.
 
-## The conversational path
+The review shows five items at a time, grouped by role. Confirm each role once,
+then review complete achievements with their contribution and outcome visible.
+Source excerpts, full fields and previous values are available when needed.
+The proposed overview includes all roles and achievements; the saved reading
+page contains only the accepted record.
 
-For your first pack, follow [your first session](getting-started.md). Bring one
-source and let the assistant handle the commands below. Review the overview,
-then the exact items you want to accept or correct. Newly accepted content can
-stay private; publication choices can wait.
+Use **Save reviewed changes** in the connected page. **Save and next five** saves
+and advances without losing the next batch. Enter your name under **How review
+and saving work**. **Correct the recorded wording** lets you edit role details or
+an achievement; **Show revised wording** creates a revision for you to confirm.
+All edited cards are included in that preview, so correcting one card keeps your
+work on the others. Clicking **Save reviewed changes**, **Save and next five** or
+**Save and pause** while wording is edited also opens this preview first. Choose
+**Looks accurate** for each revised item and save again to accept the wording.
+Unchanged approvals carry forward only while their accepted baseline remains
+valid; an older review cannot silently undo a newer correction.
 
-After downloading decisions, say **“Apply my saved review decisions and show me
-what remains”** and give the file location. To return later, say **“Continue my
-career-pack review.”** The assistant finds the session, preserves your choices,
-refreshes the readable page and gives you a useful stopping point plus a recall
-example. Ambiguous sessions are clarified rather than guessed.
+New and changed content stays private by default. Wording acceptance, evidence
+confidence and external-use permission are separate. You can stop after useful
+work is saved; optional strengths, contact details and enrichment can wait.
 
 ## Operator reference
 
-The remaining instructions are for the assistant or someone operating the CLI.
-They are not extra steps the person must perform during conversational onboarding.
-
-### Create a review
-
-Author a complete proposed pack, preserving existing facts, IDs, source references
-and metadata. Keep omissions explicit; deleting a record is a proposed removal
-that also needs acceptance. Sources, employment, education, achievements,
-strengths, preferences and other factual fields all appear in the review.
+### Intake and create a review
 
 ```sh
+python3 scripts/career_core.py intake data/sources
 python3 scripts/career_core.py review start --candidate data/candidates/proposal.json --id onboarding-v1
+python3 scripts/career_core.py review open --session reviews/pack-reviews/onboarding-v1/session.json --open
+```
+
+Inventory only the authorized scope. The report distinguishes unchanged, duplicate,
+read, deferred and unreadable material. Inspect ambiguous extracted text and keep
+writing references/job context out of career evidence. `--classifications <json>`
+accepts a mapping of inspected paths to `career_evidence`, `job_context`,
+`writing_reference` or `defer`; classification never grants factual authority.
+
+Author a complete candidate preserving existing facts, IDs and metadata. Deletions
+are proposed removals and need explicit acceptance. Review creation snapshots
+proposal/base hashes without changing the current pack. Existing legacy packs can
+be reviewed; schema errors must be corrected before saving a new accepted version.
+
+The CLI defaults to grouped reviews. `--records` preserves the legacy per-record
+layout for compatibility. Verified local source metadata can be registered as
+needed by accepted claims. Its `metadata.source_imports` receipt records an import,
+not human approval or independent corroboration. Modified source records and
+nonstandard metadata remain explicit review items. Roles are never autoapproved.
+
+### Connected and offline pages
+
+`review open` starts a temporary Python standard-library HTTP server on 127.0.0.1.
+The printed URL contains a random token. It accepts requests only from its own
+origin and serves only the review and saved reading view. No source-file directory
+is exposed. Keep it running during review; Ctrl-C stops it. It also expires after
+an idle period. It does not call a model or push to GitHub.
+
+For a standalone HTML page:
+
+```sh
 python3 scripts/career_core.py review render --session reviews/pack-reviews/onboarding-v1/session.json --output outputs/career-review.html
 ```
 
-You can also review the current legacy pack by passing its path as the candidate.
-Existing schema inconsistencies are shown in that legacy review; they must be
-corrected in a new proposal before a new accepted version can be saved. The tool
-never invents missing detail to make an older record pass validation.
-The tool snapshots both versions and their hashes in a private review directory;
-starting a review never edits or replaces the current pack. Open the generated
-HTML in a browser. It works offline, without a server or installed dependencies.
-It contains private material and personal details, so keep it on your device.
-`make pack-html` remains a read-only overview, now including strengths, preferences,
-source excerpts and wording-review status; it deliberately omits contact details.
+This file works offline. Its navigation saves a browser draft; it cannot write a
+pack directly. Choose **Download review decisions**, then give the file location
+to the assistant. A download does not change career facts. Portable decisions
+can be reloaded only into their exact proposal. Keep review pages private.
 
-### What the person reviews
+Both pages retain five stable items while answering, filters, batch jumps and
+scroll/focus navigation. The connected page refuses a stale save when the pack
+or review changed in another session. Reload to inspect the current state.
+Browser storage is a convenience; the workspace review ledger is authoritative.
 
-The page shows five review items at a time. The career overview and instructions
-can be expanded when needed; **Continue review** jumps directly to the questions.
-The default queue covers all pending sections, including supporting records, and
-excludes previously accepted items. Answers do not disappear or move the remaining
-questions while you work through a batch.
-Filter by career section or change type, search, inspect previous values, and
-expand original source excerpts. Full stored fields and IDs remain available in
-details. Text comes directly from the pack; no extra model summary is generated.
-
-The persistent bottom bar shows the question range, answered/deferred/unanswered
-counts, and a batch selector with completion counts. **Save and next five** and
-**Previous five** move focus and scroll to the beginning of that batch.
-**Next unfinished** jumps to unanswered or deferred work. You can revisit any
-batch, skip questions, or pause without accepting the remaining items.
-
-**Looks accurate** accepts the wording. **Correct this** requires an explanation.
-**Not sure** and **Review later** leave the change pending. No choice is preselected.
-Acceptance never increases evidence confidence. Existing confidence is preserved
-or lowered; new claims remain self-asserted unless unresolved or declined. A
-separate evidence review is still needed to establish stronger corroboration.
-
-External-use permission is separate from the wording choice. New or changed
-content stays private by default. **Keep private** can restrict an existing record
-while its correction is pending. **Allow this exact content externally** requires
-acceptance of that content. Keep-private does not confirm its wording. User review
-of a strength also does not change its interpretation status automatically.
-
-The final section asks what is missing, understated, personally important or
-unrepresentative. These answers are saved as follow-up notes, never invented
-achievements. During conversation, ask one follow-up question at a time. The page
-is a self-paced review document, not a demand to answer every prompt.
-
-### Save, resume and apply
-
-**Save and next five** saves a browser draft, not an accepted career pack.
-The page remembers the batch, filters, expanded details and scroll position for
-the same proposal and saved review state. Storage failures are shown explicitly.
-Enter your name under **How review and saving work**, then use **Save and pause**
-or **Download review decisions** to download a portable record. It
-can be loaded into the same proposal page on another browser. A changed proposal
-cannot reuse the file. Closing the page never accepts anything into the pack.
-
-The standalone page embeds its navigation script and works offline. Developers
-can run the optional 80-question browser regression with
-`node tests/test_review_navigation.mjs` (Chrome/Chromium and Node required;
-set `CAREER_BROWSER` to choose a browser executable). It tests navigation, narrow
-screens, draft recovery and the unchanged decision-file contract using fictional data.
-
-Move the downloaded decisions JSON into a private workspace folder, then ask the
-career tool to record it. The operator must use actual user-supplied decisions;
-it must never fill in approvals, publication permissions or answers on the user's
-behalf. Conversational decisions may be recorded using the same JSON contract only
-after the person explicitly gives them, preserving their explanation in `note`.
+### Record and apply actual decisions
 
 ```sh
-python3 scripts/career_core.py review record --session reviews/pack-reviews/onboarding-v1/session.json --input data/private/onboarding-v1-decisions.json
+python3 scripts/career_core.py review apply --input data/private/my-decisions.json
 python3 scripts/career_core.py review status --session reviews/pack-reviews/onboarding-v1/session.json
-python3 scripts/career_core.py review accept --session reviews/pack-reviews/onboarding-v1/session.json --output data/packs/career-reviewed-v1.json
+python3 scripts/career_core.py review resume
 ```
 
-Here `accept` saves a **local accepted pack version**. `publish` remains a legacy
-alias with the same local-only behavior. It uses only explicit accepted items and privacy restrictions. It
-retains previous versions and records exact content fingerprints and decision-file
-pins. Corrected, uncertain and deferred proposals remain in the private session.
-Pending removals preserve the previous record. An initial pack needs enough
-accepted items to satisfy its structural and source-reference requirements.
+Copy only the user-supplied file into the workspace if needed. Conversation
+choices use the same JSON contract, with the person's actual name, decisions and
+notes. Never fill in supporting-record approvals. `apply` assigns a new immutable
+pack filename, refreshes `outputs/career-record.html`, and reports saved facts,
+pending items and blockers. `--output data/packs/<new-name>.json` is optional.
+Notes-only/repeated saves do not create another pack version.
 
-Partial acceptance must remain coherent: approve new/changed supporting sources,
-roles and evidence together with claims that depend on them. The tool rejects a
-partial result that would silently attach a claim to different support. A factual
-correction can make an existing strength stale; reassess that interpretation later
-rather than blocking the correction or refreshing fingerprints automatically.
+**Looks accurate** accepts exact wording; **Correct this** needs an explanation;
+**Not sure** and **Review later** remain pending. **Keep private** can restrict
+existing content while correction is pending. **Allow this exact content
+externally** also requires accepting it. Acceptance cannot raise confidence;
+[evidence reassessment](workspace-maintenance.md#resolve-an-evidence-question)
+requires a separate sourced decision.
 
-After a partial save, record another user decision batch and save a new accepted
-version through the same session. Previously applied choices are not repeated.
-If an unrelated pack version becomes current, start a new comparison. Changed
-proposals, source support or reviewed content cannot reuse an earlier acceptance.
+Grouped reviews can save independent coherent choices while other selections
+need supporting records. The blocked selections stay pending with their original
+choices. Known source mismatches, changed support for existing accepted facts and
+schema errors still block invalid results. Schema 1.4 permits starting with roles
+or education before achievements; the archived 1.3 contract remains unchanged. A nonzero `apply` exit with
+`save_blocked` can accompany a partial save: inspect `saved_pack` and the message.
+Changed proposals and dependencies cannot reuse earlier approval.
 
-To correct data, work from the latest accepted version and the pending notes,
-record the person's answer with `answer.py`, author a revised candidate and start
-a new review. Do not silently apply free-text corrections as facts. Generate a
-fresh page after recording decisions to show the durable session state. The JSON
-ledger, not browser storage or generated HTML, is the saved review history.
+The lower-level `review record`, `preview`, `accept` and legacy `publish` commands
+remain available. `accept`/`publish` mean saving a local pack, not external
+publication. Preview does not write facts. Omission answers stay follow-up notes.
 
-### Apply a downloaded file and resume
+### Correct without losing earlier review
+
+For a literal role or achievement edit, `review correct --session <session>
+--input <file>` expects:
+
+```json
+{
+  "decisions": {"review_id": "...", "proposal_sha256": "...", "reviewed_by": "Actual reviewer", "decisions": [], "omissions": []},
+  "edits": [{"key": "evidence_atoms/E_PROJECT", "fingerprint": "...", "fields": {"star.action": "The person's exact revised wording"}}]
+}
+```
+
+Use actual session hashes and user text. Editable fields are achievement `title`
+and `star.situation/task/action/result`, or role `employer/title/start/end`.
+The helper saves the literal correction as a person source and creates a new
+proposal. Blank dates remain unknown. Changed wording is private and needs new
+confirmation; a correction does not establish independent corroboration.
+
+For structural edits, record the actual answer with `answer.py`, revise the full
+candidate and run:
 
 ```sh
-python3 scripts/career_core.py review apply --input data/private/my-decisions.json --output data/packs/career-reviewed-v1.json
-python3 scripts/career_core.py review resume
-python3 scripts/career_core.py review resume --session reviews/pack-reviews/onboarding-v1/session.json
+python3 scripts/career_core.py review revise --session reviews/pack-reviews/onboarding-v1/session.json --candidate data/candidates/revision.json --id onboarding-v2
 ```
 
-Copy only the file the person supplied into the private workspace if it is outside
-it. `apply` resolves the session from that file, records choices, attempts local
-acceptance and returns saved counts, pending items, a stopping point and a recall
-prompt. A blocked save returns a nonzero exit and `save_blocked`; the decisions
-remain saved. Notes-only or repeated batches succeed without creating another
-pack. Use a fresh output filename when new content is accepted. Refresh the HTML
-with `review render` after applying decisions.
+Unchanged decisions carry their original receipts only when the accepted baseline
+still matches, or the exact decision is already applied. Changed content or dependencies
+lose approval. Reopen the resulting session. The old proposals and answers remain
+available. `resume` and **Continue saved work** show the latest revision of each review,
+using its original name. Independent reviews and branches remain separate.
+Use `python3 scripts/career_core.py review resume --history` to inspect earlier
+versions. An approval invalidated by another accepted correction needs a fresh
+choice; check the proposed wording against what was recorded before.
 
-`resume` without a session lists saved reviews and their summaries. It never
-chooses approvals or mutates a pack. Use the current conversation to select the
-session; ask only when there are multiple plausible unfinished reviews.
+### Handover and tests
 
-### Short conversational handover
+`review handover --session <session> --page <page>` produces a short grounded
+handover with recorded examples and a stopping point. Keep technical inventories
+in the private review rather than repeating them in the conversation.
 
-Rendering automatically prints a short handover after the page path. To retrieve
-it later, use `career_core.py review handover --session <session-path>
---page <rendered-page-path>`. It produces the review link, directly recorded roles
-and contributions, saved/pending counts and a stopping point. Use this for the
-first-session response instead of adding technical status tables. A recall prompt
-appears when an accepted record exists.
+See [development](development.md) for deterministic, HTTP and optional real-browser
+checks; see [workspace maintenance](workspace-maintenance.md) for history,
+merge/split/refresh and portable private backup.
 
-See [workspace maintenance](workspace-maintenance.md) for connected achievement
-review, a save preview, explicit evidence reassessment, health, readable history,
-merge/split/refresh and portable private backup/restore.
+## Accurate handoffs and recovery
+
+`review handover --session <session> --page <page>` describes the offline download
+path. Add `--connected` only while the local browser connection is running; the
+handoff then explains direct Save. Unknown dates retain their qualification in
+both the overview and handoff. Source import commentary is expandable and does
+not create an extra approval question.
+
+`career_core.py recover` regenerates a handoff from valid saved sessions after an
+interruption. `career_core.py view` refreshes the saved reading page atomically.
+Use [the shared question/update contract](questions-and-updates.md) for interview
+state; pending review items and required clarification questions are distinct.

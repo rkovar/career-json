@@ -1,0 +1,119 @@
+{
+  "roles": [
+    {
+      "employer": "Arc Laboratory",
+      "title": "Engineering Lead",
+      "start": "2018-04",
+      "end": "2026-02"
+    }
+  ],
+  "claims": [
+    {
+      "name": "cobalt",
+      "anchor": "cobalt",
+      "patterns": [
+        "personally|wrote|built",
+        "\\b(?:eight|8)\\b",
+        "\\b(?:two|2)\\b",
+        "human|sign.off"
+      ],
+      "role_title": "Engineering Lead"
+    },
+    {
+      "name": "juniper",
+      "anchor": "juniper",
+      "patterns": [
+        "cumulative",
+        "pipeline",
+        "\\b(?:three|3)\\b",
+        "\\b32(?=M\\b|\\s*million\\b)"
+      ],
+      "role_title": "Engineering Lead"
+    },
+    {
+      "name": "larch",
+      "anchor": "larch",
+      "patterns": [
+        "team",
+        "\\b(?:four|4)\\b",
+        "\\b(?:120)\\b",
+        "\\b(?:three|3)\\b"
+      ],
+      "role_title": "Engineering Lead",
+      "qualification_patterns": [
+        "\\b(?:70|seventy)\\b"
+      ]
+    },
+    {
+      "name": "birch",
+      "anchor": "birch",
+      "patterns": [
+        "forum"
+      ],
+      "role_title": "Engineering Lead",
+      "qualification_patterns": [
+        "quarterly"
+      ]
+    },
+    {
+      "name": "cypress",
+      "anchor": "cypress",
+      "patterns": [
+        "pipeline",
+        "audit",
+        "\\b(?:2025)\\b"
+      ],
+      "role_title": "Engineering Lead",
+      "qualification_patterns": [
+        "triage",
+        "never.*audit|not.*audit|unaudited"
+      ]
+    },
+    {
+      "name": "inherited_support",
+      "anchor": "inherited support|support team",
+      "patterns": [
+        "inherit"
+      ],
+      "role_title": "Engineering Lead",
+      "allow_role_context": true
+    }
+  ],
+  "qualification": {
+    "anchor": "safety",
+    "patterns": [
+      "lapsed|expired"
+    ],
+    "end": "2016",
+    "forbidden": "currently certified|current licence",
+    "award_date_alternative": true
+  },
+  "forbidden_claims": [
+    "generated.*32.*revenue",
+    "solely.*120",
+    "promoted to Director",
+    "personally (?:delivered|performed|completed) 120",
+    "founded (?:the )?(?:existing )?support team",
+    "triage service (?:passed|achieved)"
+  ],
+  "covers": [
+    "formal-title",
+    "metric-semantics",
+    "personal-build",
+    "team-credit",
+    "scope-and-time",
+    "founded-or-inherited",
+    "credential-status",
+    "presentation-preferences",
+    "privacy-and-withholding",
+    "separate-audit-scopes"
+  ],
+  "human_review": [
+    "Does the proposal preserve contribution, qualifications and scope without claiming unsupported outcomes?",
+    "Can the person save useful work without answering optional enrichment questions?"
+  ],
+  "preference_patterns": [
+    "hands.on",
+    "leader|leadership"
+  ]
+}

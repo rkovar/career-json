@@ -1,5 +1,13 @@
 # Career Evidence Core release notes
 
+## 0.1.0-alpha.6 — local release candidate
+
+- Preserve scoped questions and exact answers in immutable private history, with deferral and explicit reopening.
+- Require documented strength reassessment after support changes; keep ordinary human review.
+- Share current-work and question counts, hide completed work, report repair states, and regenerate saved reading views atomically.
+- Recover interrupted reviews; keep source annotations separate from approval and preserve date uncertainty.
+- Expand fictional source evaluations and PDF/DOCX intake coverage. No accepted pack migration is required.
+
 ## 0.1.0-alpha.5 — local release candidate
 
 - Add `make start` with named continuation of saved setups and reviews; make the two starting paths prominent in onboarding docs.

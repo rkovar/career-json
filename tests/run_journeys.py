@@ -75,7 +75,9 @@ def journey(person):
         correction['evidence_atoms'][0]['source_refs'] = copy.deepcopy(correction['evidence_atoms'][0]['source_refs']) + [{'source_id': 'SRC_CLARIFY', 'excerpt': 'I clarified this account with the colleagues involved.'}]
         corrected = apply(correction, stage(correction, 'correction'), 'corrected', ['source_records/SRC_CLARIFY', 'evidence_atoms/E_STORY_1'])
         check('correction_preserves_unrelated_achievements', corrected['evidence_atoms'][1:] == accepted['evidence_atoms'][1:])
-        cli('bind-strength', '--pack', 'data/packs/corrected.json', '--strength', 'S_DISTINCTIVE', '--output', 'data/candidates/reassessed.json')
+        from editorial_fixture import strength_assessment
+        (root/'data/private/assessment.json').write_text(json.dumps(strength_assessment(corrected)))
+        cli('bind-strength', '--pack', 'data/packs/corrected.json', '--strength', 'S_DISTINCTIVE', '--output', 'data/candidates/reassessed.json', '--assessment', 'data/private/assessment.json')
         reassessed = json.loads((root / 'data/candidates/reassessed.json').read_text())
         final = apply(reassessed, stage(reassessed, 'strength'), 'final', ['strengths_profile/S_DISTINCTIVE'])
         check('strength_interpretation_survives_reassessment', final['strengths_profile'][0]['interpretation'] == original['strengths_profile'][0]['interpretation'])

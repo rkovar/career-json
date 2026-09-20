@@ -1,10 +1,21 @@
 {
   "review_id": "fictional-first-pack",
-  "created": "2026-09-16T10:17:47.159462+00:00",
+  "created": "2026-09-20T11:10:16.845240+00:00",
   "proposal": {
     "path": "reviews/pack-reviews/fictional-first-pack/proposal.json",
     "sha256": "8a085c6fa40b5d78544d7132bee6f5a67f269720491c1aa8fc13b9bacda2f54e"
   },
   "base": null,
-  "validation_warnings": []
+  "validation_warnings": [],
+  "review_version": 2,
+  "source_imports": {
+    "source_records/SRC_SUBJECT": {
+      "path": "data/sources/resume.md",
+      "sha256": "e3ac83878d07075ada0524bed64cd1a4f00f3a2a39ad2aad9e4a81d85b291009"
+    },
+    "source_records/SRC_NOTES": {
+      "path": "data/sources/project-notes.md",
+      "sha256": "54f3c2733288e4167484604bdbbfef1f9eddb10199927d4ed17bdb6cd5a2a6a6"
+    }
+  }
 }

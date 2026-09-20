@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.4",
+  "name": "Ivo Moss",
+  "employment": [
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Ivo Moss\n\nCollections Coordinator at Willow Museum, 2019 to 2025.\n\nChanged from museum operations to digital collections. Employer start and end years are known; months are unknown and must not be invented. A grant funder is not my employer. A private client project must stay private.\n\n## Maple archive\n\nMoved the Maple archive service online in 2021. It became available all day. Usage growth and savings were never measured.\n\n## Pine access project\n\nCo-designed Pine access labels with volunteers, making the collection easier to navigate. Volunteers implemented the physical labels. My individual contribution was the design and coordination.\n\n## Elm invention\n\nNamed co-inventor on the Elm preservation method. The application has not been filed. No patent number exists. Defer questions until a filing occurs.\n\n## Education and training\n\nDigital Cataloguing course completed 2022, training without certification.\n"
+        }
+      ],
+      "corroborators": [],
+      "employment_id": "EMP_MAIN",
+      "employer": "Willow Museum",
+      "title": "Collections Coordinator",
+      "start": "2019",
+      "end": "2025"
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Ivo Moss\n\nCollections Coordinator at Willow Museum, 2019 to 2025.\n\nChanged from museum operations to digital collections. Employer start and end years are known; months are unknown and must not be invented. A grant funder is not my employer. A private client project must stay private.\n\n## Maple archive\n\nMoved the Maple archive service online in 2021. It became available all day. Usage growth and savings were never measured.\n\n## Pine access project\n\nCo-designed Pine access labels with volunteers, making the collection easier to navigate. Volunteers implemented the physical labels. My individual contribution was the design and coordination.\n\n## Elm invention\n\nNamed co-inventor on the Elm preservation method. The application has not been filed. No patent number exists. Defer questions until a filing occurs.\n\n## Education and training\n\nDigital Cataloguing course completed 2022, training without certification.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_0",
+      "title": "Maple archive",
+      "star": {
+        "situation": "Maple archive",
+        "task": "Contribute within the recorded role",
+        "action": "Moved the Maple archive service online in 2021.",
+        "result": "Available all day; savings were never measured."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Ivo Moss\n\nCollections Coordinator at Willow Museum, 2019 to 2025.\n\nChanged from museum operations to digital collections. Employer start and end years are known; months are unknown and must not be invented. A grant funder is not my employer. A private client project must stay private.\n\n## Maple archive\n\nMoved the Maple archive service online in 2021. It became available all day. Usage growth and savings were never measured.\n\n## Pine access project\n\nCo-designed Pine access labels with volunteers, making the collection easier to navigate. Volunteers implemented the physical labels. My individual contribution was the design and coordination.\n\n## Elm invention\n\nNamed co-inventor on the Elm preservation method. The application has not been filed. No patent number exists. Defer questions until a filing occurs.\n\n## Education and training\n\nDigital Cataloguing course completed 2022, training without certification.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_1",
+      "title": "Pine access labels",
+      "star": {
+        "situation": "Pine access labels",
+        "task": "Contribute within the recorded role",
+        "action": "Co-designed Pine access labels with volunteers.",
+        "result": "Volunteers implemented the physical labels."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Ivo Moss\n\nCollections Coordinator at Willow Museum, 2019 to 2025.\n\nChanged from museum operations to digital collections. Employer start and end years are known; months are unknown and must not be invented. A grant funder is not my employer. A private client project must stay private.\n\n## Maple archive\n\nMoved the Maple archive service online in 2021. It became available all day. Usage growth and savings were never measured.\n\n## Pine access project\n\nCo-designed Pine access labels with volunteers, making the collection easier to navigate. Volunteers implemented the physical labels. My individual contribution was the design and coordination.\n\n## Elm invention\n\nNamed co-inventor on the Elm preservation method. The application has not been filed. No patent number exists. Defer questions until a filing occurs.\n\n## Education and training\n\nDigital Cataloguing course completed 2022, training without certification.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_2",
+      "title": "Elm invention",
+      "star": {
+        "situation": "Elm invention",
+        "task": "Contribute within the recorded role",
+        "action": "Named co-inventor on the Elm preservation method.",
+        "result": "Application not filed; no patent number exists."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    }
+  ],
+  "education": [
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Ivo Moss\n\nCollections Coordinator at Willow Museum, 2019 to 2025.\n\nChanged from museum operations to digital collections. Employer start and end years are known; months are unknown and must not be invented. A grant funder is not my employer. A private client project must stay private.\n\n## Maple archive\n\nMoved the Maple archive service online in 2021. It became available all day. Usage growth and savings were never measured.\n\n## Pine access project\n\nCo-designed Pine access labels with volunteers, making the collection easier to navigate. Volunteers implemented the physical labels. My individual contribution was the design and coordination.\n\n## Elm invention\n\nNamed co-inventor on the Elm preservation method. The application has not been filed. No patent number exists. Defer questions until a filing occurs.\n\n## Education and training\n\nDigital Cataloguing course completed 2022, training without certification.\n"
+        }
+      ],
+      "corroborators": [],
+      "education_id": "EDU_1",
+      "institution": "Fictional training provider",
+      "qualification": "Digital Cataloguing training course",
+      "end": "2022"
+    }
+  ],
+  "source_records": [
+    {
+      "source_id": "SRC_ACCOUNT",
+      "source_type": "markdown",
+      "path": "data/sources/career-account.md",
+      "sha256": "555f08b4ab0a39693f552950b84ba5a85d9156fc564548b4860b0c65b7aecc1f",
+      "independent": false
+    }
+  ]
+}

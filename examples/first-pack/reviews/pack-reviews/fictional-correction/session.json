@@ -1,13 +1,28 @@
 {
   "review_id": "fictional-correction",
-  "created": "2026-09-16T10:17:47.505839+00:00",
+  "created": "2026-09-20T11:10:17.319152+00:00",
   "proposal": {
     "path": "reviews/pack-reviews/fictional-correction/proposal.json",
-    "sha256": "4831d432320d46b41e331b937ed89ba4b3800ab0de2761dbb484657a847145fa"
+    "sha256": "79a16dc76881c65d8ac095631c53f433e12a5c0b69a2d5e3524c978ca67247fb"
   },
   "base": {
     "path": "data/packs/accepted.json",
-    "sha256": "9dea54d483ab8602d1b5960a0dc6392730c2f1b5a0eb9053c1235568fd424612"
+    "sha256": "16d6561d8e55a5d501a76c5f0703bd346e801ff247acaf2983b9904f70a9cf3f"
   },
-  "validation_warnings": []
+  "validation_warnings": [],
+  "review_version": 2,
+  "source_imports": {
+    "source_records/SRC_NOTES": {
+      "path": "data/sources/project-notes.md",
+      "sha256": "54f3c2733288e4167484604bdbbfef1f9eddb10199927d4ed17bdb6cd5a2a6a6"
+    },
+    "source_records/SRC_SUBJECT": {
+      "path": "data/sources/resume.md",
+      "sha256": "e3ac83878d07075ada0524bed64cd1a4f00f3a2a39ad2aad9e4a81d85b291009"
+    },
+    "source_records/SRC_ANSWERS": {
+      "path": "data/sources/review-answers.md",
+      "sha256": "3606cdb284e946a27dc3dd57847cdb47a44f01e276ca2fe73726af448b0433f7"
+    }
+  }
 }

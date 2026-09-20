@@ -1,0 +1,64 @@
+{
+  "roles": [
+    {
+      "employer": "Reed Institute",
+      "title": "Research Assistant",
+      "start": "2024-07",
+      "end": "2025-12"
+    }
+  ],
+  "claims": [
+    {
+      "name": "pollen",
+      "anchor": "pollen",
+      "patterns": [
+        "colleague|together|with",
+        "label|document"
+      ],
+      "role_title": "Research Assistant"
+    },
+    {
+      "name": "aster",
+      "anchor": "aster",
+      "patterns": [
+        "idea|originat|conceiv",
+        "introduction|foreword",
+        "colleague|chapter"
+      ],
+      "role_title": "Research Assistant"
+    },
+    {
+      "name": "sedge",
+      "anchor": "sedge",
+      "patterns": [
+        "co.author|shared|equal",
+        "three|3"
+      ],
+      "role_title": "Research Assistant"
+    }
+  ],
+  "qualification": {
+    "anchor": "research ethics",
+    "patterns": [
+      "course|training"
+    ],
+    "end": "2024",
+    "forbidden": "certified|certification awarded|professional certification"
+  },
+  "forbidden_claims": [
+    "managed.*researchers",
+    "saved.*(?:[$\u00a3]|percent)",
+    "sole author"
+  ],
+  "covers": [
+    "retain-unmeasured-work",
+    "authorship-roles",
+    "evidence-scope",
+    "coverage-not-keywords",
+    "untrusted-and-targeting-input"
+  ],
+  "human_review": [
+    "Does the proposal preserve contribution, qualifications and scope without claiming unsupported outcomes?",
+    "Can the person save useful work without answering optional enrichment questions?"
+  ]
+}

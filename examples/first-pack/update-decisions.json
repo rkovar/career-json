@@ -1,12 +1,12 @@
 {
   "review_id": "fictional-update",
-  "proposal_sha256": "06fa59055cc688e3b5b02eae3621234d421ea876faf29cf4253910e4377a0025",
+  "proposal_sha256": "8dca094786ea080443cb2128451e25aa3b4031a3448c2c112c84d86eaa5a1332",
   "reviewed_by": "Jules Elm (scripted fictional example)",
   "omissions": [],
   "decisions": [
     {
       "key": "evidence_atoms/E_MIGRATION_PLANNING",
-      "fingerprint": "4da3dd258aa0ef897201c050c4917620a9bfa126005fe3c862c28414136148cd",
+      "fingerprint": "05672bcab36938a787bbe9346a4ba3c7f990f6f6d3ade5be0b355f2edca5a2e6",
       "action": "accept",
       "publication": "unchanged",
       "note": ""
@@ -19,8 +19,29 @@
       "note": "I cannot recover the baseline or period. Keep the 35% estimate out of the accepted record."
     },
     {
+      "key": "source_records/SRC_ANSWERS",
+      "fingerprint": "803a53796cc02891aac03ce78a627f8ccb61ce7b8872b2000347e848546c4797",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
       "key": "source_records/SRC_CAPTURE",
-      "fingerprint": "2b639b1840b5b36ccd9587feca0d7c2631945e800ac1b72198ec381c741a3ce3",
+      "fingerprint": "dcf34a554f3480c6b2de5598670fa68d589e42bd1056b2d8a063fef586970433",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_NOTES",
+      "fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_SUBJECT",
+      "fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
       "action": "accept",
       "publication": "unchanged",
       "note": ""

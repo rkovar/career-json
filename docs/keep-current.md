@@ -3,7 +3,7 @@
 A useful career pack grows alongside your work. Save details while you remember
 them, then review and organize them when convenient.
 
-Open Claude Code in the project for the requests below. To return to an unfinished
+Open Claude Code in your career workspace for the requests below. Once a pack exists, `make start` offers **Update my career pack** first. To return to an unfinished
 setup or review, run `make start` and choose **Continue saved work**.
 
 ## Capture a detail now
@@ -28,7 +28,7 @@ The assistant helps connect notes to existing work and proposes additions or
 corrections. Check that it preserves your contribution and other people's
 ownership. Explain missing context in your own words.
 
-Accept useful items and leave the rest for later. A changed statement needs a
+Use **Save reviewed changes** in the connected review to save useful items and leave the rest for later. The saved reading page updates at `outputs/career-record.html`. Exact corrections are shown again before acceptance, and unchanged approvals remain valid. A changed statement needs a
 fresh review; an old approval does not cover new wording.
 
 [Inspect Jules's proposed update](../examples/first-pack/update-review.html) and
@@ -42,8 +42,7 @@ Put the file in `data/sources/`. New resumes, promotion write-ups, conference
 listings, publications and project notes can all add detail. Tell the assistant
 which material to use; you can ask it to inspect everything in Sources.
 
-It compares the new material with your existing record so you can review
-additions and changes. Earlier versions and sources remain available. Source
+The intake report identifies unchanged files, exact duplicates and extraction problems. The assistant compares new material with your existing record, preserves record IDs, and proposes only meaningful additions and changes. An unchanged re-import needs no new approval. Earlier versions and sources remain available. Source
 documents may contain private employer information; only bring material you can
 share with your configured model service.
 
@@ -58,7 +57,9 @@ share with your configured model service.
 
 The assistant shows proposed changes for review. Corrections preserve history;
 they do not silently replace earlier sources or turn a suggested strength into
-an independently verified fact.
+an independently verified fact. When a correction changes a strength’s supporting
+evidence, the assistant revisits its wording and limitations using the answers
+already recorded. You review any proposed change.
 
 ## Use what you have
 
@@ -70,6 +71,18 @@ an independently verified fact.
 
 A good result explains the recorded contribution and its source. You can use
 the record without generating a resume or completing every outstanding question.
+
+## Pause or recover interrupted work
+
+> Continue my saved career review, using the answers I already gave.
+
+Answered questions stay answered. Deferred work can wait; deliberately withheld
+details are not treated as gaps to investigate. Completed reviews move to history.
+If a session ends before the assistant hands over a page, ask “Recover my saved
+career review.” A saved proposal can be reopened without being approved.
+
+Choose **View my saved career record** in `make start` to regenerate its readable
+page. If rendering failed after a save, your accepted facts remain saved.
 
 ## Keep a copy
 

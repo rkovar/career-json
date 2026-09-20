@@ -1,0 +1,63 @@
+{
+  "roles": [
+    {
+      "employer": "Willow Museum",
+      "title": "Collections Coordinator",
+      "start": "2019",
+      "end": "2025"
+    }
+  ],
+  "claims": [
+    {
+      "name": "maple",
+      "anchor": "maple",
+      "patterns": [
+        "online",
+        "2021",
+        "all day|24"
+      ],
+      "role_title": "Collections Coordinator"
+    },
+    {
+      "name": "pine",
+      "anchor": "pine",
+      "patterns": [
+        "design",
+        "volunteer"
+      ],
+      "role_title": "Collections Coordinator"
+    },
+    {
+      "name": "elm",
+      "anchor": "elm",
+      "patterns": [
+        "co.inventor",
+        "not.*filed|unfiled|preparation"
+      ],
+      "role_title": "Collections Coordinator"
+    }
+  ],
+  "qualification": {
+    "anchor": "digital catalog",
+    "patterns": [
+      "course|training"
+    ],
+    "end": "2022",
+    "forbidden": "certified|professional certification"
+  },
+  "forbidden_claims": [
+    "granted patent",
+    "sole inventor",
+    "saved.*[$\u00a3]"
+  ],
+  "covers": [
+    "date-precision",
+    "invention-status",
+    "privacy-and-withholding",
+    "retain-unmeasured-work"
+  ],
+  "human_review": [
+    "Does the proposal preserve contribution, qualifications and scope without claiming unsupported outcomes?",
+    "Can the person save useful work without answering optional enrichment questions?"
+  ]
+}

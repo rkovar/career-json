@@ -64,6 +64,43 @@ class LauncherTests(unittest.TestCase):
             code = start.main(list(args), root=self.root)
         return code, out.getvalue(), err.getvalue()
 
+    def test_continue_lists_latest_revision_and_independent_review(self):
+        from pack_io import pin
+        from pack_review import session_catalog
+        previous = None
+        for rid in ('first-materials', 'correction-one', 'correction-two'):
+            row = {'review_id': rid, 'created': '2026-09-18'}
+            if previous:
+                row['previous_review'] = pin(previous, self.root)
+            previous = self.write('reviews/pack-reviews/'+rid+'/session.json', row)
+        self.write('reviews/pack-reviews/independent/session.json', {'review_id':'independent','created':'2026-09-18'})
+        saved, errors = start.saved_work(self.root, False)
+        self.assertEqual(errors,0)
+        self.assertEqual(len(saved),2)
+        latest = next(r for r in saved if 'first-materials' in r['label'])
+        self.assertIn('correction-two',latest['prompt'])
+        self.assertEqual(len(session_catalog(self.root)),4)
+        self.assertEqual(len(start.saved_work(self.root, False, history=True)[0]), 4)
+
+    def test_review_branches_remain_distinguishable(self):
+        from pack_io import pin
+        original = self.write('reviews/pack-reviews/original/session.json', {'review_id':'original','created':''})
+        for rid in ('branch-one','branch-two'):
+            self.write('reviews/pack-reviews/'+rid+'/session.json', {'review_id':rid,'created':'', 'previous_review':pin(original,self.root)})
+        saved, errors = start.saved_work(self.root,False)
+        self.assertEqual(errors,0)
+        self.assertEqual(len(saved),2)
+        self.assertTrue(all('original (branch-' in r['label'] for r in saved))
+
+    def test_changed_history_pin_does_not_hide_original(self):
+        previous = self.write('reviews/pack-reviews/original/session.json', {'review_id':'original','created':''})
+        self.write('reviews/pack-reviews/correction/session.json', {'review_id':'correction','created':'',
+            'previous_review': {'path':str(previous.relative_to(self.root)), 'sha256':'0'*64}})
+        saved, errors = start.saved_work(self.root,False)
+        self.assertEqual(errors,1)
+        self.assertEqual(len(saved),1)
+        self.assertIn('original',saved[0]['prompt'])
+
     def test_core_only_offers_career_and_no_empty_continuation(self):
         with patch.object(start.subprocess, 'run') as child:
             code, out, _ = self.run_start(inputs='q\n')
@@ -72,6 +109,26 @@ class LauncherTests(unittest.TestCase):
         self.assertNotIn('2. Create a resume', out)
         self.assertNotIn('Continue saved work', out)
         child.assert_not_called()
+
+    def test_existing_pack_offers_update_first(self):
+        self.write('data/packs/first.json', {'schema_version':'1.3','evidence_atoms':[]})
+        code,out,_=self.run_start('--print-prompt',inputs='1\n')
+        self.assertEqual(code,0)
+        self.assertIn('1. Update my career pack',out)
+        self.assertIn(start.PROMPTS['update'],out)
+
+    def test_completed_setup_only_appears_in_history(self):
+        self.session(status='handed_off')
+        self.assertEqual(start.saved_work(self.root, False)[0], [])
+        self.assertEqual(len(start.saved_work(self.root, False, history=True)[0]), 1)
+
+    def test_broken_pack_chain_is_not_a_new_user(self):
+        self.write('data/packs/broken.json', {'schema_version': '1.4',
+            'metadata': {'supersedes': 'missing.json'}})
+        code, out, err = self.run_start('--print-prompt', inputs='1\n')
+        self.assertEqual(code, 1)
+        self.assertIn('repair', (out + err).lower())
+        self.assertNotIn('1. Build my career pack', out)
 
     def test_combined_installation_routes_each_new_path(self):
         self.addon()
@@ -94,12 +151,12 @@ class LauncherTests(unittest.TestCase):
         self.addon()
         self.session(revision=1, status='active')
         self.session(revision=2, status='paused')
-        self.session(kind='resume', status='handed_off')
+        self.session(kind='resume', status='paused')
         rows, errors = start.saved_work(self.root, True)
         self.assertEqual(errors, 0)
         self.assertEqual(len(rows), 2)
         self.assertTrue(any('(Paused)' in row['label'] and 'career pack' in row['label'] for row in rows))
-        self.assertTrue(any('Continue creating my resume from saved setup named "first".' == row['prompt'] for row in rows))
+        self.assertTrue(any('Continue my resume setup named "first".' == row['prompt'] for row in rows))
 
     def test_select_named_saved_work_without_numbered_json_paths(self):
         self.session(sid='first')

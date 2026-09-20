@@ -1,101 +1,83 @@
 # First-pack review: assistant reference
 
-For the user-facing first session, use [Getting started](../getting-started.md).
-This reference preserves the review and acceptance behavior for the assistant.
+For the user-facing path, use [Your first session](../getting-started.md).
+The assistant operates the commands; the person reviews their career.
 
-Need help choosing material? Use the [guided start](career-start.md). A specific source request proceeds directly; setup does not delay the requested overview.
+## Intake the requested scope
 
-Start with one existing resume. A target job, a complete archive and independently
-verified achievements are not prerequisites. Your goal is a small record you can
-inspect, correct and retrieve something from.
+One document, all of `data/sources/`, or the person's own account is enough.
+Honor explicit scope without another setup interview. Use the
+[guided start](career-start.md) when the person needs help choosing material.
+No target job or contact profile is required.
 
-Before installing, [see the fictional first-pack walkthrough](../../examples/first-pack/README.md).
-It includes the source, browser review, saved career record and a recall example.
+```sh
+python3 scripts/career_core.py intake data/sources
+```
 
-## 1. Bring one document
+Use a filename instead for a narrower request. Read the inventory and newly
+extracted text. Inspect ambiguous material and classify it; filenames are not
+proof of purpose. Job descriptions and writing advice do not become career facts.
+Report unreadable files and duplicates. Reuse existing sources and stable record
+IDs; unchanged material alone needs no new proposal. Preserve conflicting values.
+Record conversation accounts verbatim as private person sources.
 
-Follow the README installation steps, then put one resume in `data/sources/`.
-Only ask the tool to read material you are comfortable sending to your configured
-Claude service. Local files and the offline review page remain under your control;
-model processing is separate from permission to publish a career claim.
+## Show the proposed career, then review useful work
 
-In Claude Code, say:
+Stage the complete proposed pack under `data/candidates/`, preserving existing
+facts and metadata. Validate it and create the default grouped review:
 
-> Build my first career pack from data/sources/my-resume.pdf. Keep it private.
-> Show me the overview before asking questions.
+```sh
+python3 scripts/career_core.py review start --candidate data/candidates/proposal.json --id first-review
+python3 scripts/career_core.py review open --session reviews/pack-reviews/first-review/session.json --open
+```
 
-Use your actual filename. The assistant extracts that document, stages a proposal
-and gives you a link to its readable review. It handles JSON and review commands.
-You can add LinkedIn exports, performance reviews and other sources later.
+The second command runs a temporary loopback connection. Keep it alive while the
+person reviews; stop it when finished. The printed private URL is the browser
+entry point. Use `review render` for a portable offline page if preferred.
 
-## 2. Read your career before reviewing fields
+Present a short grounded timeline and a link to the full proposed overview before
+asking questions. Review roles once, followed by their achievements. All proposed
+contributions remain available; do not discard less prominent work to shorten the
+review. Show action, outcome and role context first, with supporting detail nearby.
 
-Start with the timeline and recorded contributions. Check whether the tool captured
-your work and shared ownership accurately. Proposed strengths are interpretations;
-you can explore them later. The overview is not a claim that your career is complete.
+Verifiable source metadata is registered automatically, with an import receipt
+separate from human approval. Changes to existing source records or metadata that
+cannot be registered still require review. Never invent role, achievement, privacy
+or evidence-status decisions. Profile details and strengths can wait.
 
-Pick a few useful achievements. Inspect their source excerpts and related role
-records. Sources and profile details appear under **All career sections**; those
-supporting records also need acceptance before the first pack can be saved.
+## Correct, confirm and save
 
-You can answer in conversation, using the displayed wording, or use the browser:
+The connected page saves through **Save reviewed changes** or **Save and next
+five**. Conversation decisions use the same review contract. Offline downloads
+use `review apply --input <supplied-file>`; output version names are automatic.
+Tell the person when facts are saved versus when only review choices are saved.
+GitHub backup is a separate operation.
 
-> The rehearsal example is accurate. Keep it private. I want to revisit the
-> mentoring example because it understates the engineers’ contribution.
+Literal role/achievement corrections use `review correct`; richer corrections
+use recorded answers and a complete revised candidate with `review revise`.
+See [the exact contracts](../pack-review.md#operator-reference). Changed wording
+needs new confirmation. Unchanged decisions retain their original receipts;
+a changed role invalidates dependent approval. Never paraphrase a correction
+into accepted fact without showing it again.
 
-The assistant records only your actual decisions. It shows related records that
-need your review rather than approving them for you. You do not need to decide
-external-use permissions now; newly accepted content stays private by default.
+Save coherent independent work even while other items need their supporting role.
+Known source mismatches and invalid structures still block acceptance. Explain the
+actual blocker; missing contact details, private status, optional strengths and
+unmeasured outcomes are not first-pack defects.
 
-## 3. Save or correct, then stop
+## Stop and retrieve
 
-In the browser, choose **Download review decisions** and return to the conversation:
+A role and a few supported achievements is a useful stopping point. An education
+or other supported record can also start a pack. State what is saved and what
+remains pending. Do not turn counts into a completeness or quality score.
 
-> Apply my saved review decisions and show me what remains. The file is at
-> [the location of my downloaded decisions file].
+Offer: **Show me one recorded achievement and its original source.**
+Link the derived `outputs/career-record.html`. It reads accepted data only.
 
-The assistant copies that supplied file into the private workspace if needed,
-checks which proposal it belongs to, saves accepted items and refreshes the page.
-A download alone does not change the current pack. If a supporting record is
-missing, your decisions stay saved while the assistant shows what needs review.
+For **Continue my career-pack review**, resolve saved sessions with `review resume`.
+Prefer a successor revision over its superseded review; clarify only genuinely
+ambiguous work. Do not re-ingest sources merely because a conversation ended.
+Strengths, richer outcomes, public-work cataloguing and corroboration are optional
+later passes. Accuracy questions come first; ask one answerable question at a time.
 
-For a correction, explain it in your words. The assistant records the answer and
-shows revised wording in a new proposal. Your note is never treated as approval
-of wording you have not seen. Previously accepted, unchanged facts remain saved.
-
-A useful stopping point is a saved role and a few supported achievements you can
-retrieve. You do not need to finish every question or the strengths interview.
-The assistant states what is saved, what remains pending and what can wait.
-It must not claim that counts establish completeness or career quality.
-
-## 4. Get something back
-
-Ask:
-
-> Show me one recorded achievement and its original source.
-
-Or use an actual topic from your record:
-
-> Find the project where I helped teams change how they worked.
-
-The answer should identify the recorded contribution, its source and anything
-still uncertain. If the record contains nothing relevant, the tool should say so.
-
-## 5. Return when useful
-
-> Continue my career-pack review.
-
-The assistant finds saved sessions and resumes the one you were working on. It
-asks which review you mean only when several are plausible. It does not re-ingest
-your files or re-ask unchanged accepted facts just because the conversation ended.
-
-Back up `data/` and `reviews/` together. Keep downloaded decisions until they have
-been imported. The [operator reference](../pack-review.md#operator-reference) contains
-commands for manual operation; you do not need them for the conversational path.
-
-First-run duration and token use have not been benchmarked across source types.
-This is deliberately a bounded first exercise, not a promise about minutes or cost.
-
-See [workspace maintenance](../workspace-maintenance.md) for connected achievement
-review, a save preview, explicit evidence reassessment, health, readable history,
-merge/split/refresh and portable private backup/restore.
+Back up `data/` and `reviews/` together. See [workspace maintenance](../workspace-maintenance.md).

@@ -4,11 +4,39 @@ You can ask the assistant to check your career workspace, explain an achievement
 history, combine duplicate achievements, split a large achievement, attach a new
 source, or back up your work. These are core features; no resume add-on is needed.
 
+## Create a separate personal workspace
+
+Keep tool development and your career history in separate directories. From the
+application checkout (or an installed Core release), run:
+
+```sh
+python3 scripts/career_core.py workspace create --directory ~/Career/my-career
+cd ~/Career/my-career
+make start
+```
+
+This installs only public Core files and creates empty private data directories.
+It never copies the developer checkout's sources, packs or reviews. Add
+`--with-resume` if you also want the matching installed Resume component.
+The destination must be new and outside the tool directory; existing workspaces
+are never overwritten. This is a new workspace installer, not an upgrade command.
+
+The workspace includes the runtime it needs, so it does not depend on editing the
+development checkout or patching source paths. Component versions and file hashes
+are recorded under `components/workspace/installation.json`.
+
+Save career material inside this workspace. Local saves are not GitHub backups.
+Configure a separate **private** repository if you want centralized Git backup;
+the installer does not create a remote or publish files. The inherited `.gitignore`
+protects personal folders by default, so Git needs a deliberate private-data
+tracking policy before it can back them up. The backup command below already
+includes pending reviews and sources without changing that policy.
+
 ## Review connected information
 
 On an achievement card, expand **Role and sources for this achievement** to inspect
-the exact supporting records. **Review achievement and supporting records together**
-shows their existing decision controls together. Nothing is automatically accepted. Existing supporting records whose content and dependencies are unchanged can be reused; a legacy role does not need reapproval merely because an achievement is clarified.
+the exact supporting records. **Show achievement and role together**
+shows their existing decision controls together. No career claim is automatically accepted; verifiable source metadata is registered separately. Existing supporting records whose content and dependencies are unchanged can be reused; a legacy role does not need reapproval merely because an achievement is clarified.
 **Preview what will be saved** explains your wording and external-use choices and
 identifies supporting items that may still need review. The browser preview is a
 planning aid; the CLI checks the exact resulting pack and sources before saving.
@@ -131,3 +159,11 @@ can be moved. Remote sources without saved copies are listed as unavailable, not
 claimed to be embedded. Backup/restore preserves existing content and does not
 approve proposals, repair factual claims or certify resume quality. On a new machine,
 open the restored directory with your assistant and continue the saved review.
+
+## Recorded questions and read-only progress
+
+Backups include immutable `reviews/questions/` revisions and their pinned context.
+Legacy packs and answer logs stay unchanged. See [questions and updates](questions-and-updates.md)
+for previewable, idempotent answer import and semantic strength reassessment.
+Use `career_core.py health --summary --json` for navigation; full `health` also
+checks sources and backup references. `start.py --history` includes completed work.

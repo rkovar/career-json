@@ -64,3 +64,21 @@ def write_new(path, record, root=ROOT):
         if temporary is not None:
             temporary.unlink(missing_ok=True)
     return path
+
+
+def write_view(path, text, root=ROOT):
+    """Atomically replace a derived view; immutable career records use write_new."""
+    path = local(path, root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent, delete=False) as handle:
+            temporary = Path(handle.name)
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+    return path

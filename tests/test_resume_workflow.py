@@ -423,7 +423,7 @@ class ResumeTests(unittest.TestCase):
 
     def scenario_checks(self):
         from run_editorial_scenarios import checks
-        return checks(self.root, 'resume', {'is_error': False})
+        return checks(self.root, 'resume', {'is_error': False, 'result': 'Review ready.'})
 
     def test_resume_scenario_accepts_coherent_current_delivery(self):
         self.delivery_fixture()

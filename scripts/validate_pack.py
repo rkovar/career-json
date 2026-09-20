@@ -140,7 +140,7 @@ def check(path, schema, strict=False, root=ROOT):
             cursor = parents[cursor]
         visited.update(chain)
     if not pack.get("employment"):
-        errors.append("no employment records; every date and title in a generated artefact would be unsourced")
+        warnings.append("No employment records yet; record roles when available.")
 
     # Education: like employment, a fact a background check tests rather than a
     # claim an atom argues. Held to the same standard.
@@ -214,8 +214,11 @@ def check(path, schema, strict=False, root=ROOT):
             errors.append(f"{where}: externally_verified requires a source_ref to an independent source record")
 
     atoms = pack.get("evidence_atoms")
-    if not atoms:
-        errors.append("evidence_atoms is empty or missing")
+    if not isinstance(atoms, list):
+        errors.append("evidence_atoms must be present as a list")
+        atoms = []
+    elif not atoms:
+        warnings.append("No achievements recorded yet; roles and other reviewed facts can be saved first")
     seen = set()
     for i, atom in enumerate(atoms or []):
         aid = atom.get("id") or f"<index {i}>"
@@ -320,11 +323,11 @@ def check(path, schema, strict=False, root=ROOT):
 
     profile = pack.get("private_profile")
     if profile is None:
-        errors.append("private_profile is missing; make-resume cannot produce a contact block, so any resume from this pack is unsendable")
+        warnings.append("No private profile recorded; contact details can be added when needed.")
     elif not profile.get("name"):
         errors.append("private_profile.name is missing")
     elif not (profile.get("email") or profile.get("phone")):
-        warnings.append("private_profile has no email or phone; a named-recipient resume cannot be actioned")
+        warnings.append("No contact email or phone recorded; these are optional for a career pack.")
 
     if pack.get("schema_version") == "1.4":
         from schema_tools import walk

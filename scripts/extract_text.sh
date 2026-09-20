@@ -18,7 +18,17 @@ extract_pdf() {
   if command -v pdftotext >/dev/null 2>&1; then
     pdftotext -layout "$1" -
   elif [ "$(uname)" = "Darwin" ] && command -v swift >/dev/null 2>&1; then
-    local tmp; tmp="$(mktemp -t pdftext).swift"
+    local extraction_dir tmp module_cache
+    extraction_dir="$(mktemp -d "${TMPDIR:-/tmp}/career-pdf.XXXXXX")"
+    tmp="$extraction_dir/extract.swift"
+    # Reuse only compiler modules, never source text. A fresh module cache per
+    # document recompiles the macOS SDK for every PDF in a career archive.
+    module_cache="${CLANG_MODULE_CACHE_PATH:-${TMPDIR:-/tmp}/career-pdfkit-modules-${UID}}"
+    if [ -L "$module_cache" ] || ! (umask 077; mkdir -p "$module_cache"); then
+      rm -rf "$extraction_dir"
+      echo "PDFKit needs a writable compiler cache. Set CLANG_MODULE_CACHE_PATH to a private temporary directory." >&2
+      return 1
+    fi
     cat > "$tmp" <<'SWIFT'
 import Foundation
 import PDFKit
@@ -33,11 +43,12 @@ SWIFT
     # This function runs inside command substitution, where `set -e` does not
     # reliably stop on the failed Swift command. Cleanup must not turn a cache
     # or PDF extraction failure into successful empty text.
-    if swift "$tmp" "$1"; then
-      rm -f "$tmp"
+    if CLANG_MODULE_CACHE_PATH="$module_cache" SWIFT_MODULECACHE_PATH="$module_cache" swift "$tmp" "$1"; then
+      rm -rf "$extraction_dir"
     else
       local extraction_status=$?
-      rm -f "$tmp"
+      rm -rf "$extraction_dir"
+      echo "macOS PDFKit extraction failed. Supply a readable text copy, or use pdftotext. Scanned files may need OCR." >&2
       return "$extraction_status"
     fi
   else

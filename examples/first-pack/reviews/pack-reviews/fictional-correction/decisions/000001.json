@@ -1,6 +1,6 @@
 {
   "review_id": "fictional-correction",
-  "proposal_sha256": "4831d432320d46b41e331b937ed89ba4b3800ab0de2761dbb484657a847145fa",
+  "proposal_sha256": "79a16dc76881c65d8ac095631c53f433e12a5c0b69a2d5e3524c978ca67247fb",
   "reviewed_by": "Jules Elm (scripted fictional example)",
   "omissions": [],
   "decisions": [
@@ -40,6 +40,20 @@
       "note": ""
     },
     {
+      "key": "source_records/SRC_NOTES",
+      "fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
+      "key": "source_records/SRC_SUBJECT",
+      "fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
+      "action": "accept",
+      "publication": "unchanged",
+      "note": ""
+    },
+    {
       "key": "strengths_profile/S_DISTINCTIVE",
       "fingerprint": "b8477fdb7caa9af66a55e1deda62f750f65bd7ce36fc59f94232d06083d392fb",
       "action": "accept",
@@ -61,5 +75,5 @@
       "note": "I want to revisit the wording after reading the examples."
     }
   ],
-  "recorded": "2026-09-16T10:17:47.646343+00:00"
+  "recorded": "2026-09-20T11:10:17.496939+00:00"
 }

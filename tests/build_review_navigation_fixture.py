@@ -24,5 +24,29 @@ def fixture():
             'items': rows, 'groups': [], 'omissions': [], 'summary': {}}
 
 
+def connected_fixture(workspace):
+    import copy
+    import os
+    import shutil
+    import subprocess
+    from editorial_fixture import personas, pack_for
+    root = Path(__file__).resolve().parent.parent
+    workspace.mkdir()
+    shutil.copytree(root/'schemas', workspace/'schemas')
+    pack = pack_for(personas()[0]); pack['metadata'] = {}; pack['strengths_profile'] = []
+    original = copy.deepcopy(pack['evidence_atoms'][0])
+    pack['evidence_atoms'] = [dict(copy.deepcopy(original), id=f'E_BROWSER_{n:02}', title=f'Fictional contribution {n}') for n in range(14)]
+    (workspace/'reviews').mkdir()
+    (workspace/'reviews/onboarding.md').write_text(original['source_refs'][0]['excerpt'])
+    (workspace/'data/candidates').mkdir(parents=True)
+    (workspace/'data/candidates/browser.json').write_text(json.dumps(pack))
+    subprocess.run([sys.executable, '-B', str(root/'scripts/career_core.py'), 'review', 'start',
+                    '--candidate','data/candidates/browser.json','--id','browser'], check=True, capture_output=True,
+                   env={**os.environ, 'CAREER_WORKSPACE':str(workspace)})
+
+
 if __name__ == '__main__':
-    Path(sys.argv[1]).write_text(render_review(fixture()))
+    if sys.argv[1] == '--workspace':
+        connected_fixture(Path(sys.argv[2]))
+    else:
+        Path(sys.argv[1]).write_text(render_review(fixture()))

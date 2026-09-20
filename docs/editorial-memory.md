@@ -56,16 +56,14 @@ rejected interpretations need a person source. A recurring pattern requires
 multiple achievements, whereas a single achievement may still establish a strength.
 
 ```sh
-python3 scripts/answer.py reviews/onboarding.md --subject S_TECHNICAL_DEPTH \
-  --source SRC_ONBOARDING --question 'Does this describe your contribution?' \
-  --answer 'I designed the format; two colleagues built the integration.'
 python3 scripts/career_core.py bind-strength --pack data/candidates/career-v2.json \
-  --strength S_TECHNICAL_DEPTH --output data/candidates/career-v3.json
+  --strength S_TECHNICAL_DEPTH --assessment data/private/strength-assessment.json --output data/candidates/career-v3.json
 ```
 
-Register the answer as a person source in the new pack and cite its excerpt.
-`bind-strength` hashes only the named strength's supporting atoms; it never changes
-its status. Use it after reassessment, not to suppress a stale warning. Ensure the
+Use [the shared question/update contract](questions-and-updates.md) to record
+scoped answers and prepare the explicit assessment file. `bind-strength` updates
+the assessed interpretation, limitations and support hashes; it never changes
+confirmation status. Changed wording still needs human review. Ensure the
 new version supersedes the actual previous pack, not a detached working copy;
 the command preserves an explicit candidate metadata.supersedes when provided.
 The `status` command exposes open questions and changed support without reopening
@@ -89,7 +87,7 @@ and promotion_case. A role profile is optional for non-application formats.
 python3 scripts/editorial.py init-brief --id platform-resume-v1 \
   --output-id platform-resume --application northwind-platform --role head-of-platform-engineering \
   --format resume --audience named_recipient --length 'two A4 pages' \
-  --strength S_TECHNICAL_DEPTH --output data/briefs/platform-resume-v1-brief.json
+  --strength S_TECHNICAL_DEPTH --assessment data/private/strength-assessment.json --output data/briefs/platform-resume-v1-brief.json
 python3 scripts/editorial.py prepare --brief data/briefs/platform-resume-v1-brief.json \
   --id platform-v1 --limit 12 --output data/selections/platform-v1-selection.json
 ```

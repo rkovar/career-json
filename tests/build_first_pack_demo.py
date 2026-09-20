@@ -164,9 +164,51 @@ def build(destination):
         run('validate_pack.py')
         run('verify_excerpts.py', '--quiet')
 
+        # Demonstrate the new process without changing the accepted example.
+        accepted_before = (work / 'data/packs/updated.json').read_bytes()
+        question = {'question': 'What evidence supports the coaching benefit?',
+                    'targets': ['evidence_atoms/E_STORY_2'], 'kind': 'enrichment', 'required': False}
+        put('data/private/coaching-question.json', question)
+        asked = json.loads(run('career_core.py', 'questions', 'ask', '--pack', 'data/packs/updated.json',
+                               '--input', 'data/private/coaching-question.json'))
+        answer = json.loads(run('career_core.py', 'questions', 'respond', '--id', asked['id'], '--revision', '1',
+                            '--state', 'answered', '--by', 'Jules Elm (scripted example)', '--answer',
+                            'Three managers described the coaching as useful in our retrospective. We did not measure a numerical improvement.'))
+        question.update(question='Can we recover the baseline for the old speed estimate?',
+                        targets=['evidence_atoms/E_REVIEW_SPEED'])
+        put('data/private/speed-question.json', question)
+        deferred = json.loads(run('career_core.py', 'questions', 'ask', '--pack', 'data/candidates/update.json',
+                                  '--input', 'data/private/speed-question.json'))
+        run('career_core.py', 'questions', 'respond', '--id', deferred['id'], '--revision', '1', '--state', 'deferred',
+            '--by', 'Jules Elm (scripted example)', '--reason', 'Do not ask again without new source material.',
+            '--revisit-when', 'The original measurement record becomes available.')
+        reassessed = read('data/packs/updated.json')
+        coaching = next(a for a in reassessed['evidence_atoms'] if a['id'] == 'E_STORY_2')
+        coaching['source_refs'].append(answer['source_ref'])
+        coaching['notes'] = answer['answer']
+        reassessed['source_records'].append(answer['source_record'])
+        put('data/candidates/coaching-followup.json', reassessed)
+        from editorial_fixture import strength_assessment
+        assessment = strength_assessment(reassessed)
+        assessment['limitations'] = [{'index': 0, 'action': 'replace',
+             'text': 'Shared ownership remains explicit. Three managers reported benefit; no numerical improvement was measured.',
+             'reason': 'The recorded follow-up adds qualitative feedback while preserving the unknown numerical outcome.'}]
+        put('data/private/coaching-assessment.json', assessment)
+        run('career_core.py', 'bind-strength', '--pack', 'data/candidates/coaching-followup.json', '--strength', 'S_DISTINCTIVE',
+            '--assessment', 'data/private/coaching-assessment.json', '--output', 'data/candidates/coaching-reassessed.json')
+        candidate = read('data/candidates/coaching-reassessed.json')
+        # An unchanged second inventory neither approves facts nor stages a review.
+        run('career_core.py', 'intake', 'data/sources')
+        again = json.loads(run('career_core.py', 'intake', 'data/sources'))
+        recovery = json.loads(run('career_core.py', 'recover'))
+        put('process-habits.json', {'answered_question': answer, 'questions': json.loads(run('career_core.py', 'questions', 'list', '--all')),
+            'reassessed_strength': candidate['strengths_profile'][0], 'reimport': again, 'recovery': recovery,
+            'accepted_pack_changed': (work / 'data/packs/updated.json').read_bytes() != accepted_before,
+            'note': 'The reassessment is a candidate, not accepted wording. All answers are scripted fictional examples.'})
+
         destination.mkdir(parents=True, exist_ok=True)
         marker.write_text(MARKER)
-        for name in ('data', 'reviews'):
+        for name in ('data', 'reviews', 'outputs'):
             shutil.copytree(work / name, destination / name, dirs_exist_ok=True, ignore=shutil.ignore_patterns('.pack-write.lock'))
         for path in work.iterdir():
             if path.is_file():

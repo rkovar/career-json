@@ -62,10 +62,16 @@ def health(root=ROOT):
     audit = reference_audit(root)
     errors.extend(audit['errors'])
     attention.extend(audit['warnings'])
-    questions = [{'id': a['id'], 'question': q} for a in pack.get('evidence_atoms', []) for q in a.get('open_questions', [])]
+    from career_state import summary
+    current_state = summary(root)
+    errors.extend(current_state['errors'])
+    # Audit every historical session above; navigation shows only current work.
+    sessions = current_state['reviews']
+    question_state = current_state['questions']
+    questions = [q for q in question_state['items'] if q.get('state', 'open') == 'open' and not q.get('optional')]
     if errors:
         steps.append('Resolve the reported integrity problems before accepting another version.')
-    if sessions:
+    if any(s['actionable'] for s in sessions):
         steps.append('Continue a saved review; your recorded decisions remain available.')
     if questions:
         steps.append('Answer one open question when you have useful information to add.')
@@ -79,7 +85,7 @@ def health(root=ROOT):
             'current_pack': str(path.relative_to(root)) if path else None,
             'saved': {'roles': len(pack.get('employment', [])), 'achievements': sum(a.get('evidence_status') != 'declined' for a in pack.get('evidence_atoms', []))},
             'errors': list(dict.fromkeys(errors)), 'attention': list(dict.fromkeys(attention)),
-            'open_questions': questions, 'review_sessions': sessions, 'verification': verification['counts'],
+            'open_questions': questions, 'question_state': question_state, 'review_sessions': sessions, 'verification': verification['counts'],
             'next_steps': steps, 'readiness': 'Integrity and career completeness are separate. There is no completeness score or minimum achievement count.'}
 
 

@@ -1,0 +1,62 @@
+{
+  "roles": [
+    {
+      "employer": "Relay Ops Services",
+      "title": "Service Reliability Analyst",
+      "start": "2020-02",
+      "end": [
+        null,
+        "2024-07",
+        "2024-08"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "name": "lantern",
+      "anchor": "lantern",
+      "patterns": [
+        "credential",
+        "service owner|with.*owner",
+        "failover"
+      ],
+      "role_title": "Service Reliability Analyst"
+    },
+    {
+      "name": "moth",
+      "anchor": "moth",
+      "patterns": [
+        "checklist",
+        "both shifts|two shifts|2 shifts",
+        "ticket"
+      ],
+      "role_title": "Service Reliability Analyst"
+    }
+  ],
+  "qualification": {
+    "anchor": "itil",
+    "patterns": [
+      "foundation",
+      "certification|certified"
+    ],
+    "forbidden": null,
+    "end": "2019"
+  },
+  "forbidden_claims": [
+    "Kubernetes",
+    "[$\u00a3\u20ac]\\s*\\d|\\d\\s*%",
+    "saved.*hours|prevented.*hours"
+  ],
+  "conflict": {
+    "patterns": [
+      "2024-07|july 2024",
+      "2024-08|august 2024",
+      "unresolved|conflict|discrepan|confirm|clarif|uncertain"
+    ]
+  },
+  "human_review": [
+    "Is Relay Ops Services the employer, with Harbour Care identified only as client?",
+    "Is prevention work retained without invented savings or avoided outage claims?",
+    "Are both conflicting dates visible and explicitly unresolved?"
+  ]
+}

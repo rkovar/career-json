@@ -39,3 +39,32 @@ correction notes and omission feedback. Never fill in approvals for the person.
 When Resume Application is installed, follow its `docs/resume-authoring.md` for
 application context, optional review, durable plans and PDF/TXT/DOCX delivery.
 Resume-specific instructions remain in that component.
+
+## Career creation and maintenance defaults
+
+Honor the requested source scope; use `career_core.py intake` to inventory it.
+Skip byte-identical sources and compare new material with stable existing IDs.
+Show the full readable proposed career before follow-up questions. Review roles
+once and complete achievements in batches of five, with supporting detail available.
+Use `review open` for the temporary local browser connection, or conversation
+choices through `review apply`. Offline decisions remain supported.
+
+This stdlib loopback review connection is supported; do not add a hosted web app,
+database, model-provider integration or new Python dependency without a request.
+Literal corrections use `review correct`; structural corrections use recorded
+answers and `review revise`. Show revised wording before acceptance and carry
+unchanged approvals. Source registration is never human factual approval.
+
+A useful saved private record is the first milestone. Contact details, strengths,
+publication permissions, richer outcomes and corroboration are optional later work.
+Prioritize factual accuracy and conflicts. `open_questions.py` defaults to that
+queue; use `--optional` for enrichment or `--application` for resume diagnostics.
+Quick capture saves supplied notes without an interview. Keep recurring updates
+short: only review meaningful changes, then show the saved reading view.
+
+
+Use `docs/questions-and-updates.md` for durable scoped questions, strength
+reassessment, shared summary and recovery. Record questions before asking and
+answers before proposing changes. Saved answers are evidence, never automatic
+wording acceptance. Use `career_core.py health --summary --json` for a quick state
+view, `view` for the saved career record and `recover` after interruption.

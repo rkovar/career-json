@@ -29,14 +29,16 @@ ownership follow-ups about individual examples for subsequent turns. Appending
 two ownership questions to the first question is still a batch, even when it is
 presented as one paragraph.
 
-Record each answer immediately with `scripts/answer.py --subject <strength-or-preference-id>`.
-Create its person source in the pack and cite the recorded excerpt. Route new
+Register the scoped question with `career_core.py questions ask`, then record the
+exact response with `questions respond`. Use the returned pinned person source
+and reference in the candidate (see `docs/questions-and-updates.md`). Route new
 achievements and ownership corrections through `review-evidence`; preferences
 belong in `positioning_preferences`; publication restrictions belong on the
 underlying evidence. A confirmed interpretation never promotes evidence status.
 
-Persist proposed questions in `review_question` and `question_status`. Answers
-close questions; declined questions stay closed. Preserve rejected interpretations
+New question state lives in immutable `reviews/questions/` revisions. Legacy
+`review_question` and `question_status` fields remain readable. Answers close
+questions; declined questions stay closed. Preserve rejected interpretations
 so a future session does not re-propose them. Resume from `career_core.py status`,
 revisiting only materially changed support or an explicitly changed direction.
 
@@ -52,3 +54,13 @@ and readiness without turning completion of this interview into a prerequisite.
 Strength binding always writes a candidate under `data/candidates/`; it cannot
 publish a pack. Review the reassessed interpretation before acceptance. Use
 `career_core.py history <evidence-id>` to inspect changed supporting facts.
+
+
+## Durable questions and updates
+
+Follow `docs/questions-and-updates.md` for the shared question, reassessment and
+recovery contract. Save scoped questions before asking and exact answers before
+changing a candidate. Answered, deferred and declined work stays settled; optional
+enrichment does not block saving. Use `health --summary --json` for current work,
+and `career_core.py recover` after interruption. Reassess affected strengths with
+`bind-strength --assessment`; never renew fingerprints alone.

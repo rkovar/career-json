@@ -2,10 +2,94 @@
   "current_pack": "data/packs/accepted.json",
   "saved_roles": 4,
   "saved_achievements": 9,
-  "reviewed_items": 22,
+  "reviewed_items": 20,
   "pending_items": 6,
   "corrections": 3,
   "questions": 2,
+  "optional_questions": 3,
+  "deferred_questions": 0,
+  "question_state": {
+    "items": [
+      {
+        "kind": "recorded",
+        "question": "Can the baseline and measurement period be recovered?",
+        "unlocks": "recorded_question",
+        "subject": "E_REVIEW_SPEED",
+        "detail": null,
+        "score": 2.5,
+        "optional": false,
+        "id": "q-846c2d2a919c0f5466b7",
+        "targets": [
+          "evidence_atoms/E_REVIEW_SPEED"
+        ],
+        "state": "open",
+        "origin": "legacy",
+        "required": true
+      },
+      {
+        "kind": "recorded",
+        "question": "What part of coaching was most useful to the engineers?",
+        "unlocks": "recorded_question",
+        "subject": "E_STORY_2",
+        "detail": null,
+        "score": 2.5,
+        "optional": false,
+        "id": "q-89145ce91275544e0003",
+        "targets": [
+          "evidence_atoms/E_STORY_2"
+        ],
+        "state": "open",
+        "origin": "legacy",
+        "required": true
+      },
+      {
+        "kind": "strength",
+        "subject": "S_ENTERPRISE",
+        "question": "Does this describe your contribution?",
+        "optional": true,
+        "id": "q-5aba9d8498ca77bf61ed",
+        "targets": [
+          "strengths_profile/S_ENTERPRISE"
+        ],
+        "state": "open",
+        "origin": "legacy",
+        "required": false
+      },
+      {
+        "kind": "strength",
+        "subject": "S_TRANSLATION",
+        "question": "Does this describe your contribution?",
+        "optional": true,
+        "id": "q-9346583b2283a388555f",
+        "targets": [
+          "strengths_profile/S_TRANSLATION"
+        ],
+        "state": "open",
+        "origin": "legacy",
+        "required": false
+      },
+      {
+        "kind": "strength",
+        "subject": "S_DISTINCTIVE",
+        "question": "Does this describe your contribution?",
+        "optional": true,
+        "id": "q-cd26eddcc7a63df18f67",
+        "targets": [
+          "strengths_profile/S_DISTINCTIVE"
+        ],
+        "state": "open",
+        "origin": "legacy",
+        "required": false
+      }
+    ],
+    "open": 5,
+    "answered": 0,
+    "deferred": 0,
+    "declined": 0,
+    "superseded": 0,
+    "required": 2,
+    "optional": 3
+  },
   "next_items": [
     {
       "key": "evidence_atoms/E_QUEUE_DUPLICATE",

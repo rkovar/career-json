@@ -32,3 +32,5 @@ You do not need these pages to use the wizards.
 
 - [Career setup](operators/career-start.md)
 - [First-pack review](operators/first-pack.md)
+
+Operator reference: [Questions, saved answers and dependable updates](questions-and-updates.md).

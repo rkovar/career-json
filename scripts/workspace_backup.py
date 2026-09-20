@@ -60,7 +60,7 @@ def reference_audit(root):
                 check_path(value['artifact'], value['run'].get('artifact_sha256'), owner)
             for child in value.values(): inspect(child, owner)
     for folder in ('data/packs', 'data/candidates', 'data/selections', 'data/briefs', 'data/plans',
-                   'reviews/pack-reviews', 'reviews/decisions', 'reviews/startup'):
+                   'reviews/pack-reviews', 'reviews/decisions', 'reviews/startup', 'reviews/questions'):
         for path in (root / folder).rglob('*.json'):
             try: inspect(json.loads(path.read_text()), str(path.relative_to(root)))
             except (ValueError, OSError, TypeError) as exc: errors.append(str(path.relative_to(root)) + ': ' + str(exc))

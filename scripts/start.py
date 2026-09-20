@@ -10,12 +10,14 @@ import subprocess
 import sys
 
 from check_components import check
-from current_pack import ROOT
+from current_pack import ROOT, resolve
 from startup import FLOW_LABELS, continue_prompt
 
 PROMPTS = {
     'career': 'Walk me through the career-pack wizard.',
+    'update': 'Help me update my career pack. Save a quick note as supplied, or inspect the new material I specify and review only meaningful additions and changes.',
     'resume': 'Walk me through the resume wizard.',
+    'view': 'Show my current saved career record. Refresh its reading page from the accepted pack if needed.',
 }
 STATUSES = {'active': 'In progress', 'paused': 'Paused', 'handed_off': 'Setup complete'}
 
@@ -38,7 +40,7 @@ def resume_available(root):
         return False, 'Resume setup is unavailable: ' + str(exc)
 
 
-def saved_work(root, include_resume):
+def saved_work(root, include_resume, history=False):
     """Read current setup names and review names without creating or changing data."""
     root = Path(root).resolve()
     result, unreadable = [], 0
@@ -61,6 +63,8 @@ def saved_work(root, include_resume):
                         or path.stem != '{:06d}'.format(row['revision'])
                         or row['status'] not in STATUSES):
                     raise ValueError('invalid saved setup')
+                if row['status'] == 'handed_off' and not history:
+                    continue
                 result.append({
                     'label': '{} — {} ({})'.format(FLOW_LABELS[kind], label(row['session_id']), STATUSES[row['status']]),
                     'prompt': continue_prompt(row),
@@ -68,19 +72,20 @@ def saved_work(root, include_resume):
                 })
             except (ValueError, KeyError, TypeError, OSError):
                 unreadable += 1
-    for path in sorted((root / 'reviews/pack-reviews').glob('*/session.json')):
-        try:
-            if not path.resolve().is_relative_to(root):
-                raise ValueError('review outside workspace')
-            row = json.loads(path.read_text())
-            rid = row['review_id']
-            if rid != path.parent.name or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', rid):
-                raise ValueError('invalid review name')
-            result.append({'label': 'Career-pack review — ' + label(rid),
-                           'prompt': 'Continue my career-pack review named {}.'.format(json.dumps(rid)),
-                           'updated': label(row.get('created', ''))})
-        except (ValueError, KeyError, TypeError, OSError):
+    from pack_review import session_catalog
+    # The shared projection knows which complete review sessions have actionable
+    # work. Older incomplete headers remain discoverable for diagnosis.
+    from career_state import summary
+    current_reviews = {r['review_id']: r for r in summary(root)['reviews']}
+    for row in session_catalog(root):
+        if row.get('error'):
             unreadable += 1
+        elif history or not row['superseded_by']:
+            if not history and row['review_id'] in current_reviews and not current_reviews[row['review_id']]['actionable']:
+                continue
+            result.append({'label': 'Career-pack review — ' + label(row['label']),
+                           'prompt': 'Continue my career-pack review named {}.'.format(json.dumps(row['review_id'])),
+                           'updated': label(row['created'])})
     return sorted(result, key=lambda row: (row['updated'], row['label']), reverse=True), unreadable
 
 
@@ -103,15 +108,27 @@ def choose(title, choices):
 
 def main(argv=None, root=ROOT):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--flow', choices=('career', 'resume', 'continue'))
+    parser.add_argument('--flow', choices=('career', 'update', 'resume', 'continue', 'view'))
+    parser.add_argument('--history', action='store_true', help='include completed setup and review work')
     parser.add_argument('--print-prompt', action='store_true', help='show the conversation prompt without opening Claude Code')
     args = parser.parse_args(argv)
     root = Path(root).resolve()
     try:
         check(root)
         has_resume, note = resume_available(root)
-        saved, unreadable = saved_work(root, has_resume)
+        saved, unreadable = saved_work(root, has_resume, args.history)
         choices = [{'label': FLOW_LABELS['career'], 'flow': 'career'}]
+        try:
+            current = resolve(root / 'data/packs', root)
+        except SystemExit as exc:
+            raise ValueError('The saved career history needs repair; it is not an empty workspace. ' + str(exc)) from exc
+        from career_state import history_errors
+        problems = history_errors(current, root)
+        if problems:
+            raise ValueError('; '.join(problems))
+        if current:
+            choices.insert(0, {'label': 'Update my career pack', 'flow': 'update'})
+            choices.insert(1, {'label': 'View my saved career record', 'flow': 'view'})
         if has_resume:
             choices.append({'label': FLOW_LABELS['resume'], 'flow': 'resume'})
         if saved:

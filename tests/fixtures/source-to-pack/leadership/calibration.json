@@ -1,0 +1,205 @@
+{
+  "schema_version": "1.4",
+  "name": "Mira Fen",
+  "employment": [
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "employment_id": "EMP_MAIN",
+      "employer": "Arc Laboratory",
+      "title": "Engineering Lead",
+      "start": "2018-04",
+      "end": "2026-02",
+      "notes": "Both a hands-on builder and a leader; emphasis depends on the application."
+    }
+  ],
+  "evidence_atoms": [
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_0",
+      "title": "Cobalt review toolkit",
+      "star": {
+        "situation": "Cobalt review toolkit",
+        "task": "Contribute within the recorded role",
+        "action": "Personally wrote the Cobalt review toolkit.",
+        "result": "End-to-end approval shortened from eight days to two hours including human review and sign-off."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_1",
+      "title": "Juniper programme",
+      "star": {
+        "situation": "Juniper programme",
+        "task": "Contribute within the recorded role",
+        "action": "Led Juniper enablement.",
+        "result": "Accounts touched represented $32M cumulative pipeline over three years, not booked revenue."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_2",
+      "title": "Larch team",
+      "star": {
+        "situation": "Larch team",
+        "task": "Contribute within the recorded role",
+        "action": "Built and led the Larch team from zero to four; the team delivered 120 reviews.",
+        "result": "Four staff at peak, three at departure; the recognition programme covered the wider 70-person department."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_3",
+      "title": "Birch forum",
+      "star": {
+        "situation": "Birch forum",
+        "task": "Contribute within the recorded role",
+        "action": "Started the quarterly Birch design forum.",
+        "result": "An ongoing internal forum."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_4",
+      "title": "Cypress deployment controls",
+      "star": {
+        "situation": "Cypress deployment controls",
+        "task": "Contribute within the recorded role",
+        "action": "Led the team and personally contributed to Cypress pipeline controls.",
+        "result": "The pipeline passed an internal controls audit in 2025. A different risk-triage service was never audited."
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    },
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "id": "E_SUPPORT",
+      "title": "Inherited support team",
+      "star": {
+        "situation": "Existing support team",
+        "task": "Lead improvements",
+        "action": "Inherited the existing support team.",
+        "result": null
+      },
+      "skills": [],
+      "metrics": [],
+      "employment_id": "EMP_MAIN",
+      "outcome_type": "output"
+    }
+  ],
+  "education": [
+    {
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "# Fictional career account: Mira Fen\n\nEngineering Lead at Arc Laboratory, 2018-04 to 2026-02.\n\nFormal HR title: Engineering Lead. Director-equivalent is a grade, not a title. I founded Larch; I inherited the existing support team. Confidential customer work is private and must not be investigated further.\n\n## Cobalt review toolkit\n\nPersonally wrote the Cobalt review toolkit. It shortened end-to-end approval from eight days to two hours, including human review and sign-off. The baseline was a measured average. This is my own account, not independently audited.\n\n## Juniper programme\n\nLed Juniper enablement. An old resume said $32M annual revenue. Correction: $32M was cumulative pipeline on touched accounts over three years, not booked revenue or attributable revenue.\n\n## Larch team\n\nBuilt the Larch team from zero to four. The team delivered 120 reviews, not 120 reviews personally performed by me. Four reports was the peak; there were three at departure. A recognition programme covered the wider 70-person department.\n\n## Birch forum\n\nStarted the Birch internal design forum. Present it as quarterly; omit the number of events from external descriptions. I am both a hands-on builder and a leader; emphasis can vary by application.\n\n## Education and training\n\nProfessional Safety Licence awarded 2016; expired in 2020. Keep as lapsed history, never a current qualification.\n\n## Cypress deployment controls\n\nLed the team and personally contributed to Cypress pipeline controls. This pipeline passed an internal controls audit in 2025. A separate risk-triage service was never audited. The positive audit outcome applies only to the pipeline, not the triage service. There is no external certification or auditor report supplied.\n"
+        }
+      ],
+      "corroborators": [],
+      "education_id": "EDU_1",
+      "institution": "Fictional training provider",
+      "qualification": "Professional Safety Licence (expired in 2020)",
+      "end": "2016"
+    }
+  ],
+  "source_records": [
+    {
+      "source_id": "SRC_ACCOUNT",
+      "source_type": "person",
+      "path": "data/sources/career-account.md",
+      "sha256": "e09018acf9c021fd03ca8eb31a4e7301cc72d6675e9ddf3195b8c6816ae8cce0",
+      "independent": false,
+      "retrieved": "2026-09-20"
+    }
+  ],
+  "positioning_preferences": [
+    {
+      "id": "P_BALANCE",
+      "kind": "presentation",
+      "text": "Show both hands-on building and leadership, varying emphasis by application.",
+      "status": "active",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ACCOUNT",
+          "excerpt": "I am both a hands-on builder and a leader; emphasis can vary by application."
+        }
+      ]
+    }
+  ]
+}

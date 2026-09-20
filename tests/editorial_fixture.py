@@ -56,3 +56,15 @@ def brief_for(person, fmt='resume', version='v1'):
             'length': 'one page' if fmt == 'resume' else '150 words' if fmt == 'biography' else 'concise private preparation',
             'strength_ids': ['S_DISTINCTIVE'], 'preference_ids': ['P_DIRECTION'], 'priority_evidence_ids': [],
             'instructions': '', 'external_safe': False, 'created_by': 'system'}
+
+
+def strength_assessment(pack, strength_id=None):
+    """Explicit fictional reassessment used in lifecycle tests."""
+    strength = next(s for s in pack['strengths_profile'] if strength_id is None or s['id'] == strength_id)
+    atoms = {a['id']: a for a in pack['evidence_atoms']}
+    return {'strength_sha256': fingerprint(strength),
+            'support': {i: fingerprint(atoms[i]) for i in strength['evidence_ids']},
+            'interpretation': strength['interpretation'],
+            'reason': 'The corrected evidence still supports this fictional interpretation.',
+            'limitations': [{'index': i, 'action': 'retain', 'reason': 'This limit still applies after the correction.'}
+                            for i, _ in enumerate(strength.get('limitations', []))]}

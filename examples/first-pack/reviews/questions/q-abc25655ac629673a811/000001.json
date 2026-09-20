@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": "q-abc25655ac629673a811",
+  "revision": 1,
+  "previous": null,
+  "question": "What evidence supports the coaching benefit?",
+  "targets": [
+    "evidence_atoms/E_STORY_2"
+  ],
+  "kind": "enrichment",
+  "required": false,
+  "state": "open",
+  "context": {
+    "pack": {
+      "path": "reviews/questions/q-abc25655ac629673a811/context.json",
+      "sha256": "5e8efb1373e96cf2415c05ac13e9bfec39a89f638a7635f6e3bb45dcb70adb74"
+    },
+    "fingerprints": {
+      "evidence_atoms/E_STORY_2": "7a52bf05e90140af0fa5243a23bb6b5c3a30f272fc932c2b805bda54724e6dec"
+    },
+    "original_pack_path": "data/packs/updated.json"
+  },
+  "answer": null,
+  "by": null,
+  "reason": "",
+  "revisit_when": null,
+  "recorded_at": "2026-09-20T11:10:18.604103+00:00"
+}

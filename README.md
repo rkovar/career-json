@@ -44,6 +44,8 @@ Answer in the conversation; the assistant handles the underlying scripts and fil
 | Choose | What happens |
 | --- | --- |
 | **Build my career pack** | Bring existing material or describe your work, then review the proposed record. |
+| **Update my career pack** (once a pack exists) | Capture a note or review only additions and changes from new material. |
+| **View my saved career record** (once a pack exists) | Read your current record and its sources. |
 | **Create a resume** | Choose a job or direction and the strengths you want to highlight. |
 
 **Unsure? Start with your career pack. One old resume is enough.** Use several documents if you have them ready.
@@ -51,6 +53,8 @@ Answer in the conversation; the assistant handles the underlying scripts and fil
 If Claude Code is already open in this directory, simply say **“Walk me through
 the career-pack wizard”** or **“Walk me through the resume wizard.”** These enter
 the same workflows as the menu.
+
+Developing the tool too? [Create a separate personal workspace](docs/workspace-maintenance.md#create-a-separate-personal-workspace) so career files stay outside your development checkout.
 
 PDF sources need a text extractor; PDF resume export also needs Chrome/Chromium.
 See the [first-session guide](docs/getting-started.md) for source setup and
@@ -71,9 +75,16 @@ You can leave material for later and start with what you have.
 3. **Save and try it.** Accept a role and a few achievements, then ask to retrieve
    one. You can stop there and return whenever useful.
 
-You can give decisions in conversation. If you use the browser controls, download
-the decisions and give that file back to the assistant to apply. You decide both
-whether wording is accurate and whether it may be used in external documents.
+Give decisions in conversation or use **Save reviewed changes** in the connected
+browser review. Correct wording, preview the revision, then confirm it. The page
+shows five items at a time and saves before moving to the next batch.
+New information stays private; external-use decisions and strengths interviews
+can wait. The standalone HTML also supports downloaded decisions.
+
+Ask to use one file or **everything in Sources**. The assistant inventories that
+scope, skips unchanged material and separates career evidence from job descriptions
+and writing advice. You review roles and achievements, with source excerpts nearby.
+The saved pack has a readable page you can return to at any time.
 
 ## Keep it up to date
 
@@ -97,7 +108,8 @@ New work -> Quick note or document -> Your review -> Updated career pack
 
 You do not have to finish every question in one session. Say **“pause”**, then
 use `make start` and choose **Continue saved work** when you return. Saved setups
-and career reviews appear by name. New setup summaries also include a prompt
+and active career reviews appear by name; completed work moves to history. Answers
+and deferrals are retained, so returning does not restart the interview. New setup summaries also include a prompt
 you can copy to continue.
 
 ## Create a resume
@@ -119,8 +131,8 @@ is processed by your configured model service. Personal data and generated
 documents are excluded from normal Git commits and public release archives.
 Keep private review pages and backups private too.
 
-Career Evidence Core `0.1.0-alpha.5` is early access; Resume Application
-`0.1.0-beta.6` is beta. Human review is part of using the tool. Automated checks
+Career Evidence Core `0.1.0-alpha.6` is early access; Resume Application
+`0.1.0-beta.7` is beta. Human review is part of using the tool. Automated checks
 help catch problems, but do not establish excellent writing or predict hiring outcomes.
 
 ## Find help

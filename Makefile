@@ -1,7 +1,13 @@
 # Python code uses stdlib. PDF export additionally needs Chrome/Chromium and a PDF extractor.
-.PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts links hooks clean
+.PHONY: help check validate records test render artifacts quantities entailment evals corroboration questions index pack-html excerpts links hooks clean help-developer
 
 help:
+	@echo "make start - build, update or view your career pack; create a resume; continue saved work"
+	@echo "First session: docs/getting-started.md"
+	@echo "Keep it current: docs/keep-current.md"
+	@echo "Developer commands: make help-developer"
+
+help-developer:
 	@echo "make start     - build my career pack, create a resume, or continue saved work"
 	@echo "make check-core / check-resume - independent component checks"
 	@echo "make test-releases - test clean core and add-on installations"
@@ -52,6 +58,9 @@ test:
 	@python3 tests/test_startup.py
 	@python3 tests/run_tests.py
 	@python3 tests/test_editorial.py
+	@python3 tests/test_source_pack_evaluation.py
+	@python3 tests/test_process_state.py
+	@python3 tests/test_source_formats.py
 	@python3 tests/test_resume_workflow.py
 	@python3 tests/test_resume_process.py
 	@python3 tests/test_pdf_links.py
@@ -59,6 +68,8 @@ test:
 	@python3 tests/test_resume_quality.py
 	@python3 tests/test_core.py
 	@python3 tests/test_pack_review.py
+	@python3 tests/test_career_creation.py
+	@python3 tests/test_review_server.py
 	@python3 tests/test_workspace.py
 	@python3 tests/run_journeys.py
 	@python3 tests/test_releases.py
@@ -161,6 +172,8 @@ test-core:
 	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
 	@python3 tests/test_pack_review.py
+	@python3 tests/test_career_creation.py
+	@python3 tests/test_review_server.py
 	@python3 tests/test_workspace.py
 	@python3 tests/run_journeys.py
 test-releases:

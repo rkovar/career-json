@@ -25,7 +25,9 @@ If you already cloned or unzipped the project, skip cloning and run from its dir
 `make start`. It opens a menu and launches Claude Code for your choice. The full
 checkout includes both **Build my career pack** and **Create a resume**.
 A Core-only archive offers career-pack tools until you install the resume add-on.
-**Continue saved work** appears when there are saved setups or career reviews.
+**Continue saved work** appears for active setups or career reviews. Completed
+work stays in history. Once you save a pack, **View my saved career record** opens
+the readable current record.
 
 Choose **Build my career pack** for the first exercise below. If you need a
 resume now, choose **Create a resume**: your target is saved while the assistant
@@ -38,13 +40,15 @@ For PDF sources, macOS can use Swift/PDFKit; Linux needs Poppler. See
 [PDF source setup](extraction.md#what-it-uses) if extraction tools are missing.
 You can also start with text, a Word document, or your own account.
 
+If you also develop the tool, use a [separate personal workspace](workspace-maintenance.md#create-a-separate-personal-workspace). A normal Core archive can already be your personal workspace.
+
 ## 2. Bring what you have
 
 The wizard asks whether you want to use documents, gather material, or describe
 your work. One old resume is enough. Several sources are welcome if you already
 have them ready; you do not need to collect your whole archive.
 
-Put documents in `data/sources/` and tell the assistant which to use. It can help
+Put documents in `data/sources/` and tell the assistant which to use. Say “Use everything in Sources” to inspect the whole directory. It inventories duplicate, unchanged and unreadable files before proposing new facts. It can help
 identify resumes, project notes, talks and other useful material. Job descriptions
 and writing advice guide the work but do not become facts about your career.
 
@@ -62,21 +66,28 @@ You can give decisions in conversation:
 > The rehearsal example is accurate. Keep it private. The mentoring example
 > needs a correction: the engineers developed the approach together.
 
-Or use the browser review, which shows five items at a time. **Save and next five**
-keeps your place in the browser. To apply those choices to your pack, use
-**Download review decisions**, then tell the assistant where that file is:
+Or use the connected browser review, which shows five items at a time. Confirm a
+role once, then review its achievements with source excerpts available when needed.
+Enter your name under **How review and saving work**. **Save reviewed changes**
+writes accepted facts to your local pack; **Save and next five** also takes you to
+the next batch. The status tells you what was saved and what still needs review.
 
-> Apply my saved review decisions and show me what remains. The file is at
-> [the location of my downloaded file].
+To fix wording, expand **Correct the recorded wording**, edit the details, and
+choose **Show revised wording**. This previews edits across all cards. Saving while
+you have edited wording also opens a preview first; choose **Looks accurate** on
+the revised items and save again. Earlier approvals carry forward only when they
+still apply. New or changed information stays private by default.
 
-The assistant saves accepted items and preserves corrections and unfinished work.
-It may show related role or source information that needs your review too.
-Confirming accurate wording and allowing external use are separate choices;
-new information stays private unless you allow it externally.
+The assistant opens a temporary connection to your local workspace for browser
+saving. If you use a standalone HTML file instead, download the decisions and tell
+the assistant where you saved them. A download alone does not update the pack.
+After saving, use **Read saved career pack** to see your current record.
 
 You can stop after a role and a few useful achievements. Unanswered factual
 questions remain visible, and claims needing clarification stay out of resumes.
-There is no need to finish every question or a strengths interview now.
+There is no need to finish every question or a strengths interview now. “Not
+measured”, “later” and “keep this private” are useful answers. The assistant saves
+the question and your exact response, so you do not have to repeat them later.
 
 ## 4. Get something back
 
@@ -94,8 +105,9 @@ uncertainty. You now have a record you can reuse and improve.
 ## 5. Come back when something changes
 
 Say “pause” when you want to stop. Later, use `make start` and choose
-**Continue saved work**, or copy the continuation prompt from your setup summary.
+**Update my career pack** for new material, **Continue saved work** for a pending review, or copy the continuation prompt from your setup summary.
 The assistant resumes the named work with your earlier answers available.
+**Continue saved work** shows the latest correction under the original review name.
 
 Between reviews, save a quick note:
 

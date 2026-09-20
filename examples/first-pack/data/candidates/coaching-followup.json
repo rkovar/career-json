@@ -1,0 +1,944 @@
+{
+  "schema_version": "1.4",
+  "evidence_atoms": [
+    {
+      "id": "E_IMPORT_VALIDATION",
+      "title": "Made data imports easier to recover",
+      "employment_id": "EMP_CIVIC",
+      "occurred": {
+        "start": "2012-04",
+        "end": "2012-04",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Import failures were discovered after staff had started processing records.",
+        "task": "Make failures visible before processing and leave a recovery path for operators.",
+        "action": "Built validation checks and a rejected-record queue with the service-delivery team.",
+        "result": "Operators used the checks across 18 recurring data feeds."
+      },
+      "metrics": [],
+      "skills": [
+        "data engineering",
+        "service operations"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2012-04: Import failures were discovered after staff had started processing records. Make failures visible before processing and leave a recovery path for operators. Built validation checks and a rejected-record queue with the service-delivery team. Operators used the checks across 18 recurring data feeds."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_INCIDENT_EXERCISES",
+      "title": "Practised incident decisions across teams",
+      "employment_id": "EMP_NORTH",
+      "occurred": {
+        "start": "2017-10",
+        "end": "2017-10",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Teams had recovery instructions but had not practised making decisions together.",
+        "task": "Help service owners and support staff rehearse escalation decisions.",
+        "action": "Facilitated four incident exercises with service owners and support staff.",
+        "result": "The group clarified escalation owners and recorded gaps in recovery instructions; outage reduction was not measured."
+      },
+      "metrics": [],
+      "skills": [
+        "incident management",
+        "facilitation"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2017-10: Teams had recovery instructions but had not practised making decisions together. Help service owners and support staff rehearse escalation decisions. Facilitated four incident exercises with service owners and support staff. The group clarified escalation owners and recorded gaps in recovery instructions; outage reduction was not measured."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_OPERATIONS_RUNBOOK",
+      "title": "Handed routine recovery to operations",
+      "employment_id": "EMP_CIVIC",
+      "occurred": {
+        "start": "2013-09",
+        "end": "2013-09",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Routine recovery depended on an engineer remembering undocumented steps.",
+        "task": "Help the operations team own routine recovery safely.",
+        "action": "Paired with operators to write recovery runbooks and rehearse failure cases.",
+        "result": "Operations maintained the runbooks and performed routine recovery; no response-time baseline was recorded."
+      },
+      "metrics": [],
+      "skills": [
+        "knowledge transfer",
+        "service operations"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2013-09: Routine recovery depended on an engineer remembering undocumented steps. Help the operations team own routine recovery safely. Paired with operators to write recovery runbooks and rehearse failure cases. Operations maintained the runbooks and performed routine recovery; no response-time baseline was recorded."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_PLATFORM_ADOPTION",
+      "title": "Chose an adoption plan within team capacity",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2023-05",
+        "end": "2023-05",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Four product teams requested different platform improvements from the same small group.",
+        "task": "Agree priorities and ownership within the available engineering capacity.",
+        "action": "Worked with engineering managers and product leads to compare support burden and migration effort.",
+        "result": "The group agreed a two-quarter platform adoption plan and named an owner for each migration; revenue impact was not measured."
+      },
+      "metrics": [],
+      "skills": [
+        "engineering leadership",
+        "prioritization"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2023-05: Four product teams requested different platform improvements from the same small group. Agree priorities and ownership within the available engineering capacity. Worked with engineering managers and product leads to compare support burden and migration effort. The group agreed a two-quarter platform adoption plan and named an owner for each migration; revenue impact was not measured."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_PRIVATE_REVIEW",
+      "title": "Led a sensitive supplier review",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2024-11",
+        "end": "2024-11",
+        "inferred": false
+      },
+      "star": {
+        "situation": "A supplier arrangement needed a confidential technical review.",
+        "task": "Give procurement a technical assessment without disclosing internal contract details.",
+        "action": "Coordinated engineering and procurement input and wrote the technical tradeoff assessment.",
+        "result": "Procurement used the assessment in its supplier review; commercial terms and the final decision remain private."
+      },
+      "metrics": [],
+      "skills": [
+        "technical due diligence",
+        "stakeholder communication"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2024-11: A supplier arrangement needed a confidential technical review. Give procurement a technical assessment without disclosing internal contract details. Coordinated engineering and procurement input and wrote the technical tradeoff assessment. Procurement used the assessment in its supplier review; commercial terms and the final decision remain private."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [
+        "Private supplier and employer context; do not reuse in external documents."
+      ]
+    },
+    {
+      "id": "E_QUEUE_VISIBILITY",
+      "title": "Made a shared queue visible to service teams",
+      "employment_id": "EMP_NORTH",
+      "occurred": {
+        "start": "2016-03",
+        "end": "2016-03",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Service teams could not distinguish a quiet queue from a stalled consumer.",
+        "task": "Expose queue age and ownership without replacing the messaging platform.",
+        "action": "Designed a queue-age dashboard and paired with service owners to set alert thresholds.",
+        "result": "Five services adopted the dashboard and ownership alerts."
+      },
+      "metrics": [],
+      "skills": [
+        "observability",
+        "cross-team collaboration"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2016-03: Service teams could not distinguish a quiet queue from a stalled consumer. Expose queue age and ownership without replacing the messaging platform. Designed a queue-age dashboard and paired with service owners to set alert thresholds. Five services adopted the dashboard and ownership alerts."
+        },
+        {
+          "source_id": "SRC_NOTES",
+          "excerpt": "The March 2016 queue-age dashboard and the \"service health dashboard\" in the resume are the same project. Jules designed the dashboard and worked with the five service owners on alert thresholds. This is not a second delivery."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_SERVICE_BOUNDARIES",
+      "title": "Agreed a gradual service separation",
+      "employment_id": "EMP_STAFF",
+      "occurred": {
+        "start": "2021-02",
+        "end": "2021-02",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Product and operations disagreed about replacing a shared service in one release.",
+        "task": "Make the migration tradeoffs explicit and agree a sequence the teams could support.",
+        "action": "Mapped failure boundaries with both groups and authored a staged separation proposal.",
+        "result": "The teams chose a staged separation and retained a rollback path; product teams implemented the changes."
+      },
+      "metrics": [],
+      "skills": [
+        "software architecture",
+        "stakeholder communication"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "2021-02: Product and operations disagreed about replacing a shared service in one release. Make the migration tradeoffs explicit and agree a sequence the teams could support. Mapped failure boundaries with both groups and authored a staged separation proposal. The teams chose a staged separation and retained a rollback path; product teams implemented the changes."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_STORY_1",
+      "title": "Created a deployment rehearsal tool",
+      "employment_id": "EMP_STAFF",
+      "occurred": {
+        "start": "2019-03",
+        "end": "2019-03",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Product teams needed to test deployment steps before changing production.",
+        "task": "Make deployment practice repeatable without taking delivery ownership from the teams.",
+        "action": "Designed the rehearsal format and co-built its runner with engineers.",
+        "result": "Two teams adopted rehearsals before deployment."
+      },
+      "metrics": [],
+      "skills": [
+        "platform engineering",
+        "cross-team collaboration"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "In March 2019 I designed a deployment rehearsal format and co-built its runner with engineers. Two teams adopted rehearsals before deployment."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_TALK",
+      "title": "Shared deployment practice with peers",
+      "employment_id": "EMP_STAFF",
+      "occurred": {
+        "start": "2021-06",
+        "end": "2021-06",
+        "inferred": false
+      },
+      "star": {
+        "situation": "A community event invited practitioners to discuss deployment practice.",
+        "task": "Share the approach with peers.",
+        "action": "Co-presented with Mara Vale at Community Systems Forum.",
+        "result": "The programme lists both speakers and the shared talk; audience impact was not measured."
+      },
+      "metrics": [],
+      "skills": [
+        "public speaking",
+        "knowledge transfer"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_TALK",
+          "excerpt": "Community Systems Forum, June 2021: \"Practising deployments before production\". Co-presenters: Jules Elm and Mara Vale, Fictional Fieldwork Ltd. The programme establishes the shared talk title and speaker listing, not audience size or impact."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": []
+    },
+    {
+      "id": "E_STORY_2",
+      "title": "Built an engineering practice",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2025-02",
+        "end": "2025-02",
+        "inferred": false
+      },
+      "star": {
+        "situation": "The group was trying a shared approach to design reviews.",
+        "task": "Help engineers learn from each other.",
+        "action": "Sponsored the peer design-review pilot and coached three engineering managers; Mara Vale and Theo Reed designed the format, and the managers shared hiring responsibility.",
+        "result": "The engineering group adopted peer design reviews."
+      },
+      "metrics": [],
+      "skills": [
+        "coaching",
+        "engineering leadership"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "In February 2025 I hired and coached engineers while introducing peer design reviews. The engineering group adopted peer design reviews."
+        },
+        {
+          "source_id": "SRC_MANAGER",
+          "excerpt": "Jules sponsored the peer design-review pilot and coached three engineering managers. Engineers Mara Vale and Theo Reed designed the review format together. Hiring was shared with the managers. The engineering group adopted peer design reviews; we have not collected feedback about which coaching was most useful."
+        },
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "I sponsored the peer design-review pilot and coached three managers. Mara and Theo designed the format, and the managers shared hiring responsibility. Please keep that division of work explicit. I still cannot say which part of my coaching helped most."
+        },
+        {
+          "source_id": "SRC_ANSWER_ABC25655AC629673A811_R2",
+          "locator": "Question q-abc25655ac629673a811, revision 2",
+          "excerpt": "\"Three managers described the coaching as useful in our retrospective. We did not measure a numerical improvement.\""
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "open_questions": [
+        "What part of coaching was most useful to the engineers?"
+      ],
+      "notes": "Three managers described the coaching as useful in our retrospective. We did not measure a numerical improvement."
+    },
+    {
+      "id": "E_MIGRATION_PLANNING",
+      "title": "Agreed a phased customer-data migration",
+      "employment_id": "EMP_CURRENT",
+      "occurred": {
+        "start": "2026-08",
+        "end": "2026-08",
+        "inferred": false
+      },
+      "star": {
+        "situation": "Product wanted a single migration while operations wanted a rehearsed fallback.",
+        "task": "Help both groups agree a migration sequence and decision points.",
+        "action": "Facilitated the planning discussion and wrote a rollback decision guide; operations ran the rehearsal.",
+        "result": "Product owners agreed to migrate in phases. The migration had not yet run."
+      },
+      "metrics": [],
+      "skills": [
+        "stakeholder communication",
+        "software architecture"
+      ],
+      "source_refs": [
+        {
+          "source_id": "SRC_CAPTURE",
+          "excerpt": "Helped operations and product agree a phased customer-data migration. I wrote the rollback decision guide; operations ran the rehearsal. Capture this for my next review."
+        },
+        {
+          "source_id": "SRC_UPDATE",
+          "excerpt": "August 2026: product wanted a single customer-data migration while operations wanted a rehearsed fallback. Jules facilitated the planning discussion and wrote a rollback decision guide. Operations ran the rehearsal, and product owners agreed to migrate in phases. The migration had not yet run; no claim about a successful launch, time saved or reduced incidents is established."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "outcome_type": "output",
+      "corroborators": [],
+      "constraints": [],
+      "capture": {
+        "method": "note",
+        "note_id": "N0001"
+      }
+    }
+  ],
+  "education": [
+    {
+      "education_id": "EDU_BSC",
+      "institution": "Fictional Eastbank University",
+      "qualification": "BSc",
+      "field": "Computer Science",
+      "start": "2006-09",
+      "end": "2010-06",
+      "grade": null,
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "BSc in Computer Science, Fictional Eastbank University, September 2006 to June 2010. No grade supplied."
+        }
+      ]
+    }
+  ],
+  "employment": [
+    {
+      "employment_id": "EMP_CIVIC",
+      "employer": "Fictional Civic Atlas",
+      "employer_of_record": "Fictional Civic Atlas",
+      "title": "Software Engineer",
+      "start": "2010-09",
+      "end": "2014-06",
+      "parent_employment_id": null,
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Software Engineer at Fictional Civic Atlas, September 2010 to June 2014. Built data-import tools with a service-delivery team."
+        }
+      ],
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_CURRENT",
+      "employer": "Fictional Fieldwork Ltd",
+      "employer_of_record": "Fictional Fieldwork Ltd",
+      "title": "Head of Engineering",
+      "start": "2022-07",
+      "end": "present",
+      "parent_employment_id": "EMP_STAFF",
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, July 2022 to present. Leads a group of 18 engineers through three engineering managers; partners with product and operations. London."
+        }
+      ],
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "corroborators": [],
+      "scope": {
+        "team_size": "18 engineers",
+        "direct_reports": "3 engineering managers",
+        "source_refs": [
+          {
+            "source_id": "SRC_SUBJECT",
+            "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, July 2022 to present. Leads a group of 18 engineers through three engineering managers; partners with product and operations. London."
+          }
+        ]
+      }
+    },
+    {
+      "employment_id": "EMP_NORTH",
+      "employer": "Fictional North Quay Systems",
+      "employer_of_record": "Fictional North Quay Systems",
+      "title": "Senior Software Engineer",
+      "start": "2014-07",
+      "end": "2017-12",
+      "parent_employment_id": null,
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Senior Software Engineer at Fictional North Quay Systems, July 2014 to December 2017. Worked on service operations and shared platform tools."
+        }
+      ],
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_STAFF",
+      "employer": "Fictional Fieldwork Ltd",
+      "employer_of_record": "Fictional Fieldwork Ltd",
+      "title": "Staff Engineer",
+      "start": "2018-01",
+      "end": "2022-06",
+      "parent_employment_id": null,
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Staff Engineer at Fictional Fieldwork Ltd, January 2018 to June 2022. Supported several product teams without line-management responsibility."
+        }
+      ],
+      "external_safe": true,
+      "evidence_status": "self_asserted",
+      "corroborators": []
+    }
+  ],
+  "name": "Jules Elm",
+  "private_profile": {
+    "name": "Jules Elm",
+    "location": "London"
+  },
+  "purpose": "Entirely fictional career-review demonstration; never use as personal evidence.",
+  "publications": [
+    {
+      "publication_id": "PUB_DEPLOYMENT_TALK",
+      "title": "Practising deployments before production",
+      "kind": "talk",
+      "venue": "Community Systems Forum",
+      "date": "2021-06",
+      "role": "co_speaker",
+      "collaborators": [
+        "Mara Vale"
+      ],
+      "employment_id": "EMP_STAFF",
+      "evidence_id": "E_TALK",
+      "source_refs": [
+        {
+          "source_id": "SRC_TALK",
+          "excerpt": "Community Systems Forum, June 2021: \"Practising deployments before production\". Co-presenters: Jules Elm and Mara Vale, Fictional Fieldwork Ltd. The programme establishes the shared talk title and speaker listing, not audience size or impact."
+        }
+      ],
+      "evidence_status": "self_asserted",
+      "external_safe": true,
+      "url": null
+    }
+  ],
+  "source_records": [
+    {
+      "source_id": "SRC_MANAGER",
+      "source_type": "markdown",
+      "path": "data/sources/manager-review-2025.md",
+      "independent": true,
+      "sha256": "452b7e943c97015f1d5c5d005b602ad95414d7428313233ef2e114fb52f09997",
+      "character_count": 357
+    },
+    {
+      "source_id": "SRC_NOTES",
+      "source_type": "markdown",
+      "path": "data/sources/project-notes.md",
+      "independent": false,
+      "sha256": "54f3c2733288e4167484604bdbbfef1f9eddb10199927d4ed17bdb6cd5a2a6a6",
+      "character_count": 489
+    },
+    {
+      "source_id": "SRC_SUBJECT",
+      "source_type": "markdown",
+      "path": "data/sources/resume.md",
+      "independent": false,
+      "sha256": "e3ac83878d07075ada0524bed64cd1a4f00f3a2a39ad2aad9e4a81d85b291009",
+      "character_count": 3629
+    },
+    {
+      "source_id": "SRC_TALK",
+      "source_type": "markdown",
+      "path": "data/sources/conference-programme.md",
+      "independent": true,
+      "sha256": "b70ba5456fff724e9fffc49df7a13bcf47ffe5e9270eb1ca0fb777b8ea9602ff",
+      "character_count": 277
+    },
+    {
+      "source_id": "SRC_ANSWERS",
+      "source_type": "person",
+      "path": "data/sources/review-answers.md",
+      "independent": false,
+      "sha256": "3606cdb284e946a27dc3dd57847cdb47a44f01e276ca2fe73726af448b0433f7",
+      "character_count": 760,
+      "retrieved": "2026-09-16"
+    },
+    {
+      "source_id": "SRC_CAPTURE",
+      "source_type": "json",
+      "path": "data/sources/captured-note.json",
+      "independent": false,
+      "sha256": "6ca8d5ffc1f00203565ae8c9fa0037aa28750a09c0ec80cfefd426f40bae1737",
+      "character_count": 368
+    },
+    {
+      "source_id": "SRC_UPDATE",
+      "source_type": "markdown",
+      "path": "data/sources/update-2026.md",
+      "independent": false,
+      "sha256": "b52b5e7f5aedbd4a6201077323860726704ef4d8390cf71a46750f2999112ddb",
+      "character_count": 424
+    },
+    {
+      "source_id": "SRC_ANSWER_ABC25655AC629673A811_R2",
+      "source_type": "person",
+      "path": "reviews/questions/q-abc25655ac629673a811/000002.json",
+      "sha256": "513216051f4327eb0647268fb477c5c07785fb7246d5d321420eef15e1d653d8",
+      "retrieved": "2026-09-20",
+      "independent": false
+    }
+  ],
+  "metadata": {
+    "human_review": {
+      "session": {
+        "path": "reviews/pack-reviews/fictional-update/session.json",
+        "sha256": "5db20b480f22f82c59e6545e144071eb07002cd31061ad7fd89098c6d4f70926"
+      },
+      "items": {
+        "education/EDU_BSC": {
+          "fingerprint": "f1728d17fda35ac440a9176fadfc69b2e65dede87df5581dbb371335078432bb",
+          "reviewed_fingerprint": "f1728d17fda35ac440a9176fadfc69b2e65dede87df5581dbb371335078432bb",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "employment/EMP_CIVIC": {
+          "fingerprint": "cac5ad7727949ae1cca7132240e717047d06a73ed6a07b9b6c027c9bc628a803",
+          "reviewed_fingerprint": "cac5ad7727949ae1cca7132240e717047d06a73ed6a07b9b6c027c9bc628a803",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "employment/EMP_CURRENT": {
+          "fingerprint": "3535c42a6340c0d7e971fc5f6a6a262e1fc3a300a51198c77ef23e478796c009",
+          "reviewed_fingerprint": "3535c42a6340c0d7e971fc5f6a6a262e1fc3a300a51198c77ef23e478796c009",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "employment/EMP_NORTH": {
+          "fingerprint": "e8935ce009ca70434688fd7928cebdb91af5282ac5cf46de1c0996dfc8037867",
+          "reviewed_fingerprint": "e8935ce009ca70434688fd7928cebdb91af5282ac5cf46de1c0996dfc8037867",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "employment/EMP_STAFF": {
+          "fingerprint": "4cafaf6e503109ce7fdc49b5e85cc8e87cc1e0c18480945b32b0578ab8a4d9c5",
+          "reviewed_fingerprint": "4cafaf6e503109ce7fdc49b5e85cc8e87cc1e0c18480945b32b0578ab8a4d9c5",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_IMPORT_VALIDATION": {
+          "fingerprint": "407257d8392b66bbc7da34e364b1602bfe9d4046336365468c969389b71c2a6a",
+          "reviewed_fingerprint": "407257d8392b66bbc7da34e364b1602bfe9d4046336365468c969389b71c2a6a",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_INCIDENT_EXERCISES": {
+          "fingerprint": "007fbe977904accbe9e6f63b1a9dd9a2814b93f1f6cd34dcef57a8f88a21477e",
+          "reviewed_fingerprint": "007fbe977904accbe9e6f63b1a9dd9a2814b93f1f6cd34dcef57a8f88a21477e",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_OPERATIONS_RUNBOOK": {
+          "fingerprint": "bd8656c10e3b86a4daeb8f3a41337761b9aaae60d935619577ef3bf8547afe6e",
+          "reviewed_fingerprint": "bd8656c10e3b86a4daeb8f3a41337761b9aaae60d935619577ef3bf8547afe6e",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_PLATFORM_ADOPTION": {
+          "fingerprint": "386e8239ecd5a23fc1ba37d7ee300a0c4c659e9e6ddf88fc416db35415b3a605",
+          "reviewed_fingerprint": "386e8239ecd5a23fc1ba37d7ee300a0c4c659e9e6ddf88fc416db35415b3a605",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_PRIVATE_REVIEW": {
+          "fingerprint": "897be38294dfceef695a14ada58a47b90986b1a31f48447eedc85fb71009b5f4",
+          "reviewed_fingerprint": "897be38294dfceef695a14ada58a47b90986b1a31f48447eedc85fb71009b5f4",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_QUEUE_VISIBILITY": {
+          "fingerprint": "9a902ef1c5985c7ea7b9f8ea3dd84bc5f24ef6f7b03f8dd1d0e8a83680873d40",
+          "reviewed_fingerprint": "9a902ef1c5985c7ea7b9f8ea3dd84bc5f24ef6f7b03f8dd1d0e8a83680873d40",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.496939+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "ddce39fbaf344045b0abd8cce39e1d9ceb82c4a9adc06b5f1884a37b65285ce8"
+          }
+        },
+        "evidence_atoms/E_SERVICE_BOUNDARIES": {
+          "fingerprint": "77a98c21eaea1690dc04063507e4b6ccfc188d9896a4032be35728ecaeb88fdf",
+          "reviewed_fingerprint": "77a98c21eaea1690dc04063507e4b6ccfc188d9896a4032be35728ecaeb88fdf",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_STORY_1": {
+          "fingerprint": "d10452b77f6ada6309831059214f33ac08457d08e2d00a19a76d8dfb1d2c165f",
+          "reviewed_fingerprint": "d10452b77f6ada6309831059214f33ac08457d08e2d00a19a76d8dfb1d2c165f",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_TALK": {
+          "fingerprint": "a4a40f340ad10497b375baa285c15ee1f5f297e19d34fe0978b33fba41ead369",
+          "reviewed_fingerprint": "a4a40f340ad10497b375baa285c15ee1f5f297e19d34fe0978b33fba41ead369",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "field/name": {
+          "fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
+          "reviewed_fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "field/private_profile": {
+          "fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
+          "reviewed_fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "field/purpose": {
+          "fingerprint": "84ea82a25842ff6554fd44ce22332b4d2a0b28ee7ca61eb60eded640b03f3f19",
+          "reviewed_fingerprint": "84ea82a25842ff6554fd44ce22332b4d2a0b28ee7ca61eb60eded640b03f3f19",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "publications/PUB_DEPLOYMENT_TALK": {
+          "fingerprint": "c54ae630d37eb39c272b9436c435e943ee5113fab065042df128b10fdc0be3ff",
+          "reviewed_fingerprint": "c54ae630d37eb39c272b9436c435e943ee5113fab065042df128b10fdc0be3ff",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "source_records/SRC_MANAGER": {
+          "fingerprint": "94c5c86cf9bb6c797492b258c97e106770d1c9906715fe31a5260f07b266f48f",
+          "reviewed_fingerprint": "94c5c86cf9bb6c797492b258c97e106770d1c9906715fe31a5260f07b266f48f",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "source_records/SRC_NOTES": {
+          "fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
+          "reviewed_fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:18.068889+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+            "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+          }
+        },
+        "source_records/SRC_SUBJECT": {
+          "fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
+          "reviewed_fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:18.068889+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+            "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+          }
+        },
+        "source_records/SRC_TALK": {
+          "fingerprint": "837eef43d09c98b7123d00127d1b8ec63ed04f53b915265e0623cda09163ca85",
+          "reviewed_fingerprint": "837eef43d09c98b7123d00127d1b8ec63ed04f53b915265e0623cda09163ca85",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
+          }
+        },
+        "evidence_atoms/E_STORY_2": {
+          "fingerprint": "7a52bf05e90140af0fa5243a23bb6b5c3a30f272fc932c2b805bda54724e6dec",
+          "reviewed_fingerprint": "7a52bf05e90140af0fa5243a23bb6b5c3a30f272fc932c2b805bda54724e6dec",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.496939+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "ddce39fbaf344045b0abd8cce39e1d9ceb82c4a9adc06b5f1884a37b65285ce8"
+          }
+        },
+        "positioning_preferences/P_DIRECTION": {
+          "fingerprint": "498016121bf82a983b0faf1ab47fd6611b5c0a536e30ce4cd243cf9076910095",
+          "reviewed_fingerprint": "498016121bf82a983b0faf1ab47fd6611b5c0a536e30ce4cd243cf9076910095",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.496939+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "ddce39fbaf344045b0abd8cce39e1d9ceb82c4a9adc06b5f1884a37b65285ce8"
+          }
+        },
+        "source_records/SRC_ANSWERS": {
+          "fingerprint": "803a53796cc02891aac03ce78a627f8ccb61ce7b8872b2000347e848546c4797",
+          "reviewed_fingerprint": "803a53796cc02891aac03ce78a627f8ccb61ce7b8872b2000347e848546c4797",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:18.068889+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+            "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+          }
+        },
+        "strengths_profile/S_DISTINCTIVE": {
+          "fingerprint": "b8477fdb7caa9af66a55e1deda62f750f65bd7ce36fc59f94232d06083d392fb",
+          "reviewed_fingerprint": "b8477fdb7caa9af66a55e1deda62f750f65bd7ce36fc59f94232d06083d392fb",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:17.496939+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-correction/decisions/000001.json",
+            "sha256": "ddce39fbaf344045b0abd8cce39e1d9ceb82c4a9adc06b5f1884a37b65285ce8"
+          }
+        },
+        "evidence_atoms/E_MIGRATION_PLANNING": {
+          "fingerprint": "05672bcab36938a787bbe9346a4ba3c7f990f6f6d3ade5be0b355f2edca5a2e6",
+          "reviewed_fingerprint": "05672bcab36938a787bbe9346a4ba3c7f990f6f6d3ade5be0b355f2edca5a2e6",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:18.068889+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+            "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+          }
+        },
+        "source_records/SRC_CAPTURE": {
+          "fingerprint": "dcf34a554f3480c6b2de5598670fa68d589e42bd1056b2d8a063fef586970433",
+          "reviewed_fingerprint": "dcf34a554f3480c6b2de5598670fa68d589e42bd1056b2d8a063fef586970433",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:18.068889+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+            "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+          }
+        },
+        "source_records/SRC_UPDATE": {
+          "fingerprint": "6052a00cd2e9b551c0d1b7772396338fd7cbb701caf286016869fbd238fe9499",
+          "reviewed_fingerprint": "6052a00cd2e9b551c0d1b7772396338fd7cbb701caf286016869fbd238fe9499",
+          "reviewed_by": "Jules Elm (scripted fictional example)",
+          "recorded": "2026-09-20T11:10:18.068889+00:00",
+          "batch": {
+            "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+            "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+          }
+        }
+      },
+      "applied_batches": [
+        {
+          "path": "reviews/pack-reviews/fictional-update/decisions/000001.json",
+          "sha256": "5f2b767a24b44bc131968e73c37f1ae353d1b0f703c2d0c14c6cb0901ee6e293"
+        }
+      ],
+      "accepted_at": "2026-09-20T11:10:18.075855+00:00"
+    },
+    "supersedes": "data/packs/corrected.json"
+  },
+  "positioning_preferences": [
+    {
+      "id": "P_DIRECTION",
+      "kind": "direction",
+      "text": "I want technical leadership work that keeps me close to system design and helps other engineers develop. I am open to Staff Engineer or engineering leadership roles; a larger reporting organization is not my main goal.",
+      "status": "active",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "I want technical leadership work that keeps me close to system design and helps other engineers develop. I am open to Staff Engineer or engineering leadership roles; a larger reporting organization is not my main goal."
+        }
+      ]
+    }
+  ],
+  "strengths_profile": [
+    {
+      "id": "S_DISTINCTIVE",
+      "interpretation": "Helps teams adopt practical engineering approaches",
+      "evidence_ids": [
+        "E_STORY_1",
+        "E_STORY_2"
+      ],
+      "evidence_fingerprints": {
+        "E_STORY_1": "0c1e99191b3e2486f0bfd73f8efa84a6cf76c6ba950bbfa299a38243a42440ee",
+        "E_STORY_2": "5c8747a9141ce7a600d0efaf2f3dc79be825161858c6c262fedc6d3797090bef"
+      },
+      "status": "confirmed",
+      "basis": "recurring_pattern",
+      "limitations": [
+        "Shared ownership is explicit; the coaching benefit has not been measured."
+      ],
+      "timeframe": "Dates of the supporting achievements",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_ANSWERS",
+          "excerpt": "Yes: helping teams adopt practical engineering approaches describes my contribution. It includes coaching and creating space for engineers to design the solution; it does not mean I built everything myself. Keep this interpretation private for now."
+        }
+      ],
+      "question_status": "answered",
+      "review_question": "Does this describe your contribution?"
+    }
+  ]
+}

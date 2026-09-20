@@ -29,6 +29,30 @@ def main(argv=None, _locked=False):
         from pack_io import workspace_lock
         with workspace_lock():
             return main(argv, _locked=True)
+    if argv and argv[0] == "workspace":
+        from workspace_setup import main as workspace_main
+        return workspace_main(argv[1:])
+    if argv and argv[0] == "intake":
+        from career_intake import main as intake_main
+        return intake_main(argv[1:])
+    if argv and argv[0] == 'questions':
+        from question_history import main as questions_main
+        return questions_main(argv[1:])
+    if argv and argv[0] == 'recover':
+        from career_state import recover
+        print(json.dumps(recover(), indent=2)); return 0
+    if argv and argv[0] == 'view':
+        from career_review import reading_page
+        from pack_io import workspace_lock
+        with workspace_lock():
+            page = reading_page()
+        print(page or 'No saved career pack yet.'); return 0
+    if argv and argv[0] == 'health' and '--summary' in argv:
+        from career_state import summary
+        state = summary()
+        print(json.dumps(state, indent=2) if '--json' in argv else state['next'] + '\n' +
+              str(state['questions']['required']) + ' factual questions; ' + str(state['questions']['optional']) + ' optional questions.')
+        return 1 if state['errors'] else 0
     if argv and argv[0] == "start":
         from career_start import main as start_main
         return start_main(argv[1:])
@@ -38,7 +62,7 @@ def main(argv=None, _locked=False):
     if argv and argv[0] in ('health', 'history', 'maintain', 'backup', 'restore'):
         from workspace_tools import main as workspace_main
         return workspace_main(argv)
-    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: start, review, health, history, maintain, backup and restore. Use <command> --help for details.")
+    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: intake, start, review, workspace, health, history, maintain, backup and restore. Use <command> --help for details.")
     sub = parser.add_subparsers(dest='command', required=True)
     status = sub.add_parser('status', help='private strengths interview queue')
     status.add_argument('--pack', help='inspect a proposal before its first acceptance')
@@ -48,6 +72,7 @@ def main(argv=None, _locked=False):
     bind.add_argument('--pack', required=True)
     bind.add_argument('--strength', required=True)
     bind.add_argument('--output', required=True)
+    bind.add_argument('--assessment', help='JSON explaining the interpretation and every limitation against current support')
     export = sub.add_parser('export', help='lossless private JSON copy; source files must be backed up separately')
     export.add_argument('--output', required=True)
     args = parser.parse_args(argv)
@@ -95,8 +120,13 @@ def main(argv=None, _locked=False):
                 strength = next((s for s in record['strengths_profile'] if s['id'] == args.strength), None)
                 if strength is None:
                     raise ValueError('unknown strength')
-                atoms = atoms_by_id(record)
-                strength['evidence_fingerprints'] = {i: digest(atoms[i]) for i in strength['evidence_ids']}
+                if not args.assessment:
+                    raise ValueError('bind-strength needs --assessment: reassess the interpretation and every limitation; refreshing hashes alone is insufficient')
+                from career_profile import reassess_strength
+                from pack_io import pin
+                receipt = reassess_strength(strength, record, read(args.assessment))
+                receipt['assessment'] = pin(args.assessment)
+                metadata.setdefault('strength_reassessments', {})[strength['id']] = receipt
         validate_candidate(record, destination)
         written = write_new(destination, record)
         print(written.relative_to(ROOT.resolve()))

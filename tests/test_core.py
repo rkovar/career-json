@@ -99,8 +99,10 @@ class CoreTests(unittest.TestCase):
         self.save(self.pack)
         status = json.loads(self.run_cli('career_core.py', 'status').stdout)
         self.assertTrue(status['strengths'][0]['ask'])
+        from editorial_fixture import strength_assessment
+        (self.root/'assessment.json').write_text(json.dumps(strength_assessment(self.pack)))
         result = self.run_cli('career_core.py', 'bind-strength', '--pack', 'data/packs/pack.json',
-                              '--strength', strength['id'], '--output', 'data/candidates/v2.json')
+                              '--strength', strength['id'], '--output', 'data/candidates/v2.json', '--assessment', 'assessment.json')
         self.assertEqual(result.returncode, 0, result.stderr)
         bound = json.loads((self.root / 'data/candidates/v2.json').read_text())
         self.assertEqual(bound['strengths_profile'][0]['status'], strength['status'])
@@ -117,8 +119,10 @@ class CoreTests(unittest.TestCase):
         candidate=self.root/'data/candidates/unbound.json'
         candidate.parent.mkdir(parents=True)
         candidate.write_text(json.dumps(self.pack))
+        from editorial_fixture import strength_assessment
+        (self.root/'assessment.json').write_text(json.dumps(strength_assessment(self.pack)))
         result=self.run_cli('career_core.py','bind-strength','--pack','data/candidates/unbound.json',
-                            '--strength','S_DISTINCTIVE','--output','data/candidates/proposal.json')
+                            '--strength','S_DISTINCTIVE','--output','data/candidates/proposal.json','--assessment','assessment.json')
         self.assertEqual(result.returncode,0,result.stderr)
         candidate.unlink()
         proposal=json.loads((self.root/'data/candidates/proposal.json').read_text())
@@ -130,8 +134,10 @@ class CoreTests(unittest.TestCase):
         candidate=self.root/'data/candidates/unbound.json'
         candidate.parent.mkdir(parents=True)
         candidate.write_text(json.dumps(self.pack))
+        from editorial_fixture import strength_assessment
+        (self.root/'assessment.json').write_text(json.dumps(strength_assessment(self.pack)))
         result=self.run_cli('career_core.py','bind-strength','--pack','data/candidates/unbound.json',
-                            '--strength','S_DISTINCTIVE','--output','data/candidates/proposal.json')
+                            '--strength','S_DISTINCTIVE','--output','data/candidates/proposal.json','--assessment','assessment.json')
         self.assertEqual(result.returncode,0,result.stderr)
         candidate.unlink()
         proposal=json.loads((self.root/'data/candidates/proposal.json').read_text())

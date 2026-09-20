@@ -1,0 +1,8 @@
+{
+  "question": "Can we recover the baseline for the old speed estimate?",
+  "targets": [
+    "evidence_atoms/E_REVIEW_SPEED"
+  ],
+  "kind": "enrichment",
+  "required": false
+}

@@ -31,7 +31,17 @@ Tell the assistant “Remember that I…” to save a quick note. When convenien
 ask it to review your recent notes and update the pack. Proposed changes enter
 your reviewed record after you check them.
 
-Use **Continue saved work** in `make start` to return to named setups and reviews.
+Once a pack exists, **Update my career pack** handles new notes and documents.
+Review roles once, then achievements in batches of five. The connected review
+saves directly to the local pack; corrections are previewed before confirmation.
+Sources are registered separately from factual approval. Private content and
+optional strengths questions never prevent a useful first save.
+
+Developing the tool too? [Create a separate personal workspace](docs/workspace-maintenance.md#create-a-separate-personal-workspace).
+
+Choose **View my saved career record** to read what you have saved. Use
+**Continue saved work** to return to active setups and reviews. Answers,
+corrections and deferrals remain available when you return.
 See [Keep your career pack current](docs/keep-current.md) for examples.
 
 Resume generation is optional. Installing the matching add-on makes **Create a

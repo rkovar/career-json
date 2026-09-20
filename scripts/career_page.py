@@ -203,7 +203,9 @@ def build(pack, pack_path):
         end = "present" if "present" in ends else None if None in ends else max(ends)
         anchor = e(root["employment_id"])
         nav.append(f'<a href="#{anchor}"><span class="mono">{e(root["start"][:4])}</span>{e(root["employer"])}</a>')
-        titles = "".join(f'<li><span class="mono">{e(span(x["start"], x["end"]))}</span>{e(x["title"])}</li>' for x in reversed(chain))
+        from career_state import uncertainty
+        titles = "".join(f'<li><span class="mono">{e(span(x["start"], x["end"]))}</span>{e(x["title"])}'
+                         + (f'<p class="open">{e(uncertainty(x))}</p>' if uncertainty(x) else '') + '</li>' for x in reversed(chain))
         scope = (chain[-1].get("scope") or {})
         scope_rows = "".join(f'<div><dt>{e(k.replace("_", " "))}</dt><dd>{e(v)}</dd></div>'
                              for k, v in (("remit", scope.get("remit")), ("team", scope.get("team_size")),

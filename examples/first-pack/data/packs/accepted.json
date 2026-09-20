@@ -1,112 +1,5 @@
 {
   "schema_version": "1.4",
-  "education": [
-    {
-      "education_id": "EDU_BSC",
-      "institution": "Fictional Eastbank University",
-      "qualification": "BSc",
-      "field": "Computer Science",
-      "start": "2006-09",
-      "end": "2010-06",
-      "grade": null,
-      "evidence_status": "self_asserted",
-      "external_safe": false,
-      "source_refs": [
-        {
-          "source_id": "SRC_SUBJECT",
-          "excerpt": "BSc in Computer Science, Fictional Eastbank University, September 2006 to June 2010. No grade supplied."
-        }
-      ]
-    }
-  ],
-  "employment": [
-    {
-      "employment_id": "EMP_CIVIC",
-      "employer": "Fictional Civic Atlas",
-      "employer_of_record": "Fictional Civic Atlas",
-      "title": "Software Engineer",
-      "start": "2010-09",
-      "end": "2014-06",
-      "parent_employment_id": null,
-      "location": "London",
-      "source_refs": [
-        {
-          "source_id": "SRC_SUBJECT",
-          "excerpt": "Software Engineer at Fictional Civic Atlas, September 2010 to June 2014. Built data-import tools with a service-delivery team."
-        }
-      ],
-      "external_safe": false,
-      "evidence_status": "self_asserted",
-      "corroborators": []
-    },
-    {
-      "employment_id": "EMP_CURRENT",
-      "employer": "Fictional Fieldwork Ltd",
-      "employer_of_record": "Fictional Fieldwork Ltd",
-      "title": "Head of Engineering",
-      "start": "2022-07",
-      "end": "present",
-      "parent_employment_id": "EMP_STAFF",
-      "location": "London",
-      "source_refs": [
-        {
-          "source_id": "SRC_SUBJECT",
-          "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, July 2022 to present. Leads a group of 18 engineers through three engineering managers; partners with product and operations. London."
-        }
-      ],
-      "external_safe": false,
-      "evidence_status": "self_asserted",
-      "corroborators": [],
-      "scope": {
-        "team_size": "18 engineers",
-        "direct_reports": "3 engineering managers",
-        "source_refs": [
-          {
-            "source_id": "SRC_SUBJECT",
-            "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, July 2022 to present. Leads a group of 18 engineers through three engineering managers; partners with product and operations. London."
-          }
-        ]
-      }
-    },
-    {
-      "employment_id": "EMP_NORTH",
-      "employer": "Fictional North Quay Systems",
-      "employer_of_record": "Fictional North Quay Systems",
-      "title": "Senior Software Engineer",
-      "start": "2014-07",
-      "end": "2017-12",
-      "parent_employment_id": null,
-      "location": "London",
-      "source_refs": [
-        {
-          "source_id": "SRC_SUBJECT",
-          "excerpt": "Senior Software Engineer at Fictional North Quay Systems, July 2014 to December 2017. Worked on service operations and shared platform tools."
-        }
-      ],
-      "external_safe": false,
-      "evidence_status": "self_asserted",
-      "corroborators": []
-    },
-    {
-      "employment_id": "EMP_STAFF",
-      "employer": "Fictional Fieldwork Ltd",
-      "employer_of_record": "Fictional Fieldwork Ltd",
-      "title": "Staff Engineer",
-      "start": "2018-01",
-      "end": "2022-06",
-      "parent_employment_id": null,
-      "location": "London",
-      "source_refs": [
-        {
-          "source_id": "SRC_SUBJECT",
-          "excerpt": "Staff Engineer at Fictional Fieldwork Ltd, January 2018 to June 2022. Supported several product teams without line-management responsibility."
-        }
-      ],
-      "external_safe": true,
-      "evidence_status": "self_asserted",
-      "corroborators": []
-    }
-  ],
   "evidence_atoms": [
     {
       "id": "E_IMPORT_VALIDATION",
@@ -399,6 +292,113 @@
       "constraints": []
     }
   ],
+  "education": [
+    {
+      "education_id": "EDU_BSC",
+      "institution": "Fictional Eastbank University",
+      "qualification": "BSc",
+      "field": "Computer Science",
+      "start": "2006-09",
+      "end": "2010-06",
+      "grade": null,
+      "evidence_status": "self_asserted",
+      "external_safe": false,
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "BSc in Computer Science, Fictional Eastbank University, September 2006 to June 2010. No grade supplied."
+        }
+      ]
+    }
+  ],
+  "employment": [
+    {
+      "employment_id": "EMP_CIVIC",
+      "employer": "Fictional Civic Atlas",
+      "employer_of_record": "Fictional Civic Atlas",
+      "title": "Software Engineer",
+      "start": "2010-09",
+      "end": "2014-06",
+      "parent_employment_id": null,
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Software Engineer at Fictional Civic Atlas, September 2010 to June 2014. Built data-import tools with a service-delivery team."
+        }
+      ],
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_CURRENT",
+      "employer": "Fictional Fieldwork Ltd",
+      "employer_of_record": "Fictional Fieldwork Ltd",
+      "title": "Head of Engineering",
+      "start": "2022-07",
+      "end": "present",
+      "parent_employment_id": "EMP_STAFF",
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, July 2022 to present. Leads a group of 18 engineers through three engineering managers; partners with product and operations. London."
+        }
+      ],
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "corroborators": [],
+      "scope": {
+        "team_size": "18 engineers",
+        "direct_reports": "3 engineering managers",
+        "source_refs": [
+          {
+            "source_id": "SRC_SUBJECT",
+            "excerpt": "Head of Engineering at Fictional Fieldwork Ltd, July 2022 to present. Leads a group of 18 engineers through three engineering managers; partners with product and operations. London."
+          }
+        ]
+      }
+    },
+    {
+      "employment_id": "EMP_NORTH",
+      "employer": "Fictional North Quay Systems",
+      "employer_of_record": "Fictional North Quay Systems",
+      "title": "Senior Software Engineer",
+      "start": "2014-07",
+      "end": "2017-12",
+      "parent_employment_id": null,
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Senior Software Engineer at Fictional North Quay Systems, July 2014 to December 2017. Worked on service operations and shared platform tools."
+        }
+      ],
+      "external_safe": false,
+      "evidence_status": "self_asserted",
+      "corroborators": []
+    },
+    {
+      "employment_id": "EMP_STAFF",
+      "employer": "Fictional Fieldwork Ltd",
+      "employer_of_record": "Fictional Fieldwork Ltd",
+      "title": "Staff Engineer",
+      "start": "2018-01",
+      "end": "2022-06",
+      "parent_employment_id": null,
+      "location": "London",
+      "source_refs": [
+        {
+          "source_id": "SRC_SUBJECT",
+          "excerpt": "Staff Engineer at Fictional Fieldwork Ltd, January 2018 to June 2022. Supported several product teams without line-management responsibility."
+        }
+      ],
+      "external_safe": true,
+      "evidence_status": "self_asserted",
+      "corroborators": []
+    }
+  ],
   "name": "Jules Elm",
   "private_profile": {
     "name": "Jules Elm",
@@ -467,237 +467,237 @@
     "human_review": {
       "session": {
         "path": "reviews/pack-reviews/fictional-first-pack/session.json",
-        "sha256": "f52924c8a7deb267943355968058845c221dfb121cfe41b33b52bc7bb5857494"
+        "sha256": "6d719aba5f01bf2aaf3302ecf9bb4301e13beb6e62d646e395372bf49de31cc0"
       },
       "items": {
         "education/EDU_BSC": {
           "fingerprint": "f1728d17fda35ac440a9176fadfc69b2e65dede87df5581dbb371335078432bb",
           "reviewed_fingerprint": "f1728d17fda35ac440a9176fadfc69b2e65dede87df5581dbb371335078432bb",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "employment/EMP_CIVIC": {
           "fingerprint": "cac5ad7727949ae1cca7132240e717047d06a73ed6a07b9b6c027c9bc628a803",
           "reviewed_fingerprint": "cac5ad7727949ae1cca7132240e717047d06a73ed6a07b9b6c027c9bc628a803",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "employment/EMP_CURRENT": {
           "fingerprint": "3535c42a6340c0d7e971fc5f6a6a262e1fc3a300a51198c77ef23e478796c009",
           "reviewed_fingerprint": "3535c42a6340c0d7e971fc5f6a6a262e1fc3a300a51198c77ef23e478796c009",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "employment/EMP_NORTH": {
           "fingerprint": "e8935ce009ca70434688fd7928cebdb91af5282ac5cf46de1c0996dfc8037867",
           "reviewed_fingerprint": "e8935ce009ca70434688fd7928cebdb91af5282ac5cf46de1c0996dfc8037867",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "employment/EMP_STAFF": {
           "fingerprint": "4cafaf6e503109ce7fdc49b5e85cc8e87cc1e0c18480945b32b0578ab8a4d9c5",
           "reviewed_fingerprint": "4cafaf6e503109ce7fdc49b5e85cc8e87cc1e0c18480945b32b0578ab8a4d9c5",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_IMPORT_VALIDATION": {
           "fingerprint": "407257d8392b66bbc7da34e364b1602bfe9d4046336365468c969389b71c2a6a",
           "reviewed_fingerprint": "407257d8392b66bbc7da34e364b1602bfe9d4046336365468c969389b71c2a6a",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_INCIDENT_EXERCISES": {
           "fingerprint": "007fbe977904accbe9e6f63b1a9dd9a2814b93f1f6cd34dcef57a8f88a21477e",
           "reviewed_fingerprint": "007fbe977904accbe9e6f63b1a9dd9a2814b93f1f6cd34dcef57a8f88a21477e",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_OPERATIONS_RUNBOOK": {
           "fingerprint": "bd8656c10e3b86a4daeb8f3a41337761b9aaae60d935619577ef3bf8547afe6e",
           "reviewed_fingerprint": "bd8656c10e3b86a4daeb8f3a41337761b9aaae60d935619577ef3bf8547afe6e",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_PLATFORM_ADOPTION": {
           "fingerprint": "386e8239ecd5a23fc1ba37d7ee300a0c4c659e9e6ddf88fc416db35415b3a605",
           "reviewed_fingerprint": "386e8239ecd5a23fc1ba37d7ee300a0c4c659e9e6ddf88fc416db35415b3a605",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_PRIVATE_REVIEW": {
           "fingerprint": "897be38294dfceef695a14ada58a47b90986b1a31f48447eedc85fb71009b5f4",
           "reviewed_fingerprint": "897be38294dfceef695a14ada58a47b90986b1a31f48447eedc85fb71009b5f4",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_QUEUE_VISIBILITY": {
           "fingerprint": "47295d08a26bfa190ffdb9a6102299b22de3def3846d6699ba701b5999328bac",
           "reviewed_fingerprint": "47295d08a26bfa190ffdb9a6102299b22de3def3846d6699ba701b5999328bac",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_SERVICE_BOUNDARIES": {
           "fingerprint": "77a98c21eaea1690dc04063507e4b6ccfc188d9896a4032be35728ecaeb88fdf",
           "reviewed_fingerprint": "77a98c21eaea1690dc04063507e4b6ccfc188d9896a4032be35728ecaeb88fdf",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_STORY_1": {
           "fingerprint": "d10452b77f6ada6309831059214f33ac08457d08e2d00a19a76d8dfb1d2c165f",
           "reviewed_fingerprint": "d10452b77f6ada6309831059214f33ac08457d08e2d00a19a76d8dfb1d2c165f",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "evidence_atoms/E_TALK": {
           "fingerprint": "a4a40f340ad10497b375baa285c15ee1f5f297e19d34fe0978b33fba41ead369",
           "reviewed_fingerprint": "a4a40f340ad10497b375baa285c15ee1f5f297e19d34fe0978b33fba41ead369",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "field/name": {
           "fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
           "reviewed_fingerprint": "4118a018b36a0845f867fbf6774a5b74878af7b770b6846fd453aaafda649955",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "field/private_profile": {
           "fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
           "reviewed_fingerprint": "9ea5d0de834cc985ad8e84b90b1783d6866353e205dda769881057bde1035dff",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "field/purpose": {
           "fingerprint": "84ea82a25842ff6554fd44ce22332b4d2a0b28ee7ca61eb60eded640b03f3f19",
           "reviewed_fingerprint": "84ea82a25842ff6554fd44ce22332b4d2a0b28ee7ca61eb60eded640b03f3f19",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "publications/PUB_DEPLOYMENT_TALK": {
           "fingerprint": "c54ae630d37eb39c272b9436c435e943ee5113fab065042df128b10fdc0be3ff",
           "reviewed_fingerprint": "c54ae630d37eb39c272b9436c435e943ee5113fab065042df128b10fdc0be3ff",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "source_records/SRC_MANAGER": {
           "fingerprint": "94c5c86cf9bb6c797492b258c97e106770d1c9906715fe31a5260f07b266f48f",
           "reviewed_fingerprint": "94c5c86cf9bb6c797492b258c97e106770d1c9906715fe31a5260f07b266f48f",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "source_records/SRC_NOTES": {
           "fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
           "reviewed_fingerprint": "c0e2277523b43de078155b81480cda312bf951628e77ed5b51f45149bbd7f486",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "source_records/SRC_SUBJECT": {
           "fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
           "reviewed_fingerprint": "6a5247de72175290530256992da7c1e734f6fde4e02cab749d8421094384689f",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         },
         "source_records/SRC_TALK": {
           "fingerprint": "837eef43d09c98b7123d00127d1b8ec63ed04f53b915265e0623cda09163ca85",
           "reviewed_fingerprint": "837eef43d09c98b7123d00127d1b8ec63ed04f53b915265e0623cda09163ca85",
           "reviewed_by": "Jules Elm (scripted fictional example)",
-          "recorded": "2026-09-16T10:17:47.281955+00:00",
+          "recorded": "2026-09-20T11:10:17.026993+00:00",
           "batch": {
             "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-            "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+            "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
           }
         }
       },
       "applied_batches": [
         {
           "path": "reviews/pack-reviews/fictional-first-pack/decisions/000001.json",
-          "sha256": "8395497f48eefa52c1719d0e75eec2ba316cb5dcc9654f9a70480dbd48577456"
+          "sha256": "0b4545e814ebecfc21703bc204523537afde226d60f24fb1d67960fa6f62c904"
         }
       ],
-      "accepted_at": "2026-09-16T10:17:47.289140+00:00"
+      "accepted_at": "2026-09-20T11:10:17.035349+00:00"
     }
   }
 }

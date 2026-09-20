@@ -46,7 +46,7 @@ answers. `answer --input <file> --session <latest-json>` applies a patch:
 }
 ```
 
-Before extracting facts, inspect and classify files within the requested scope:
+For a direct source request, run `career_core.py intake <authorized-path>` without creating an unnecessary wizard session. Use `data/sources` only when the whole directory was authorized. Read its inventory and extracted text; unchanged material needs no new candidate. Before extracting facts, inspect and classify files within the requested scope:
 `career_evidence`, `job_context`, `writing_reference`, or `defer`. A filename alone
 does not establish purpose. “Everything in Sources” authorizes inspection of that
 directory, not treating advice or employer requirements as career history.

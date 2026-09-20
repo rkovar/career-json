@@ -3,7 +3,7 @@
     {
       "note_id": "N0001",
       "text": "Helped operations and product agree a phased customer-data migration. I wrote the rollback decision guide; operations ran the rehearsal. Capture this for my next review.",
-      "captured": "2026-09-16",
+      "captured": "2026-09-20",
       "occurred": "2026-08",
       "tags": [
         "migration"
@@ -14,6 +14,6 @@
       "promoted_to": null
     }
   ],
-  "accepted_pack_sha256": "ba20e1c411993f9ec05d380a4221e1a88e67239aca0debf1e637a445aa561c8b",
+  "accepted_pack_sha256": "a3d0c923143f3f94de2d355e8c81aa57ef8c174e8267401001aaa1603b41293f",
   "pack_changed": false
 }

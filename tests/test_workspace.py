@@ -72,7 +72,9 @@ class WorkspaceTests(unittest.TestCase):
 
     def test_binding_second_version_links_candidate_to_current_head(self):
         t = self.fixture; p = copy.deepcopy(t.pack); p['metadata']['supersedes'] = 'data/packs/base.json'; t.put('data/packs/v2.json', p)
-        self.cli('bind-strength', '--pack', 'data/packs/v2.json', '--strength', 'S_DISTINCTIVE', '--output', 'data/candidates/v3.json')
+        from editorial_fixture import strength_assessment
+        t.put('data/private/assessment.json', strength_assessment(p))
+        self.cli('bind-strength', '--pack', 'data/packs/v2.json', '--strength', 'S_DISTINCTIVE', '--assessment', 'data/private/assessment.json', '--output', 'data/candidates/v3.json')
         candidate = json.loads((self.root / 'data/candidates/v3.json').read_text())
         self.assertEqual(candidate['metadata']['supersedes'], 'data/packs/v2.json')
         self.assertEqual(len(list((self.root / 'data/packs').glob('*.json'))), 2)
@@ -119,7 +121,7 @@ class WorkspaceTests(unittest.TestCase):
         t.cli('render', '--session', t.session, '--output', 'outputs/review.html')
         page = (self.root / 'outputs/review.html').read_text()
         self.assertIn('Preview what will be saved', page)
-        self.assertIn('Review achievement and supporting records together', page)
+        self.assertIn('Show achievement and role together', page)
         self.assertEqual(page.count('class="card" data-key="employment/EMP_CURRENT"'), 1)
 
     def test_health_separates_integrity_from_career_completeness(self):

@@ -122,7 +122,8 @@ def verify(pack, root=ROOT):
         elif path is None or not path.exists():
             texts[sid] = ("unverifiable", f"file not found: {source.get('path')}")
         elif kind == "person":
-            texts[sid] = ("ok", normalise(path.read_text()))
+            texts[sid] = (("changed", "person source no longer matches its pinned revision")
+                          if source.get('sha256') and sha256(path) != source['sha256'] else ("ok", normalise(path.read_text())))
         elif kind in FILE_TYPES:
             recorded = source.get("sha256")
             if recorded and sha256(path) != recorded:
@@ -148,6 +149,12 @@ def verify(pack, root=ROOT):
             if source is None:
                 row.update(status="mismatch", detail="unknown source")
             else:
+                from question_history import answer_scope_error
+                scope_error = answer_scope_error(source, key, root)
+                if scope_error:
+                    row.update(status='mismatch', detail=scope_error)
+                    results.append(row)
+                    continue
                 try:
                     state, payload = source_text(source)
                 except (OSError, UnicodeError, RuntimeError) as exc:

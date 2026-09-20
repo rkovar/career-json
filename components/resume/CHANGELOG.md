@@ -1,5 +1,11 @@
 # Resume Application release notes
 
+## 0.1.0-beta.7 — local release candidate
+
+- Pin compatibility to Core alpha.6 and its question/history contract.
+- Include broader fictional extraction calibration and preserve model termination diagnostics.
+- Resume authoring and existing career schema 1.3/1.4 remain compatible.
+
 ## 0.1.0-beta.6 — local release candidate
 
 - Expose Create a resume through the shared launcher and add clear continuation prompts to setup summaries.

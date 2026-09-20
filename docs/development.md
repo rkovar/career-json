@@ -48,6 +48,7 @@ The launcher can be inspected without opening a model session:
 
 ```sh
 python3 scripts/start.py --flow career --print-prompt
+python3 scripts/start.py --flow update --print-prompt
 python3 scripts/start.py --flow resume --print-prompt
 python3 scripts/start.py --flow continue --print-prompt
 ```
@@ -60,6 +61,10 @@ a fake executable to check arguments, workspace and exit status without a model 
 
 Normal tests cover parsers, content equivalence, failure handling, link matching,
 review navigation structure, input staleness, privacy and publication rules.
+Normal tests also run temporary loopback HTTP checks for direct saving, corrected
+previews, stale writes and origin/token rejection. They need permission to bind
+a local socket. Creation tests cover partial packs, source registration, carried
+approvals, repeated saves, intake scope and clean workspace installation.
 Real PDF/browser checks are optional because they need installed external tools.
 
 With Chrome/Chromium and Poppler or macOS Swift/PDFKit available:
@@ -75,7 +80,8 @@ For interactive review navigation, with Node.js providing built-in WebSocket:
 node tests/test_review_navigation.mjs
 ```
 
-Set `CAREER_BROWSER` if Chrome is installed elsewhere. These checks use temporary
+Set `CAREER_BROWSER` if Chrome is installed elsewhere. The browser test covers both the 80-question offline page and actual connected
+saves, corrections and reload recovery. These checks use temporary
 fictional workspaces and an isolated browser profile. They do not open the user's
 career files. Rendering and text/link extraction still do not establish good prose
 or universal ATS compatibility; inspect the final document and record any judgment.
@@ -107,3 +113,10 @@ plans stale.
 `data/`, `reviews/`, `outputs/`, `backups/` and local archive directories must remain
 outside source commits. Public release archives use explicit allowlists; private
 workspace backups use a separate format and contain personal material.
+
+Source-to-pack checks and bounded live runs are documented in
+[quality benchmarks](quality-benchmarks.md#source-to-pack-preservation).
+`make check` includes evaluator calibration using fictional sources and deliberate
+factual errors. Live model runs remain opt-in; do not report deterministic tests
+as proof of extraction quality. Review UI regressions also exercise multi-card
+wording edits and require a fresh confirmation before accepting revised text.

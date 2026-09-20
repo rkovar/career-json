@@ -306,8 +306,10 @@ class EditorialTests(unittest.TestCase):
         self.pack['strengths_profile'][0]['status'] = 'proposed'
         self.pack['evidence_atoms'][0]['star']['action'] += ' Updated.'
         candidate = self.put('data/private/candidate.json', self.pack)
+        from editorial_fixture import strength_assessment
+        self.put('data/private/assessment.json', strength_assessment(self.pack, 'S_DEPTH'))
         out = self.cli('editorial.py', 'bind-strength', '--pack', candidate, '--strength', 'S_DEPTH',
-                       '--output', 'data/candidates/v2.json')
+                       '--output', 'data/candidates/v2.json', '--assessment', 'data/private/assessment.json')
         self.assertEqual(out.returncode, 0, out.stderr)
         saved = editorial.read('data/candidates/v2.json')
         self.assertEqual(saved['metadata']['supersedes'], 'data/packs/pack.json')

@@ -39,6 +39,14 @@ and understand its gaps. It does not certify resume quality. Role and screen
 records, when an application supplies them, may suggest questions; they carry no
 factual authority and are not required for onboarding.
 
+The default review groups achievements by role and registers verifiable source
+metadata separately from human approval. Use `review open` for a temporary local
+browser connection with direct saving; `review render` remains the offline option.
+Corrections produce revised wording for confirmation and retain unchanged decisions.
+A partial private pack needs no contact profile or strengths interview.
+`open_questions.py` defaults to factual uncertainties; `--optional` adds enrichment
+and `--application` includes role/screen/publication questions.
+
 ## Strengths and direction
 
 Schema 1.4 stores `strengths_profile` and `positioning_preferences`. A strength
@@ -46,7 +54,10 @@ records an interpretation, supporting evidence IDs and fingerprints, timeframe,
 limitations, status, disclosure constraints, and interview state. It remains an
 interpretation even after confirmation. Preferences record what the person wants;
 they are never past achievements. Confirmed or rejected interpretations and
-preferences require person-source answer references.
+preferences require person-source references, including explicit intent in a
+user-written account. A Markdown account can be a person source; its file format
+is not its provenance. Never manufacture confirmation or reclassify third-party
+material to satisfy this requirement.
 
 Ask one answerable question and wait. Reuse existing answers; allow corrections,
 rejection, a skipped question, or no particular career narrative. Recurring
@@ -55,13 +66,13 @@ rejected interpretations. Changed supporting facts make an interpretation stale.
 
 ```sh
 python3 scripts/career_core.py migrate --output data/candidates/career-v2.json
-python3 scripts/answer.py reviews/onboarding.md --subject S_DEPTH --source SRC_ONBOARDING --question 'Does this describe your contribution?' --answer 'I designed the format; colleagues built the runner.'
-python3 scripts/career_core.py bind-strength --pack data/candidates/career-v2.json --strength S_DEPTH --output data/candidates/career-v3.json
+python3 scripts/career_core.py bind-strength --pack data/candidates/career-v2.json --strength S_DEPTH --assessment data/private/strength-assessment.json --output data/candidates/career-v3.json
 ```
 
-Use actual IDs and the person's actual answer. Register its person source and
-excerpt in the new pack. `bind-strength` refreshes only the named, reassessed
-interpretation's fingerprints; it never changes its status. Preserve an explicit
+Record scoped questions and answers and prepare the assessment as described in
+[Questions and dependable updates](questions-and-updates.md). Use actual IDs and
+the person’s exact answer. `bind-strength` updates the named interpretation and
+its assessed limitations and fingerprints; it never changes its confirmation status. Preserve an explicit
 supersedes link to the actual previous pack in a working candidate. Recheck the
 pack and chain before finishing. Schema 1.3 remains readable without migration.
 
@@ -95,3 +106,11 @@ when installed. Building a career pack does not require installing the add-on.
 See [workspace maintenance](workspace-maintenance.md) for connected achievement
 review, a save preview, explicit evidence reassessment, health, readable history,
 merge/split/refresh and portable private backup/restore.
+
+## Question state and strength reassessment
+
+Use [Questions and dependable updates](questions-and-updates.md) for new scoped
+answers, previewable legacy imports, and `bind-strength --assessment`. Bare hash
+refresh is rejected. `health --summary --json` gives fast current-work state;
+`status` remains the compatible strengths view. Packs still use schema 1.4 and
+read 1.3; immutable question revisions have their own version 1 contract.

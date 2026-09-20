@@ -279,6 +279,43 @@ def collect(pack, profiles, cited):
     return found
 
 
+def career_questions(pack, optional=False, include_closed=False, root=ROOT):
+    """Accuracy questions for a private record; output optimization is opt-in."""
+    required = {'recorded', 'no_source', 'status', 'conflict', 'employment'}
+    extras = {'empty_role', 'classification', 'undated', 'publications', 'metric_basis'}
+    questions = [q for q in collect(pack, [], set()) if q['kind'] in required or (optional and q['kind'] in extras)]
+    employment = {r['employment_id']: r for r in pack.get('employment', [])}
+    for q in questions:
+        q['optional'] = q['kind'] in extras
+        if q['kind'] == 'employment':
+            role = employment[q['subject']]
+            q['question'] = f"Is {role['title']} at {role['employer']} still current, or is its end date unknown? You can leave it unknown."
+        elif q['kind'] == 'empty_role':
+            role = employment[q['subject']]
+            q.update(question=f"Would you like to add a contribution from {role['title']} at {role['employer']}?", detail='Optional: this role can remain a timeline entry.')
+        elif q['kind'] == 'publications':
+            q.update(question='Would you like to itemise talks, publications or other public work?', detail='Optional: supply titles, dates and links, or leave this for later.')
+        elif q['kind'] == 'classification':
+            q.update(question='Would you like to add what changed as a result of this contribution?', detail='Optional: an unfinished or unknown outcome can stay open.')
+    priority = {'conflict': 0, 'recorded': 1, 'no_source': 2, 'status': 3, 'metric_basis': 4, 'employment': 5}
+    for strength in pack.get('strengths_profile', []):
+        if strength.get('question_status') == 'open' and strength.get('review_question'):
+            questions.append({'kind': 'strength', 'subject': strength['id'], 'question': strength['review_question'], 'optional': True})
+    # Historical notes can resolve one field while explicitly leaving another
+    # open. Preserve that stated conflict; do not treat a RESOLVED prefix as a
+    # blanket answer or infer facts from the rest of the narrative.
+    for note in pack.get('metadata', {}).get('known_conflicts', []):
+        if not isinstance(note, str): continue
+        remaining = re.search(r'[^.;]*(?:remains|remain) (?:open|unresolved)[^.;]*', note, re.I)
+        if remaining:
+            subject = next((r['employment_id'] for r in pack.get('employment', []) if r['employment_id'] in note), None)
+            if subject:
+                questions.append({'kind':'conflict','subject':subject,'question':'Clarify the recorded conflict: '+remaining.group().strip(),
+                                  'optional':False,'detail':note,'unlocks':'recorded_conflict'})
+    from question_history import queue
+    return queue(pack, questions, optional, include_closed, root)
+
+
 def delta(pack, pack_path):
     """What the current pack version changed, and how much of it has no source.
 
@@ -336,6 +373,8 @@ def main(argv):
     output.add_argument("--json", action="store_true", help="explicit JSON output (the default)")
     parser.add_argument("--delta", action="store_true",
                         help="what the current pack version changed, and what has no source")
+    parser.add_argument("--application", action="store_true", help="include resume, publication and target-role questions")
+    parser.add_argument("--optional", action="store_true", help="include optional career enrichment")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--pack", help="inspect a staged candidate before acceptance")
     args = parser.parse_args(argv[1:])
@@ -351,7 +390,7 @@ def main(argv):
         print(json.dumps(delta(pack, path), indent=2))
         return 0
 
-    questions = collect(pack, roles(), cited_ids())
+    questions = collect(pack, roles(), cited_ids()) if args.application else career_questions(pack, args.optional)
     if args.limit:
         questions = questions[: args.limit]
 
@@ -361,13 +400,13 @@ def main(argv):
         return 0
 
     out = ["# Open questions", "", f"Pack: `{path.resolve().relative_to(ROOT.resolve())}`", "",
-           "Ordered by what answering each one unlocks, not by where it sits in the",
-           "pack. Answer from the top: the first few are the ones that move something.", ""]
+           "Answer what you can; unknown facts can remain open. A saved private career record",
+           "does not require every question to be answered. Optional enrichment is marked below.", ""]
     if not questions:
         out.append("Nothing outstanding.")
     for i, q in enumerate(questions, 1):
-        out.append(f"{i}. **{q['question']}**")
-        out.append(f"   _unlocks {q['unlocks'].replace('_', ' ')}"
+        out.append(f"{i}. **{q['question']}**" + (" (optional)" if q.get("optional") else ""))
+        out.append(f"   _unlocks {q.get('unlocks', 'recorded_question').replace('_', ' ')}"
                    + (f" · `{q['subject']}`" if q["subject"] else "") + "_")
         if q.get("detail"):
             out.append(f"   {q['detail']}")
