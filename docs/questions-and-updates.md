@@ -97,6 +97,8 @@ it does not establish that the resulting claim means the same thing.
   Do not add expansions, causality or STAR details absent from the evidence.
 - Keep historical approvals tied to their exact displayed content. If that
   context is unavailable, record the gap; never approve reconstructed wording.
+  A newly worded strength stays `proposed` when the originally confirmed wording
+  is unavailable, even if the person previously agreed with its general theme.
 
 Save a compact reconciliation note beside the review: answer/question revision,
 affected record keys, correction applied, and any remaining ambiguity or missing

@@ -94,6 +94,13 @@ def evaluate(pack, case):
             check(wanted['name'] + '_fact_' + str(n + 1), any(matches(pattern, value) for value in values))
         for n, pattern in enumerate(wanted.get('qualification_patterns', [])):
             check(wanted['name'] + '_scope_' + str(n + 1), any(matches(pattern, text(a)) for a in candidates))
+        # A correct basis/constraint cannot repair an incompatible metric value.
+        # These restrictions belong to a fictional case, not a universal prose rule.
+        metric_values = [str(m.get('value', '')) if isinstance(m, dict) else str(m)
+                         for a in candidates for m in a.get('metrics', [])]
+        for n, pattern in enumerate(wanted.get('forbidden_metric_values', [])):
+            check(wanted['name'] + '_metric_value_' + str(n + 1),
+                  not any(asserted_match(pattern, value) for value in metric_values))
         check(wanted['name'] + '_role_link', bool(candidates) and all(any(r.get('employment_id') == a.get('employment_id') and
               r.get('title') == wanted['role_title'] for r in roles) for a in candidates))
     qualification = expected['qualification']

@@ -94,14 +94,14 @@ def validate_pack_object(pack, allow_schema_errors=False):
     from career_core import validate_candidate
     import tempfile
     with tempfile.TemporaryDirectory(prefix='career-review-validation-', dir=ROOT) as folder:
-        validate_candidate(pack, Path(folder) / 'candidate.json')
+        warnings = validate_candidate(pack, Path(folder) / 'candidate.json')
     schema_path = ROOT / 'schemas' / ('archive/career-1.3.schema.json' if pack.get('schema_version') == '1.3' else 'career.schema.json')
     schema = json.loads(schema_path.read_text())
     errors = []
     walk(pack, schema, schema, '', errors)
     if errors and not allow_schema_errors:
         raise ValueError('; '.join(errors))
-    return errors
+    return warnings + errors
 
 
 def start(candidate_path, review_id, grouped=False):

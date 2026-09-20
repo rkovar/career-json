@@ -72,6 +72,17 @@ class EvaluationTests(unittest.TestCase):
         pack=example('collaboration'); pack['evidence_atoms'].pop()
         self.assertIn('willow_present_once',self.failures(pack))
 
+    def test_correct_basis_does_not_hide_wrong_metric_value(self):
+        pack = example('leadership')
+        atom = next(a for a in pack['evidence_atoms'] if 'Juniper' in a['title'])
+        atom['metrics'] = [{'value': '$32M cumulative revenue',
+                            'basis': 'Cumulative pipeline on touched accounts, not booked revenue.'}]
+        self.assertIn('juniper_metric_value_1', self.failures(pack, 'leadership'))
+        atom['metrics'][0]['value'] = '$32M cumulative pipeline, not booked revenue'
+        self.assertNotIn('juniper_metric_value_1', self.failures(pack, 'leadership'))
+        atom['metrics'].append('$32M revenue')
+        self.assertIn('juniper_metric_value_1', self.failures(pack, 'leadership'))
+
     def test_dates_scope_and_role_assignment_fail_independently(self):
         mutations=[('role_chronology_1',lambda p:p['employment'][0].update(start='2018-03')),
                    ('cedar_fact_3',lambda p:p['evidence_atoms'][0]['star'].update(result='20 teams adopted it.')),

@@ -18,9 +18,10 @@ def validate_candidate(record, destination):
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', dir=destination.parent) as handle:
         json.dump(record, handle)
         handle.flush()
-        errors, _ = check(Path(handle.name), json.loads(SCHEMA.read_text()))
+        errors, warnings = check(Path(handle.name), json.loads(SCHEMA.read_text()))
     if errors:
         raise ValueError('; '.join(errors))
+    return warnings
 
 
 def main(argv=None, _locked=False):

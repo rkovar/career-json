@@ -7,7 +7,7 @@ The private reference and its interview transcript are never public test fixture
 | Contract | Evidence | Gate and limit |
 | --- | --- | --- |
 | formal-title | leadership: exact role title; collaboration: separate roles | Title inflation mutation fails. |
-| metric-semantics | leadership: Juniper cumulative pipeline and timeframe | Booked revenue mutation fails. |
+| metric-semantics | leadership: Juniper cumulative pipeline and timeframe | Revenue mutation fails, including a wrong metric value paired with a correct pipeline basis. This is a bounded fictional check, not general entailment. |
 | personal-build | leadership: Cobalt personal build and human approval | Replacing build with sponsorship fails. |
 | team-credit | leadership: Larch; collaboration: Cedar | Sole-credit and shared-ownership mutations fail. |
 | scope-and-time | leadership: peak/current staff and wider recognition | Wrong headcount mutation fails; scope may live in constraints. |

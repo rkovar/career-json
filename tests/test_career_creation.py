@@ -60,6 +60,21 @@ class CreationTests(unittest.TestCase):
         self.assertTrue(session['validation_warnings'])
         self.assertFalse(list((self.root / 'data/packs').glob('*.json')))
 
+    def test_staging_preserves_structural_warnings_as_well_as_excerpts(self):
+        role = self.pack['employment'][0]
+        role.update(start='2020-01', end='2024-06')
+        self.pack['evidence_atoms'][0].update(
+            employment_id=role['employment_id'],
+            occurred={'start': '2020-01', 'end': 'ongoing', 'inferred': True})
+        self.put('data/candidates/date-warning.json', self.pack)
+        result = self.cli('review', 'revise', '--session', self.session,
+                          '--candidate', 'data/candidates/date-warning.json', '--id', 'date-warning')
+        warning = 'inferred occurred dates extend outside linked employment'
+        self.assertIn(warning, result.stderr)
+        session = json.loads((self.root / result.stdout.strip()).read_text())
+        self.assertTrue(any(warning in message for message in session['validation_warnings']))
+        self.assertFalse(list((self.root / 'data/packs').glob('*.json')))
+
     def choices(self, actions, pack=None):
         pack = pack or self.pack
         state = self.state()

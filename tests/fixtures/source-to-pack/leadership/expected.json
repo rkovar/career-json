@@ -22,6 +22,7 @@
     {
       "name": "juniper",
       "anchor": "juniper",
+      "forbidden_metric_values": ["\\b(?:booked |annual |attributable )?revenue\\b"],
       "patterns": [
         "cumulative",
         "pipeline",

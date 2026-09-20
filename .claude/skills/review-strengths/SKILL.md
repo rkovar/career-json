@@ -35,6 +35,8 @@ and reference in the candidate (see `docs/questions-and-updates.md`). Route new
 achievements and ownership corrections through `review-evidence`; preferences
 belong in `positioning_preferences`; publication restrictions belong on the
 underlying evidence. A confirmed interpretation never promotes evidence status.
+An old yes to an unavailable interpretation cannot confirm reconstructed wording.
+Keep the new interpretation `proposed` and retain the original answer as context.
 
 New question state lives in immutable `reviews/questions/` revisions. Legacy
 `review_question` and `question_status` fields remain readable. Answers close
