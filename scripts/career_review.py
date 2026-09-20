@@ -7,6 +7,7 @@ import copy
 from datetime import date
 import json
 from pathlib import Path
+import re
 import uuid
 
 import pack_review as review
@@ -119,6 +120,57 @@ def revise(session, candidate, review_id):
     """Rebase a corrected proposal while retaining exact unchanged decisions."""
     with workspace_lock():
         return _revise(session, candidate, review_id)
+
+
+def revise_changes(session, changes_path, review_id):
+    """Apply record fields to a pinned proposal, then use ordinary review staging.
+
+    Fields replace their top-level value (including complete arrays/STAR objects).
+    Omitted fields and records survive unchanged; metadata/receipts are not edits.
+    """
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', review_id):
+        raise ValueError('review id must use letters, numbers, hyphens or underscores')
+    changes = read(changes_path)
+    if not isinstance(changes, dict) or not changes:
+        raise ValueError('Changes must map collection/ID keys to nonempty field objects.')
+    with workspace_lock():
+        _, proposed, _ = review.load_session(session)
+        candidate = copy.deepcopy(proposed)
+        items = review.units(candidate)
+        changed = False
+        for key, fields in changes.items():
+            group, slash, ident = key.partition('/')
+            id_field = review.COLLECTIONS.get(group)
+            if not slash or not ident or '/' in ident or not id_field:
+                raise ValueError('Change a named collection record, not metadata or approval receipts: ' + key)
+            if not isinstance(fields, dict) or not fields:
+                raise ValueError('Each record change needs nonempty fields: ' + key)
+            if id_field in fields and fields[id_field] != ident:
+                raise ValueError('Record ID must match its change key: ' + key)
+            previous = items.get(key)
+            value = copy.deepcopy(previous) if previous is not None else {id_field: ident}
+            value.update(fields)
+            if value == previous:
+                continue
+            if 'external_safe' in value:
+                value['external_safe'] = False
+            if group == 'strengths_profile' and value.get('status') == 'confirmed':
+                value['status'] = 'proposed'
+            if value == previous:
+                continue
+            if previous is None:
+                candidate.setdefault(group, []).append(value)
+            else:
+                candidate[group] = [value if row[id_field] == ident else row for row in candidate[group]]
+            changed = True
+        if not changed:
+            raise ValueError('No content changed; resume the existing review.')
+        destination = local('data/candidates/' + review_id + '.json')
+        if destination.exists() or local('reviews/pack-reviews/' + review_id).exists():
+            raise ValueError('Review or candidate already exists; resume it or choose a new id.')
+        review.validate_pack_object(candidate)
+        write_new(destination, candidate)
+        return _revise(session, destination, review_id)
 
 
 def _revise(session, candidate, review_id):

@@ -83,6 +83,84 @@ class CreationTests(unittest.TestCase):
                  'action': action, 'publication': 'unchanged', 'note': 'Please correct this wording.' if action == 'correct' else ''}
                  for key, action in actions.items()], 'omissions': []}
 
+    def test_record_changes_preserve_omitted_content_and_require_review(self):
+        original_path = self.root / 'reviews/pack-reviews/first/proposal.json'
+        original_bytes = original_path.read_bytes()
+        original = json.loads(original_bytes)
+        key = 'evidence_atoms/' + original['evidence_atoms'][0]['id']
+        self.put('data/private/changes.json', {key: {'title': 'Reworded proposed contribution'}})
+        result = self.cli('review', 'revise', '--session', self.session,
+                          '--changes', 'data/private/changes.json', '--id', 'record-update')
+        header = json.loads((self.root / result.stdout.strip()).read_text())
+        updated = json.loads((self.root / header['proposal']['path']).read_text())
+        expected = copy.deepcopy(original)
+        expected['evidence_atoms'][0]['title'] = 'Reworded proposed contribution'
+        expected['evidence_atoms'][0]['external_safe'] = False
+        self.assertEqual(updated, expected)
+        self.assertEqual(header['previous_review']['path'], self.session)
+        self.assertEqual(original_path.read_bytes(), original_bytes)
+        self.assertIn('Human review is still required', result.stderr)
+        self.assertFalse(list((self.root / 'data/packs').glob('*.json')))
+
+    def test_record_changes_add_publications_without_dropping_existing_records(self):
+        pub = {'title': 'Fictional source-backed talk', 'kind': 'talk',
+               'source_refs': self.pack['evidence_atoms'][0]['source_refs'],
+               'external_safe': True, 'evidence_status': 'self_asserted'}
+        self.put('data/private/add.json', {'publications/PUB_NEW': pub})
+        result = self.cli('review', 'revise', '--session', self.session,
+                          '--changes', 'data/private/add.json', '--id', 'add-record')
+        header = json.loads((self.root / result.stdout.strip()).read_text())
+        pack = json.loads((self.root / header['proposal']['path']).read_text())
+        self.assertEqual(pack['evidence_atoms'], self.pack['evidence_atoms'])
+        self.assertEqual(pack['publications'][-1]['publication_id'], 'PUB_NEW')
+        self.assertFalse(pack['publications'][-1]['external_safe'])
+        self.assertEqual(len(pack['publications']), len(self.pack.get('publications', [])) + 1)
+
+    def test_record_changes_do_not_confirm_rewritten_strengths(self):
+        strength = self.pack['strengths_profile'][0]
+        self.put('data/private/strength.json', {'strengths_profile/' + strength['id']:
+                 {'interpretation': 'New proposed interpretation', 'status': 'confirmed'}})
+        result = self.cli('review', 'revise', '--session', self.session,
+                          '--changes', 'data/private/strength.json', '--id', 'strength-update')
+        header = json.loads((self.root / result.stdout.strip()).read_text())
+        pack = json.loads((self.root / header['proposal']['path']).read_text())
+        self.assertEqual(pack['strengths_profile'][0]['status'], 'proposed')
+        self.assertFalse(pack['strengths_profile'][0]['external_safe'])
+
+    def test_record_changes_reject_bad_keys_ids_and_schema_before_writing(self):
+        for i, changes in enumerate([
+            {'field/metadata': {'human_review': {'items': {}}}},
+            {'evidence_atoms/E_STORY_1': {'id': 'E_OTHER'}},
+            {'publications/PUB_NEW': {'kind': 'talk'}},
+            {'evidence_atoms/E_STORY_1': {'typo_field': 'value'}},
+            {'evidence_atoms/E_STORY_1': None},
+        ]):
+            ident = 'invalid-' + str(i)
+            self.put('data/private/invalid.json', changes)
+            self.cli('review', 'revise', '--session', self.session,
+                     '--changes', 'data/private/invalid.json', '--id', ident, ok=False)
+            self.assertFalse((self.root / ('data/candidates/' + ident + '.json')).exists())
+            self.assertFalse((self.root / ('reviews/pack-reviews/' + ident)).exists())
+
+    def test_record_changes_noop_collision_and_tampered_base_do_not_write(self):
+        key = 'evidence_atoms/' + self.pack['evidence_atoms'][0]['id']
+        self.put('data/private/noop.json', {key: {'title': self.pack['evidence_atoms'][0]['title']}})
+        self.cli('review', 'revise', '--session', self.session,
+                 '--changes', 'data/private/noop.json', '--id', 'noop', ok=False)
+        self.assertFalse((self.root / 'data/candidates/noop.json').exists())
+        self.put('data/private/change.json', {key: {'title': 'Changed'}})
+        path = self.write('data/candidates/collision.json', 'existing unrelated content')
+        self.cli('review', 'revise', '--session', self.session,
+                 '--changes', 'data/private/change.json', '--id', 'collision', ok=False)
+        self.assertEqual(path.read_text(), 'existing unrelated content')
+        self.cli('review', 'revise', '--session', self.session,
+                 '--changes', 'data/private/change.json', '--id', '../escape', ok=False)
+        self.assertFalse((self.root / 'data/escape.json').exists())
+        self.write('reviews/pack-reviews/first/proposal.json', '{}')
+        self.cli('review', 'revise', '--session', self.session,
+                 '--changes', 'data/private/change.json', '--id', 'tampered', ok=False)
+        self.assertFalse((self.root / 'data/candidates/tampered.json').exists())
+
     def apply(self, payload):
         self.put('data/private/choices.json', payload)
         return json.loads(self.cli('review', 'apply', '--input', 'data/private/choices.json').stdout)

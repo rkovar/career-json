@@ -670,7 +670,9 @@ def main(argv=None):
     begin.add_argument('--records', dest='grouped', action='store_false', help='legacy record-by-record review')
     revision = commands.add_parser('revise', help='stage corrected wording and keep unchanged decisions')
     revision.add_argument('--session', required=True)
-    revision.add_argument('--candidate', required=True)
+    revision_input = revision.add_mutually_exclusive_group(required=True)
+    revision_input.add_argument('--candidate', help='complete proposed pack')
+    revision_input.add_argument('--changes', help='JSON mapping collection/ID keys to changed fields; omitted content is preserved')
     revision.add_argument('--id', required=True)
     correction = commands.add_parser('correct', help='stage exact user edits for confirmation; never accepts them')
     correction.add_argument('--session', required=True)
@@ -699,8 +701,9 @@ def main(argv=None):
         if args.command == 'start':
             result = start(args.candidate, args.id, grouped=args.grouped)
         elif args.command == 'revise':
-            from career_review import revise
-            result = revise(args.session, args.candidate, args.id)
+            from career_review import revise, revise_changes
+            result = (revise_changes(args.session, args.changes, args.id) if args.changes
+                      else revise(args.session, args.candidate, args.id))
         elif args.command == 'correct':
             from career_review import correct
             payload = read(args.input)

@@ -53,6 +53,34 @@ needed by accepted claims. Its `metadata.source_imports` receipt records an impo
 not human approval or independent corroboration. Modified source records and
 nonstandard metadata remain explicit review items. Roles are never autoapproved.
 
+### Revise a few records without rewriting the pack
+
+For a small addition or correction, write a JSON object keyed by collection and
+record ID, for example `data/private/changes.json`:
+
+```json
+{
+  "employment/EMP_EXAMPLE": {"end": "2026-06"}
+}
+```
+
+```sh
+python3 scripts/career_core.py review revise --session reviews/pack-reviews/onboarding-v1/session.json --changes data/private/changes.json --id onboarding-v2
+```
+
+Omitted records and fields are preserved. Supplied fields replace their whole
+value: provide the complete array or STAR object when changing one. Include
+updated source references for new facts. A new collection/ID creates a record
+and must supply its required fields; its ID is taken from the key. Existing IDs
+cannot be renamed this way. Metadata and approval receipts cannot be edited.
+
+The command validates and saves a new candidate and review, keeping the original
+proposal unchanged. Changed records stay private; rewritten confirmed strengths
+return to `proposed`. It does not accept facts. No-op changes, invalid records and
+existing output names are rejected. Continue from the returned session, including
+when fixing a warning. The existing `--candidate` option remains available for
+complete proposals, removals and broader structural changes.
+
 ### Connected and offline pages
 
 `review open` starts a temporary Python standard-library HTTP server on 127.0.0.1.

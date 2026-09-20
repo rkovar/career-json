@@ -102,12 +102,17 @@ If the person wants to interview now, follow it with one answerable question.
    accepted packs; finish the authorized inventory before presenting final review.
    Follow the intake report's `reading_batches`; read oversized sources in sections.
    Keep writes bounded too: derive the next candidate from the saved proposal and
-   apply a small coherent set of record changes, using targeted edits or a short
+   apply a small coherent set of record changes with `review revise --changes`
+   (see `docs/pack-review.md`). Supply changed top-level fields keyed by collection
+   and ID; omitted records and fields are preserved. New records need their
+   required fields and sources. Use this existing command before writing a custom
    helper script. Do not re-emit every unchanged record in one large model write.
    Write and execute one small update at a time; a script containing several
    future batches is not a checkpoint until it runs. Validate and stage each
    useful batch before writing the next update. A larger time budget
    does not replace these checkpoints; resume from the last valid saved batch.
+   Chain each revision from the session just returned, including repairs to a
+   batch, so an abandoned draft does not become an accidental review branch.
    Staging reports validation warnings directly while keeping the session path
    on standard output. Use that result; inspect the saved session or runtime
    implementation only when a warning or error needs investigation.
