@@ -48,6 +48,18 @@ class CreationTests(unittest.TestCase):
     def state(self):
         return json.loads(self.cli('review', 'status', '--session', self.session).stdout)
 
+    def test_staging_reports_excerpt_warning_and_keeps_machine_readable_path(self):
+        self.pack['evidence_atoms'][0]['source_refs'][0]['excerpt'] = 'This claim does not occur in the supplied source.'
+        self.put('data/candidates/warning.json', self.pack)
+        result = self.cli('review', 'revise', '--session', self.session,
+                          '--candidate', 'data/candidates/warning.json', '--id', 'warning')
+        self.assertEqual(result.stdout.strip(), 'reviews/pack-reviews/warning/session.json')
+        self.assertIn('mismatch', result.stderr)
+        self.assertIn('Human review is still required', result.stderr)
+        session = json.loads((self.root / result.stdout.strip()).read_text())
+        self.assertTrue(session['validation_warnings'])
+        self.assertFalse(list((self.root / 'data/packs').glob('*.json')))
+
     def choices(self, actions, pack=None):
         pack = pack or self.pack
         state = self.state()

@@ -731,6 +731,14 @@ def main(argv=None):
             print(json.dumps(status(args.session), indent=2))
             return 0
         print(str(result.relative_to(ROOT.resolve())))
+        if args.command in ('start', 'revise'):
+            warnings = read(result).get('validation_warnings', [])
+            print('Proposal saved. Validation warnings: ' + str(len(warnings)) +
+                  '. Human review is still required.', file=sys.stderr)
+            for warning in warnings[:5]:
+                print('- ' + warning, file=sys.stderr)
+            if len(warnings) > 5:
+                print('See validation_warnings in the saved session for the remaining items.', file=sys.stderr)
         if args.command == 'render':
             handoff = handover(args.session, result)
             from pack_io import write_view

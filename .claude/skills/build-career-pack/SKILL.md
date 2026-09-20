@@ -108,6 +108,11 @@ If the person wants to interview now, follow it with one answerable question.
    future batches is not a checkpoint until it runs. Validate and stage each
    useful batch before writing the next update. A larger time budget
    does not replace these checkpoints; resume from the last valid saved batch.
+   Staging reports validation warnings directly while keeping the session path
+   on standard output. Use that result; inspect the saved session or runtime
+   implementation only when a warning or error needs investigation.
+   If a helper captures subprocess output, also surface standard error so it
+   does not hide the staging warnings.
    These are reading limits, not permission to omit later material. Continue from
    the saved proposal and remaining source paths after each checkpoint.
 2. Compare with the current pack; preserve IDs, facts, unknowns and conflicts.
