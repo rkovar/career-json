@@ -18,6 +18,13 @@ are interpretations, never new evidence. Keep `external_safe: false` until their
 wording has been reviewed against the disclosure constraints of every support.
 Do not force a recurring narrative onto someone with one significant achievement.
 
+Keep the interpretation to a few sentences describing the pattern with one or
+two useful examples. Detailed metrics and chronology stay in the supporting
+atoms; avoid regenerating them in every summary. Check any summary count against
+its actual examples. Set `timeframe` from demonstrated work, keeping future intent
+in preferences. Correct an inaccurate claim or timeframe directly; a limitation
+that contradicts it does not make the original field accurate.
+
 Ask one question and wait. Explain the examples behind the interpretation, invite
 correction, and allow a genuine null answer. Explore missing contribution,
 contradictory examples, overlooked work, and what the person wants next without

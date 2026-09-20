@@ -126,6 +126,9 @@ human review; do not ask the person to repeat answers already available.
   also supply `text`; new limits use `action: add`, `index: null` and `text`.
 
 Generate canonical digests using `career_profile.digest`, not file-byte hashes.
+Keep the resulting interpretation concise, with detailed claims in its linked
+atoms. If the review finds an incorrect summary count or timeframe, correct that
+field before binding; do not leave it in place with a contradictory limitation.
 Use already recorded answers to remove stale “unrecorded” caveats while retaining
 the remaining uncertainty. Do not turn a recorded measurement basis into
 independent verification. The assessment explains an operator decision; it does
