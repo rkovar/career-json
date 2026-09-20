@@ -59,6 +59,9 @@ array. Each entry supplies `question`, `answer`, explicit `targets`, `by`, and a
 only after inspecting the mapping. Exact legacy text must exist in the pinned
 source. Missing mappings are reported; the tool does not infer what a bare yes
 approved. Reapplying the same mapping leaves the existing answer in place.
+For JSON ledgers, `question` and `answer` must belong to the same object; escaped
+quotes, Unicode and newlines are decoded before exact comparison. An answer from
+another question is not a match, even if both strings appear elsewhere in the file.
 
 Preserve original markdown logs as history. Resolve short/bulk answers using the
 actual displayed proposal, never the final reference pack as extraction input.

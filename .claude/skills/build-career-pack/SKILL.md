@@ -104,7 +104,9 @@ If the person wants to interview now, follow it with one answerable question.
    Keep writes bounded too: derive the next candidate from the saved proposal and
    apply a small coherent set of record changes, using targeted edits or a short
    helper script. Do not re-emit every unchanged record in one large model write.
-   Validate and stage each useful batch before continuing. A larger time budget
+   Write and execute one small update at a time; a script containing several
+   future batches is not a checkpoint until it runs. Validate and stage each
+   useful batch before writing the next update. A larger time budget
    does not replace these checkpoints; resume from the last valid saved batch.
    These are reading limits, not permission to omit later material. Continue from
    the saved proposal and remaining source paths after each checkpoint.

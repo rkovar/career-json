@@ -119,6 +119,29 @@ class ProcessTests(unittest.TestCase):
         mapping=self.write('data/private/mapping.json',{'answers':[{'question':'Who?'}]})
         self.assertEqual(questions.import_answers(mapping,root=self.root)['entries'][0]['status'],'needs_mapping')
 
+    def test_json_legacy_import_preserves_quoted_unicode_and_multiline_answers(self):
+        question = 'Who built the "Aurora" service?'
+        answer = 'The team led by Zoë.\nThe path was C:\\tools; I reviewed "release 2".'
+        source = self.write('reviews/old.json', {'answers': [{'question': question, 'answer': answer}]})
+        mapping = self.write('data/private/mapping.json', {'answers': [{'question': question, 'answer': answer,
+            'targets': [self.target], 'by': 'Fictional owner', 'source': pin(source, self.root)}]})
+        before = source.read_bytes()
+        self.assertEqual(questions.import_answers(mapping, root=self.root)['entries'][0]['status'], 'ready')
+        self.assertFalse((self.root / 'reviews/questions').exists())
+        self.assertEqual(questions.import_answers(mapping, True, self.root)['entries'][0]['status'], 'imported')
+        self.assertEqual(questions.catalogue(self.root)[0]['answer'], answer)
+        self.assertEqual(source.read_bytes(), before)
+
+    def test_json_legacy_import_rejects_answer_from_another_question(self):
+        source = self.write('reviews/old.json', [
+            {'question': 'Did you write it?', 'answer': 'No, the team did.'},
+            {'question': 'Did you lead them?', 'answer': 'Yes.'}])
+        mapping = self.write('data/private/mapping.json', {'answers': [{'question': 'Did you write it?',
+            'answer': 'Yes.', 'targets': [self.target], 'by': 'Fictional owner', 'source': pin(source, self.root)}]})
+        for apply in (False, True):
+            self.assertEqual(questions.import_answers(mapping, apply, self.root)['entries'][0]['status'], 'needs_mapping')
+            self.assertFalse((self.root / 'reviews/questions').exists())
+
     def test_invalid_legacy_mapping_is_rejected_in_preview_without_partial_question(self):
         source = self.write('reviews/old.md', 'Who? Team.')
         mapping = self.write('data/private/mapping.json', {'answers': [{'question': 'Who?', 'answer': 'Team.',

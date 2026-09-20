@@ -182,6 +182,26 @@ def queue(pack, generated=(), optional=False, include_closed=False, root=ROOT):
                    and (optional or r['required'])), key=lambda r: (not r['required'], r['id']))
 
 
+def legacy_pair_present(raw, question, answer):
+    """Decode JSON escapes and keep structured questions paired with their answers."""
+    try:
+        value = json.loads(raw)
+    except ValueError:
+        # Plain-text historical logs still require an explicit scope mapping.
+        return question in raw and answer in raw
+
+    def contains(node):
+        if isinstance(node, dict):
+            if node.get('question') == question and node.get('answer') == answer:
+                return True
+            return any(contains(child) for child in node.values())
+        if isinstance(node, list):
+            return any(contains(child) for child in node)
+        return False
+
+    return contains(value)
+
+
 def import_answers(path, apply=False, root=ROOT):
     """Preview explicit mappings from a legacy ledger. Never guess target scope."""
     payload = read(path, root)
@@ -198,7 +218,7 @@ def import_answers(path, apply=False, root=ROOT):
             if pin_errors(entry['source'], root):
                 raise ValueError('legacy source changed or missing')
             raw = local(entry['source']['path'], root).read_text()
-            if entry['question'] not in raw or entry['answer'] not in raw:
+            if not legacy_pair_present(raw, entry['question'], entry['answer']):
                 raise ValueError('exact legacy question/answer is not present in the pinned source')
             if not entry.get('by') or not entry.get('targets'):
                 raise ValueError('explicit author and target mapping required')
