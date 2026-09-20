@@ -70,7 +70,11 @@ Missing dates stay unknown. Unidentified decks or episodes stay listed as covera
 gaps, without inventing titles or requiring another interview before saving.
 
 Publications carry an absolute HTTP(S) URL or `null`. Local captures belong in
-source references. A title-only video capture supports its title, not the complete
+source references. Copy an actual source link or the saved page's canonical URL;
+never construct a likely address from its title. Compare existing URLs when
+merging duplicate items: preserving richer metadata must not preserve a wrong
+address. Format validation does not establish provenance or live availability.
+A title-only video capture supports its title, not the complete
 description; a saved 404 supports no career claim. Text extraction failure for an
 image should lead to direct image inspection when the assistant supports it, with
 the visual check and any automated-verification limitation stated separately.
