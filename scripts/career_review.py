@@ -174,9 +174,16 @@ def revise_changes(session, changes_path, review_id):
 
 
 def _revise(session, candidate, review_id):
-    review.load_session(session)
+    previous, previous_pack, _ = review.load_session(session)
     path = review._start(candidate, review_id, grouped=True)
     record = read(path)
+    # Import commentary lives beside the proposal. Loading that proposal for a
+    # small update must not silently discard notes about unchanged sources.
+    old_sources = {s['source_id']: s for s in previous_pack.get('source_records', [])}
+    new_sources = {s['source_id']: s for s in read(record['proposal']['path']).get('source_records', [])}
+    for sid, annotation in previous.get('source_annotations', {}).items():
+        if sid in new_sources and old_sources.get(sid) == new_sources[sid]:
+            record.setdefault('source_annotations', {}).setdefault(sid, annotation)
     record['previous_review'] = pin(session)
     # _start just created this session under the same exclusive lock. Publish the
     # completed header atomically before exposing it to callers.

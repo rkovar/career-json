@@ -161,6 +161,37 @@ class CreationTests(unittest.TestCase):
                  '--changes', 'data/private/change.json', '--id', 'tampered', ok=False)
         self.assertFalse((self.root / 'data/candidates/tampered.json').exists())
 
+    def test_revision_preserves_source_commentary_without_overriding_new_notes(self):
+        pack = copy.deepcopy(self.pack)
+        source = pack['source_records'][0]
+        source['notes'] = 'Imported context, not independent corroboration.'
+        self.put('data/candidates/commented.json', pack)
+        first = self.cli('review', 'revise', '--session', self.session,
+                         '--candidate', 'data/candidates/commented.json', '--id', 'commented').stdout.strip()
+        before = json.loads((self.root / first).read_text())
+        self.assertEqual(before['source_annotations'][source['source_id']]['notes'], source['notes'])
+        self.put('data/private/one-change.json', {'evidence_atoms/' + pack['evidence_atoms'][0]['id']:
+                 {'title': 'Updated proposed wording'}})
+        second = self.cli('review', 'revise', '--session', first,
+                          '--changes', 'data/private/one-change.json', '--id', 'comment-kept').stdout.strip()
+        kept = json.loads((self.root / second).read_text())
+        self.assertEqual(kept['source_annotations'], before['source_annotations'])
+        # Explicit new commentary wins; it is not replaced by an old receipt.
+        self.put('data/private/new-note.json', {'source_records/' + source['source_id']:
+                 {'notes': 'Updated import context.'}})
+        third = self.cli('review', 'revise', '--session', second,
+                         '--changes', 'data/private/new-note.json', '--id', 'comment-updated').stdout.strip()
+        updated = json.loads((self.root / third).read_text())
+        self.assertEqual(updated['source_annotations'][source['source_id']]['notes'], 'Updated import context.')
+        # A different source pin does not inherit commentary about the old input.
+        self.write('reviews/new-source.md', 'Different source content.')
+        self.put('data/private/source-change.json', {'source_records/' + source['source_id']:
+                 {'path': 'reviews/new-source.md', 'sha256': hashlib.sha256(b'Different source content.').hexdigest()}})
+        fourth = self.cli('review', 'revise', '--session', third,
+                          '--changes', 'data/private/source-change.json', '--id', 'different-source').stdout.strip()
+        changed = json.loads((self.root / fourth).read_text())
+        self.assertNotIn(source['source_id'], changed.get('source_annotations', {}))
+
     def apply(self, payload):
         self.put('data/private/choices.json', payload)
         return json.loads(self.cli('review', 'apply', '--input', 'data/private/choices.json').stdout)
