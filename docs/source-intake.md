@@ -53,3 +53,27 @@ The operator inspects the content before excluding it as a job description or
 writing advice. A relevant interview can contain a hiring quote or careers link.
 Only an explicitly supplied classification changes the source's purpose; an
 unreviewed hint cannot make new material disappear from the intake summary.
+
+## Catalogue coverage
+
+For a large publication archive, the assistant saves a compact coverage note beside
+the review. Each catalogue entry or author-page card maps to a publication ID, an
+existing achievement, a collection/profile, or an explicit unresolved item. Count
+only individually identified works; a series or archive is not another authored
+item. Summaries of programmes and team founding remain achievements.
+
+Preserve the stated contribution: author, co-author, foreword contributor, host,
+guest, speaker and committee member are different roles. A shared archive URL
+does not make two talks the same work. Use titles, dates, venues and contributor
+context to reconcile duplicates; preserve conflicting titles when unresolved.
+Missing dates stay unknown. Unidentified decks or episodes stay listed as coverage
+gaps, without inventing titles or requiring another interview before saving.
+
+Publications carry an absolute HTTP(S) URL or `null`. Local captures belong in
+source references. A title-only video capture supports its title, not the complete
+description; a saved 404 supports no career claim. Text extraction failure for an
+image should lead to direct image inspection when the assistant supports it, with
+the visual check and any automated-verification limitation stated separately.
+
+The coverage note makes omissions visible; it is not factual approval or proof
+that every description is correct. Only the ordinary review accepts new content.

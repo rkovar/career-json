@@ -14,6 +14,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(os.environ.get("CAREER_WORKSPACE", Path(__file__).resolve().parent.parent))
 SCHEMA = ROOT / "schemas" / "career.schema.json"
@@ -211,6 +212,16 @@ def check(path, schema, strict=False, root=ROOT):
             errors.append(f"{where}: date {rec.get('date')!r} must be YYYY, YYYY-MM or YYYY-MM-DD")
         if rec.get("date") is None:
             warnings.append(f"{where}: undated")
+        url = rec.get("url")
+        if url is not None:
+            try:
+                parts = urlsplit(url) if isinstance(url, str) else None
+                valid_url = bool(parts and parts.scheme.lower() in ('http', 'https') and parts.hostname
+                                 and not any(ch.isspace() or ord(ch) < 32 or ch == '\\' for ch in url))
+            except ValueError:
+                valid_url = False
+            if not valid_url:
+                errors.append(f"{where}: url must be an absolute HTTP(S) URL or null; keep local source paths in source_refs")
         if rec.get("employment_id") and rec.get("employment_id") not in employment_ids:
             errors.append(f"{where}: unknown employment_id {rec.get('employment_id')!r}")
         if not rec.get("source_refs"):

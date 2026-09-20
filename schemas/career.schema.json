@@ -1086,7 +1086,8 @@
           "type": [
             "string",
             "null"
-          ]
+          ],
+          "description": "Absolute HTTP(S) publication URL, or null when unavailable. Local capture paths belong in source_refs."
         },
         "role": {
           "type": [

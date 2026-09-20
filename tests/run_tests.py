@@ -947,6 +947,14 @@ def test_publications():
             "external_safe": True, "constraints": [], "notes": None}
     code, out, _ = run("validate_pack.py", pack_with(good))
     check("a pack with a publication validates", code == 0, out)
+    for url in ('https://example.org/talk?q=a%20b#slides', 'http://example.org', 'HTTPS://example.org/talk'):
+        code, out, _ = run("validate_pack.py", pack_with(dict(good, url=url)))
+        check(f"publication web URL {url!r} validates", code == 0, out)
+    for url in ('reviews/intake/text/capture.txt', 'file:///tmp/talk.html', '//example.org/talk',
+                'https:///talk', 'https://[broken', 'https://example.org/a b',
+                'https://example.org/\ntalk', 'https://example.org\\talk', '', 17):
+        code, out, _ = run("validate_pack.py", pack_with(dict(good, url=url)))
+        check(f"publication invalid URL {url!r} is rejected", code == 1 and 'url must be' in out, out)
     for mutate, why in (
             (lambda d: d.pop("title"), "missing title"),
             (lambda d: d.update({"kind": "tweet"}), "kind"),

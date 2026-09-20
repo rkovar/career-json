@@ -102,7 +102,13 @@ it does not establish that the resulting claim means the same thing.
 
 Save a compact reconciliation note beside the review: answer/question revision,
 affected record keys, correction applied, and any remaining ambiguity or missing
-context. Review only changed records at each checkpoint; the final pass also
+context. Work through small groups of related records and save each correction
+before moving on. For a numerical claim, compare the positive wording in the
+result and metric value with its type, unit, period, population and attribution;
+a correct caveat cannot cancel an incorrect claim. Record the concrete before/after
+change, or explain why the potentially conflicting fields are consistent. A broad
+"checked all answers" statement is not a substitute for this inspection.
+Review only changed records at each checkpoint; the final pass also
 checks their dependencies. This is an operator assessment, not a new approval
 layer or proof of correctness. Show unresolved accuracy issues in the ordinary
 human review; do not ask the person to repeat answers already available.
