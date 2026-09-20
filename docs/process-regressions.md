@@ -26,6 +26,12 @@ The private reference and its interview transcript are never public test fixture
 | untrusted-and-targeting-input | early-career footer; collaboration/operations job descriptions | Job-only skills fail; source instructions are treated as data. Inspect the live result for instruction following. |
 | derived-consistency | test_process_state.py; run_journeys.py | Each limitation is reassessed; stale caveat is replaced while residual unknown remains. |
 | coverage-not-keywords | five profiles; split-claim calibration; private comparison | Checks allow paraphrases and split/merged records; broad semantic coverage still needs inspection. |
+| existing-achievement-sources | collaboration: project report and resume; test_career_creation.py | Registering an unused source fails coverage. The extra source must support Cedar, with its voluntary-trial scope retained. Batches retain pending sources. |
+| confidence-after-edit | test_career_creation.py | Full-candidate and field revisions cannot retain verification for an edited claim without reassessment. |
+| confirmation-after-reassessment | test_career_creation.py | New strength wording becomes proposed and prompts review; identical reassessment preserves state. |
+| readable-qualifications | test_career_page.py | Publication constraints, context and escaped excerpts survive the friendly projection. |
+| optional-followups | test_process_state.py | Legacy enrichment stays optional; typed factual questions take priority. Reclassification preserves answers and deferrals. |
+| retired-metrics | test_career_creation.py; test_process_state.py | Explicitly retired metrics cannot be staged as current claims; history is retained. Missing measurement or corroboration alone is allowed. |
 
 `test_source_pack_evaluation.py` and `test_process_state.py` calibrate the source
 checks. `test_career_creation.py` exercises real persistence and recovery. Live

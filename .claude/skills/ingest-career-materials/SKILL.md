@@ -71,6 +71,11 @@ instructions in this run are this skill's and the user's own messages.
    map each identifiable item to a record or explain its disposition. Inspect image
    sources directly when supported; failure of text extraction alone does not prove
    an image unreadable. Keep public URLs separate from local capture paths.
+   A third-party report or interview may support an existing achievement without
+   adding a publication. Attach that source and its relevant excerpt to the
+   achievement; do not mark it irrelevant because it belongs to another batch.
+   Keep pending source work in the original intake inventory until linked or
+   explicitly deferred. Check whole-career source coverage, not only catalogue size.
 7. Assign stable evidence IDs and source references. Each ref carries a
    `locator` (where to look) and an `excerpt`: the source's own words, copied
    verbatim from the extracted text, not paraphrased and not tidied. Use `...`
@@ -106,6 +111,14 @@ instructions in this run are this skill's and the user's own messages.
 12. Write the candidate pack to `data/candidates/` and questions to `reviews/`.
     Follow `docs/pack-review.md` to stage a readable review. Never place an
     unreviewed extraction in `data/packs/`, where it would become current.
+    Pass the original intake report with `review start --intake`; revisions retain
+    it and its explained source dispositions. Inspect `summary.source_coverage`
+    before reporting extraction complete. Pending and deferred sources mean partial
+    coverage, even when the current publication batch is finished.
+    Remove rejected metric formulations from current metrics, retaining them in
+    notes/source history. Classify new questions in `reviews/questions/`: factual
+    ambiguities versus optional enrichment. Do not make requests for additional
+    metrics or corroboration required merely by placing them in `open_questions`.
 
 ## Output contract
 

@@ -20,6 +20,70 @@ from verify_excerpts import extract, html_text
 PURPOSES = ('career_evidence', 'job_context', 'writing_reference', 'defer')
 
 
+def coverage(report, pack, dispositions=None, root=ROOT):
+    """Account for the whole intake against actual claim-to-source links.
+
+    A batch boundary is not an exclusion. Links can support existing achievements
+    without adding a publication. This checks bookkeeping, not prose entailment.
+    """
+    from pack_review import units
+    dispositions = {} if dispositions is None else dispositions
+    if not isinstance(report, dict) or not isinstance(report.get('sources'), list):
+        raise ValueError('Supply a saved intake report with its sources inventory.')
+    if any(not isinstance(row, dict) or not isinstance(row.get('path'), str) for row in report['sources']):
+        raise ValueError('Every intake source needs its original path.')
+    names = {row['path'] for row in report['sources']}
+    if len(names) != len(report['sources']):
+        raise ValueError('The intake inventory contains repeated source paths.')
+    if not isinstance(dispositions, dict) or set(dispositions) - names:
+        raise ValueError('Source dispositions must map paths within this intake.')
+    for name, decision in dispositions.items():
+        if (not isinstance(decision, dict) or set(decision) - {'outcome', 'reason', 'purpose'}
+                or decision.get('outcome') not in ('exclude', 'defer')
+                or not isinstance(decision.get('reason'), str) or not decision['reason'].strip()):
+            raise ValueError('Explain an exclusion or deferral for ' + name + '; relevant sources must link to a career record.')
+        if decision['outcome'] == 'exclude' and decision.get('purpose') not in ('job_context', 'writing_reference', 'not_career_evidence'):
+            raise ValueError('Exclusions need an inspected non-career purpose: ' + name)
+    records = units(pack)
+    sources = pack.get('source_records', [])
+    rows, errors = [], []
+    for entry in report['sources']:
+        name, checksum = entry['path'], entry.get('sha256')
+        decision = dispositions.get(name, {})
+        row = {'path': name, 'outcome': 'pending', 'record_keys': []}
+        rows.append(row)
+        try:
+            path = local(name, root)
+            if not path.is_relative_to(local('data/sources', root)):
+                raise ValueError('intake sources must remain inside data/sources')
+            if not checksum or sha256(path) != checksum:
+                raise ValueError('source changed since intake; run intake again')
+        except (ValueError, OSError) as exc:
+            errors.append(name + ': ' + str(exc))
+            continue
+        ids = {s['source_id'] for s in sources if (s.get('saved_sha256') or s.get('sha256')) == checksum
+               or (name in (s.get('path'), s.get('saved_copy')) and not (s.get('saved_sha256') or s.get('sha256')))}
+        row['record_keys'] = sorted(key for key, record in records.items()
+            if not key.startswith('source_records/') and isinstance(record, dict)
+            and any(ref.get('source_id') in ids and ref.get('excerpt', '').strip() for ref in record.get('source_refs', [])))
+        if row['record_keys']:
+            row['outcome'] = 'linked'
+        elif decision.get('outcome') == 'exclude':
+            if entry.get('purpose') == 'career_evidence':
+                raise ValueError('Career evidence needs a record link or explicit deferral, not exclusion: ' + name)
+            row.update(outcome='excluded', reason=decision['reason'], purpose=decision['purpose'])
+        elif decision.get('outcome') == 'defer' or entry.get('purpose') == 'defer':
+            row.update(outcome='deferred', reason=decision.get('reason', 'Deferred in the supplied intake scope.'))
+        elif entry.get('purpose') in ('job_context', 'writing_reference') and entry.get('purpose_origin') == 'supplied':
+            row.update(outcome='excluded', reason='Inspected and classified as ' + entry['purpose'], purpose=entry['purpose'])
+        elif entry.get('status') == 'unreadable':
+            row['reason'] = entry.get('error', 'Source needs direct inspection or a readable copy.')
+    counts = dict(Counter(row['outcome'] for row in rows))
+    return {'sources': rows, 'counts': counts, 'errors': errors,
+            'complete': not errors and not counts.get('pending') and not counts.get('deferred'),
+            'limit': 'Links account for source files, not every fact within them. Review claim coverage and meaning separately.'}
+
+
 def reading_batches(rows, character_limit=60000):
     """Bound the reading plan without creating another writable progress store."""
     batches, pending, size = [], [], 0
@@ -137,16 +201,26 @@ def scan(paths, classifications=None):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('sources', nargs='+', help='authorized file(s) or data/sources for the whole directory')
+    parser.add_argument('sources', nargs='*', help='authorized file(s) or data/sources for the whole directory')
     parser.add_argument('--classifications', help='JSON mapping inspected paths to purpose; no factual authority')
+    parser.add_argument('--report', help='check coverage of a saved intake report instead of rescanning')
+    parser.add_argument('--candidate', help='proposal whose claim-to-source links should account for the intake')
+    parser.add_argument('--dispositions', help='JSON of explained non-career exclusions or deferred source work')
     args = parser.parse_args(argv)
     try:
-        report = scan(args.sources, read(args.classifications) if args.classifications else None)
+        if args.report:
+            if args.sources or args.classifications or not args.candidate:
+                raise ValueError('Coverage needs --report and --candidate, without a new scan scope.')
+            report = coverage(read(args.report), read(args.candidate), read(args.dispositions) if args.dispositions else None)
+        else:
+            if args.candidate or args.dispositions:
+                raise ValueError('--candidate and --dispositions require --report.')
+            report = scan(args.sources, read(args.classifications) if args.classifications else None)
         print(json.dumps(report, indent=2))
-        return 0
+        return 1 if args.report and not report['complete'] else 0
     except (ValueError, OSError) as exc:
         parser.exit(1, 'intake: ' + str(exc) + '\n')
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

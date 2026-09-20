@@ -78,7 +78,21 @@ def overview(state):
         body += '<details><summary>Recorded strengths (interpretations)</summary>' + show(strengths) + '</details>'
     return ('<section class="panel" id="career-overview"><h2>Your proposed career record</h2><p>This includes every proposed role and achievement. Checking it here does not accept it automatically.</p>'
             + '<p><strong>' + str(len(roles)) + ' roles · ' + str(len(atoms)) + ' achievements</strong></p>'
-            + (body or '<p>No career details recorded yet.</p>') + '</section>')
+            + (body or '<p>No career details recorded yet.</p>') + '</section>' + source_coverage_html(state))
+
+
+def source_coverage_html(state):
+    report = state.get('summary', {}).get('source_coverage')
+    if not report:
+        return ''
+    counts = report['counts']
+    message = (f"{counts.get('linked', 0)} sources linked to career records · "
+               f"{counts.get('pending', 0)} still to process · {counts.get('deferred', 0)} deferred")
+    rows = ''.join('<li>' + esc(r['path']) + ': ' + esc(r['outcome'])
+                   + (' — ' + esc(r['reason']) if r.get('reason') else '') + '</li>' for r in report['sources'])
+    return ('<section class="panel"><h2>Source coverage</h2><p>' + esc(message) + '</p>'
+            + ''.join('<p>' + esc(error) + '</p>' for error in report['errors'])
+            + '<details><summary>Sources and remaining work</summary><ul>' + rows + '</ul></details></section>')
 
 
 

@@ -47,6 +47,22 @@ Use `questions list --all` to inspect history. The default accuracy queue combin
 legacy pack questions with this history and removes answered/deferred/declined
 items from required work. Startup choices still belong to the startup wizard.
 
+Legacy `open_questions` text on a settled claim is optional until explicitly
+classified. Questions attached to `unresolved` claims remain in the accuracy
+queue. Use a typed factual question for an ambiguity within an otherwise settled
+achievement. A matching durable classification takes precedence over legacy text.
+More metrics, corroboration and future audit results are optional enrichment.
+
+Correct a saved question's classification without reopening it:
+
+```sh
+python3 scripts/career_core.py questions classify --id q-0123456789abcdef0123 --revision 2 --kind enrichment --reason "Useful future measurement, not a disputed current fact."
+```
+
+This writes a new revision while retaining the answer, author, context and
+answered/deferred/declined state. Old answer references remain valid. Factual
+questions can also use `--optional`; enrichment and preferences are always optional.
+
 The question file format has its own `version: 1`. Existing person source fields
 carry its references, so career schema 1.3/1.4 and old receipts need no migration.
 Do not edit old packs or append to a pinned answer revision.
@@ -80,6 +96,11 @@ it does not establish that the resulting claim means the same thing.
 - Apply a correction everywhere it appears: title, STAR wording, metric value
   and basis, dates, constraints, notes, linked achievements and strengths. A
   corrected measurement basis does not repair a contradictory result sentence.
+  Remove rejected or superseded figures from current `metrics`. Preserve their
+  wording in notes and original source/review history. `measured: false` means an
+  unmeasured claim, not a rejected claim. Validation catches explicit retirement
+  statements in a metric's own basis; other contradictions still need source review.
+  It never rewrites a metric from a prose guess.
 - Recheck inherited achievement dates when a role's dates change. Preserve
   explicit event dates and their precision; do not replace them with a whole
   employment window. Split or relink work that spans roles when the sources
@@ -99,6 +120,11 @@ it does not establish that the resulting claim means the same thing.
   context is unavailable, record the gap; never approve reconstructed wording.
   A newly worded strength stays `proposed` when the originally confirmed wording
   is unavailable, even if the person previously agreed with its general theme.
+  `bind-strength` also returns changed interpretations, limitations, timeframes or
+  supporting fingerprints to proposed review and clears the old review date and
+  external permission. Declined questions remain closed; exact no-change
+  reassessments retain their state. Confirmation applies to wording and support,
+  not simply the strength ID.
 
 Save a compact reconciliation note beside the review: answer/question revision,
 affected record keys, correction applied, and any remaining ambiguity or missing

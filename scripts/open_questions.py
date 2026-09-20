@@ -285,8 +285,12 @@ def career_questions(pack, optional=False, include_closed=False, root=ROOT):
     extras = {'empty_role', 'classification', 'undated', 'publications', 'metric_basis'}
     questions = [q for q in collect(pack, [], set()) if q['kind'] in required or (optional and q['kind'] in extras)]
     employment = {r['employment_id']: r for r in pack.get('employment', [])}
+    unresolved = {a['id'] for a in pack.get('evidence_atoms', []) if a.get('evidence_status') == 'unresolved'}
     for q in questions:
-        q['optional'] = q['kind'] in extras
+        # Legacy free text has no factual/enrichment classification. An unresolved
+        # claim needs attention; a bounded own account does not need more evidence
+        # merely because a past operator left a follow-up. Typed history wins below.
+        q['optional'] = q['kind'] in extras or (q['kind'] == 'recorded' and q.get('subject') not in unresolved)
         if q['kind'] == 'employment':
             role = employment[q['subject']]
             q['question'] = f"Is {role['title']} at {role['employer']} still current, or is its end date unknown? You can leave it unknown."

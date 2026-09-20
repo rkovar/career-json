@@ -92,6 +92,9 @@ If the person wants to interview now, follow it with one answerable question.
 ## Workflow
 
 1. Run `career_core.py intake <authorized-path>` and `ingest-career-materials`.
+   Keep the returned report for `review start --intake`. Whole-source coverage
+   follows subsequent revisions; relevant evidence can attach to an existing
+   achievement without adding a publication. Pending/deferred sources stay visible.
    Inspect all authorized new material before starting review. Report duplicates,
    unchanged sources and extraction failures. Classify ambiguous text by content;
    advice and job context never become career facts. Use existing extraction tools.

@@ -76,6 +76,28 @@ class CareerPageTests(unittest.TestCase):
         self.assertIn('Stale', page)
         self.assertNotIn('>Confirmed<', page)
 
+    def test_publication_caveats_and_sources_survive_readable_projection(self):
+        pub = {'publication_id': 'PUB_ONE', 'kind': 'talk', 'title': 'Conference panel',
+               'role': 'co_speaker', 'evidence_status': 'self_asserted', 'external_safe': False,
+               'constraints': ['The card advertises a panel; attendance is not established.'],
+               'notes': 'The two programmes name different collaborators.',
+               'source_refs': [{'source_id': 'SRC_CARD', 'locator': 'Name strip', 'excerpt': '<Alex & colleagues>'}]}
+        self.pack['publications'] = [pub]
+        page = career_page.publications_html(self.pack)
+        self.assertIn(pub['constraints'][0], page)
+        self.assertIn(pub['notes'], page)
+        self.assertIn('SRC_CARD', page)
+        self.assertIn('Name strip', page)
+        self.assertIn('&lt;Alex &amp; colleagues&gt;', page)
+        self.assertIn('<details', page)
+        self.assertNotIn('<Alex & colleagues>', page)
+
+    def test_achievement_notes_are_available_without_loading_sources(self):
+        atom = self.pack['evidence_atoms'][0]
+        atom['notes'] = 'Retired wording: <obsolete claim>. See the original review.'
+        page = career_page.atom_html(atom)
+        self.assertIn('Retired wording: &lt;obsolete claim&gt;', page)
+
 
 if __name__ == '__main__':
     unittest.main()

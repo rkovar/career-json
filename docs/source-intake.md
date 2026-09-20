@@ -54,6 +54,61 @@ writing advice. A relevant interview can contain a hiring quote or careers link.
 Only an explicitly supplied classification changes the source's purpose; an
 unreviewed hint cannot make new material disappear from the intake summary.
 
+## Preserve coverage across batches
+
+Evidence can add a record **or support an existing one**. A customer account of a
+programme, project report or interview can strengthen an achievement without
+becoming a publication. Attach its source and excerpt to the existing record.
+Do not exclude it because the current batch is about talks or it adds no new work.
+
+When staging an extraction, pass the original report returned by intake:
+
+```sh
+python3 scripts/career_core.py review start --candidate data/candidates/proposal.json --id first --intake reviews/intake/intake-example.json
+```
+
+Use the actual generated intake path in place of `intake-example.json`. The review
+retains the whole inventory across `review revise` and `review correct`. Its status
+and page show sources linked to claims, sources still to process and explicit
+deferrals. Registering a source without attaching its excerpt to a career record
+does not complete its coverage. Partial proposals can still be saved.
+
+For material that should wait or is unrelated, optionally supply
+`--dispositions data/private/source-dispositions.json`:
+
+```json
+{
+  "data/sources/project-report.md": {
+    "outcome": "defer",
+    "reason": "Read this during the achievements batch."
+  },
+  "data/sources/job-description.md": {
+    "outcome": "exclude",
+    "purpose": "job_context",
+    "reason": "Requirements for a target role, not the person's history."
+  }
+}
+```
+
+Exclusion purposes are `job_context`, `writing_reference` or
+`not_career_evidence`. Material classified as career evidence needs a record link
+or deferral. If the initial classification was wrong, inspect it and create a
+corrected intake report. `not_relevant` to one batch is not a whole-career
+exclusion. Revisions retain dispositions unless replacements are supplied; a newly
+linked source supersedes its deferral automatically.
+
+Check coverage without editing anything:
+
+```sh
+python3 scripts/career_core.py intake --report reviews/intake/intake-example.json --candidate data/candidates/proposal.json
+```
+
+Add `--dispositions` to include exclusions or deferrals. Exit status is nonzero
+while sources remain pending, deferred or changed since intake. This is a
+completeness check, not a prerequisite for saving reviewed facts. Links do not
+establish that every important fact in a long document was preserved; the final
+source-to-pack review still checks meaning, contribution and scope.
+
 ## Catalogue coverage
 
 For a large publication archive, the assistant saves a compact coverage note beside

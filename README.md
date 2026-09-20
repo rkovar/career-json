@@ -1,36 +1,37 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="graphics/career-json-reversed.svg">
+  <img src="graphics/career-json-primary.svg" alt="career.json logo" width="180">
+</picture>
+
 # career.json
 
-**Keep your career up to date, one conversation at a time.**
+**Your career, structured. The right facet, selected.**
 
-Projects finish and useful details fade. career.json helps you keep a record
-while the work is fresh, ready for your next review, interview or job opportunity.
+career.json is an open-source career evidence system for experienced
+professionals, especially those pursuing senior, specialist, technical or
+leadership roles.
 
-Start with a resume or describe your work. The assistant organizes it into a
-**career pack**: a file containing your roles, achievements, sources and strengths.
-Review it in a browser, add information over time, and export it when useful.
+Keep the roles, achievements and context that a single resume leaves out. Build
+a reusable **career pack**, keep achievements connected to their original sources,
+and select relevant evidence for resumes, interviews and performance reviews.
 
-## See what you keep
+Start with an old resume or describe your work. Claude Code proposes a record;
+you review the wording and decide what can be used externally. Add quick notes
+and new documents as your career develops.
 
-In our fictional example, Jules's old resume says:
+Accepted changes are saved in versioned JSON with a private reading page. The
+pack holds employment history, achievements, qualifications, publications and
+source references, with optional strengths and preferences. You can build it
+before choosing a target job.
 
-> I designed a deployment rehearsal format and co-built its runner with engineers.
-> Two teams adopted rehearsals before deployment.
-
-The career pack keeps the contribution, shared ownership and original source
-together. Months later, Jules can ask:
-
-> Find the deployment rehearsal example and show me its source.
-
-That reviewed example can support a review, interview or resume. [Follow Jules's complete walkthrough](examples/first-pack/README.md)
-to explore a fuller career, review corrections and add new work later.
+[Start here](#start-here) · [See an example](#see-an-example) · [All guides](docs/README.md)
 
 ## Start here
 
-You need **Claude Code**, Git, Python 3.9+, `make`, and macOS or Linux. Claude Code
-must already be installed and configured. The repository includes both career-pack
-and resume workflows.
+You need **Claude Code installed and configured**, Git, Python 3.9+, `make`, and
+macOS or Linux. The Python tools use the standard library.
 
-Run these commands in your terminal:
+Run this in your terminal:
 
 ```sh
 git clone https://github.com/rkovar/career-json.git
@@ -38,67 +39,69 @@ cd career-json
 make start
 ```
 
-`make start` opens a menu, then launches Claude Code for your chosen path.
-Answer in the conversation; the assistant handles the underlying scripts and files.
+Choose **Build my career pack**. One old resume is enough.
 
-| Choose | What happens |
+`make start` launches Claude Code for your menu choice. Answer in the conversation;
+the assistant runs the tools. If the launcher prints a prompt instead, paste it
+into Claude Code in this directory.
+
+| Menu choice | Use it to… |
 | --- | --- |
-| **Build my career pack** | Bring existing material or describe your work, then review the proposed record. |
-| **Update my career pack** (once a pack exists) | Capture a note or review only additions and changes from new material. |
-| **View my saved career record** (once a pack exists) | Read your current record and its sources. |
-| **Create a resume** | Choose a job or direction and the strengths you want to highlight. |
+| **Build my career pack** | Turn existing material or your own account into a reviewed record. |
+| **Update my career pack** | Capture a note or review new material once a pack exists. |
+| **View my saved career record** | Read the current saved pack once one exists. |
+| **Continue saved work** | Resume an unfinished setup or career review when saved work is available. |
+| **Create a resume** | Choose a job or direction and prepare a resume from your career pack. |
 
-**Unsure? Start with your career pack. One old resume is enough.** Use several documents if you have them ready.
+Already in Claude Code? Say **“Walk me through the career-pack wizard”** or
+**“Walk me through the resume wizard.”** These enter the same workflows.
 
-If Claude Code is already open in this directory, simply say **“Walk me through
-the career-pack wizard”** or **“Walk me through the resume wizard.”** These enter
-the same workflows as the menu.
+PDF input needs Poppler, or Swift/PDFKit when using macOS. Text, Markdown and DOCX
+need neither. See [source setup](docs/extraction.md#what-it-uses). Model-assisted work
+consumes tokens; cost and time depend on your material and configured service.
 
-Developing the tool too? [Create a separate personal workspace](docs/workspace-maintenance.md#create-a-separate-personal-workspace) so career files stay outside your development checkout.
+## Build your first pack
 
-PDF sources need a text extractor; PDF resume export also needs Chrome/Chromium.
-See the [first-session guide](docs/getting-started.md) for source setup and
-[export setup](docs/resume-exports.md) for PDF resumes.
-Model-assisted conversations consume tokens; time and cost depend on your material
-and configured service.
+1. **Bring what you have.** Put resumes, LinkedIn PDFs, reviews, project notes or
+   publication material in `data/sources/`. Name the files to use, or say
+   **“Use everything in Sources”** for the whole folder.
+2. **Read the proposal.** Check your contribution, dates, shared ownership and
+   anything missing. Supporting excerpts and caveats are available when needed.
+3. **Confirm or correct.** Give decisions in conversation or use the browser
+   review, which shows five items at a time. Corrected wording is shown again
+   before acceptance. You can defer uncertain items.
+4. **Save something useful.** Save a role and a few achievements, then ask:
+   **“Show me one recorded achievement and its original source.”** Accepted
+   changes become a new pack version; pending proposals stay separate.
 
-## Build my career pack
+In the connected review, **Save and next five** saves and advances. Standalone
+HTML reviews require downloading decisions and asking the assistant to apply them;
+downloading alone does not update the pack. [Review details](docs/pack-review.md)
 
-The wizard helps you choose useful sources: old resumes, LinkedIn exports,
-performance reviews, publications, talks, project notes or your own account.
-You can leave material for later and start with what you have.
+Intake identifies unchanged files, duplicates and extraction problems. The review
+tracks remaining source work across batches. A source linked to a career record
+does not prove that every important detail in it was captured.
 
-1. **Read the proposed record.** The assistant gives you a browser view of your
-   history, achievements and their sources.
-2. **Review a useful amount.** Confirm accurate wording, explain corrections, or
-   defer uncertain items. Browser reviews show five items at a time.
-3. **Save and try it.** Accept a role and a few achievements, then ask to retrieve
-   one. You can stop there and return whenever useful.
+Your own account is valid evidence. Strengths interviews, contact details and
+independent corroboration can wait. Accepting wording, assessing its evidence and
+allowing external use are separate decisions. New or changed content stays private
+unless you allow external use.
 
-Give decisions in conversation or use **Save reviewed changes** in the connected
-browser review. Correct wording, preview the revision, then confirm it. The page
-shows five items at a time and saves before moving to the next batch.
-New information stays private; external-use decisions and strengths interviews
-can wait. The standalone HTML also supports downloaded decisions.
+## Keep it current
 
-Ask to use one file or **everything in Sources**. The assistant inventories that
-scope, skips unchanged material and separates career evidence from job descriptions
-and writing advice. You review roles and achievements, with source excerpts nearby.
-The saved pack has a readable page you can return to at any time.
-
-## Keep it up to date
-
-Use ordinary requests as your work changes:
+Capture useful details while they are fresh. Choose **Update my career pack**,
+or ask in Claude Code:
 
 | When | What to say |
 | --- | --- |
-| Something worth remembering happens | “Remember that I helped the operations team rehearse the migration.” |
-| You have new material | “I've added my annual review. Help me update my career pack.” |
-| You're ready to organize your notes | “Review my recent notes with me and update my career pack.” |
+| A useful detail is fresh | “Remember that I helped the operations team rehearse the migration.” |
+| You have new material | “I've added my annual review to Sources. Help me update my career pack.” |
+| You're ready to review notes | “Review my recent notes with me and update my career pack.” |
 | You need an example | “Find an achievement that shows how I mentored other engineers.” |
 
-Quick notes are saved for later review. They become part of the reviewed pack
-after you check the proposed wording. Earlier versions and sources remain available.
+Quick capture saves your supplied note without an interview. Notes enter the
+accepted pack after review. Updates compare new material with your existing
+record; earlier pack versions and review history remain available.
 
 ```text
 New work -> Quick note or document -> Your review -> Updated career pack
@@ -106,40 +109,62 @@ New work -> Quick note or document -> Your review -> Updated career pack
                                                    Recall or reuse
 ```
 
-You do not have to finish every question in one session. Say **“pause”**, then
-use `make start` and choose **Continue saved work** when you return. Saved setups
-and active career reviews appear by name; completed work moves to history. Answers
-and deferrals are retained, so returning does not restart the interview. New setup summaries also include a prompt
-you can copy to continue.
+Say **“pause”** and return through **Continue saved work**. Saved answers and
+deferrals are reused; changed evidence can need a fresh review. **View my saved
+career record** refreshes the reading page. [Keeping your pack current](docs/keep-current.md)
 
-## Create a resume
+## See an example
 
-Choose **Create a resume** from the same launcher. Bring a job description, name
-a type of role, or ask for help exploring directions. If you need a career pack
-first, the wizard saves your target while you build one.
+[Jules Elm's fictional walkthrough](examples/first-pack/README.md) follows sixteen
+years across four roles, through ownership corrections, partial acceptance and a
+later update. Its sources and decisions are scripted examples.
 
-You can review ranked achievements and the reasons for including them before
-writing. The assistant uses your reviewed facts, retains feedback through revisions,
-and prepares **PDF, TXT and DOCX**. Missing evidence or unfinished checks are reported.
+Open [examples/first-pack/index.html](examples/first-pack/index.html) locally after
+cloning or downloading the repository. It needs no Claude session or server.
+GitHub displays HTML as source; use your local browser to try the review controls.
 
-The next application starts from the same reusable career record.
+## Create a resume when you need one
 
-## Privacy and project status
+Choose **Create a resume**. Bring a job description, describe a role, or explore
+directions. If you need a career pack first, the wizard saves your target while
+you build one.
 
-Your workspace files stay on your computer, but material you ask Claude to read
-is processed by your configured model service. Personal data and generated
-documents are excluded from normal Git commits and public release archives.
-Keep private review pages and backups private too.
+Review ranked achievements and inclusion reasons, or request automatic drafting
+and review. The workflow uses eligible career evidence and prepares **PDF, TXT
+and DOCX** from shared content. Each application can draw a different selection from
+the same career record. New facts return through career-pack review.
 
-Career Evidence Core `0.1.0-alpha.6` is early access; Resume Application
-`0.1.0-beta.7` is beta. Human review is part of using the tool. Automated checks
-help catch problems, but do not establish excellent writing or predict hiring outcomes.
+PDF export also needs Chrome/Chromium and a supported PDF extractor. Failed checks
+or missing formats leave the bundle incomplete; final layout needs inspection.
+See [resume creation](docs/resume-start.md) and
+[export setup and checks](docs/resume-exports.md).
 
-## Find help
+## Your files and privacy
+
+Career sources, packs and review history are local files. Material you ask Claude
+to read is processed by your configured model service.
+
+The default `.gitignore` excludes personal work in the designated data folders,
+`reviews/`, `outputs/` and `backups/` from ordinary commits. Files elsewhere do
+not inherit that protection. Reading pages include withheld information too.
+
+Local saves are separate from GitHub backup. If you also develop this tool,
+[create a separate personal workspace](docs/workspace-maintenance.md#create-a-separate-personal-workspace).
+The installer creates neither a GitHub repository nor automatic syncing.
+[Backup and restore](docs/workspace-maintenance.md#portable-private-backup-and-restore)
+preserves sources, pending reviews and saved packs; archives are not encrypted.
+
+## Project status and help
+
+**Career Evidence Core `0.1.0-alpha.6` is early access; Resume Application
+`0.1.0-beta.7` is beta.** This checkout includes both. Core also works as a separate installation; see
+[component versions and releases](docs/releases.md).
+
+Automated checks help catch structural, source and export problems. Human review
+remains necessary: the checks establish neither complete extraction nor likely
+hiring outcomes.
 
 - [Your first session](docs/getting-started.md)
-- [Keep your career pack current](docs/keep-current.md)
-- [Create a resume](docs/resume-start.md)
 - [All guides and technical references](docs/README.md)
-
-MIT licensed. See [LICENSE](LICENSE).
+- [Development and validation](docs/development.md)
+- [MIT license](LICENSE)

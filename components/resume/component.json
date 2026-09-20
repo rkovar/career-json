@@ -84,6 +84,7 @@
     "tests/fixtures/source-to-pack/collaboration/expected.json": "tests/fixtures/source-to-pack/collaboration/expected.json",
     "tests/fixtures/source-to-pack/collaboration/sources/resume-copy.md": "tests/fixtures/source-to-pack/collaboration/sources/resume-copy.md",
     "tests/fixtures/source-to-pack/collaboration/sources/resume.md": "tests/fixtures/source-to-pack/collaboration/sources/resume.md",
+    "tests/fixtures/source-to-pack/collaboration/sources/project-report.md": "tests/fixtures/source-to-pack/collaboration/sources/project-report.md",
     "tests/fixtures/source-to-pack/collaboration/sources/role-description.md": "tests/fixtures/source-to-pack/collaboration/sources/role-description.md",
     "tests/fixtures/source-to-pack/operations/expected.json": "tests/fixtures/source-to-pack/operations/expected.json",
     "tests/fixtures/source-to-pack/operations/sources/contract-note.md": "tests/fixtures/source-to-pack/operations/sources/contract-note.md",

@@ -9,7 +9,8 @@ The review shows five items at a time, grouped by role. Confirm each role once,
 then review complete achievements with their contribution and outcome visible.
 Source excerpts, full fields and previous values are available when needed.
 The proposed overview includes all roles and achievements; the saved reading
-page contains only the accepted record.
+page contains only the accepted record. Publication caveats remain visible there;
+supporting notes and source excerpts are expandable, as they are for achievements.
 
 Use **Save reviewed changes** in the connected page. **Save and next five** saves
 and advances without losing the next batch. Enter your name under **How review
@@ -25,6 +26,9 @@ valid; an older review cannot silently undo a newer correction.
 New and changed content stays private by default. Wording acceptance, evidence
 confidence and external-use permission are separate. You can stop after useful
 work is saved; optional strengths, contact details and enrichment can wait.
+Editing a claim or its supporting records also removes inherited corroborated or
+independently verified status on save. A new explicit evidence reassessment is
+needed to retain that confidence. Unchanged claims keep their existing status.
 
 ## Operator reference
 
@@ -32,7 +36,7 @@ work is saved; optional strengths, contact details and enrichment can wait.
 
 ```sh
 python3 scripts/career_core.py intake data/sources
-python3 scripts/career_core.py review start --candidate data/candidates/proposal.json --id onboarding-v1
+python3 scripts/career_core.py review start --candidate data/candidates/proposal.json --id onboarding-v1 --intake reviews/intake/intake-example.json
 python3 scripts/career_core.py review open --session reviews/pack-reviews/onboarding-v1/session.json --open
 ```
 
@@ -41,6 +45,12 @@ read, deferred and unreadable material. Inspect ambiguous extracted text and kee
 writing references/job context out of career evidence. `--classifications <json>`
 accepts a mapping of inspected paths to `career_evidence`, `job_context`,
 `writing_reference` or `defer`; classification never grants factual authority.
+Replace `intake-example.json` above with the returned report path. The original
+inventory and any `--dispositions` are retained across revisions; status keeps
+unprocessed sources visible even after all proposed facts are accepted. Sources
+that support an existing achievement count through that link, not through an
+invented publication. See [source coverage](source-intake.md#preserve-coverage-across-batches).
+Conversation-only corrections without a source intake do not need `--intake`.
 
 Author a complete candidate preserving existing facts, IDs and metadata. Deletions
 are proposed removals and need explicit acceptance. Review creation snapshots

@@ -94,6 +94,12 @@ def evaluate(pack, case):
             check(wanted['name'] + '_fact_' + str(n + 1), any(matches(pattern, value) for value in values))
         for n, pattern in enumerate(wanted.get('qualification_patterns', [])):
             check(wanted['name'] + '_scope_' + str(n + 1), any(matches(pattern, text(a)) for a in candidates))
+        source_records = {s['source_id']: s for s in pack.get('source_records', [])}
+        for n, path in enumerate(wanted.get('source_paths', [])):
+            check(wanted['name'] + '_source_' + str(n + 1), any(
+                path in (source_records.get(ref.get('source_id'), {}).get('path'),
+                         source_records.get(ref.get('source_id'), {}).get('saved_copy')) and ref.get('excerpt')
+                for a in candidates for ref in a.get('source_refs', [])))
         # A correct basis/constraint cannot repair an incompatible metric value.
         # These restrictions belong to a fictional case, not a universal prose rule.
         metric_values = [str(m.get('value', '')) if isinstance(m, dict) else str(m)

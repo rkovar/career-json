@@ -115,6 +115,24 @@ def metrics_html(atom):
             f'<tbody>{"".join(rows)}</tbody></table>')
 
 
+def supporting_detail(record):
+    """Keep material qualifications visible, with provenance available on demand."""
+    parts = []
+    if record.get('constraints'):
+        parts.append('<div class="handle"><span class="lbl">Handling</span><ul>' +
+                     ''.join(f'<li>{e(c)}</li>' for c in record['constraints']) + '</ul></div>')
+    if record.get('notes'):
+        parts.append('<details class="sources"><summary>Recorded context</summary><p>' + e(record['notes']) + '</p></details>')
+    refs = record.get('source_refs') or []
+    if refs:
+        items = ''.join('<li><span class="mono src">' + e(r['source_id']) + '</span>'
+                        + (f'<span class="loc">{e(r["locator"])}</span>' if r.get('locator') else '')
+                        + (f'<blockquote>{e(r["excerpt"])}</blockquote>' if r.get('excerpt') else '<p>No excerpt recorded.</p>')
+                        + '</li>' for r in refs)
+        parts.append(f'<details class="sources"><summary>{len(refs)} source reference{"s" if len(refs) != 1 else ""}</summary><ul>{items}</ul></details>')
+    return ''.join(parts)
+
+
 def atom_html(atom):
     status, kind = STATUS.get(atom.get("evidence_status"), (atom.get("evidence_status"), ""))
     pills = [pill(status, kind)]
@@ -131,18 +149,9 @@ def atom_html(atom):
              f'<header><div class="when mono">{e(when)}</div><h4>{e(atom["title"])}</h4>'
              f'<div class="pills">{"".join(pills)}</div></header>',
              star_html(atom), metrics_html(atom)]
-    if atom.get("constraints"):
-        parts.append('<div class="handle"><span class="lbl">Handling</span><ul>' +
-                     "".join(f"<li>{e(c)}</li>" for c in atom["constraints"]) + "</ul></div>")
+    parts.append(supporting_detail(atom))
     if atom.get("role_fit_notes"):
         parts.append(f'<p class="fit"><span class="lbl">Role relevance</span>{e(atom["role_fit_notes"])}</p>')
-    refs = [r for r in atom.get("source_refs") or [] if r.get("excerpt")]
-    if refs:
-        items = "".join(
-            f'<li><span class="mono src">{e(r["source_id"])}</span>'
-            + (f'<span class="loc">{e(r["locator"])}</span>' if r.get("locator") else "")
-            + f'<blockquote>{e(r["excerpt"])}</blockquote></li>' for r in refs)
-        parts.append(f'<details class="sources"><summary>{len(refs)} source excerpt{"s" if len(refs) != 1 else ""}</summary><ul>{items}</ul></details>')
     if atom.get("open_questions"):
         parts.append('<p class="open"><span class="lbl">Open</span>' + e(" ".join(atom["open_questions"])) + "</p>")
     parts.append("</article>")
@@ -174,7 +183,7 @@ def publications_html(pack):
                                           ("with " + ", ".join(i["collaborators"])) if i.get("collaborators") else None] if x)
             rows.append('<li' + ("" if i.get("external_safe") else ' class="private"') + f'><div class="pub-head">{head}<span class="mono">{e(ym(i.get("date")) if i.get("date") and len(i["date"]) <= 7 else (i.get("date") or "undated"))}</span></div>'
                         f'<div class="pub-meta"><span class="mono">{e(meta)}</span> {pill(status, skind)}{"" if i.get("external_safe") else pill("Private", "stop")}</div>'
-                        + (f'<p>{e(i["description"])}</p>' if i.get("description") else "") + "</li>")
+                        + (f'<p>{e(i["description"])}</p>' if i.get("description") else "") + supporting_detail(i) + "</li>")
         out.append(f'<div class="pubgroup"><h3>{e(labels.get(kind, kind.replace("_", " ").title()))} <span class="count mono">{len(items)}</span></h3><ul class="pubs">{"".join(rows)}</ul></div>')
     return "".join(out)
 

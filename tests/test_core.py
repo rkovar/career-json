@@ -105,7 +105,9 @@ class CoreTests(unittest.TestCase):
                               '--strength', strength['id'], '--output', 'data/candidates/v2.json', '--assessment', 'assessment.json')
         self.assertEqual(result.returncode, 0, result.stderr)
         bound = json.loads((self.root / 'data/candidates/v2.json').read_text())
-        self.assertEqual(bound['strengths_profile'][0]['status'], strength['status'])
+        self.assertEqual(bound['strengths_profile'][0]['status'], 'proposed')
+        self.assertEqual(bound['strengths_profile'][0]['question_status'], 'open')
+        self.assertFalse(bound['strengths_profile'][0]['external_safe'])
         self.assertEqual(next(a for a in bound['evidence_atoms'] if a['id'] == aid)['evidence_status'], original_status)
 
     def test_core_recall_and_questions_work_without_roles(self):

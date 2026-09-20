@@ -9,7 +9,7 @@ import re
 import sys
 
 from current_pack import ROOT, resolve, sha256
-from career_profile import digest
+from career_profile import digest, propose_strength, strength_content
 from pack_io import local, read, pin, pin_errors, write_new
 from schema_tools import walk
 
@@ -104,13 +104,13 @@ def validate_pack_object(pack, allow_schema_errors=False):
     return warnings + errors
 
 
-def start(candidate_path, review_id, grouped=False):
+def start(candidate_path, review_id, grouped=False, intake=None, dispositions=None):
     from pack_io import workspace_lock
     with workspace_lock():
-        return _start(candidate_path, review_id, grouped=grouped)
+        return _start(candidate_path, review_id, grouped=grouped, intake=intake, dispositions=dispositions)
 
 
-def _start(candidate_path, review_id, grouped=False):
+def _start(candidate_path, review_id, grouped=False, intake=None, dispositions=None):
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,79}', review_id):
         raise ValueError('review id must use letters, numbers, hyphens or underscores')
     candidate_path = local(candidate_path)
@@ -127,11 +127,27 @@ def _start(candidate_path, review_id, grouped=False):
                 receipt = proposed.get('metadata', {}).get('strength_reassessments', {}).get(strength['id'], {})
                 if receipt.get('result_sha256') != digest(strength) or pin_errors(receipt.get('assessment', {})):
                     raise ValueError('Supporting facts changed: reassess the interpretation and limitations with bind-strength before confirming ' + strength['id'])
+            if previous and strength_content(previous) != strength_content(strength):
+                receipt = proposed.get('metadata', {}).get('strength_reassessments', {}).get(strength['id'], {})
+                assessed = receipt.get('result_sha256') == digest(strength)
+                propose_strength(strength)
+                if assessed:
+                    receipt['result_sha256'] = digest(strength)
     annotations = {}
     if grouped:
         from career_review import source_annotations
         annotations = source_annotations(proposed, read(base_path) if base_path else {})
     warnings = validate_pack_object(proposed, allow_schema_errors=bool(base_path and candidate_path == local(base_path)))
+    source_dispositions = read(dispositions) if dispositions else {}
+    if dispositions and not intake:
+        raise ValueError('Source dispositions need the original --intake report.')
+    if intake:
+        from career_intake import coverage
+        coverage_report = coverage(read(intake), proposed, source_dispositions)
+        if coverage_report['errors']:
+            raise ValueError('; '.join(coverage_report['errors']))
+        if not coverage_report['complete']:
+            warnings.append('Source intake remains incomplete; pending and deferred sources are listed in review status.')
     from verify_excerpts import verify
     source_report = verify(proposed)
     warnings.extend(r['record'] + ': ' + r['status'] + ': ' + str(r['detail']) for r in source_report['excerpts'] if r['status'] != 'verified')
@@ -141,6 +157,9 @@ def _start(candidate_path, review_id, grouped=False):
     proposal = write_new(folder / 'proposal.json', proposed)
     session = {'review_id': review_id, 'created': now(), 'proposal': pin(proposal),
                'base': pin(base_path) if base_path else None, 'validation_warnings': warnings}
+    if intake:
+        session['intake'] = pin(intake)
+        session['source_dispositions'] = pin(write_new(folder / 'source-dispositions.json', source_dispositions))
     if annotations:
         session['source_annotations'] = annotations
     if grouped:
@@ -158,6 +177,9 @@ def load_session(path):
     errors = pin_errors(session['proposal'])
     if session['base']:
         errors.extend(pin_errors(session['base']))
+    for name in ('intake', 'source_dispositions'):
+        if session.get(name):
+            errors.extend(pin_errors(session[name]))
     if errors:
         raise ValueError('; '.join(errors))
     return session, read(session['proposal']['path']), read(session['base']['path']) if session['base'] else {}
@@ -415,10 +437,16 @@ def _publish(path, output=None, preview=False, payload=None):
                 # corroboration, irrespective of what a candidate claims.
                 rank = {'declined': 0, 'unresolved': 1, 'self_asserted': 2, 'corroborated': 3, 'externally_verified': 4}
                 prior = (units(latest).get(key) or {}).get('evidence_status', 'self_asserted')
+                if fingerprint(key, proposed) != fingerprint(key, latest) and rank[prior] > rank['self_asserted']:
+                    prior = 'self_asserted'
                 if rank[value['evidence_status']] > rank[prior]:
                     value['evidence_status'] = prior
                 if choice.get('reassessment'):
                     value['evidence_status'] = reassess(choice, proposed_units[key], proposed)
+            if key.startswith('strengths_profile/') and isinstance(value, dict):
+                previous = units(latest).get(key)
+                if previous and strength_content(previous) != strength_content(value):
+                    propose_strength(value)
             if isinstance(value, dict) and 'external_safe' in value:
                 unchanged = key in units(latest) and fingerprint(key, proposed) == fingerprint(key, latest)
                 value['external_safe'] = bool(unchanged and units(latest)[key].get('external_safe'))
@@ -530,6 +558,10 @@ def status(path):
     pending = [r for r in rows if r['review_status'] not in ('accepted', 'registered') and not r['source_registration']]
     from career_state import question_summary
     questions = question_summary(proposed)
+    source_coverage = None
+    if session.get('intake'):
+        from career_intake import coverage
+        source_coverage = coverage(read(session['intake']['path']), proposed, read(session['source_dispositions']['path']))
     summary = {
         'current_pack': str(local(current).relative_to(ROOT.resolve())) if current else None,
         'saved_roles': len(latest.get('employment', [])),
@@ -538,6 +570,7 @@ def status(path):
         'corrections': sum(r.get('decision', {}).get('action') == 'correct' for r in pending),
         'questions': questions['required'], 'optional_questions': questions['optional'],
         'deferred_questions': questions['deferred'], 'question_state': questions,
+        'source_coverage': source_coverage,
         'next_items': [{'key': r['key'], 'action': r.get('decision', {}).get('action', 'review')} for r in pending],
         'stopping_point': ('Your saved career record is available for recall. You can stop here and return to pending items later.'
                            if latest.get('evidence_atoms') else
@@ -666,6 +699,8 @@ def main(argv=None):
     begin = commands.add_parser('start')
     begin.add_argument('--candidate', required=True)
     begin.add_argument('--id', required=True)
+    begin.add_argument('--intake', help='original intake report; preserve whole-source coverage across review revisions')
+    begin.add_argument('--dispositions', help='explained non-career exclusions or deferred source work')
     begin.add_argument('--grouped', action='store_true', default=True, help='achievement review with automatic verified source registration (default)')
     begin.add_argument('--records', dest='grouped', action='store_false', help='legacy record-by-record review')
     revision = commands.add_parser('revise', help='stage corrected wording and keep unchanged decisions')
@@ -674,6 +709,7 @@ def main(argv=None):
     revision_input.add_argument('--candidate', help='complete proposed pack')
     revision_input.add_argument('--changes', help='JSON mapping collection/ID keys to changed fields; omitted content is preserved')
     revision.add_argument('--id', required=True)
+    revision.add_argument('--dispositions', help='updated source dispositions; otherwise retain the previous revision')
     correction = commands.add_parser('correct', help='stage exact user edits for confirmation; never accepts them')
     correction.add_argument('--session', required=True)
     correction.add_argument('--input', required=True, help='JSON with decisions and edits supplied by the person')
@@ -699,11 +735,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.command == 'start':
-            result = start(args.candidate, args.id, grouped=args.grouped)
+            result = start(args.candidate, args.id, grouped=args.grouped, intake=args.intake, dispositions=args.dispositions)
         elif args.command == 'revise':
             from career_review import revise, revise_changes
-            result = (revise_changes(args.session, args.changes, args.id) if args.changes
-                      else revise(args.session, args.candidate, args.id))
+            result = (revise_changes(args.session, args.changes, args.id, args.dispositions) if args.changes
+                      else revise(args.session, args.candidate, args.id, args.dispositions))
         elif args.command == 'correct':
             from career_review import correct
             payload = read(args.input)

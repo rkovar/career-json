@@ -21,6 +21,19 @@ SCHEMA = ROOT / "schemas" / "career.schema.json"
 SHA256 = re.compile(r"^[a-f0-9]{64}$")
 
 
+def retired_metric(metric):
+    """Catch explicit retirement statements; this is not general entailment.
+
+    Missing measurement or independent verification does not retire a claim.
+    Qualifiers about a different historical figure should stay in record notes.
+    """
+    basis = metric.get('basis') if isinstance(metric, dict) else None
+    return isinstance(basis, str) and bool(re.search(
+        r'\bnot (?:as )?a supported metric(?:[.;]|$)|'
+        r'(?:^|[.;]\s*)(?:this|the) (?:metric|figure|claim) (?:is|was|has been) (?:rejected|superseded|withdrawn)\b',
+        basis, re.I))
+
+
 def month_bounds(value):
     """Conservative bounds: a year-only value may mean any month that year."""
     if not isinstance(value, str) or not re.fullmatch(r"\d{4}(?:-(?:0[1-9]|1[0-2]))?", value):
@@ -339,6 +352,8 @@ def check(path, schema, strict=False, root=ROOT):
             else:
                 for field in set(metric) - {"value", "basis", "measured"}:
                     errors.append(f"{where}: metrics[{j}] unknown field {field!r}")
+                if retired_metric(metric):
+                    errors.append(f"{where}: metrics[{j}] is explicitly retired in its basis; remove it from current metrics and preserve the old wording in notes/source history")
 
         if not isinstance(atom.get("star"), dict):
             errors.append(f"{where}: missing star object; flat situation/task/action/result is no longer part of the contract")

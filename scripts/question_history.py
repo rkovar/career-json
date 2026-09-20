@@ -135,6 +135,25 @@ def respond(identifier, revision, state, answer=None, by=None, reason='', revisi
     return result
 
 
+def classify(identifier, revision, kind, reason, optional=False, root=ROOT):
+    """Correct a question's purpose without reopening it or rewriting its answer."""
+    if not isinstance(reason, str) or not reason.strip():
+        raise ValueError('Explain why the question classification is changing.')
+    with workspace_lock(root):
+        previous, path = load(identifier, root=root)
+        if previous['revision'] != revision:
+            raise ValueError('Question changed; read the current revision before classifying it.')
+        required = kind.startswith('factual_') and not optional
+        question_fields({**previous, 'kind': kind, 'required': required}, root=root)
+        if previous['kind'] == kind and previous['required'] == required:
+            return dict(previous, record=pin(path, root))
+        row = {**previous, 'revision': revision + 1, 'previous': pin(path, root),
+               'kind': kind, 'required': required, 'classification_reason': reason.strip(),
+               'recorded_at': datetime.now(timezone.utc).isoformat()}
+        path = write_new(folder(identifier, root) / ('%06d.json' % row['revision']), row, root)
+        return dict(row, record=pin(path, root))
+
+
 def answer_scope_error(source, key, root=ROOT):
     """Normal person sources stay compatible; new answers have verifiable scope."""
     path = source.get('path', '')
@@ -249,12 +268,17 @@ def main(argv=None):
     a = sub.add_parser('respond'); a.add_argument('--id', required=True); a.add_argument('--revision', required=True, type=int)
     a.add_argument('--state', required=True, choices=STATES); a.add_argument('--answer'); a.add_argument('--by', required=True)
     a.add_argument('--reason', default=''); a.add_argument('--revisit-when')
+    a = sub.add_parser('classify', help='change factual/enrichment purpose without reopening settled questions')
+    a.add_argument('--id', required=True); a.add_argument('--revision', required=True, type=int)
+    a.add_argument('--kind', choices=KINDS, required=True); a.add_argument('--reason', required=True)
+    a.add_argument('--optional', action='store_true')
     a = sub.add_parser('list'); a.add_argument('--all', action='store_true')
     a = sub.add_parser('import'); a.add_argument('--input', required=True); a.add_argument('--apply', action='store_true')
     args = parser.parse_args(argv)
     try:
         if args.command == 'ask': result = ask(read(args.input), args.pack)
         elif args.command == 'respond': result = respond(args.id, args.revision, args.state, args.answer, args.by, args.reason, args.revisit_when)
+        elif args.command == 'classify': result = classify(args.id, args.revision, args.kind, args.reason, args.optional)
         elif args.command == 'import': result = import_answers(args.input, args.apply)
         else: result = [r for r in catalogue() if args.all or r['state'] == 'open']
         print(json.dumps(result, indent=2, ensure_ascii=False)); return 0

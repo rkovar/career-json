@@ -416,7 +416,7 @@
         },
         "metrics": {
           "type": "array",
-          "description": "A metric is a claim, and a claim whose denominator nobody recorded cannot be defended. A plain string is still valid, so existing packs need no migration; the object form exists so the basis has somewhere to live rather than being reconstructed in an interview.",
+          "description": "Current asserted measures, with their recorded basis and uncertainty. Retired or rejected formulations belong in notes/source history, not this array; measured:false does not mean rejected. Plain strings remain valid for compatibility, while objects preserve the measurement basis without reconstructing it in an interview.",
           "items": {
             "anyOf": [
               {

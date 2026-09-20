@@ -11,6 +11,24 @@ def atoms_by_id(pack):
     return {a['id']: a for a in pack.get('evidence_atoms', [])}
 
 
+def strength_content(strength):
+    """The interpretation and support a confirmation applies to."""
+    return {key: strength.get(key) for key in
+            ('interpretation', 'basis', 'limitations', 'timeframe', 'evidence_ids', 'evidence_fingerprints')}
+
+
+def propose_strength(strength):
+    """Reassessment is a proposal; preserve declined questions and past sources."""
+    strength['external_safe'] = False
+    if strength.get('status') == 'rejected':
+        return
+    if strength.get('status') == 'confirmed':
+        strength['status'] = 'proposed'
+    if strength.get('question_status') != 'declined':
+        strength['question_status'] = 'open'
+    strength.pop('reviewed_on', None)
+
+
 def reassess_strength(strength, pack, assessment):
     """Require a concrete narrative reassessment, not a fingerprint-only refresh.
 
@@ -42,7 +60,10 @@ def reassess_strength(strength, pack, assessment):
             limitations.append(row['text'])
     if covered != set(range(len(originals))):
         raise ValueError('reassess every prior limitation; do not silently drop one')
+    previous = strength_content(strength)
     strength.update(interpretation=assessment['interpretation'], limitations=limitations, evidence_fingerprints=support)
+    if strength_content(strength) != previous:
+        propose_strength(strength)
     return {'result_sha256': digest(strength), 'support': support, 'reason': assessment['reason']}
 
 

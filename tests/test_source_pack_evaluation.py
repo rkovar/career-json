@@ -43,6 +43,13 @@ def example(case):
             'education':[dict(copy.deepcopy(common),**qualification)],
             'source_records':[{'source_id':'SRC_RESUME','source_type':'markdown','path':'data/sources/resume.md',
                                'sha256':hashlib.sha256(source.encode()).hexdigest(),'character_count':len(source),'independent':False}]}
+    if case == 'collaboration':
+        report = (FIXTURES/case/'sources/project-report.md').read_text()
+        pack['source_records'].append({'source_id': 'SRC_REPORT', 'source_type': 'markdown',
+            'path': 'data/sources/project-report.md', 'sha256': hashlib.sha256(report.encode()).hexdigest(),
+            'character_count': len(report), 'independent': False})
+        atoms[0]['source_refs'].append({'source_id': 'SRC_REPORT', 'excerpt': report})
+        atoms[0]['constraints'] = ['Adoption was a voluntary trial by two teams, not a company-wide mandate.']
     if case == 'operations':
         pack['employment'][0]['notes'] = 'Unresolved date conflict: July 2024 in the contract note, August 2024 in the resume; please confirm.'
         pack['employment'][0]['evidence_status'] = 'unresolved'
@@ -71,6 +78,14 @@ class EvaluationTests(unittest.TestCase):
     def test_missing_distinctive_work_does_not_pass_via_source_quotes(self):
         pack=example('collaboration'); pack['evidence_atoms'].pop()
         self.assertIn('willow_present_once',self.failures(pack))
+
+    def test_existing_achievement_needs_its_additional_source_not_just_registration(self):
+        pack = example('collaboration')
+        pack['evidence_atoms'][0]['source_refs'] = [r for r in pack['evidence_atoms'][0]['source_refs'] if r['source_id'] != 'SRC_REPORT']
+        self.assertIn('cedar_source_2', self.failures(pack))
+        pack = example('collaboration')
+        pack['evidence_atoms'][0]['constraints'] = []
+        self.assertIn('cedar_scope_1', self.failures(pack))
 
     def test_correct_basis_does_not_hide_wrong_metric_value(self):
         pack = example('leadership')

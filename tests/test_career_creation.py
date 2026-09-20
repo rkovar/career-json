@@ -126,6 +126,157 @@ class CreationTests(unittest.TestCase):
         pack = json.loads((self.root / header['proposal']['path']).read_text())
         self.assertEqual(pack['strengths_profile'][0]['status'], 'proposed')
         self.assertFalse(pack['strengths_profile'][0]['external_safe'])
+        self.assertEqual(pack['strengths_profile'][0]['question_status'], 'open')
+
+    def test_bind_reopens_changed_strength_but_keeps_an_exact_reassessment(self):
+        from editorial_fixture import strength_assessment
+        self.put('data/packs/base.json', self.pack)
+        for label, new_text in [('same', self.pack['strengths_profile'][0]['interpretation']),
+                                ('changed', 'Builds reliable release practices with shared ownership.')]:
+            assessment = strength_assessment(self.pack)
+            assessment['interpretation'] = new_text
+            self.put('reviews/assessment.json', assessment)
+            output = 'data/candidates/' + label + '.json'
+            self.cli('bind-strength', '--pack', 'data/packs/base.json', '--strength', 'S_DISTINCTIVE',
+                     '--assessment', 'reviews/assessment.json', '--output', output)
+            row = json.loads(self.cli('status', '--pack', output).stdout)['strengths'][0]
+            self.assertEqual(row['state'], 'confirmed' if label == 'same' else 'proposed')
+            self.assertEqual(row['ask'], label == 'changed')
+        # Reassessment never changes the accepted interpretation.
+        self.assertEqual(json.loads((self.root/'data/packs/base.json').read_text()), self.pack)
+
+    def test_full_candidate_rewrite_cannot_keep_strength_confirmation(self):
+        self.put('data/packs/base.json', self.pack)
+        candidate = copy.deepcopy(self.pack)
+        candidate['strengths_profile'][0]['interpretation'] = 'A newly proposed interpretation.'
+        self.put('data/candidates/reworded.json', candidate)
+        session = self.cli('review', 'start', '--candidate', 'data/candidates/reworded.json', '--id', 'rewritten').stdout.strip()
+        proposal = json.loads((self.root/json.loads((self.root/session).read_text())['proposal']['path']).read_text())
+        self.assertEqual(proposal['strengths_profile'][0]['status'], 'proposed')
+        self.assertEqual(proposal['strengths_profile'][0]['question_status'], 'open')
+
+    def test_changed_claim_does_not_inherit_verified_status_in_either_revision_route(self):
+        self.pack['strengths_profile'] = []
+        atom = self.pack['evidence_atoms'][0]
+        old_text = 'Migrated 10 services onto the new platform.'
+        self.write('data/sources/closeout.md', old_text)
+        self.pack['source_records'].append({'source_id': 'SRC_REPORT', 'source_type': 'markdown',
+            'path': 'data/sources/closeout.md', 'sha256': hashlib.sha256(old_text.encode()).hexdigest(),
+            'character_count': len(old_text), 'independent': True})
+        atom['star']['action'] = old_text
+        atom['source_refs'] = [{'source_id': 'SRC_REPORT', 'excerpt': old_text}]
+        atom['evidence_status'] = 'externally_verified'
+        self.put('data/packs/base.json', self.pack)
+        self.put('data/candidates/verified.json', self.pack)
+        initial = self.cli('review', 'start', '--candidate', 'data/candidates/verified.json', '--id', 'verified').stdout.strip()
+        self.session = initial
+        self.put('reviews/unchanged.json', self.choices({'evidence_atoms/E_STORY_1': 'accept'}, self.pack))
+        unchanged = json.loads(self.cli('review', 'preview', '--session', initial, '--input', 'reviews/unchanged.json').stdout)
+        self.assertEqual(next(r['after']['evidence_status'] for r in unchanged['changes']
+                              if r['key'] == 'evidence_atoms/E_STORY_1'), 'externally_verified')
+        changed = copy.deepcopy(self.pack)
+        changed['evidence_atoms'][0]['star']['action'] = 'Migrated 1000 services onto the new platform.'
+        self.put('data/candidates/changed.json', changed)
+        self.put('reviews/changed-fields.json', {'evidence_atoms/E_STORY_1': {'star': changed['evidence_atoms'][0]['star']}})
+        # Preview exercises the exact same save boundary without creating competing heads.
+        for label, argument, path in [('full', '--candidate', 'data/candidates/changed.json'),
+                                      ('fields', '--changes', 'reviews/changed-fields.json')]:
+            self.session = self.cli('review', 'revise', '--session', initial, argument, path, '--id', label).stdout.strip()
+            header = json.loads((self.root/self.session).read_text())
+            proposed = json.loads((self.root/header['proposal']['path']).read_text())
+            self.put('reviews/choices.json', self.choices({'evidence_atoms/E_STORY_1': 'accept'}, proposed))
+            self.cli('review', 'record', '--session', self.session, '--input', 'reviews/choices.json')
+            preview = json.loads(self.cli('review', 'preview', '--session', self.session).stdout)
+            saved_row = next(r for r in preview['changes'] if r['key'] == 'evidence_atoms/E_STORY_1')
+            self.assertEqual(saved_row['after']['evidence_status'], 'self_asserted')
+        self.cli('review', 'publish', '--session', self.session, '--output', 'data/packs/accepted.json')
+        saved = json.loads((self.root/'data/packs/accepted.json').read_text())['evidence_atoms'][0]
+        self.assertEqual(saved['evidence_status'], 'self_asserted')
+        self.assertFalse(saved['external_safe'])
+        # A reviewer can explicitly reassess corrected wording against its source.
+        accurate = copy.deepcopy(self.pack)
+        accurate['evidence_atoms'][0]['star']['action'] = 'Migrated ten services onto the new platform.'
+        self.put('data/candidates/accurate.json', accurate)
+        self.session = self.cli('review', 'start', '--candidate', 'data/candidates/accurate.json', '--id', 'reverified').stdout.strip()
+        payload = self.choices({'evidence_atoms/E_STORY_1': 'accept'}, accurate)
+        payload['decisions'][0]['reassessment'] = {'status': 'externally_verified',
+            'reason': 'The closeout report confirms the count of ten services.', 'source_refs': atom['source_refs']}
+        self.put('reviews/reassessment.json', payload)
+        self.cli('review', 'record', '--session', self.session, '--input', 'reviews/reassessment.json')
+        self.cli('review', 'publish', '--session', self.session, '--output', 'data/packs/reverified.json')
+        final = json.loads((self.root/'data/packs/reverified.json').read_text())['evidence_atoms'][0]
+        self.assertEqual(final['evidence_status'], 'externally_verified')
+
+    def test_source_coverage_survives_batches_and_attaches_to_existing_achievement(self):
+        source = 'Mara co-built the rehearsal runner. Two teams adopted it.'
+        self.write('data/sources/team-report.md', source)
+        intake = json.loads(self.cli('intake', 'data/sources').stdout)
+        self.session = self.cli('review', 'start', '--candidate', 'data/candidates/first.json',
+                                '--id', 'with-intake', '--intake', intake['report']).stdout.strip()
+        self.assertEqual(self.state()['summary']['source_coverage']['counts'], {'pending': 1})
+        self.put('reviews/bad-disposition.json', {'data/sources/team-report.md': {'outcome': 'not_relevant', 'reason': 'No new publication.'}})
+        self.put('reviews/new-title.json', {'evidence_atoms/E_STORY_1': {'title': 'A proposed title'}})
+        self.cli('review', 'revise', '--session', self.session, '--changes', 'reviews/new-title.json',
+                 '--dispositions', 'reviews/bad-disposition.json', '--id', 'bad-disposition', ok=False)
+        self.assertFalse((self.root/'data/candidates/bad-disposition.json').exists())
+        self.assertFalse((self.root/'reviews/pack-reviews/bad-disposition').exists())
+        actions = {r['key']: 'accept' for r in self.state()['items'] if not r.get('source_registration')}
+        self.apply(self.choices(actions))
+        pending = json.loads(self.cli('health', '--summary', '--json').stdout)
+        current_review = next(r for r in pending['reviews'] if r['review_id'] == 'with-intake')
+        self.assertEqual(current_review['summary']['pending_items'], 0)
+        self.assertTrue(current_review['actionable'])
+        record = {'source_id': 'SRC_TEAM_REPORT', 'source_type': 'markdown', 'path': 'data/sources/team-report.md',
+                  'sha256': hashlib.sha256(source.encode()).hexdigest(), 'character_count': len(source), 'independent': False}
+        self.put('reviews/register.json', {'source_records/SRC_TEAM_REPORT': record})
+        self.session = self.cli('review', 'revise', '--session', self.session, '--changes', 'reviews/register.json',
+                                '--id', 'registered-only').stdout.strip()
+        self.assertFalse(self.state()['summary']['source_coverage']['complete'])
+        refs = self.pack['evidence_atoms'][0]['source_refs'] + [{'source_id': 'SRC_TEAM_REPORT', 'excerpt': source}]
+        self.put('reviews/link.json', {'evidence_atoms/E_STORY_1': {'source_refs': refs}})
+        self.session = self.cli('review', 'revise', '--session', self.session, '--changes', 'reviews/link.json',
+                                '--id', 'linked-to-existing').stdout.strip()
+        state = self.state()
+        self.assertTrue(state['summary']['source_coverage']['complete'])
+        self.assertEqual(state['summary']['source_coverage']['sources'][0]['record_keys'], ['evidence_atoms/E_STORY_1'])
+        self.assertFalse(any(r['key'].startswith('publications/') for r in state['items']))
+        self.assertEqual(state['session']['intake']['path'], intake['report'])
+        self.cli('review', 'render', '--session', self.session, '--output', 'outputs/coverage.html')
+        self.assertIn('1 sources linked to career records', (self.root/'outputs/coverage.html').read_text())
+
+    def test_source_exclusion_is_scoped_and_deferral_is_not_completion(self):
+        self.write('data/sources/field-note.md', 'The project was adopted by two teams.')
+        self.put('reviews/purpose.json', {'data/sources/field-note.md': 'career_evidence'})
+        intake = json.loads(self.cli('intake', 'data/sources', '--classifications', 'reviews/purpose.json').stdout)
+        def check(disposition, ok=False):
+            self.put('reviews/disposition.json', disposition)
+            return self.cli('intake', '--report', intake['report'], '--candidate', 'data/candidates/first.json',
+                            '--dispositions', 'reviews/disposition.json', ok=ok)
+        old = check({'data/sources/field-note.md': {'outcome': 'not_relevant', 'reason': 'No new publication.'}})
+        self.assertIn('relevant sources must link', old.stderr)
+        invalid = check({'data/sources/field-note.md': {'outcome': 'exclude', 'purpose': 'not_career_evidence', 'reason': 'No new publication.'}})
+        self.assertIn('record link or explicit deferral', invalid.stderr)
+        deferred = json.loads(check({'data/sources/field-note.md': {'outcome': 'defer', 'reason': 'Process during the achievement pass.'}}).stdout)
+        self.assertEqual(deferred['counts'], {'deferred': 1})
+        self.assertFalse(deferred['complete'])
+        self.write('data/sources/field-note.md', 'Changed after intake.')
+        stale = json.loads(check({}).stdout)
+        self.assertIn('source changed since intake', stale['errors'][0])
+
+    def test_retired_metric_must_move_to_history_before_staging(self):
+        bad = {'value': 'Doubled the team', 'basis': 'Old resume wording, not as a supported metric.', 'measured': False}
+        self.put('reviews/retired.json', {'evidence_atoms/E_STORY_1': {'metrics': [bad]}})
+        result = self.cli('review', 'revise', '--session', self.session, '--changes', 'reviews/retired.json',
+                          '--id', 'bad-metric', ok=False)
+        self.assertIn('remove it from current metrics', result.stderr)
+        self.assertFalse((self.root/'data/candidates/bad-metric.json').exists())
+        self.put('reviews/retired.json', {'evidence_atoms/E_STORY_1': {'metrics': [],
+            'notes': 'Retired wording: Doubled the team. The source establishes a team built from zero to six.'}})
+        session = self.cli('review', 'revise', '--session', self.session, '--changes', 'reviews/retired.json',
+                           '--id', 'history-kept').stdout.strip()
+        proposal = json.loads((self.root/json.loads((self.root/session).read_text())['proposal']['path']).read_text())
+        self.assertEqual(proposal['evidence_atoms'][0]['metrics'], [])
+        self.assertIn('Retired wording', proposal['evidence_atoms'][0]['notes'])
 
     def test_record_changes_reject_bad_keys_ids_and_schema_before_writing(self):
         for i, changes in enumerate([

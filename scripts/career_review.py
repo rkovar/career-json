@@ -116,13 +116,13 @@ def save(session, payload, expected=None, output=None):
         return state
 
 
-def revise(session, candidate, review_id):
+def revise(session, candidate, review_id, dispositions=None):
     """Rebase a corrected proposal while retaining exact unchanged decisions."""
     with workspace_lock():
-        return _revise(session, candidate, review_id)
+        return _revise(session, candidate, review_id, dispositions)
 
 
-def revise_changes(session, changes_path, review_id):
+def revise_changes(session, changes_path, review_id, dispositions=None):
     """Apply record fields to a pinned proposal, then use ordinary review staging.
 
     Fields replace their top-level value (including complete arrays/STAR objects).
@@ -154,8 +154,9 @@ def revise_changes(session, changes_path, review_id):
                 continue
             if 'external_safe' in value:
                 value['external_safe'] = False
-            if group == 'strengths_profile' and value.get('status') == 'confirmed':
-                value['status'] = 'proposed'
+            if group == 'strengths_profile':
+                from career_profile import propose_strength
+                propose_strength(value)
             if value == previous:
                 continue
             if previous is None:
@@ -170,12 +171,17 @@ def revise_changes(session, changes_path, review_id):
             raise ValueError('Review or candidate already exists; resume it or choose a new id.')
         review.validate_pack_object(candidate)
         write_new(destination, candidate)
-        return _revise(session, destination, review_id)
+        try:
+            return _revise(session, destination, review_id, dispositions)
+        except BaseException:
+            destination.unlink(missing_ok=True)
+            raise
 
 
-def _revise(session, candidate, review_id):
+def _revise(session, candidate, review_id, dispositions=None):
     previous, previous_pack, _ = review.load_session(session)
-    path = review._start(candidate, review_id, grouped=True)
+    path = review._start(candidate, review_id, grouped=True, intake=previous.get('intake', {}).get('path'),
+                         dispositions=dispositions or previous.get('source_dispositions', {}).get('path'))
     record = read(path)
     # Import commentary lives beside the proposal. Loading that proposal for a
     # small update must not silently discard notes about unchanged sources.

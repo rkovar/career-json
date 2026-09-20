@@ -17,6 +17,8 @@
     {
       "name": "cedar",
       "anchor": "cedar",
+      "source_paths": ["data/sources/resume.md", "data/sources/project-report.md"],
+      "qualification_patterns": ["voluntary|not a company.wide mandate"],
       "patterns": [
         "co[- ]?(built|developed|created)|collaborat|with.*engineer",
         "\\b(?:three|3)\\b",
@@ -50,6 +52,7 @@
     "[$\u00a3\u20ac]\\s*\\d|\\d\\s*%"
   ],
   "human_review": [
+    "Was the project report attached to the existing Cedar achievement, retaining the voluntary-trial scope without inventing a separate publication?",
     "Did Alex retain ownership of the rehearsal design while sharing implementation credit?",
     "Were mentoring and lack of direct reports preserved without adding a management claim?",
     "Does the course remain training rather than an awarded professional qualification?"

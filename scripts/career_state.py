@@ -85,7 +85,10 @@ def summary(root=ROOT):
                                         env={**os.environ, 'CAREER_WORKSPACE': str(root)}, capture_output=True, text=True)
                 if result.returncode: raise ValueError(result.stderr.strip())
                 state = json.loads(result.stdout)
-            sessions.append(dict(row, summary=state['summary'], actionable=bool(state['summary']['pending_items'])))
+            coverage = state['summary'].get('source_coverage') or {}
+            errors.extend(coverage.get('errors', []))
+            sessions.append(dict(row, summary=state['summary'], actionable=bool(state['summary']['pending_items']
+                                 or coverage.get('counts', {}).get('pending'))))
         except (ValueError, OSError, KeyError) as exc:
             errors.append(row['path'] + ': ' + str(exc))
     try: questions = question_summary(pack, root)

@@ -100,6 +100,43 @@ class ProcessTests(unittest.TestCase):
         self.assertEqual(questions.queue(self.pack,root=self.root),[])
         self.assertEqual(len(questions.queue(self.pack,optional=True,root=self.root)),1)
 
+    def test_legacy_followup_is_optional_but_typed_factual_question_takes_priority(self):
+        from open_questions import career_questions
+        text = 'Has a later audit measured the result?'
+        self.pack['evidence_atoms'][0]['open_questions'] = [text]
+        self.assertNotIn(text, [q['question'] for q in career_questions(self.pack, root=self.root)])
+        self.assertIn(text, [q['question'] for q in career_questions(self.pack, optional=True, root=self.root)])
+        row = self.ask(text, kind='factual_ambiguity', required=True)
+        self.assertIn(text, [q['question'] for q in career_questions(self.pack, root=self.root)])
+        questions.classify(row['id'], 1, 'enrichment', 'This is future measurement, not a disputed current fact.', root=self.root)
+        self.assertNotIn(text, [q['question'] for q in career_questions(self.pack, root=self.root)])
+
+    def test_classification_preserves_answers_deferrals_and_exact_old_revisions(self):
+        for state in ('answered', 'deferred', 'declined'):
+            row = self.ask('Question that is ' + state)
+            answer = 'The team did it.' if state == 'answered' else None
+            previous = questions.respond(row['id'], 1, state, answer, 'Fictional owner', root=self.root)
+            old_bytes = (self.root/previous['record']['path']).read_bytes()
+            changed = questions.classify(row['id'], 2, 'enrichment', 'Optional additional context.', root=self.root)
+            self.assertEqual((changed['state'], changed['answer']), (state, answer))
+            self.assertEqual((self.root/previous['record']['path']).read_bytes(), old_bytes)
+            self.assertFalse(changed['required'])
+            with self.assertRaisesRegex(ValueError, 'Question changed'):
+                questions.classify(row['id'], 2, 'preference', 'Stale change.', root=self.root)
+        self.assertEqual(questions.queue(self.pack, optional=True, root=self.root), [])
+
+    def test_unresolved_legacy_question_stays_in_accuracy_queue(self):
+        from open_questions import career_questions
+        atom = self.pack['evidence_atoms'][0]
+        atom.update(evidence_status='unresolved', open_questions=['Was it ten or twenty services?'])
+        self.assertIn(atom['open_questions'][0], [q['question'] for q in career_questions(self.pack, root=self.root)])
+
+    def test_unmeasured_or_uncorroborated_metrics_are_not_retired(self):
+        from validate_pack import retired_metric
+        for basis in ('Not independently verified.', 'No baseline was measured.', 'An estimate from my own notes.',
+                      'The previous number was rejected; this value is the corrected count.'):
+            self.assertFalse(retired_metric({'value': 'six engineers', 'basis': basis}), basis)
+
     def test_tampered_question_history_is_detected(self):
         row=self.ask();questions.respond(row['id'],1,'answered','Team','Fictional owner',root=self.root)
         self.write(row['record']['path'],'{}')

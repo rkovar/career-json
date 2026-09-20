@@ -40,12 +40,12 @@ def journey(person):
             put('data/candidates/' + name + '.json', pack)
             cli('review', 'start', '--candidate', 'data/candidates/' + name + '.json', '--id', name)
             return 'reviews/pack-reviews/' + name + '/session.json'
-        def apply(pack, session, name, keys):
+        def apply(pack, session, name, keys, external=()):
             s = json.loads((root / session).read_text())
             # Decisions are explicitly authored fixture inputs, never model-inferred approvals.
             payload = {'review_id': s['review_id'], 'proposal_sha256': s['proposal']['sha256'], 'reviewed_by': person['name'],
                        'decisions': [{'key': key, 'fingerprint': fingerprint(key, pack), 'action': 'accept', 'note': '',
-                                      'publication': 'external' if isinstance(units(pack)[key], dict) and units(pack)[key].get('external_safe') is True else 'unchanged'} for key in keys], 'omissions': []}
+                                      'publication': 'external' if key in external or (isinstance(units(pack)[key], dict) and units(pack)[key].get('external_safe') is True) else 'unchanged'} for key in keys], 'omissions': []}
             put('data/private/' + name + '-choices.json', payload)
             cli('review', 'apply', '--input', 'data/private/' + name + '-choices.json', '--output', 'data/packs/' + name + '.json')
             return json.loads((root / ('data/packs/' + name + '.json')).read_text())
@@ -79,7 +79,12 @@ def journey(person):
         (root/'data/private/assessment.json').write_text(json.dumps(strength_assessment(corrected)))
         cli('bind-strength', '--pack', 'data/packs/corrected.json', '--strength', 'S_DISTINCTIVE', '--output', 'data/candidates/reassessed.json', '--assessment', 'data/private/assessment.json')
         reassessed = json.loads((root / 'data/candidates/reassessed.json').read_text())
-        final = apply(reassessed, stage(reassessed, 'strength'), 'final', ['strengths_profile/S_DISTINCTIVE'])
+        check('reassessment_requires_fresh_review', reassessed['strengths_profile'][0]['status'] == 'proposed'
+              and reassessed['strengths_profile'][0]['external_safe'] is False)
+        # The fictional person explicitly reviews the reassessed strength and
+        # permits its new support externally; old permission is not inherited.
+        final = apply(reassessed, stage(reassessed, 'strength'), 'final', ['strengths_profile/S_DISTINCTIVE'],
+                      external=['strengths_profile/S_DISTINCTIVE'])
         check('strength_interpretation_survives_reassessment', final['strengths_profile'][0]['interpretation'] == original['strengths_profile'][0]['interpretation'])
         check('source_excerpts_still_verify', json.loads(cli('--json', script='verify_excerpts.py'))['counts']['mismatch'] == 0)
         history = json.loads(cli('history', 'E_STORY_1'))
