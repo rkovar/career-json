@@ -20,6 +20,24 @@ from verify_excerpts import extract, html_text
 PURPOSES = ('career_evidence', 'job_context', 'writing_reference', 'defer')
 
 
+def reading_batches(rows, character_limit=60000):
+    """Bound the reading plan without creating another writable progress store."""
+    batches, pending, size = [], [], 0
+    for row in rows:
+        if row['status'] != 'read':
+            continue
+        count = row['character_count']
+        if pending and size + count > character_limit:
+            batches.append({'sources': pending, 'characters': size})
+            pending, size = [], 0
+        pending.append({'path': row['path'], 'extracted_text': row['extracted_text'],
+                        'read_in_sections': count > character_limit})
+        size += count
+    if pending:
+        batches.append({'sources': pending, 'characters': size})
+    return batches
+
+
 def purpose(text):
     """Conservative content hints. Ambiguous purpose remains visible to the operator."""
     beginning = text[:12000].lower()
@@ -109,6 +127,7 @@ def scan(paths, classifications=None):
     report = {'intake_id': run, 'created': datetime.now(timezone.utc).isoformat(),
               'scope': [str(p) for p in paths], 'current_pack': str(local(current).relative_to(ROOT.resolve())) if current else None,
               'sources': rows, 'has_new_material': any(row['status'] == 'read' and row['purpose'] not in ('job_context', 'writing_reference') for row in rows), 'counts': dict(Counter(row['status'] for row in rows)),
+              'reading_batches': reading_batches(rows),
               'next': 'Read new extracted text and classify ambiguous material before proposing career facts. Compare with the current pack; preserve conflicts and existing IDs. No career facts have been changed.'}
     destination = write_new('reviews/intake/' + run + '.json', report)
     return dict(report, report=str(destination.relative_to(ROOT.resolve())))

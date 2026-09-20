@@ -41,3 +41,9 @@ saves deferrals, and works with one source. Resume generation is separate.
 PDFs are the most common input. `scripts/extract_text.sh` handles them without any
 install on macOS, and with poppler elsewhere. See [extraction.md](extraction.md).
 You do not need to run it yourself; `build-career-pack` uses it.
+For large archives, the report includes `reading_batches` of roughly 60,000
+extracted characters. These are suggested reading boundaries, not a token budget
+or a completeness score. Oversized individual sources are flagged for reading in
+sections. The operator saves a valid partial proposal after each useful batch,
+then resumes from that proposal and the remaining paths. Every authorized source
+remains in the inventory; batching never grants permission to omit material.

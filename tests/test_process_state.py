@@ -15,6 +15,7 @@ import question_history as questions
 from career_profile import digest, reassess_strength
 from career_review import source_annotations
 from career_state import dates, reading_state
+from career_intake import reading_batches
 from pack_io import pin, write_view
 from verify_excerpts import verify
 try:
@@ -144,6 +145,16 @@ class ProcessTests(unittest.TestCase):
         role={'start':'2020','end':'2024-08','evidence_status':'unresolved','notes':'July or August 2024; sources disagree.'}
         self.assertIn('Unresolved',dates(role));self.assertIn('July or August',dates(role))
         self.assertIn('End not recorded',dates({'start':'2020'}))
+
+    def test_large_intake_batches_preserve_scope_and_flag_oversized_sources(self):
+        rows = [{'path': str(i), 'status': 'read', 'extracted_text': str(i)+'.txt', 'character_count': size}
+                for i, size in enumerate((40000, 30000, 90000, 10000))]
+        rows += [{'path': 'duplicate', 'status': 'duplicate'}, {'path': 'old', 'status': 'unchanged'}]
+        batches = reading_batches(rows)
+        self.assertEqual([s['path'] for b in batches for s in b['sources']], ['0', '1', '2', '3'])
+        self.assertTrue(next(s for b in batches for s in b['sources'] if s['path'] == '2')['read_in_sections'])
+        self.assertTrue(all(b['characters'] <= 60000 or len(b['sources']) == 1 for b in batches))
+        self.assertEqual(reading_batches(rows[-2:]), [])
 
     def test_failed_view_replace_preserves_last_good_page(self):
         path=self.write('outputs/career-record.html','last good page')
