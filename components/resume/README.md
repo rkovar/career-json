@@ -9,7 +9,9 @@ to your Core workspace.
 
 ## Start here
 
-From the shared project directory, run:
+With your career folder open in Claude Code, including Desktop's Code → Local,
+ask “Walk me through the resume wizard.” For the terminal launcher, run from the
+shared project directory:
 
 ```sh
 make start
@@ -19,9 +21,11 @@ Choose **Create a resume**. The launcher opens Claude Code with the resume wizar
 Bring a job description, name a type of role, or ask for help choosing a direction.
 
 You can review ranked achievements and their selection reasons before writing.
-The assistant keeps your preferences, prepares PDF, TXT and DOCX, and reports
-remaining work. If your career pack needs building first, the target is saved
-while you do that.
+The assistant keeps your preferences, prepares PDF, TXT, DOCX and Markdown, and reports
+remaining work. The clean `files/resume.md` is selected resume content; the full
+private `outputs/career.md` is a separate record. Send the format the employer
+requests, rather than the entire export directory. If your career pack needs
+building first, the target is saved while you do that.
 
 Follow [Create a resume](../../docs/resume-start.md) for the complete user guide,
 including PDF prerequisites. Use **Continue saved work** in the launcher to return

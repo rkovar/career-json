@@ -19,19 +19,39 @@ Start with an old resume or describe your work. Claude Code proposes a record;
 you review the wording and decide what can be used externally. Add quick notes
 and new documents as your career develops.
 
-Accepted changes are saved in versioned JSON with a private reading page. The
-pack holds employment history, achievements, qualifications, publications and
+Accepted changes are saved in versioned JSON, with a private HTML reading page
+and a complete Markdown snapshot. The pack holds employment history, achievements, qualifications, publications and
 source references, with optional strengths and preferences. You can build it
 before choosing a target job.
 
 [Project website](https://rkovar.github.io/career-json/) · [Start here](#start-here) · [See an example](#see-an-example) · [All guides](docs/README.md)
 
+## What you are installing
+
+career.json is a local workspace of Python tools and Claude workflow instructions.
+Claude handles extraction, questions and drafting; deterministic scripts validate
+and save records and generate exports. You review proposed facts before they
+enter the accepted record. The public website hosts guides and fictional examples;
+you do your career work in your own folder.
+
+No third-party Python packages, database or hosted career.json account are required. The
+Python tools use the standard library. Claude access is a separate requirement;
+model-assisted work uses your configured service and its usage limits.
+
 ## Start here
 
-You need **Claude Code installed and configured**, Git, Python 3.9+, `make`, and
-macOS or Linux. The Python tools use the standard library.
+Choose one setup route. Both use the same career tools and file formats.
 
-Run this in your terminal:
+| Route | Requirements | Start |
+| --- | --- | --- |
+| Download a folder and use Claude Desktop | Mac, Claude Desktop with access to its Code tab, Python 3.9+ | [Download and first achievement](docs/nontechnical-start.md); no Git, `make` or separate Claude CLI installation needed |
+| Clone and use the terminal | macOS or Linux, configured Claude Code CLI, Git, Python 3.9+, `make` | Commands below and [your first session](docs/getting-started.md) |
+
+Native Windows is unsupported by these career tools. A Linux/WSL setup needs
+separate technical configuration. Node.js is only needed to develop the website.
+
+For the terminal route, install and sign in to the CLI using
+[Anthropic's quickstart](https://code.claude.com/docs/en/quickstart), then run:
 
 ```sh
 git clone https://github.com/rkovar/career-json.git
@@ -56,9 +76,9 @@ into Claude Code in this directory.
 Already in Claude Code? Say **“Walk me through the career-pack wizard”** or
 **“Walk me through the resume wizard.”** These enter the same workflows.
 
-PDF input needs Poppler, or Swift/PDFKit when using macOS. Text, Markdown and DOCX
-need neither. See [source setup](docs/extraction.md#what-it-uses). Model-assisted work
-consumes tokens; cost and time depend on your material and configured service.
+PDF input needs Poppler, or a working Swift/PDFKit toolchain on macOS. Text,
+Markdown and DOCX need no PDF software. See
+[source setup](docs/extraction.md#what-it-uses). Model-assisted work consumes tokens; cost and time depend on your material and configured service.
 
 ## Build your first pack
 
@@ -111,7 +131,22 @@ New work -> Quick note or document -> Your review -> Updated career pack
 
 Say **“pause”** and return through **Continue saved work**. Saved answers and
 deferrals are reused; changed evidence can need a fresh review. **View my saved
-career record** refreshes the reading page. [Keeping your pack current](docs/keep-current.md)
+career record** refreshes both reading formats.
+[Keeping your pack current](docs/keep-current.md) explains the update workflow.
+
+## Read and reuse your record
+
+| Output | Purpose |
+| --- | --- |
+| Saved JSON under `data/packs/` | Authoritative career record with version history |
+| `outputs/career-record.html` | Private reading page; omits the profile contact block |
+| `outputs/career.md` | Complete private snapshot, including contacts, notes, evidence and use restrictions |
+| A resume bundle's `files/resume.md` | Clean, selected resume content without internal citations |
+
+Generate just the full Markdown snapshot with `make career-markdown`, or
+`python3 scripts/career_core.py export-markdown`. A saved pack must exist first.
+Editing generated Markdown does not update the JSON; regeneration replaces the
+snapshot. [Files, exports and editing rules](docs/files-and-exports.md)
 
 ## See an example
 
@@ -130,12 +165,14 @@ directions. If you need a career pack first, the wizard saves your target while
 you build one.
 
 Review ranked achievements and inclusion reasons, or request automatic drafting
-and review. The workflow uses eligible career evidence and prepares **PDF, TXT
-and DOCX** from shared content. Each application can draw a different selection from
+and review. The workflow uses eligible career evidence and prepares **PDF, TXT, DOCX
+and Markdown** from shared content. Each application can draw a different selection from
 the same career record. New facts return through career-pack review.
 
 PDF export also needs Chrome/Chromium and a supported PDF extractor. Failed checks
-or missing formats leave the bundle incomplete; final layout needs inspection.
+or missing formats leave the bundle incomplete; successful formats are retained.
+The workflow produces all four formats; send only the one the employer requests.
+Final layout needs inspection.
 See [resume creation](docs/resume-start.md) and
 [export setup and checks](docs/resume-exports.md).
 

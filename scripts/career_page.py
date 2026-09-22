@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, metric_text, metric_basis, ROOT  # noqa: E402
-from pack_io import local, read
+from pack_io import local
 from career_profile import profile_state
 
 MONTHS = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -416,10 +416,10 @@ def main(argv):
         out = local(args.output)
         if not out.is_relative_to(local("outputs")) or out.suffix.lower() != ".html":
             raise ValueError("private reading pages belong under outputs/ with an .html extension")
-        page = build(read(path), path.relative_to(ROOT.resolve()))
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(page, encoding="utf-8")
+        from career_markdown import refresh
+        refresh(path, out)
         print(out.relative_to(ROOT.resolve()))
+        print('outputs/career.md')
         return 0
     except (ValueError, KeyError, OSError) as exc:
         print("error: " + str(exc), file=sys.stderr)

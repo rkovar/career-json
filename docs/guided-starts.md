@@ -1,7 +1,9 @@
 # Build my career pack
 
-Use **Build my career pack** in `make start`. For installation and a complete
-first exercise, follow [Your first session](getting-started.md).
+With your career folder open in Claude Code, ask “Walk me through the career-pack
+wizard.” In the terminal launcher, choose **Build my career pack** in `make start`.
+For setup, use the [Mac Desktop starter](nontechnical-start.md) or the
+[terminal first-session guide](getting-started.md).
 
 The wizard helps you choose a starting point:
 

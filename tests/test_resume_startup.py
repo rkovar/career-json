@@ -35,7 +35,7 @@ class ResumeStartupTests(StartupCase):
         self.assertIn(finished['continue_prompt'], page)
         self.assertIn('<h1>Create a resume</h1>', page)
         brief = json.loads((self.root/finished['handoff']['brief']['path']).read_text())
-        self.assertEqual(brief['application']['required_exports'], ['pdf', 'txt', 'docx'])
+        self.assertEqual(brief['application']['required_exports'], ['pdf', 'txt', 'docx', 'md'])
         self.assertEqual(brief['application']['paper_size'], 'A4')
         self.assertEqual(brief['application']['review_mode'], 'interactive')
         self.assertIn('mentoring', brief['instructions'])

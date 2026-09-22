@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start your career notebook | career.json</title>
+<style>
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; line-height: 1.65; }
+body { max-width: 720px; margin: auto; padding: 32px 24px 70px; }
+h1,h2 { line-height: 1.2; } h1 { font-size: clamp(2rem,6vw,3rem); } h2 { margin-top: 2rem; }
+a { color: light-dark(#086078,#8bd5e8); } .note { padding: 16px; border: 1px solid #7d919b; border-radius: 12px; }
+.prompt { font-size: 1.25rem; font-weight: 650; } button { font: inherit; padding: 8px 18px; cursor: pointer; }
+li { margin: 12px 0; } code { overflow-wrap: anywhere; } .status { min-height: 1.6em; }
+</style></head><body>
+<p>career.json · Your first saved achievement</p>
+<h1>Start your career notebook.</h1>
+<p>Think of a notebook containing the useful details of your working life. Claude helps organize it. You check the facts. Later, you choose the parts you need for a CV or interview.</p>
+<p class="note">Start on a <strong>Mac</strong> with Claude Desktop and a paid plan that includes Code. Python 3.9 or newer is also needed; Claude checks for it. Native Windows is not supported by the current career tools. Linux users can use the same folder with Claude Code and Python.</p>
+<h2>1. Keep this folder</h2>
+<p>Move the whole <strong>My Career</strong> folder to somewhere you can find again, such as Documents. This is where your record will live. Keep its contents together. Start from a new folder; never replace an older career folder with a fresh download.</p>
+<h2>2. Open it in Claude</h2>
+<ol><li>Open <a href="https://claude.com/download">Claude Desktop</a> and sign in.</li><li>Select <strong>Code</strong>, then <strong>Local</strong>, then <strong>Select folder</strong>.</li><li>Choose this <strong>My Career</strong> folder—the one containing START-HERE.html.</li></ol>
+<p>Although the tab is called Code, you will talk about your career in ordinary language.</p>
+<h2>3. Send this message</h2>
+<p class="prompt" id="prompt">Help me start my career notebook.</p>
+<button type="button" id="copy" hidden>Copy message</button><p id="status" class="status" role="status" aria-live="polite"></p>
+<p>Claude will check the setup and help you use a CV or describe one thing you accomplished. You can start by typing about your work; you do not need to prepare documents.</p>
+<h2>4. Check one fact, then find it again</h2>
+<p>Read the proposed role and achievement. Correct anything overstated or missing. When the wording is accurate, tell Claude to save it privately.</p>
+<p>Then ask: <strong>“Show me the achievement you saved and its original source.”</strong> You should see the accepted wording and where it came from. A draft in the conversation is not the saved record.</p>
+<h2>Your saved files</h2>
+<p>Ask Claude to show your saved career record. It can provide a reading page and <code>outputs/career.md</code>, a complete private text copy including your evidence and contact details. Changes belong in the reviewed record; editing the copy does not update it. A CV has separate clean PDF, Word, text and Markdown exports.</p>
+<h2>If you get stuck</h2>
+<ul><li><strong>No Code tab?</strong> Update Claude Desktop and check that your plan includes Code. <a href="https://code.claude.com/docs/en/desktop-quickstart">Anthropic's setup guide</a> explains access.</li><li><strong>Python is missing?</strong> Open <a href="https://www.python.org/downloads/macos/">Python's Mac downloads</a>, choose the latest stable Python 3 macOS installer, open the downloaded .pkg, and follow the installer. Quit and reopen Claude, select this folder, and send the same message again.</li><li><strong>A PDF will not open?</strong> Paste the paragraph you want to use, or describe the work. Claude can save your own account as the source.</li><li><strong>An approval you do not understand?</strong> Ask Claude what it will change and why. You still need to approve actions when the app asks.</li><li><strong>A damaged download?</strong> Extract a fresh copy into a different folder. Keep your existing folder if you have already started work.</li></ul>
+<h2>When you return</h2>
+<p>Open this same folder in Claude Code and say: <strong>“Show my saved career record and help me continue where I left off.”</strong> After the first save, Claude will also leave a short note in <code>outputs/CONTINUE.txt</code>.</p>
+<p>Your files stay in this folder. Material Claude reads is processed by your model service. Private means excluded from documents you share; it does not hide information from Claude. Ask Claude to help back up the folder after your first save.</p>
+<p><a href="https://career-json.com/guides/nontechnical-start.html">Read the full beginner guide</a></p>
+<script>
+const copy = document.getElementById('copy');
+if (navigator.clipboard?.writeText) {
+  copy.hidden = false;
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(document.getElementById('prompt').textContent); document.getElementById('status').textContent = 'Copied. Paste this message into Claude’s Code tab.'; }
+    catch { document.getElementById('status').textContent = 'Select the message above and copy it manually.'; }
+  });
+}
+</script></body></html>

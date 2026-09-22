@@ -32,7 +32,7 @@ when it helps. Preserve contribution, context, ownership and meaningful older
 work. Track the default two editorial revision cycles in the [process record](resume-process.md), with separate integrity,
 representation, relevance, readability and delivery findings.
 
-[PDF, TXT and DOCX exports](resume-exports.md) are required from shared content.
+[PDF, TXT, DOCX and Markdown exports](resume-exports.md) are required from shared content.
 Inspect final PDF layout and verify recovered text; do not infer Word pagination,
 accessibility or employer ATS performance from content checks alone. Submission
 files exclude the internal citations retained in the editable draft and sidecars.

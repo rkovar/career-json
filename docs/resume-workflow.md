@@ -27,8 +27,8 @@ reassess affected interpretations. An application cannot upgrade an evidence
 status or silently turn its own prose into a source.
 
 Before delivering, run representation and integrity review, then a cold recruiter
-screen. Review exact final bytes; regenerate manifests after edits. Every resume requires PDF, TXT and DOCX exports. Check final PDF
-layout and verify recovered text across all three formats. Report shortcomings independently: a faithful
+screen. Review exact final bytes; regenerate manifests after edits. Every resume requires PDF, TXT, DOCX and Markdown exports. Check final PDF
+layout and verify recovered text across all four formats. Report shortcomings independently: a faithful
 resume may still be weak, and a well-written one may target an unsupported role.
 
 The add-on includes `Makefile.resume` for its deterministic checks. The developer

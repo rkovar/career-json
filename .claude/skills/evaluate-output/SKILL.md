@@ -157,7 +157,7 @@ inspect `resume_workflow.py compare` findings; it cannot establish semantic equi
 Keep accuracy, representation, relevance, readability and delivery findings separate.
 A factual error or confidentiality leak blocks integrity; missing role evidence
 is a relevance limitation; a failed export blocks delivery. A planned resume needs
-PDF, TXT and DOCX, with matching recovered content and export hashes. Manually inspect
+PDF, TXT, DOCX and Markdown, with matching recovered content and export hashes. Manually inspect
 PDF layout; distinguish that observation from DOCX structure and unverified Word
 pagination. Use `manifest.py --plan --exports --process` along with selection and artifact.
 

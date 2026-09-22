@@ -13,7 +13,7 @@ from pack_io import local
 
 PRIVATE = ('data', 'reviews', 'outputs')
 PUBLIC = ('scripts', 'schemas', '.claude', 'components', 'docs', 'tests', 'examples')
-ROOT_FILES = ('README.md', 'CLAUDE.md', 'LICENSE', 'Makefile', 'Makefile.resume', '.gitignore')
+ROOT_FILES = ('README.md', 'CLAUDE.md', 'LICENSE', 'Makefile', 'Makefile.resume', '.gitignore', 'START-HERE.html')
 
 
 def reference_audit(root):

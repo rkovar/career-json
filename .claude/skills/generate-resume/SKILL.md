@@ -1,6 +1,6 @@
 ---
 name: generate-resume
-description: "Draft a resume from an existing approved career pack and ready resume plan. Normally called by make-resume, which also performs review and PDF/TXT/DOCX delivery."
+description: "Draft a resume from an existing approved career pack and ready resume plan. Normally called by make-resume, which also performs review and PDF/TXT/DOCX/Markdown delivery."
 ---
 
 # Generate a resume
@@ -28,7 +28,7 @@ Use the Markdown structure and inline evidence-comment placement in `make-resume
 Keep public links accurate, employment titles literal, contact appropriate to the
 application and internal warnings outside the artifact. New factual answers return
 to Core review. Run `evaluate-output` before calling any artifact publishable;
-resume delivery additionally requires verified PDF, TXT and DOCX exports.
+resume delivery additionally requires verified PDF, TXT, DOCX and Markdown exports.
 
 Before drafting, use the privacy comparison and intended-prominence checks in
 `docs/resume-process.md`. An empty `strength_ids` list does not exempt an impression

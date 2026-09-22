@@ -33,6 +33,7 @@ help-developer:
 	@echo "make questions - outstanding questions, ranked by what answering unlocks"
 	@echo "make pack-html - browsable private view of the whole pack"
 	@echo "make career-page - private reading page of the recorded career"
+	@echo "make career-markdown - complete private Markdown record"
 	@echo "make resume-json - export a JSON Resume projection to outputs/resume.json"
 	@echo "make verdicts  - record screen verdicts and show the trend"
 	@echo "make hooks     - install the pre-commit hook"
@@ -54,6 +55,7 @@ test:
 	@python3 tests/test_start_launcher.py
 	@python3 tests/test_staged.py
 	@python3 tests/test_career_page.py
+	@python3 tests/test_career_markdown.py
 	@python3 tests/test_resume_startup.py
 	@python3 tests/test_startup.py
 	@python3 tests/run_tests.py
@@ -62,6 +64,7 @@ test:
 	@python3 tests/test_process_state.py
 	@python3 tests/test_source_formats.py
 	@python3 tests/test_resume_workflow.py
+	@python3 tests/test_resume_markdown.py
 	@python3 tests/test_resume_process.py
 	@python3 tests/test_pdf_links.py
 	@python3 tests/test_employer_layout.py
@@ -162,6 +165,7 @@ check-resume: records
 	@python3 scripts/check_components.py --require resume
 	@python3 tests/test_editorial.py
 	@python3 tests/test_resume_workflow.py
+	@python3 tests/test_resume_markdown.py
 	@python3 tests/test_resume_process.py
 	@python3 tests/test_pdf_links.py
 	@python3 tests/test_employer_layout.py
@@ -169,6 +173,7 @@ check-resume: records
 test-core:
 	@python3 tests/test_start_launcher.py
 	@python3 tests/test_career_page.py
+	@python3 tests/test_career_markdown.py
 	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
 	@python3 tests/test_pack_review.py
@@ -198,3 +203,7 @@ export-resume:
 .PHONY: start
 start:
 	@python3 scripts/start.py
+
+.PHONY: career-markdown
+career-markdown:
+	@python3 scripts/career_markdown.py

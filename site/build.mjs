@@ -34,6 +34,17 @@ export function destination(name) {
 }
 
 export function rewriteLink(href, source, published, tracked = new Set()) {
+  // Public Markdown must work on GitHub as well as in the rendered site. Keep
+  // its full website links in source, but resolve them locally in site builds
+  // so starter downloads work on previews, Pages subpaths and custom domains.
+  for (const base of ['https://career-json.com/', 'https://www.career-json.com/', 'https://rkovar.github.io/career-json/']) {
+    if (href?.startsWith(base)) {
+      const url = new URL(href);
+      let target = url.pathname.slice(new URL(base).pathname.length);
+      if (!target || target.endsWith('/')) target += 'index.html';
+      return path.posix.relative(path.posix.dirname(destination(source)), target) + url.search + url.hash;
+    }
+  }
   if (!href || href.startsWith('#') || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(href)) return href;
   const resolved = new URL(href, 'https://source.invalid/' + source);
   const target = decodeURIComponent(resolved.pathname.slice(1));
@@ -123,6 +134,8 @@ export async function build() {
     ['404.html', 'Page not found', 'Find the career.json guides or return to the homepage.', notFound(context)]
   ];
   for (const [page, title, description, content] of pages) await write(page, layout({page,title,description,content,...context}));
+  // Package only explicit public component files, never the developer workspace.
+  execFileSync('python3', [path.join(root, 'scripts/build_starter.py'), '--output-dir', path.join(output, 'downloads')], {cwd: root});
   const urls = ['','start/','demo/','guides/','privacy/'];
   await write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u => `<url><loc>${escape(siteUrl + '/' + u)}</loc></url>`).join('')}</urlset>`);
   await write('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`);

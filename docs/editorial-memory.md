@@ -250,7 +250,7 @@ conservative checks supplement semantic review; they do not prove every sentence
 
 [Resume authoring](resume-authoring.md) extends this workflow with typed application
 settings, immutable plans in `data/plans`, optional conversational selection review,
-wording decisions and required PDF/TXT/DOCX exports. Its review-mode instructions
+wording decisions and required PDF/TXT/DOCX/Markdown exports. Its review-mode instructions
 replace the earlier blanket no-questions default: explicit automatic delivery
 still proceeds, while requested interactive review waits for the person's answer.
 Plans and policy are pinned by manifests; export reports pin final submission

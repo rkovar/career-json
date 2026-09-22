@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export one cited draft to PDF, UTF-8 TXT and editable DOCX; verify recovered content.
+"""Export one cited draft to PDF, UTF-8 TXT, editable DOCX and clean Markdown; verify recovered content.
 
 TXT/DOCX use Python's standard library. PDF requires Chrome/Chromium plus Poppler
 or macOS Swift/PDFKit for verification. Missing tools are reported as failures,
@@ -24,6 +24,7 @@ import zipfile
 from current_pack import ROOT, sha256
 from editorial import local, pin, read, pin_errors
 from resume_layout import diagnostics as layout_diagnostics, poppler_geometry
+from resume_markdown import submission_markdown, validate_markdown
 from resume_document import document_from_markdown, paragraphs, plain_text, submission_html, normalized, pdf_wrapping_matches
 from resume_links import validate_pdf_links
 
@@ -237,28 +238,40 @@ def validate_export_report(report_path):
             except ValueError as exc: errors.append(str(exc))
     if not report.get('complete'):
         errors.append('required exports are incomplete or failed validation')
-    if set(report.get('formats', {})) != {'pdf', 'txt', 'docx'}:
-        errors.append('export report must account for PDF, TXT, and DOCX')
+    version = report.get('export_version', 1)
+    if type(version) is not int or version not in (1, 2, 3, 4):
+        errors.append('unsupported export report version')
+        return errors
+    required = {'pdf', 'txt', 'docx', 'md'} if version >= 4 else {'pdf', 'txt', 'docx'}
+    if version < 2:
+        errors.append('legacy export did not verify PDF hyperlinks; create a new export bundle')
+    if set(report.get('formats', {})) != required:
+        errors.append('export report must account for ' + ', '.join(sorted(required)))
     for fmt, result in report.get('formats', {}).items():
         if result.get('status') != 'verified': errors.append(fmt + ' is not verified')
         if result.get('file'): errors.extend(pin_errors(result['file']))
         else: errors.append(fmt + ' has no file pin')
     if not errors:
         document = document_from_markdown(local(report['artifact']['path']).read_text(encoding='utf-8'))
-        pdf = report['formats']['pdf']
-        if report.get('export_version', 1) < 2:
-            errors.append('legacy export did not verify PDF hyperlinks; create a new export bundle')
-        else:
-            if report.get('export_version', 1) >= 3:
-                plan = read(report['plan']['path']) if report.get('plan') else None
-                if pdf.get('layout') != layout_diagnostics(document, pdf.get('geometry'), plan):
-                    errors.append('PDF layout diagnostics are missing or inconsistent')
+        if version >= 4:
             try:
-                links = validate_pdf_links(document, pdf.get('links'))
-                if pdf.get('hyperlinks') != links or 'hyperlink_targets' not in pdf.get('checks', []):
-                    errors.append('PDF hyperlink verification is missing or inconsistent')
+                md = report['formats']['md']
+                validate_markdown(document, local(md['file']['path']).read_text(encoding='utf-8'))
+                if not {'markdown_structure', 'hyperlink_targets'} <= set(md.get('checks', [])):
+                    errors.append('Markdown structure/link verification is missing')
             except ValueError as exc:
                 errors.append(str(exc))
+        pdf = report['formats']['pdf']
+        if version >= 3:
+            plan = read(report['plan']['path']) if report.get('plan') else None
+            if pdf.get('layout') != layout_diagnostics(document, pdf.get('geometry'), plan):
+                errors.append('PDF layout diagnostics are missing or inconsistent')
+        try:
+            links = validate_pdf_links(document, pdf.get('links'))
+            if pdf.get('hyperlinks') != links or 'hyperlink_targets' not in pdf.get('checks', []):
+                errors.append('PDF hyperlink verification is missing or inconsistent')
+        except ValueError as exc:
+            errors.append(str(exc))
     return errors
 
 
@@ -267,7 +280,7 @@ def export(artifact, destination, plan_path=None, paper_size=None, page_limit=No
     if not destination.is_relative_to(local('outputs')):
         raise ValueError('exports belong under outputs/')
     if destination.exists(): raise ValueError('export destination exists; choose a new version directory')
-    report = {'export_version': 3, 'artifact': pin(artifact), 'formats': {}, 'complete': False,
+    report = {'export_version': 4, 'artifact': pin(artifact), 'formats': {}, 'complete': False,
               'visual_review': 'not_recorded', 'docx_pagination': 'not_verified_in_Word',
               'accessibility': 'semantic HTML and native DOCX structure; assistive-technology review not performed',
               'ats_compatibility': 'not_tested_against_an_employer_ATS'}
@@ -299,11 +312,14 @@ def export(artifact, destination, plan_path=None, paper_size=None, page_limit=No
         review = staging / 'review'; review.mkdir()
         html_path = review / 'preview.html'; html_path.write_text(submission_html(document), encoding='utf-8')
         (review / 'document.json').write_text(json.dumps(document, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-        for fmt in ('txt', 'docx', 'pdf'):
+        for fmt in ('md', 'txt', 'docx', 'pdf'):
             path = files / ('resume.' + fmt)
             result = {'status': 'failed'}
             try:
-                if fmt == 'txt':
+                if fmt == 'md':
+                    path.write_text(submission_markdown(document), encoding='utf-8')
+                    recovered = validate_markdown(document, path.read_text(encoding='utf-8'))
+                elif fmt == 'txt':
                     path.write_text(plain_text(document), encoding='utf-8')
                     recovered = path.read_text(encoding='utf-8')
                 elif fmt == 'docx':
@@ -319,6 +335,7 @@ def export(artifact, destination, plan_path=None, paper_size=None, page_limit=No
                 result['status'] = 'verified'
                 result['checks'] = ['text_content', 'reading_order', 'internal_metadata_excluded']
                 if fmt == 'pdf': result['checks'].append('hyperlink_targets')
+                if fmt == 'md': result['checks'].extend(['markdown_structure', 'hyperlink_targets'])
             except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
                 result['error'] = str(exc)
             if path.exists():
@@ -350,7 +367,7 @@ def main(argv=None):
         if args.check:
             errors = validate_export_report(args.check)
             if errors: raise ValueError('; '.join(errors))
-            print('all three export files match their verified content and inputs'); return 0
+            print('all required export files match their verified content and inputs'); return 0
         if not args.artifact or not args.output: parser.error('artifact and --output are required for export')
         report, path = export(args.artifact, args.output, args.plan, args.paper_size, args.page_limit)
         for fmt, row in report['formats'].items(): print(fmt.upper() + ': ' + row['status'] + (': ' + row['error'] if row.get('error') else ''))

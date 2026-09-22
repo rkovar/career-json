@@ -99,6 +99,8 @@
     "tests/fixtures/source-to-pack/early-career/sources/career-account.md": "tests/fixtures/source-to-pack/early-career/sources/career-account.md",
     "tests/fixtures/source-to-pack/leadership/expected.json": "tests/fixtures/source-to-pack/leadership/expected.json",
     "tests/fixtures/source-to-pack/leadership/calibration.json": "tests/fixtures/source-to-pack/leadership/calibration.json",
-    "tests/fixtures/source-to-pack/leadership/sources/career-account.md": "tests/fixtures/source-to-pack/leadership/sources/career-account.md"
+    "tests/fixtures/source-to-pack/leadership/sources/career-account.md": "tests/fixtures/source-to-pack/leadership/sources/career-account.md",
+    "scripts/resume_markdown.py": "scripts/resume_markdown.py",
+    "tests/test_resume_markdown.py": "tests/test_resume_markdown.py"
   }
 }

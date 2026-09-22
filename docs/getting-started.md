@@ -1,5 +1,8 @@
 # Your first session
 
+Prefer a plain-language introduction with a downloadable starter?
+[Start here if you're not technical](nontechnical-start.md).
+
 Start with a role and a few achievements you can read, correct and find again.
 You can add the rest of your career over time.
 
@@ -9,8 +12,16 @@ with much less material.
 
 ## 1. Open the tool
 
-You need Claude Code installed and configured, Git, Python 3.9+, `make`, and
-macOS or Linux. Source files and review pages live in your workspace. Material
+This section is the **terminal route**: you need the Claude Code CLI installed
+and signed in, Git, Python 3.9+, `make`, and macOS or Linux. Follow
+[Anthropic's CLI quickstart](https://code.claude.com/docs/en/quickstart) for installation
+and authentication. A working `claude --version` checks that the CLI is on PATH.
+
+For the downloadable **Desktop route**, follow the
+[Mac starter guide](nontechnical-start.md) instead. It uses Code → Local with a
+selected folder and does not require Git, `make` or a separate CLI installation.
+
+Source files and review pages live in your workspace. Material
 you ask Claude to read is processed by your configured model service.
 
 For a new checkout, run this in your terminal:
@@ -26,8 +37,7 @@ If you already cloned or unzipped the project, skip cloning and run from its dir
 checkout includes both **Build my career pack** and **Create a resume**.
 A Core-only archive offers career-pack tools until you install the resume add-on.
 **Continue saved work** appears for active setups or career reviews. Completed
-work stays in history. Once you save a pack, **View my saved career record** opens
-the readable current record.
+work stays in history. Once you save a pack, **View my saved career record** refreshes and links to the readable current record and its complete Markdown snapshot.
 
 Choose **Build my career pack** for the first exercise below. If you need a
 resume now, choose **Create a resume**: your target is saved while the assistant
@@ -36,7 +46,8 @@ helps you build a pack.
 **Already in Claude Code?** Ask “Walk me through the career-pack wizard” or
 “Walk me through the resume wizard.” These are alternatives to opening the launcher.
 
-For PDF sources, macOS can use Swift/PDFKit; Linux needs Poppler. See
+For PDF sources, macOS can use an installed, working Swift/PDFKit toolchain or
+Poppler; Linux needs Poppler. See
 [PDF source setup](extraction.md#what-it-uses) if extraction tools are missing.
 You can also start with text, a Word document, or your own account.
 
@@ -101,6 +112,12 @@ Then try a topic from your own work:
 
 The answer should show the recorded contribution and its source, including any
 uncertainty. You now have a record you can reuse and improve.
+
+Viewing your saved record generates `outputs/career-record.html` and
+`outputs/career.md`. The Markdown copy includes the complete saved pack, including
+private contact details and restrictions; it is not a clean resume. The JSON pack
+remains authoritative, and edits to the generated views do not sync back.
+See [your files and exports](files-and-exports.md) for the file map and commands.
 
 ## 5. Come back when something changes
 

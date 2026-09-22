@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Check the generated public site's local links and publication boundaries."""
+import hashlib
 import json
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+import zipfile
 
 
 class Page(HTMLParser):
@@ -61,6 +63,25 @@ def check(base):
     for name in inventory['source_files']:
         if not name.startswith(('docs/', 'graphics/', 'examples/first-pack/')):
             errors.append('Unexpected publication source: ' + name)
+    # The download is code plus fictional examples, never a personal workspace.
+    archive = base / 'downloads/career-json-starter.zip'
+    try:
+        with zipfile.ZipFile(archive) as starter:
+            prefix = 'My Career/'
+            manifest_name = prefix + 'components/starter/inventory.json'
+            files = json.loads(starter.read(manifest_name))['files']
+            expected = {prefix + name for name in files} | {manifest_name}
+            if set(starter.namelist()) != expected or len(starter.namelist()) != len(expected):
+                errors.append('Starter download does not match its inventory.')
+            for name, digest in files.items():
+                parts = Path(name).parts
+                if (not parts or Path(name).is_absolute() or '..' in parts or '\\' in name
+                        or parts[0] in ('data', 'reviews', 'outputs', 'backups', '.git', '.codex', '.agents')):
+                    errors.append('Unexpected starter path: ' + name)
+                if hashlib.sha256(starter.read(prefix + name)).hexdigest() != digest:
+                    errors.append('Starter file checksum mismatch: ' + name)
+    except (OSError, ValueError, KeyError, zipfile.BadZipFile) as exc:
+        errors.append('Starter download is missing or invalid: ' + str(exc))
     if errors:
         print('\n'.join(errors), file=sys.stderr)
         return 1

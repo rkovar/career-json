@@ -12,6 +12,7 @@ excerpts:
 test:
 	@python3 tests/test_start_launcher.py
 	@python3 tests/test_career_page.py
+	@python3 tests/test_career_markdown.py
 	@python3 tests/test_startup.py
 	@python3 tests/test_core.py
 	@python3 tests/test_process_state.py
@@ -45,3 +46,7 @@ journeys:
 .PHONY: start
 start:
 	@python3 scripts/start.py
+
+.PHONY: career-markdown
+career-markdown:
+	@python3 scripts/career_markdown.py

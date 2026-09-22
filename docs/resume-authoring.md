@@ -15,7 +15,7 @@ Pack + application brief -> selection -> resume plan
                                              |
                                   draft -> shared document
                                              |
-                                 PDF + TXT + DOCX exports
+                                 PDF + TXT + DOCX + Markdown exports
                                              |
                        integrity / representation / reader / file checks
                                              |
@@ -31,7 +31,7 @@ or `--market US` when known and `--review-mode interactive` when the person want
 checkpoints. Each application setting has an origin and reason. Edit a candidate
 brief to record explicit employer/user instructions, then save with `editorial.py
 save`. Page limits are positive integers or null; never infer a precise limit
-from a country's convention. A4/Letter are contextual defaults. All three exports
+from a country's convention. A4/Letter are contextual defaults. All four exports
 are required regardless of which one the employer accepts for submission.
 
 First-time users should be offered a selection review and an own-voice review.
@@ -148,7 +148,7 @@ as for other decisions. Recheck evidence when reusing previously approved wordin
 
 ## Delivery and review
 
-See [resume-exports.md](resume-exports.md) for required PDF/TXT/DOCX delivery.
+See [resume-exports.md](resume-exports.md) for required PDF/TXT/DOCX/Markdown delivery.
 Use one exact manifest for representation and integrity reviews:
 
 ```sh

@@ -1,5 +1,9 @@
 # Career Evidence Core
 
+For “Help me start my career notebook,” follow `docs/operators/desktop-start.md`.
+Run setup checks yourself, use conversation review, and verify the first saved
+achievement by reading it back with its source. Resume existing work on return.
+
 This workspace uses Career Evidence Core (early access). Read
 `docs/core-workflow.md`. The core supplies five skills for intake, evidence review,
 strengths review and capture. Core work finishes with a useful career pack and

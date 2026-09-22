@@ -114,7 +114,7 @@ def check(path):
         if blockers and record.get("publishable"):
             errors.append("publishable is true while blocker findings are recorded")
         if record.get('publishable') and record.get('run', {}).get('editorial_inputs', {}).get('plan') and not record['run'].get('exports'):
-            errors.append('a planned resume needs verified PDF, TXT, and DOCX exports before publishable is true')
+            errors.append('a planned resume needs verified PDF, TXT, DOCX and Markdown exports before publishable is true')
         for artefact in record.get("artifacts", []):
             if not (ROOT / artefact).exists():
                 errors.append(f"artifact {artefact} does not exist")

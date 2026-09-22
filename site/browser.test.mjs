@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import assert from 'node:assert/strict';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -70,10 +70,20 @@ try {
   };
   for (const width of [1440,390]) {
     await cdp('Emulation.setDeviceMetricsOverride',{width,height:width===1440?1000:844,deviceScaleFactor:1,mobile:false});
-    for (const route of ['', 'start/', 'demo/', 'guides/', 'guides/getting-started.html', 'privacy/', 'examples/first-pack/career.html']) {
+    for (const route of ['', 'start/', 'demo/', 'guides/', 'guides/getting-started.html', 'guides/nontechnical-start.html', 'guides/files-and-exports.html', 'guides/resume-exports.html', 'privacy/', 'examples/first-pack/career.html']) {
       await load(route);
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true,`${width}px ${route}: no horizontal page overflow`);
     }
+    await load('guides/nontechnical-start.html');
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('main a')).find(a => a.textContent.includes('Get the career starter')).href`), address + 'start/index.html#download', 'Guide download stays within the current site and project subpath');
+    await load('start/');
+    assert.equal(await evaluate(`document.querySelector('[download]').getAttribute('href')`), '../downloads/career-json-starter.zip');
+    assert.equal(await evaluate(`(async () => { const response = await fetch(document.querySelector('[download]').href); const bytes = new Uint8Array(await response.arrayBuffer()); return response.ok && bytes[0] === 80 && bytes[1] === 75; })()`), true, 'Starter link downloads a ZIP under a project subpath');
+    await evaluate(`Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: async text => {window.copiedPrompt = text;}}}); document.querySelector('[data-copy="starter-prompt"]').click()`);
+    assert.equal(await evaluate('window.copiedPrompt'), 'Help me start my career notebook.');
+    assert.equal(await evaluate(`document.querySelector('#starter-prompt').closest('.terminal').querySelector('.copy-status').textContent.includes('Code tab')`), true);
+    await evaluate(`navigator.clipboard.writeText = async () => {throw Error('clipboard unavailable')}; document.querySelector('[data-copy="starter-prompt"]').click()`);
+    assert.equal(await evaluate(`document.querySelector('#starter-prompt').closest('.terminal').querySelector('.copy-status').textContent.includes('manually')`), true);
     await load('');
     assert.equal(await evaluate('document.querySelectorAll("[role=tab]").length'),3);
     await evaluate('document.getElementById("tab-leadership").click()');
@@ -87,11 +97,18 @@ try {
       await evaluate('scrollTo(0,800)'); await pause(200); await screenshot('home-details');
       await load('start/'); await screenshot('start-desktop');
       await load('guides/getting-started.html'); await screenshot('guide-desktop');
+      await load('guides/nontechnical-start.html'); await screenshot('beginner-guide-desktop');
     }
   }
   await cdp('Emulation.setScriptExecutionDisabled',{value:true});
   await load('');
   assert.equal(await evaluate('!document.getElementById("panel-engineering").hidden && document.querySelector("[data-tabs]").hidden'),true,'Default evidence stays readable without JavaScript');
+  await load('start/');
+  assert.equal(await evaluate(`document.getElementById('starter-prompt').textContent`), 'Help me start my career notebook.', 'Starter message remains copyable without JavaScript');
+  await cdp('Page.navigate', {url: pathToFileURL(path.join(root, 'components/starter/START-HERE.html')).href});
+  await pause(250);
+  assert.equal(await evaluate(`document.getElementById('prompt').textContent`), 'Help me start my career notebook.', 'Downloaded instructions work as a local file without JavaScript');
+  assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true, 'Local starter fits on mobile');
   assert.equal(errors.length,0,JSON.stringify(errors));
   console.log('PASS: desktop/mobile routes, project-subpath links, source ownership, keyboard tabs and no-JavaScript reading; no HTTP or JavaScript errors.');
 } finally {

@@ -76,7 +76,7 @@ reviews/            source answers and review records. Git ignored
 | `resume_start.py` | Targeting wizard and typed brief handoff; consumes shared startup primitives |
 | `workspace_tools.py` / `workspace_backup.py` | Health, history, reviewed maintenance and verified private backup/restore |
 | `resume_workflow.py` / `resume_employment.py` | Application plans, evidence tradeoffs and employer/position structure |
-| `resume_document.py` / `export_resume.py` / `resume_links.py` | Shared content, PDF/TXT/DOCX output and exact content/link verification |
+| `resume_document.py` / `export_resume.py` / `resume_links.py` | Shared content, PDF/TXT/DOCX/Markdown output and exact content/link verification |
 | `resume_process.py` / `resume_quality.py` / `resume_layout.py` | Durable claim/editorial reviews, omitted-evidence review and final PDF inspection records |
 | `check_staged.py` | Developer hook: reject private paths and test an isolated snapshot of the Git index |
 | `current_pack.py` | Resolves the current pack by supersedes chain, not by mtime. Refuses when ambiguous |
@@ -196,7 +196,7 @@ Selection review HTML is a private conversational aid. Scoped wording decisions
 preserve user voice without becoming career facts.
 
 `resume_document.py` derives a small block structure from the final cited draft.
-`export_resume.py` produces PDF, TXT and DOCX with identical content. Submission
+`export_resume.py` produces PDF, TXT, DOCX and Markdown with identical content. Submission
 files live under an export bundle's `files/`; internal provenance and reports
 live in `review/`. PDF is the only export with external rendering prerequisites.
 Exact plan, policy and export-file hashes join the existing manifest chain.

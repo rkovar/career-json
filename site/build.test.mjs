@@ -36,6 +36,9 @@ test('guide and source links follow their rendered destinations', () => {
   assert.equal(rewriteLink('#local', 'docs/README.md', files), '#local');
   assert.equal(rewriteLink('https://example.com/a.md?q=x', 'docs/README.md', files), 'https://example.com/a.md?q=x');
   assert.equal(rewriteLink('../scripts/start.py', 'docs/README.md', files, new Set(['scripts/start.py'])), 'https://github.com/rkovar/career-json/blob/main/scripts/start.py');
+  assert.equal(rewriteLink('https://career-json.com/start/#download', 'docs/nontechnical-start.md', files), '../start/index.html#download');
+  assert.equal(rewriteLink('https://rkovar.github.io/career-json/start/#download', 'docs/operators/first-pack.md', files), '../../start/index.html#download');
+  assert.equal(rewriteLink('https://career-json.com.example/start/', 'docs/README.md', files), 'https://career-json.com.example/start/');
 });
 
 test('Markdown retains tables, nested lists, code, links and stable heading anchors', () => {

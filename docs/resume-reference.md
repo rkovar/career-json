@@ -10,7 +10,7 @@ the commands and saved records described below.
 | Evidence selection and durable feedback | [Editorial memory](editorial-memory.md) |
 | Planning and writing | [Resume authoring](resume-authoring.md) |
 | Employer tenures and position history | [Employment grouping](resume-employment.md) |
-| PDF, TXT and DOCX prerequisites and checks | [Exports](resume-exports.md) |
+| PDF, TXT, DOCX and Markdown prerequisites and checks | [Exports](resume-exports.md) |
 | Claim review, revisions and handoffs | [Process review](resume-process.md) |
 | Omitted evidence, language and visual review | [Editorial quality](resume-quality.md) |
 | Fictional evaluation cases and reader observations | [Quality benchmarks](quality-benchmarks.md) |

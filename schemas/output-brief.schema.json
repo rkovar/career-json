@@ -169,12 +169,13 @@
             "enum": [
               "pdf",
               "txt",
-              "docx"
+              "docx",
+              "md"
             ]
           },
           "uniqueItems": true,
           "minItems": 3,
-          "maxItems": 3
+          "maxItems": 4
         },
         "review_mode": {
           "type": "string",

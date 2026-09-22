@@ -1,8 +1,9 @@
 # Extracting Text From Sources
 
 Ingestion needs the text of a source plus the values that make its provenance
-auditable. `scripts/extract_text.sh` does both and requires nothing beyond the
-shell.
+auditable. `scripts/extract_text.sh` does both. It uses Bash and ordinary shell
+utilities; DOCX fallback extraction also uses Python. PDF extraction needs one
+of the toolchains below.
 
 ```sh
 scripts/extract_text.sh data/sources/resume.pdf             # text to stdout
@@ -17,14 +18,18 @@ scripts/extract_text.sh --record data/sources/resume.pdf    # source record fiel
 | Input | Extractor |
 | --- | --- |
 | PDF, any platform with poppler | `pdftotext -layout` |
-| PDF, macOS without poppler | Swift PDFKit, no install required |
+| PDF, macOS without Poppler | An installed, working `swift` command and the system PDFKit framework |
 | Word `.docx`, with pandoc | `pandoc -t plain`, which keeps tab and column spacing |
-| Word `.docx`, without pandoc | `word/document.xml` read with the standard library, no install required |
-| Anything else | Direct UTF-8 read |
+| Word `.docx`, without pandoc | `word/document.xml` read with Python's standard library; no extra Python package |
+| Recognized text formats, including TXT, Markdown, JSON, CSV and HTML | Direct UTF-8 read; HTML is reduced to text by the intake workflow |
+| Legacy `.doc`, PowerPoint, images and unknown extensions | Rejected; supply PDF, DOCX or readable text instead |
 
 If neither PDF extractor is present the script says so and exits non-zero. Install
 poppler (`brew install poppler`, `apt install poppler-utils`) or convert the file
-to text by hand.
+to text by hand. Swift is not guaranteed to be installed on every Mac; an
+unusable compiler/toolchain can also cause extraction to fail. A scanned PDF may
+need OCR performed separately. A text copy or your own account lets you continue
+without installing PDF tools.
 
 A `.docx` is a zip, and read as bytes it yields around 120,000 "characters" of
 zip noise: a source record that is provenance for nothing. Both docx paths read
@@ -57,8 +62,13 @@ stays `corroborated`.
 python3 scripts/validate_pack.py
 ```
 
-Standard library only. It checks required fields, status and outcome enums,
-source-reference integrity, duplicate IDs, the URL-versus-file source rules, that
-`externally_verified` atoms actually cite an independent source, and that
-`private_profile` exists. Superseded packs are skipped. Warnings flag atoms with
-no corroborator and packs with no contact details.
+The validator uses Python's standard library. It checks record structure, status
+and outcome values, reference integrity, duplicate IDs, source rules and the
+support required for independently verified claims. Superseded packs are skipped
+unless you name them explicitly. Partial private packs may omit contact details.
+Optional corroboration is not required for saving your own account.
+
+Structural validation does not prove that an excerpt exists in a source. Use
+`python3 scripts/verify_excerpts.py` for source-text checks. Neither check proves
+that extraction captured every relevant detail; review the proposed record
+against your material.

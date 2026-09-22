@@ -774,6 +774,11 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex]:focus-visi
   padding-block:75px
 }
 
+.starter-download {
+  padding-top:0;
+  scroll-margin-top:110px
+}
+
 .setup-grid h2 {
   font-size:2.2rem
 }

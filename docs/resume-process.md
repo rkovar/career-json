@@ -20,7 +20,7 @@ Versioned draft --> reader observations (before viewing the plan)
                                |
                    compress / revise when needed
                                |
-                    PDF + TXT + DOCX verification
+                    PDF + TXT + DOCX + Markdown verification
                                |
                     final reviews + generated handoff
 
@@ -163,7 +163,7 @@ coverage and consistency; they do not replace a competent semantic review.
 Export the final draft, inspect its PDF, and save one exact manifest with selection,
 plan, artifact, exports **and `--process`**. Use it for the representation and
 evaluation records. A planned resume cannot be marked publishable without a valid
-completed process review and all three verified exports. A later screen may expose
+completed process review and all four verified exports. A later screen may expose
 new issues: record them, revise within budget and regenerate the final records.
 Keep reviewer context honest; fresh readers are useful when available and allowed.
 

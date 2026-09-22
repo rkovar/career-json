@@ -1,12 +1,12 @@
 ---
 name: make-resume
-description: "Create or tailor a resume, CV, or cover letter from the approved career pack. Plans evidence, supports optional person review, generates the document, evaluates it, and delivers PDF, TXT and DOCX for resumes."
+description: "Create or tailor a resume, CV, or cover letter from the approved career pack. Plans evidence, supports optional person review, generates the document, evaluates it, and delivers PDF, TXT, DOCX and Markdown for resumes."
 ---
 
 # Create a resume
 
 Read `docs/resume-authoring.md`, `docs/resume-process.md` and `docs/editorial-memory.md`. The former owns
-resume planning, authoring policy and PDF/TXT/DOCX delivery; the latter owns
+resume planning, authoring policy and PDF/TXT/DOCX/Markdown delivery; the latter owns
 immutable briefs, selection, scoped decisions and review provenance. Existing
 career facts remain in Core. Never create a stronger fact through resume editing.
 
@@ -34,8 +34,8 @@ Use the target supplied by the user or the applicable saved role profile. Ask fo
 the role only if it cannot be established. Reuse applicable preferences and record
 employer requirements, user choices and inferred defaults in the brief. A standard
 UK or US resume is supported; specialized applications need verified, recorded
-instructions rather than presumed portal rules. All resumes require PDF, TXT and
-DOCX even if the employer accepts just one of them.
+instructions rather than presumed portal rules. All resumes require PDF, TXT, DOCX and
+Markdown even if the employer accepts just one of them.
 
 Create/update a version-2 brief, run `editorial.py prepare`, and curate candidates
 using `review-selection`. Ranking is retrieval, not career value. Read candidates
@@ -125,16 +125,16 @@ context, method, timeframe and strength support, and save material tradeoffs.
 Rebuild stale selections/plans and re-review the final text.
 
 Render internal HTML with `render.py`, validate with `validate_artifact.py --plan`,
-and export all three formats with `export_resume.py --plan`; read
+and export all four formats with `export_resume.py --plan`; read
 `docs/resume-exports.md`. Inspect final PDF page breaks, typography and recovered
 text. Report Word pagination or accessibility checks as unverified unless actually
 performed. Export failures complete with explicit limitations, never false success.
 
 Use `manifest.py --selection --plan --artifact --exports --process` with actual paths.
 Save representation and evaluation through `save_review.py` with the same exact
-manifest. A planned resume cannot be marked publishable without all three verified
+manifest. A planned resume cannot be marked publishable without all four verified
 exports. Changed input or export bytes invalidate prior approval. Regenerate the
-artifact index, and return links to PDF, TXT and DOCX plus separate integrity,
+artifact index, and return links to PDF, TXT, DOCX and Markdown plus separate integrity,
 representation, relevance, reader-quality and delivery findings. Explain material
 omissions, inferences and remaining questions privately. No hiring probability or
 ATS-pass claim is supported by these checks.
@@ -169,7 +169,7 @@ from memory. Explain optional decisions as decisions, not policy.
 **Cover letter:** three or four concise paragraphs addressing `central_requirement`,
 with evidence references and accurate motivation. Avoid repeating the resume.
 **LinkedIn:** first person with public audience constraints. These formats reuse
-durable selection and review, but do not require a resume plan or three exports.
+durable selection and review, but do not require a resume plan or four exports.
 **Interview preparation:** use `make-interview-brief`, whose private view includes
 evidence unavailable for publication. It is a separate workflow.
 

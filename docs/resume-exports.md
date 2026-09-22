@@ -1,20 +1,25 @@
-# PDF, TXT and DOCX export
+# PDF, TXT, DOCX and Markdown export
 
-All three formats are required in the first release of the revised workflow.
+New export bundles require all four formats.
 They share a derived document (`resume_document.py`) built from the final cited
 Markdown. Supported source syntax is H1–H4 headings, paragraphs, ordinary bullets,
 inline emphasis and recorded HTTP(S)/mailto links. Unsupported tables, images,
 raw HTML, code and other structures fail explicitly instead of silently dropping
-content. URLs are visible in every format; headings, chronology and wording stay
-identical. Exporting never rewrites facts or edits the career pack.
+content. PDF, TXT and DOCX display recorded URLs with their labels. Markdown
+preserves labels and destinations using standard link syntax; a rendered Markdown
+reader may display only the label. Section order, chronology and wording remain
+consistent. Exporting never rewrites facts or edits the career pack.
+
+The resume wizard runs these commands for you. For manual operation, replace the
+example draft, plan and output paths with your reviewed application's paths:
 
 ```sh
 python3 scripts/export_resume.py outputs/example-draft.md --plan data/plans/example-v2-plan.json --output outputs/example-v2-export
 python3 scripts/export_resume.py --check outputs/example-v2-export/review/export-report.json
 ```
 
-The output directory must be new. `files/` contains only `resume.pdf`, `resume.txt`
-and `resume.docx`. `review/` holds the clean HTML preview, internal derived document
+The output directory must be new. `files/` contains only `resume.pdf`, `resume.txt`,
+`resume.docx` and `resume.md`. `review/` holds the clean HTML preview, internal derived document
 with claim references, and export report. Send only the required files from
 `files/`, never the review directory. The report pins the draft, plan and actual
 submission bytes. Re-export to a new directory after editing. A standalone legacy
@@ -27,13 +32,17 @@ this compatibility path does not confer planned-resume approval.
   Chrome/Chromium renders the document using
   an isolated temporary profile, with browser headers/footers disabled. No network
   assets are loaded. Visual inspection of final page breaks is still required.
+- **Markdown:** clean UTF-8 `resume.md` with headings, paragraphs, bullets, emphasis
+  and recorded links. Internal citations and review metadata are excluded; the cited
+  working draft remains unchanged. The checker compares canonical Markdown structure,
+  formatting, wording and link targets with the shared document.
 - **TXT:** UTF-8, ordinary heading text, blank-line separation and `-` list markers.
 - **DOCX:** editable WordprocessingML with native paragraph styles, heading outline
   levels and true list numbering. No layout tables, floating boxes, hidden review
   data or macros. Word may paginate differently from the PDF renderer; inspect
   DOCX in the intended word processor when a DOCX page limit is consequential.
 
-TXT and DOCX need only standard-library Python. PDF requires Chrome or Chromium
+Markdown, TXT and DOCX need only standard-library Python. PDF requires Chrome or Chromium
 and either Poppler (`pdftotext`, `pdfinfo` and `pdftohtml`) or macOS Swift/PDFKit
 for text, page-count and hyperlink checks. `export_resume.py` reports missing prerequisites or tool
 failures per format and exits nonzero. It retains successful formats and a failure
@@ -45,7 +54,8 @@ Unicode compatibility normalization, whitespace wrapping and list markers.
 For PDF only, a physical newline after an existing hyphen or inside an expected
 URL can be reconciled with the exact source token. Ordinary within-word spaces,
 missing word boundaries and changed URL characters still fail. The report records
-when this bounded reconciliation was needed. TXT and DOCX remain strict.
+when this bounded reconciliation was needed. TXT and DOCX remain strict. Markdown is compared against its canonical structure,
+inline formatting, wording and link destinations.
 Word boundaries are preserved: `SQL pipelines` and `SQLpipelines` are different.
 Missing, added or reordered content fails. Native DOCX content and styles are
 also covered by regression tests. The export report records PDF tools, page count,
@@ -105,3 +115,46 @@ Follow [resume-quality.md](resume-quality.md) for role-sensitive selection, expl
 editorial questions, review of omitted eligible evidence, PDF geometry diagnostics
 and the visual review required for the exact exported bundle. These extend existing
 process records; they never promote application judgments into career facts.
+
+## Markdown and report compatibility
+
+Version-4 reports require PDF, TXT, DOCX and Markdown. Version-2 and version-3
+reports retain their original three-format checks; version-1 reports still require
+a fresh export for verified PDF hyperlinks. Existing bundles are never rewritten.
+New briefs request four formats; saved three-format briefs remain readable and
+produce four formats when exported again. Markdown does not carry PDF pagination.
+
+Markdown normalizes whitespace around emphasis delimiters without changing the
+visible wording. Emphasis that cannot be represented faithfully in supported
+Markdown fails explicitly instead of exporting extra literal asterisks.
+
+## Requirements by task
+
+| Task | Requirements beyond Python 3.9+ |
+| --- | --- |
+| Full career Markdown snapshot | None; works without a model session or PDF software |
+| Clean resume Markdown, TXT and DOCX | None; the cited draft and planned-review inputs must already exist |
+| Resume PDF | Chrome/Chromium, plus either all three Poppler tools (`pdftotext`, `pdfinfo`, `pdftohtml`) or a working macOS Swift/PDFKit toolchain |
+
+Generating a resume from career evidence uses Claude; rendering an existing draft
+uses local scripts. A PDF prerequisite or verification failure retains successful
+formats but leaves the four-format bundle incomplete. Read the report's per-format
+error, correct the cause and export into a new directory. Do not bypass a failed
+check or describe a partial bundle as fully verified.
+
+For the complete private record rather than a resume, see
+[your files and exports](files-and-exports.md).
+
+## Known PDF verification limitation
+
+In local testing on 2026-09-22, the optional real-PDF regression failed because
+Poppler recovered neighboring words or punctuation as part of a hyperlink's
+clickable text. The same failure occurred with the previous exporter. This does
+not establish that every PDF is affected, but installing the prerequisites alone
+does not guarantee a verified bundle.
+
+If this happens, retain the export report and generated PDF for diagnosis. The
+successful Markdown, TXT and DOCX files remain available, but the bundle stays
+incomplete. Do not rewrite factual content or remove evidence merely to satisfy
+the extractor. Test any toolchain or rendering fix against the failing example
+before claiming the PDF is verified.

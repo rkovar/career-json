@@ -42,12 +42,15 @@ def main(argv=None, _locked=False):
     if argv and argv[0] == 'recover':
         from career_state import recover
         print(json.dumps(recover(), indent=2)); return 0
+    if argv and argv[0] == 'export-markdown':
+        from career_markdown import main as markdown_main
+        return markdown_main(argv[1:])
     if argv and argv[0] == 'view':
         from career_review import reading_page
         from pack_io import workspace_lock
         with workspace_lock():
             page = reading_page()
-        print(page or 'No saved career pack yet.'); return 0
+        print((page + '\noutputs/career.md') if page else 'No saved career pack yet.'); return 0
     if argv and argv[0] == 'health' and '--summary' in argv:
         from career_state import summary
         state = summary()
@@ -63,7 +66,7 @@ def main(argv=None, _locked=False):
     if argv and argv[0] in ('health', 'history', 'maintain', 'backup', 'restore'):
         from workspace_tools import main as workspace_main
         return workspace_main(argv)
-    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: intake, start, review, workspace, health, history, maintain, backup and restore. Use <command> --help for details.")
+    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: intake, start, review, view, export-markdown, workspace, health, history, maintain, backup and restore. Use <command> --help for details.")
     sub = parser.add_subparsers(dest='command', required=True)
     status = sub.add_parser('status', help='private strengths interview queue')
     status.add_argument('--pack', help='inspect a proposal before its first acceptance')

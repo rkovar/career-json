@@ -14,7 +14,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parent.parent
 PRIVATE = {'data', 'outputs', 'reviews', 'dist', '.git', '.codex', '.agents'}
 PUBLIC = {'scripts', 'schemas', 'docs', 'examples', 'tests', '.claude', 'components'}
-ROOT_FILES = {'README.md', 'CLAUDE.md', 'Makefile', 'Makefile.resume', 'LICENSE', '.gitignore'}
+ROOT_FILES = {'README.md', 'CLAUDE.md', 'Makefile', 'Makefile.resume', 'LICENSE', '.gitignore', 'START-HERE.html'}
 
 
 def public_path(name):

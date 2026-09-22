@@ -2291,7 +2291,7 @@ INVARIANTS = {
                     "never invents intent", "keyword_coverage.py", "fresh context",
                     "at the end of the claim's own line", "recruiter-screen",
                     "Cover letter", "central_requirement", "employment", "career_span_years",
-                    "resume_workflow.py", "export_resume.py", "PDF, TXT and DOCX"],
+                    "resume_workflow.py", "export_resume.py", "PDF, TXT, DOCX and Markdown"],
     "build-career-pack": ["private_profile", "business_outcome", "never how they are *asked*",
                           "validate_pack.py", "optional and off by default",
                           "employer_of_record", "annual write-up", "dedupe.py",

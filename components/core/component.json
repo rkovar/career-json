@@ -18,6 +18,9 @@
     "LICENSE": "LICENSE",
     "Makefile": "components/core/Makefile",
     "README.md": "components/core/README.md",
+    "START-HERE.html": "components/starter/START-HERE.html",
+    "scripts/desktop_setup.py": "scripts/desktop_setup.py",
+    "docs/operators/desktop-start.md": "docs/operators/desktop-start.md",
     "components/core/CHANGELOG.md": "components/core/CHANGELOG.md",
     "components/core/component.json": "components/core/component.json",
     "docs/core-workflow.md": "docs/core-workflow.md",
@@ -25,6 +28,7 @@
     "docs/extraction.md": "docs/extraction.md",
     "docs/first-session.md": "docs/first-session.md",
     "docs/linkedin.md": "docs/linkedin.md",
+    "docs/nontechnical-start.md": "docs/nontechnical-start.md",
     "docs/pack-review.md": "docs/pack-review.md",
     "docs/quality-benchmarks.md": "docs/quality-benchmarks.md",
     "docs/releases.md": "docs/releases.md",
@@ -164,6 +168,9 @@
     "examples/first-pack/reviews/intake/intake-dbe62459af6e.json": "examples/first-pack/reviews/intake/intake-dbe62459af6e.json",
     "examples/first-pack/reviews/intake/intake-574235fb5888.json": "examples/first-pack/reviews/intake/intake-574235fb5888.json",
     "examples/first-pack/reviews/questions/q-ebd6d2dabcbbf078fb1e/context.json": "examples/first-pack/reviews/questions/q-ebd6d2dabcbbf078fb1e/context.json",
-    "examples/first-pack/reviews/questions/q-abc25655ac629673a811/context.json": "examples/first-pack/reviews/questions/q-abc25655ac629673a811/context.json"
+    "examples/first-pack/reviews/questions/q-abc25655ac629673a811/context.json": "examples/first-pack/reviews/questions/q-abc25655ac629673a811/context.json",
+    "scripts/career_markdown.py": "scripts/career_markdown.py",
+    "tests/test_career_markdown.py": "tests/test_career_markdown.py",
+    "docs/files-and-exports.md": "docs/files-and-exports.md"
   }
 }

@@ -96,3 +96,27 @@ personal and employer information.
 You can also ask for a lossless JSON export of the accepted career pack.
 See [workspace maintenance](workspace-maintenance.md) for backup, restore,
 history and advanced maintenance details.
+
+## Export the complete record as Markdown
+
+Viewing or refreshing your saved career record also writes `outputs/career.md`.
+This is a complete private snapshot of the selected saved JSON pack, including
+contact details, restricted work, notes, evidence and recorded review/use states.
+It retains source references without embedding the source files. Pending capture
+notes and separate review proposals remain outside the saved-pack snapshot.
+
+JSON stays authoritative: editing Markdown does not update your pack. Regeneration
+replaces the generated snapshot. Keep a separate copy if you want to edit it.
+
+```sh
+make career-markdown
+python3 scripts/career_core.py export-markdown --pack data/packs/example.json --output outputs/example.md
+```
+
+The export needs only Python, includes its source hash, and does not contact a
+model or external service. Treat it as your personal record; it includes material
+that has not been permitted for external use. A resume bundle’s `files/resume.md`
+is a separate, clean document containing only the selected resume content.
+
+For a complete file map and the difference between `career.md`, the cited draft
+and clean `resume.md`, see [your files and exports](files-and-exports.md).

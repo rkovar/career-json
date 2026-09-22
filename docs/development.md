@@ -124,3 +124,20 @@ Source-to-pack checks and bounded live runs are documented in
 factual errors. Live model runs remain opt-in; do not report deterministic tests
 as proof of extraction quality. Review UI regressions also exercise multi-card
 wording edits and require a fresh confirmation before accepting revised text.
+
+## Self-service Desktop starter
+
+`python3 tests/test_starter.py` builds the download and tests an empty extracted
+workspace with developer tools removed from PATH. It covers explicit review,
+private acceptance, retrieval from a separate process, repeated setup, backup
+and restore, damaged files and unsupported native Windows. The website check
+also runs these tests and audits the downloadable archive.
+
+For website changes, run `npm run check --prefix site` and
+`node site/browser.test.mjs`. The latter checks the download, clipboard fallback,
+mobile layout and local START-HERE.html without JavaScript.
+
+A real Claude trial is separate from these deterministic checks. Use an extracted
+starter, fictional material, a bounded model budget and explicit scripted review
+replies. Keep the trial's files and model output outside the development workspace.
+Do not call the Desktop UI verified merely because a CLI model trial succeeds.

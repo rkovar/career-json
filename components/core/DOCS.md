@@ -7,6 +7,9 @@ when useful.
 
 ## Using your career pack
 
+[Your files and exports](files-and-exports.md) explains saved JSON, the full
+private Markdown snapshot, reading pages and clean resume files.
+
 - [Build my career pack](guided-starts.md): choosing material or starting with your own account
 - [Source suggestions](source-intake.md): resumes, reviews, talks and other useful inputs
 - [Jules's fictional walkthrough](../examples/first-pack/README.md): four roles, review decisions, corrections and a later update

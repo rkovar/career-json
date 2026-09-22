@@ -10,6 +10,7 @@ import unicodedata
 import render
 from resume_links import source_links
 from resume_employment import date_range
+from resume_markdown import inline_nodes
 
 
 class Text(HTMLParser):
@@ -77,13 +78,14 @@ def document_from_markdown(markdown, paper_size='A4'):
         parts = [s.strip() for s in visible.split('|')]
         if kind in ('h1', 'h2', 'h3'):
             employer_group = kind == 'h3' and len(parts) >= 2 and date_range(parts[1]) is not None
-        block = {'id': f'b{index + 1}', 'kind': kind, 'text': visible, 'evidence_ids': ids, 'links': links}
+        block = {'id': f'b{index + 1}', 'kind': kind, 'text': visible, 'evidence_ids': ids, 'links': links,
+                 'inline': inline_nodes(text)}
         if employer_group and kind == 'p' and len(parts) >= 2 and date_range(parts[1]):
             block['employment_part'] = 'position'
         blocks.append(block)
     if not blocks:
         raise ValueError('empty resume')
-    return {'document_version': 2, 'paper_size': paper_size, 'blocks': blocks}
+    return {'document_version': 3, 'paper_size': paper_size, 'blocks': blocks}
 
 
 def paragraphs(document):

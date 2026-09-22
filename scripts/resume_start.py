@@ -14,7 +14,7 @@ QUESTIONS = {
                'choices': ['job_description', 'role', 'explore']},
     'focus': {'label': 'Desired impression', 'prompt': 'What should the reader remember about you? Name qualities to highlight, or ask me to suggest strengths from your pack.'},
     'achievements': {'label': 'Examples to feature', 'prompt': 'Any achievements to include or give less space? I can suggest a ranked selection and explain each choice.'},
-    'constraints': {'label': 'Application requirements', 'prompt': 'Which market and any employer instructions or length limits? Unknown is fine; PDF, TXT and DOCX are included.'},
+    'constraints': {'label': 'Application requirements', 'prompt': 'Which market and any employer instructions or length limits? Unknown is fine; PDF, TXT, DOCX and Markdown are included.'},
     'review_mode': {'label': 'How to work together', 'prompt': 'Review the proposed evidence selection before writing, or let me generate and review automatically?',
                     'choices': ['interactive', 'automatic']},
 }
@@ -184,7 +184,7 @@ def answer_text(question, value, session):
         return '\n'.join(r for r in rows if r) or 'Suggest complementary examples from the pack.'
     if question == 'constraints':
         return '\n'.join('{}: {}'.format(k.replace('_', ' ').capitalize(), v)
-                         for k, v in value.items() if k != 'setting_sources') + '\nExports: PDF, TXT and DOCX.'
+                         for k, v in value.items() if k != 'setting_sources') + '\nExports: PDF, TXT, DOCX and Markdown.'
     return 'Review the selection before writing.' if value == 'interactive' else 'Generate and review automatically.'
 
 
@@ -194,7 +194,7 @@ def next_step(session):
     if session['handoff']:
         if session['handoff']['action'] == 'build_pack_then_resume':
             return 'Build and review your career pack, then continue with your saved target and preferences.'
-        return 'Rank evidence with reasons and alternatives, prepare a resume plan, and follow the chosen review mode. Deliver PDF, TXT and DOCX.'
+        return 'Rank evidence with reasons and alternatives, prepare a resume plan, and follow the chosen review mode. Deliver PDF, TXT, DOCX and Markdown.'
     if flow.answer(session, 'target', {}).get('mode') == 'explore':
         return 'Suggest a few directions from available career evidence, explain support and gaps, then save the chosen direction before drafting.'
     if session['context'].get('constraints_to_review'):
@@ -288,7 +288,7 @@ def handoff(session, args):
             raise ValueError('brief ID already exists; use a new revision ID')
     return {'action': 'prepare_selection' if current['pack'] else 'build_pack_then_resume',
             'pack': current['pack'], 'job_description': session['context'].get('job_description'),
-            'review_mode': mode, 'required_exports': ['pdf', 'txt', 'docx']}, (
+            'review_mode': mode, 'required_exports': ['pdf', 'txt', 'docx', 'md']}, (
                 'data/briefs/' + brief['brief_id'] + '.json', brief)
 
 

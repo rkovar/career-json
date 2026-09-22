@@ -20,7 +20,7 @@ def default_application(market='unspecified', review_mode='automatic', audience=
               'submission_channel': 'public' if audience == 'public' else 'unspecified',
               'contact_mode': 'public' if audience == 'public' else 'standard',
               'paper_size': 'Letter' if market == 'US' else 'A4', 'page_limit': None,
-              'required_exports': ['pdf', 'txt', 'docx'], 'review_mode': review_mode,
+              'required_exports': ['pdf', 'txt', 'docx', 'md'], 'review_mode': review_mode,
               'employer_instructions': ''}
     values['setting_sources'] = {key: {'origin': 'inferred', 'reason': 'Workflow default; replace with explicit instructions when available.'}
                                 for key in values if key != 'workflow_version'}
@@ -34,8 +34,8 @@ def application_errors(brief):
     errors = []
     if app['page_limit'] is not None and app['page_limit'] < 1:
         errors.append('page_limit must be positive or null')
-    if set(app['required_exports']) != {'pdf', 'txt', 'docx'}:
-        errors.append('resume delivery requires PDF, TXT, and DOCX')
+    if set(app['required_exports']) not in ({'pdf', 'txt', 'docx'}, {'pdf', 'txt', 'docx', 'md'}):
+        errors.append('resume delivery requires PDF, TXT, DOCX and Markdown (legacy briefs may omit Markdown)')
     fields = set(app) - {'workflow_version', 'setting_sources'}
     if set(app['setting_sources']) != fields:
         errors.append('every application setting needs its origin and reason')

@@ -1,8 +1,10 @@
 # Publish the project website
 
 The public website is a static companion to the local career tools. It includes
-the product pages, existing Markdown guides and Jules's fictional example.
-Personal career creation still runs locally in Claude Code.
+the product pages, Markdown guides, Jules's fictional example, and a downloadable
+career starter.
+Personal career creation runs in a local folder through Claude Code, either the
+CLI or the Desktop Code tab. The website does not accept personal uploads.
 
 ## Build and preview
 
@@ -19,7 +21,8 @@ npm run preview --prefix site
 
 Open `http://127.0.0.1:8000`. The build writes only `dist/site/`. It replaces that
 generated directory on each build. The source remains in `site/`, `docs/`,
-`graphics/` and `examples/first-pack/`.
+`graphics/` and `examples/first-pack/`. The starter is assembled from the public
+component manifests and `components/starter/START-HERE.html`.
 
 `site/public-files.json` explicitly lists every repository document, graphic and
 fictional example included in the site. Add new public guides to that manifest.
@@ -27,8 +30,23 @@ The build rejects paths outside those public roots, path traversal and symlinks.
 It preserves the fictional source files and JSON byte-for-byte, alongside rendered
 HTML reading pages. Tests check links, source boundaries and Markdown rendering.
 
+The build also writes `downloads/career-json-starter.zip`. `scripts/build_starter.py`
+combines the Core and Resume release archives under a single `My Career/` folder,
+retaining their file inventories and adding a combined checksum inventory. It
+never walks a personal workspace. The archive includes local instructions;
+`Help me start my career notebook` routes Claude to the Desktop setup workflow.
+The website checker audits the download's paths, file inventory and checksums.
+
+`tests/test_starter.py` extracts that actual archive into an empty folder and
+exercises preparation, explicit review, a private save, source verification,
+retrieval in a new process and a repeat setup. It removes developer tools from
+PATH for these calls. It also checks damaged downloads and prevents setup from
+following a personal-directory symlink outside the workspace. These checks run
+with `npm run check --prefix site` and make no model calls.
+
 With Chrome/Chromium installed, run `node site/browser.test.mjs` after building
-for desktop/mobile navigation, keyboard tabs and browser error checks. Set
+for desktop/mobile navigation, the starter download and copy message, offline
+instructions, keyboard tabs and browser error checks. Set
 `CAREER_BROWSER` for a nonstandard browser path. `CAREER_SITE_SCREENSHOTS` optionally
 names a directory for preview screenshots. These checks use a temporary local
 server and browser profile and make no model calls.
@@ -51,7 +69,10 @@ Pages and identity permissions it needs. It uses pinned official action revision
 `SITE_URL` sets canonical links and the sitemap. The deployment workflow takes it
 from GitHub Pages configuration, so both the project address and a custom domain
 work. Local builds default to `https://career-json.com`. Navigation uses relative
-links so local previews and project subpaths work too.
+links so local previews and project subpaths work too. During the build, links
+from public Markdown to the project website are also made relative, including
+the starter download route. The Markdown source keeps its full website URLs
+so the same guide remains usable when read on GitHub.
 
 ## Connect career-json.com
 

@@ -76,6 +76,10 @@ relaxes the evidence, privacy, or publication rules above.
 
 ## Claude behaviour
 
+For “Help me start my career notebook,” follow `docs/operators/desktop-start.md`.
+Run setup checks yourself, use conversation review, and verify the first saved
+achievement by reading it back with its source. Resume existing work on return.
+
 Use the skills in `.claude/skills/` when their trigger applies. Keep questions focused and explain why a claim needs support. Do not ask the user to repeat information already present in the datapack or source material.
 
 ## Durable editorial context
@@ -86,7 +90,7 @@ Briefs and selections live in private data directories; decisions live in review
 Generated documents are never new evidence merely because the system wrote them.
 Resume generation follows `docs/resume-authoring.md`: create a typed application
 brief and ready plan, offer first-time selection/voice review, and honor explicit
-automatic delivery. Every resume requires verified PDF, TXT and DOCX exports
+automatic delivery. Every resume requires verified PDF, TXT, DOCX and Markdown exports
 from shared content before being called publishable.
 
 

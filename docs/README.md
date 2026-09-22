@@ -1,9 +1,15 @@
 # Documentation
 
+New to tools like this? [Start here if you're not technical](nontechnical-start.md)
+explains the idea and walks through one achievement, with a downloadable folder and guided setup.
+
 Start with [Your first session](getting-started.md). It is the complete path from
 opening the tool to saving and retrieving a useful piece of your career.
 
 ## Using your career pack
+
+[Your files and exports](files-and-exports.md) explains saved JSON, the full
+private Markdown snapshot, reading pages and clean resume files.
 
 | I want to… | Read |
 | --- | --- |

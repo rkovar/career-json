@@ -32,9 +32,9 @@ for (const button of document.querySelectorAll('[data-copy]')) {
     const status = button.closest('.terminal').querySelector('.copy-status');
     try {
       await navigator.clipboard.writeText(document.getElementById(button.dataset.copy).textContent);
-      status.textContent = 'Commands copied. Paste them into your terminal.';
+      status.textContent = button.dataset.copyKind === 'message' ? 'Message copied. Paste it into Claude’s Code tab.' : 'Commands copied. Paste them into your terminal.';
     } catch {
-      status.textContent = 'Copy was unavailable. Select the commands above and copy them manually.';
+      status.textContent = button.dataset.copyKind === 'message' ? 'Copy was unavailable. Select the message above and copy it manually.' : 'Copy was unavailable. Select the commands above and copy them manually.';
     }
   });
 }

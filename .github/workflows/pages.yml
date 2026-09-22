@@ -3,9 +3,9 @@ name: Public website
 on:
   push:
     branches: [main]
-    paths: ['site/**', 'docs/**', 'graphics/**', 'examples/first-pack/**', 'components/*/component.json', '.github/workflows/pages.yml']
+    paths: ['site/**', 'docs/**', 'graphics/**', 'examples/**', 'components/**', 'scripts/**', 'schemas/**', '.claude/**', 'tests/**', 'CLAUDE.md', 'LICENSE', '.gitignore', '.github/workflows/pages.yml']
   pull_request:
-    paths: ['site/**', 'docs/**', 'graphics/**', 'examples/first-pack/**', 'components/*/component.json', '.github/workflows/pages.yml']
+    paths: ['site/**', 'docs/**', 'graphics/**', 'examples/**', 'components/**', 'scripts/**', 'schemas/**', '.claude/**', 'tests/**', 'CLAUDE.md', 'LICENSE', '.gitignore', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:

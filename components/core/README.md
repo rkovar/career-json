@@ -8,8 +8,13 @@ Add notes or documents as your work changes.
 
 ## Start here
 
-Unzip the Core archive into a new directory. You need Claude Code installed and
-configured, Python 3.9+, `make`, and macOS or Linux.
+Using Claude Desktop on a Mac? Open **START-HERE.html** for the download-based
+route, then say **“Help me start my career notebook.”** Claude checks the setup
+and guides your first saved achievement. See the [beginner guide](docs/nontechnical-start.md).
+
+For terminal use, unzip the Core archive into a new directory. You need a
+configured Claude Code CLI, Python 3.9+, `make`, and macOS or Linux. The Desktop
+starter route above does not require `make` or a separate CLI installation.
 
 From that directory, run:
 
@@ -56,3 +61,9 @@ are excluded from normal source commits and public release archives.
 Keep readable reviews, exports and backups private.
 
 [All Core guides and technical references](docs/README.md). MIT licensed; see LICENSE.
+
+Viewing the saved career record also generates a complete private Markdown copy
+at `outputs/career.md`. Use `make career-markdown` to refresh that copy directly.
+JSON remains authoritative; Markdown edits do not sync back. The full snapshot
+includes private contact details and restricted evidence; the HTML reading page
+omits the profile contact block. See [your files and exports](docs/files-and-exports.md).

@@ -79,10 +79,14 @@ pack and chain before finishing. Schema 1.3 remains readable without migration.
 ## Export and portability
 
 `make career-page` creates a private reading page from the recorded pack at
-`outputs/career-record.html`. It includes withheld work, preserves unknown dates
+`outputs/career-record.html` and a complete private Markdown snapshot at
+`outputs/career.md`. The HTML view includes withheld work, preserves unknown dates
 and marks strengths whose support changed. `make pack-html` provides a searchable
 overview. Neither view adds facts from raw sources or records approval; use the
-human review workflow for changes and the JSON export for the complete data.
+human review workflow for changes. Both the Markdown snapshot and the JSON
+export contain the complete saved pack. The HTML page omits the profile contact
+block. See [your files and exports](files-and-exports.md) for scope and regeneration
+rules; generated-file edits never update the pack.
 
 ```sh
 python3 scripts/career_core.py export --output data/private/career-export.json

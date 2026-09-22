@@ -162,7 +162,7 @@ def main(argv):
                         help="the Markdown artefact this record evaluates; pins its sha256")
     parser.add_argument('--selection', help='durable selection used to produce the artifact')
     parser.add_argument('--plan', help='ready resume plan for this selection')
-    parser.add_argument('--exports', help='verified PDF/TXT/DOCX export report')
+    parser.add_argument('--exports', help='verified PDF/TXT/DOCX/Markdown export report')
     parser.add_argument('--process', help='private exact-draft process review')
     parser.add_argument('--settings', type=Path, help='JSON object of generation settings; no credentials')
     args = parser.parse_args(argv[1:])

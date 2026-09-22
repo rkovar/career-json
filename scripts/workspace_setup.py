@@ -12,7 +12,7 @@ import tempfile
 
 TOOL = Path(__file__).resolve().parent.parent
 PUBLIC = {'scripts', 'schemas', 'docs', 'examples', 'tests', '.claude', 'components'}
-ROOT_FILES = {'README.md', 'CLAUDE.md', 'Makefile', 'Makefile.resume', 'LICENSE', '.gitignore'}
+ROOT_FILES = {'README.md', 'CLAUDE.md', 'Makefile', 'Makefile.resume', 'LICENSE', '.gitignore', 'START-HERE.html'}
 
 
 def create(destination, with_resume=False, tool=TOOL):

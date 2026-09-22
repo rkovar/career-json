@@ -12,7 +12,7 @@ import uuid
 
 import pack_review as review
 from career_profile import digest
-from pack_io import local, pin, pin_errors, read, write_new, write_view, workspace_lock
+from pack_io import local, pin, pin_errors, read, write_new, workspace_lock
 
 SOURCE_FIELDS = {'source_id', 'source_type', 'path', 'sha256', 'character_count', 'byte_size',
                  'extraction_method', 'retrieved', 'independent', 'saved_copy', 'saved_sha256'}
@@ -72,13 +72,12 @@ def check_token(session, expected):
 
 
 def reading_page():
-    from career_page import build
+    from career_markdown import refresh
     current = review.resolve()
     if current is None:
         return None
     path = local('outputs/career-record.html')
-    marker = '<!-- career-pack-sha256: ' + pin(current)['sha256'] + ' -->\n'
-    write_view(path, marker + build(read(current), str(local(current).relative_to(review.ROOT.resolve()))))
+    refresh(current, path)
     return str(path.relative_to(review.ROOT.resolve()))
 
 
