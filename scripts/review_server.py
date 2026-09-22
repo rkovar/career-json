@@ -3,6 +3,7 @@ import argparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import secrets
+from socketserver import TCPServer
 import time
 import webbrowser
 
@@ -12,6 +13,14 @@ import pack_review
 from review_html import render_review
 
 MAX_BODY = 1024 * 1024
+
+
+class LoopbackHTTPServer(HTTPServer):
+    def server_bind(self):
+        # HTTPServer resolves a hostname here, which can stall offline or on
+        # macOS runners. This server uses its literal loopback address throughout.
+        TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address[:2]
 
 
 def create_server(session, port=0):
@@ -92,7 +101,7 @@ def create_server(session, port=0):
             except (ValueError, KeyError, TypeError, OSError, SystemExit) as exc:
                 self.send(409, json.dumps({'error': str(exc)}))
 
-    server = HTTPServer(('127.0.0.1', port), Handler)
+    server = LoopbackHTTPServer(('127.0.0.1', port), Handler)
     server.timeout = 1
     server.token = secrets.token_urlsafe(32)
     server.authority = '127.0.0.1:' + str(server.server_port)

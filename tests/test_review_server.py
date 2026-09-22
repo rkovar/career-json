@@ -115,6 +115,25 @@ class ReviewConnectionTests(unittest.TestCase):
             urlopen(self.origin+'/reviews/onboarding.md', timeout=5)
         self.assertEqual(error.exception.code, 404)
 
+    def test_startup_does_not_require_hostname_resolution(self):
+        script = '''
+import socket
+import sys
+from unittest.mock import patch
+sys.path.insert(0, sys.argv[1])
+from review_server import create_server
+with patch.object(socket, 'getfqdn', side_effect=AssertionError('Unexpected DNS lookup')):
+    with create_server(sys.argv[2]) as server:
+        assert server.server_address[0] == '127.0.0.1'
+        assert server.server_port > 0
+        assert server.origin == 'http://127.0.0.1:' + str(server.server_port)
+'''
+        result = subprocess.run(
+            [sys.executable, '-B', '-c', script, str(ROOT/'scripts'), self.session],
+            cwd=self.root, env={**os.environ, 'CAREER_WORKSPACE': str(self.root)},
+            text=True, capture_output=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
