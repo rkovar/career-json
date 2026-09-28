@@ -1087,7 +1087,14 @@
             "string",
             "null"
           ],
-          "description": "Absolute HTTP(S) publication URL, or null when unavailable. Local capture paths belong in source_refs."
+          "description": "Primary absolute HTTP(S) publication URL, used to link the title, or null when unavailable. Put further named links in `links`. Local capture paths belong in source_refs."
+        },
+        "links": {
+          "type": "array",
+          "description": "Additional named links for the item, in display order: event page, slides, recording, companion post. Each is source-provided. Does not replace `url`, which stays the primary link.",
+          "items": {
+            "$ref": "#/$defs/namedLink"
+          }
         },
         "role": {
           "type": [
@@ -1166,6 +1173,27 @@
             "string",
             "null"
           ]
+        }
+      }
+    },
+    "namedLink": {
+      "type": "object",
+      "description": "One labelled web link for a record, such as a talk's event page, slides, recording or companion blog post. Links are source-provided like any other fact; never guess one.",
+      "required": [
+        "label",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the link is, as it should read on a page: 'Event page', 'Slides', 'Video', 'Blog post'."
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Absolute HTTP(S) URL. Local capture paths belong in source_refs."
         }
       }
     }

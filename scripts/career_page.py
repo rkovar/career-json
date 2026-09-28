@@ -66,6 +66,13 @@ def linked_title(title, url):
     return e(title)
 
 
+def named_links(links):
+    """A record's labelled links in their recorded order; invalid targets stay as plain labels."""
+    shown = [linked_title(link.get("label") or "Link", link.get("url"))
+             for link in links or [] if isinstance(link, dict)]
+    return f'<p class="pub-links">{" · ".join(shown)}</p>' if shown else ""
+
+
 def employment_chains(records):
     """Include every descendant in a tenure, rejecting cycles and missing parents."""
     by_id = {r["employment_id"]: r for r in records}
@@ -183,6 +190,7 @@ def publications_html(pack):
                                           ("with " + ", ".join(i["collaborators"])) if i.get("collaborators") else None] if x)
             rows.append('<li' + ("" if i.get("external_safe") else ' class="private"') + f'><div class="pub-head">{head}<span class="mono">{e(ym(i.get("date")) if i.get("date") and len(i["date"]) <= 7 else (i.get("date") or "undated"))}</span></div>'
                         f'<div class="pub-meta"><span class="mono">{e(meta)}</span> {pill(status, skind)}{"" if i.get("external_safe") else pill("Private", "stop")}</div>'
+                        + named_links(i.get("links"))
                         + (f'<p>{e(i["description"])}</p>' if i.get("description") else "") + supporting_detail(i) + "</li>")
         out.append(f'<div class="pubgroup"><h3>{e(labels.get(kind, kind.replace("_", " ").title()))} <span class="count mono">{len(items)}</span></h3><ul class="pubs">{"".join(rows)}</ul></div>')
     return "".join(out)
@@ -372,7 +380,7 @@ ul.posts {{ margin:0; padding-left:1.1rem; columns:2; column-gap:2rem; font-size
 ul.pubs {{ list-style:none; margin:0.4rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.7rem; }}
 ul.pubs li {{ padding-bottom:0.7rem; border-bottom:1px solid var(--line-soft); }}
 .pub-head {{ display:flex; justify-content:space-between; gap:1rem; align-items:baseline; font-size:0.98rem; color:var(--ink); }} .pub-head a {{ color:var(--ink); }} .pub-head .mono {{ white-space:nowrap; }}
-.pub-meta {{ margin-top:0.2rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }} ul.pubs li.private {{ border-left:2px dashed var(--stop); padding-left:0.6rem; }} ul.pubs p {{ margin:0.25rem 0 0; font-size:0.88rem; }}
+.pub-meta {{ margin-top:0.2rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }} ul.pubs li.private {{ border-left:2px dashed var(--stop); padding-left:0.6rem; }} ul.pubs p {{ margin:0.25rem 0 0; font-size:0.88rem; }} .pub-links a {{ color:var(--ink); }}
 @media (max-width: 860px) {{ ul.posts {{ columns:1; }} }}
 footer {{ max-width:1180px; margin:0 auto; padding:1.5rem 2rem 3rem; border-top:1px solid var(--line); }}
 @media (max-width: 860px) {{ .page {{ grid-template-columns:1fr; gap:1.5rem; }} nav.side {{ position:static; }} .masthead .inner {{ grid-template-columns:1fr; }} .ledger {{ grid-auto-flow:row; grid-template-columns:repeat(2,1fr); }} .ledger div {{ border-left:0; border-top:1px solid var(--line); }} .titles li {{ grid-template-columns:1fr; gap:0; }} td.mv {{ white-space:normal; }} }}

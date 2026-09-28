@@ -126,7 +126,11 @@ gaps, without inventing titles or requiring another interview before saving.
 
 Publications carry an absolute HTTP(S) URL or `null`. Local captures belong in
 source references. Copy an actual source link or the saved page's canonical URL;
-never construct a likely address from its title. Compare existing URLs when
+never construct a likely address from its title. When a source gives several
+links for one item, such as a talk's event page, slides, recording and companion
+blog post, keep the primary in `url` and record the others in `links` as
+`{label, url}` pairs in the source's order. Each named link follows the same
+provenance rule. Compare existing URLs when
 merging duplicate items: preserving richer metadata must not preserve a wrong
 address. Format validation does not establish provenance or live availability.
 A title-only video capture supports its title, not the complete
