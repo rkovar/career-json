@@ -55,12 +55,13 @@ def web_url(url):
 def link_problems(rec, where):
     """Named links are checked like the primary url; repeats are warnings, not errors."""
     errors, warnings = [], []
-    links = rec.get("links")
-    if links is None:
+    if "links" not in rec:
         return errors, warnings
+    links = rec["links"]
     if not isinstance(links, list):
         return [f"{where}: links must be a list of {{label, url}} objects"], warnings
-    seen_urls = {rec.get("url")} if rec.get("url") else set()
+    primary_url = rec.get("url")
+    seen_urls = {primary_url} if web_url(primary_url) else set()
     seen_labels = set()
     for n, link in enumerate(links):
         at = f"{where}.links[{n}]"
