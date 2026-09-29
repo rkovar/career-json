@@ -171,6 +171,11 @@
     "examples/first-pack/reviews/questions/q-abc25655ac629673a811/context.json": "examples/first-pack/reviews/questions/q-abc25655ac629673a811/context.json",
     "scripts/career_markdown.py": "scripts/career_markdown.py",
     "tests/test_career_markdown.py": "tests/test_career_markdown.py",
-    "docs/files-and-exports.md": "docs/files-and-exports.md"
+    "docs/files-and-exports.md": "docs/files-and-exports.md",
+    "scripts/github_workspace.py": "scripts/github_workspace.py",
+    "scripts/github_hooks/pre-commit": "scripts/github_hooks/pre-commit",
+    "scripts/github_hooks/pre-push": "scripts/github_hooks/pre-push",
+    "tests/test_github_workspace.py": "tests/test_github_workspace.py",
+    "docs/github-workspace.md": "docs/github-workspace.md"
   }
 }

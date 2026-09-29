@@ -23,8 +23,10 @@ import json
 import os
 import re
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
+from pack_io import workspace_lock
 
 ROOT = Path(os.environ.get("CAREER_WORKSPACE", Path(__file__).resolve().parent.parent))
 NOTES = ROOT / "data" / "capture" / "notes.jsonl"
@@ -42,12 +44,18 @@ def _write_atomically(path, text):
     writes, so an interruption mid-save left the log empty: the one file this
     product exists to keep. os.replace is atomic on the same filesystem."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".tmp")
-    with tmp.open("w") as handle:
-        handle.write(text)
-        handle.flush()
-        os.fsync(handle.fileno())
-    os.replace(tmp, path)
+    tmp = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                         suffix=".tmp", delete=False) as handle:
+            tmp = Path(handle.name)
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, path)
+    finally:
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
 
 
 def save_all(notes):
@@ -79,6 +87,12 @@ def next_id(notes):
 
 
 def add(text, tags, skills, occurred):
+    with workspace_lock(ROOT):
+        return _add(text, tags, skills, occurred)
+
+
+def _add(text, tags, skills, occurred):
+    """Caller holds the workspace lock across reading, ID allocation and saving."""
     notes = load()
     note = {
         "note_id": next_id(notes),
@@ -110,6 +124,14 @@ def main(argv):
     parser.add_argument("--atom", help="the atom id it became")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv[1:])
+
+    # All mutations share the same lock as pack acceptance and workspace backup.
+    # Lock before reading so an edit/delete cannot overwrite a concurrent add.
+    with workspace_lock(ROOT):
+        return _execute(args, parser)
+
+
+def _execute(args, parser):
 
     if args.delete:
         notes = load()
@@ -185,7 +207,7 @@ def main(argv):
     if not args.text:
         parser.print_help()
         return 2
-    note = add(" ".join(args.text), args.tags, args.skills, args.occurred)
+    note = _add(" ".join(args.text), args.tags, args.skills, args.occurred)
     print(f"{note['note_id']} captured ({note['occurred']}). "
           f"{sum(1 for n in load() if not n['promoted_to'])} awaiting promotion.")
     return 0

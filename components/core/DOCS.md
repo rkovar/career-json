@@ -28,6 +28,7 @@ You do not need these pages to use the wizards.
 - [Core workflow](core-workflow.md) and [data model](data-model.md)
 - [Review contract and commands](pack-review.md)
 - [Workspace maintenance and backup](workspace-maintenance.md)
+- [Private GitHub career workspace](github-workspace.md)
 - [PDF extraction](extraction.md) and [LinkedIn input](linkedin.md)
 - [Quality benchmarks](quality-benchmarks.md) and [releases](releases.md)
 

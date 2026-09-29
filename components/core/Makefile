@@ -21,6 +21,7 @@ test:
 	@python3 tests/test_career_creation.py
 	@python3 tests/test_review_server.py
 	@python3 tests/test_workspace.py
+	@python3 tests/test_github_workspace.py
 	@python3 tests/run_journeys.py
 coverage:
 	@python3 scripts/coverage.py

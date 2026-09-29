@@ -14,6 +14,7 @@ import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, sha256, this_year, ROOT  # noqa: E402
@@ -192,13 +193,29 @@ def check(md_path, html_path, pack, private=False, strict=False, audience="named
             # number, and an exact match reported a reformatted one as missing.
             digits = re.sub(r"\D", "", value)
             return len(digits) >= 7 and digits in re.sub(r"\D", "", seen)
+        if field in ('linkedin', 'personal_website'):
+            # Check destinations as well as labels. Tracking queries, URI
+            # escaping, and a trailing slash do not anonymise a profile link.
+            from resume_links import source_links
+            def identity(url):
+                parts = urlsplit(url)
+                host = (parts.hostname or '').lower().removeprefix('www.')
+                return host, unquote(parts.path).rstrip('/')
+            wanted = identity(value)
+            try:
+                if wanted[0] and any(identity(link['target']) == wanted for link in source_links(seen)):
+                    return True
+            except ValueError:
+                # Other validation handles malformed links; retain the literal
+                # contact check even if a different link is malformed.
+                pass
         return value in seen
 
     has_contact = any(present(field) for field in ("email", "phone"))
     if (application or {}).get('contact_mode') == 'anonymous' and not private:
         if pack.get('name') and pack['name'] in seen and not present('name'):
             errors.append('canonical name appears in an anonymous application')
-        for field in ('name', 'email', 'phone', 'location', 'personal_website'):
+        for field in ('name', 'email', 'phone', 'location', 'personal_website', 'linkedin'):
             if present(field):
                 errors.append(f'{field} appears in an anonymous application; inspect employer anonymisation instructions')
     elif audience == "public" and not private:

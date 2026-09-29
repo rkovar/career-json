@@ -82,7 +82,7 @@ def create(destination, with_resume=False, tool=TOOL):
         raise
     return {'workspace': str(target), 'components': versions,
             'next': 'Open this directory in Claude Code or run make start here. Put your material in data/sources.',
-            'backup': 'Ask to back up this career workspace. GitHub backup requires a separately configured private repository.'}
+            'backup': 'Use backup for a private ZIP, or ask to save this career to GitHub. See docs/github-workspace.md.'}
 
 
 def main(argv=None):

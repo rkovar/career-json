@@ -18,6 +18,7 @@ PROMPTS = {
     'update': 'Help me update my career pack. Save a quick note as supplied, or inspect the new material I specify and review only meaningful additions and changes.',
     'resume': 'Walk me through the resume wizard.',
     'view': 'Show my current saved career record. Refresh its reading page from the accepted pack if needed.',
+    'github': 'Help me save my career workspace to a private GitHub repository. Follow docs/github-workspace.md; show the destination and upload inventory before syncing. Resume the configured workspace if one exists.',
 }
 STATUSES = {'active': 'In progress', 'paused': 'Paused', 'handed_off': 'Setup complete'}
 
@@ -108,7 +109,7 @@ def choose(title, choices):
 
 def main(argv=None, root=ROOT):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--flow', choices=('career', 'update', 'resume', 'continue', 'view'))
+    parser.add_argument('--flow', choices=('career', 'update', 'resume', 'continue', 'view', 'github'))
     parser.add_argument('--history', action='store_true', help='include completed setup and review work')
     parser.add_argument('--print-prompt', action='store_true', help='show the conversation prompt without opening Claude Code')
     args = parser.parse_args(argv)
@@ -133,9 +134,14 @@ def main(argv=None, root=ROOT):
             choices.append({'label': FLOW_LABELS['resume'], 'flow': 'resume'})
         if saved:
             choices.append({'label': 'Continue saved work', 'flow': 'continue'})
+        choices.append({'label': 'Save my career to GitHub', 'flow': 'github'})
         print('Start here')
         print('Build a private career record, or turn it into a resume.')
         print('Unsure? Start with your career pack. One old resume is enough.')
+        if (root / 'components/workspace/github.json').exists():
+            from github_workspace import status
+            state = status(root=root)
+            print('GitHub: ' + state['state'].replace('_', ' ') + ' (last fetched status; make status checks GitHub).')
         if note:
             print('\n' + note)
         if unreadable:

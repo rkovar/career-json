@@ -2086,6 +2086,42 @@ def test_resume_json_export():
     check("role export shortlists highlights", total <= 5, str(total))
 
 
+def test_resume_json_nested_employment():
+    root = sandbox()
+    try:
+        pack = json.loads(COMPLEX.read_text())
+        roles = {r['employment_id']: r for r in pack['employment']}
+        roles['EMP_CX_ENG']['parent_employment_id'] = 'EMP_CX_LEAD'
+        atom = next(a for a in pack['evidence_atoms']
+                    if a['external_safe'] and a['evidence_status'] not in ('unresolved', 'declined'))
+        atom['employment_id'] = 'EMP_CX_ENG'
+        atom['occurred'] = {'start': '2018', 'end': '2018', 'inferred': False}
+        highlight = (atom.get('star') or {}).get('result') or atom['title']
+        path = root / 'data/packs/pack.json'
+        path.write_text(json.dumps(pack))
+        code, out, err = run('validate_pack.py', workspace=root)
+        check('the three-level promotion fixture is a valid pack', code == 0, out + err)
+        code, out, err = run('export_resume_json.py', workspace=root)
+        check('nested promotion export succeeds', code == 0, err)
+        resume = json.loads(out)
+        work = next(w for w in resume['work'] if w['name'] == roles['EMP_CX_DIR']['employer'])
+        check('nested role achievements survive export', highlight in work.get('highlights', []))
+        check('nested role dates extend the collapsed tenure', work['startDate'] == '2017-01', str(work))
+        check('nested export preserves the latest title', work['position'] == roles['EMP_CX_DIR']['title'])
+        for withheld in ('EMP_CX_ENG', 'EMP_CX_LEAD', 'EMP_CX_DIR'):
+            roles[withheld]['external_safe'] = False
+            path.write_text(json.dumps(pack))
+            code, out, err = run('export_resume_json.py', workspace=root)
+            check('withheld ancestor/role exports without leaking: ' + withheld,
+                  code == 0 and highlight not in out, err)
+            if withheld == 'EMP_CX_LEAD' and code == 0:
+                work = next(w for w in json.loads(out)['work'] if w['name'] == roles['EMP_CX_DIR']['employer'])
+                check('withheld subtree does not extend the public tenure', work['startDate'] == roles['EMP_CX_DIR']['start'])
+            roles[withheld]['external_safe'] = True
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def test_find():
     code, out, _ = run("find.py", "--skill", "threat modeling")
     check("alias spelling finds the canonical skill",
@@ -2547,7 +2583,7 @@ def main():
                  test_screen_context_is_reported,
                  test_capture_is_durable,
                  test_capture_edit_delete, test_coverage,
-                 test_resume_json_export,
+                 test_resume_json_export, test_resume_json_nested_employment,
                  test_skill_contracts, test_docs_match_reality,
                  test_walkthrough, test_pdf_extraction_failure, test_docx_extraction, test_fun_packs):
         test()

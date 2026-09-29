@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+CAREER_WORKSPACE="$(pwd -P)"
+export CAREER_WORKSPACE
+exec python3 -B scripts/github_workspace.py pre-push "$@"
