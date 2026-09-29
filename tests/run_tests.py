@@ -955,6 +955,16 @@ def test_publications():
                 'https://example.org/\ntalk', 'https://example.org\\talk', '', 17):
         code, out, _ = run("validate_pack.py", pack_with(dict(good, url=url)))
         check(f"publication invalid URL {url!r} is rejected", code == 1 and 'url must be' in out, out)
+    for links in ([], [{'label': 'Slides', 'url': 'https://example.org/slides'}]):
+        code, out, _ = run("validate_pack.py", pack_with(dict(good, links=links)))
+        check(f"publication named links {links!r} validate", code == 0, out)
+    code, out, err = run("validate_pack.py", pack_with(dict(good, links=None)))
+    check("publication null links are rejected with a validation error",
+          code == 1 and 'links must be a list' in out and 'Traceback' not in err, out + err)
+    for url in (['https://example.org'], {'url': 'https://example.org'}):
+        code, out, err = run("validate_pack.py", pack_with(dict(good, url=url, links=[])))
+        check(f"publication malformed primary URL {url!r} reports an error without crashing",
+              code == 1 and 'url must be' in out and 'Traceback' not in err, out + err)
     for mutate, why in (
             (lambda d: d.pop("title"), "missing title"),
             (lambda d: d.update({"kind": "tweet"}), "kind"),

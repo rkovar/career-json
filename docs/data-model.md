@@ -155,6 +155,11 @@ Recorded like education: a checkable fact with provenance, not a STAR story.
   "venue": "Black Hat USA",
   "date": "2019-08",
   "url": "https://attack.mitre.org/resources/...",
+  "links": [
+    {"label": "Event page", "url": "https://www.blackhat.com/us-19/briefings/schedule/..."},
+    {"label": "Slides", "url": "https://i.blackhat.com/USA-19/..."},
+    {"label": "Video", "url": "https://www.youtube.com/watch?v=..."}
+  ],
   "role": "co_speaker",
   "collaborators": ["Katie Nickels"],
   "employment_id": "EMP_PRIOR",
@@ -173,6 +178,12 @@ find in resumes, catalogues, author archives and programme pages; a public page
 that lists the item makes it `externally_verified`, a subject-supplied catalogue
 leaves it `self_asserted`. Roles use the same vocabulary as the record: a
 `foreword` is not an `author`, a `co_speaker` is not a `speaker`.
+
+`url` is the primary link and links the title. `links` holds any further named
+links, such as the event page, slides, recording and a companion blog post,
+each as `{label, url}` in display order. Every link must come from a source;
+validation checks format and flags repeated labels or addresses, not whether a
+page still exists.
 
 ## Source records
 

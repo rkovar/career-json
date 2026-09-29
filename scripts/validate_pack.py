@@ -42,6 +42,50 @@ def month_bounds(value):
     return (int(year) * 12 + int(month),) * 2 if month else (int(year) * 12 + 1, int(year) * 12 + 12)
 
 
+def web_url(url):
+    """An absolute HTTP(S) URL with a host and no whitespace, control or backslash characters."""
+    try:
+        parts = urlsplit(url) if isinstance(url, str) else None
+        return bool(parts and parts.scheme.lower() in ('http', 'https') and parts.hostname
+                    and not any(ch.isspace() or ord(ch) < 32 or ch == '\\' for ch in url))
+    except ValueError:
+        return False
+
+
+def link_problems(rec, where):
+    """Named links are checked like the primary url; repeats are warnings, not errors."""
+    errors, warnings = [], []
+    if "links" not in rec:
+        return errors, warnings
+    links = rec["links"]
+    if not isinstance(links, list):
+        return [f"{where}: links must be a list of {{label, url}} objects"], warnings
+    primary_url = rec.get("url")
+    seen_urls = {primary_url} if web_url(primary_url) else set()
+    seen_labels = set()
+    for n, link in enumerate(links):
+        at = f"{where}.links[{n}]"
+        if not isinstance(link, dict):
+            errors.append(f"{at}: must be an object with label and url")
+            continue
+        for field in set(link) - {"label", "url"}:
+            errors.append(f"{at}: unknown field {field!r}")
+        label = link.get("label")
+        if not isinstance(label, str) or not label.strip():
+            errors.append(f"{at}: label must be a non-empty string")
+        elif label.strip().lower() in seen_labels:
+            warnings.append(f"{at}: label {label!r} is repeated; name each link distinctly")
+        else:
+            seen_labels.add(label.strip().lower())
+        if not web_url(link.get("url")):
+            errors.append(f"{at}: url must be an absolute HTTP(S) URL; keep local source paths in source_refs")
+        elif link["url"] in seen_urls:
+            warnings.append(f"{at}: url repeats the primary url or another link")
+        else:
+            seen_urls.add(link["url"])
+    return errors, warnings
+
+
 def enums(schema):
     atom = schema["$defs"]["evidenceAtom"]["properties"]
     src = schema["$defs"]["sourceRecord"]["properties"]
@@ -225,16 +269,11 @@ def check(path, schema, strict=False, root=ROOT):
             errors.append(f"{where}: date {rec.get('date')!r} must be YYYY, YYYY-MM or YYYY-MM-DD")
         if rec.get("date") is None:
             warnings.append(f"{where}: undated")
-        url = rec.get("url")
-        if url is not None:
-            try:
-                parts = urlsplit(url) if isinstance(url, str) else None
-                valid_url = bool(parts and parts.scheme.lower() in ('http', 'https') and parts.hostname
-                                 and not any(ch.isspace() or ord(ch) < 32 or ch == '\\' for ch in url))
-            except ValueError:
-                valid_url = False
-            if not valid_url:
-                errors.append(f"{where}: url must be an absolute HTTP(S) URL or null; keep local source paths in source_refs")
+        if rec.get("url") is not None and not web_url(rec.get("url")):
+            errors.append(f"{where}: url must be an absolute HTTP(S) URL or null; keep local source paths in source_refs")
+        link_errors, link_warnings = link_problems(rec, where)
+        errors.extend(link_errors)
+        warnings.extend(link_warnings)
         if rec.get("employment_id") and rec.get("employment_id") not in employment_ids:
             errors.append(f"{where}: unknown employment_id {rec.get('employment_id')!r}")
         if not rec.get("source_refs"):

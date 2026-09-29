@@ -17,7 +17,7 @@ FIELDS = {'situation':'Context','task':'Responsibility','action':'Your contribut
           'limitations':'Limits of this interpretation','status':'Recorded status','text':'Your preference',
           'source_refs':'Source excerpts','private_profile':'Personal details','known_conflicts':'Conflicting information',
           'occurred':'Recorded dates','inferred':'Dates are approximate','start':'From','end':'To',
-          'metrics':'Recorded measures','basis':'Measurement information','measured':'Explicitly measured',
+          'metrics':'Recorded measures','url':'Web address','links':'Named links','label':'Name','basis':'Measurement information','measured':'Explicitly measured',
           'question_status':'Interview progress','open_questions':'Questions still open', 'scope':'Scope of your role'}
 
 
