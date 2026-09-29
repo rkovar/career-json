@@ -40,6 +40,7 @@ need to read them before using the wizards.
 | Career data and supported strengths | [Data model](data-model.md), [Core workflow](core-workflow.md) |
 | Human review and acceptance | [Review contract and commands](pack-review.md) |
 | History, corrections and portability | [Workspace maintenance and backup](workspace-maintenance.md) |
+| Save and continue your career on GitHub | [Private GitHub career workspace](github-workspace.md) |
 | PDF and LinkedIn input | [Extraction](extraction.md), [LinkedIn](linkedin.md) |
 | Resume planning, reviews and formats | [Resume reference index](resume-reference.md) |
 | Overall assistant operation | [Claude workflow](claude-workflow.md) |

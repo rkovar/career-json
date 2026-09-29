@@ -1,5 +1,13 @@
 # Career Evidence Core release notes
 
+## Unreleased
+
+- Add a private GitHub career workspace output with a generated README and complete
+  `CAREER.md`, explicit connection and sync, clone/resume, and local/remote status.
+- Preserve records, source references and pending reviews across Git saves and
+  offline backups; stop at divergent history and validate the exact staged files.
+- Add the GitHub path to the launcher and publish setup, recovery and daily-use guides.
+
 ## 0.1.0-alpha.6 — local release candidate
 
 - Preserve scoped questions and exact answers in immutable private history, with deferral and explicit reopening.

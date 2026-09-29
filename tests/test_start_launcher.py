@@ -110,6 +110,13 @@ class LauncherTests(unittest.TestCase):
         self.assertNotIn('Continue saved work', out)
         child.assert_not_called()
 
+    def test_github_output_is_available_without_an_accepted_pack(self):
+        before = self.snapshot()
+        code, out, _ = self.run_start('--flow', 'github', '--print-prompt')
+        self.assertEqual(code, 0)
+        self.assertIn('docs/github-workspace.md', out)
+        self.assertEqual(self.snapshot(), before)
+
     def test_existing_pack_offers_update_first(self):
         self.write('data/packs/first.json', {'schema_version':'1.3','evidence_atoms':[]})
         code,out,_=self.run_start('--print-prompt',inputs='1\n')

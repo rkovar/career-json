@@ -14,6 +14,7 @@ resume's export directory depend on the saved version.
 | `data/packs/*.json` | Saved versions of your career record, including evidence IDs, sources and use restrictions | Authoritative record; make changes through career review |
 | `outputs/career-record.html` | A reading view of the saved record, including restricted work; omits the profile contact block | Browse your career privately |
 | `outputs/career.md` | The complete selected saved pack, including contact details, private notes, recorded states and supporting evidence | Read or reuse your full record in a Markdown editor; private by default |
+| Private GitHub workspace | Personal README, `CAREER.md`, records, sources, pending reviews, outputs and installed runtime | Own a readable repository and continue work on another machine; [setup and sync](github-workspace.md) |
 | `outputs/<application>-draft.md` | A selected resume draft with internal evidence citations | Authoring and review; use the clean export for sharing |
 | `outputs/<export>/files/resume.md` | Clean resume wording, headings, emphasis, bullets and links, without internal citations | Edit or reuse the selected resume; share only when appropriate to the recipient |
 | `outputs/<export>/files/resume.pdf`, `resume.txt`, `resume.docx` | The same selected resume content in submission formats | Send the format the employer requests |
@@ -83,6 +84,10 @@ This command requires a new output filename. Neither a JSON copy nor `career.md`
 is a complete workspace backup: source files, pending work and history live
 elsewhere in the workspace. Use [backup and restore](workspace-maintenance.md#portable-private-backup-and-restore)
 to preserve them together.
+
+The [GitHub workspace output](github-workspace.md) includes sources and history
+alongside the Markdown record. Its root `CAREER.md` is generated from the same
+accepted pack as `outputs/career.md`; the repository is private and sync is explicit.
 
 Generated files stay local unless you share or sync them. Material an assistant
 reads is processed by its configured model service. A record's private status

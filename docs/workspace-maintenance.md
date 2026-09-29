@@ -26,11 +26,11 @@ development checkout or patching source paths. Component versions and file hashe
 are recorded under `components/workspace/installation.json`.
 
 Save career material inside this workspace. Local saves are not GitHub backups.
-Configure a separate **private** repository if you want centralized Git backup;
-the installer does not create a remote or publish files. The inherited `.gitignore`
-protects personal folders by default, so Git needs a deliberate private-data
-tracking policy before it can back them up. The backup command below already
-includes pending reviews and sources without changing that policy.
+Choose **Save my career to GitHub** in `make start` for a
+[private GitHub career workspace](github-workspace.md), including a readable
+`CAREER.md`, sources, pending reviews and installed tools. Preparation creates a
+separate directory with personal Git rules; connect and sync explicitly to upload.
+The ordinary installer continues to create a local workspace without a remote.
 
 ## Review connected information
 

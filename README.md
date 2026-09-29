@@ -185,9 +185,12 @@ The default `.gitignore` excludes personal work in the designated data folders,
 `reviews/`, `outputs/` and `backups/` from ordinary commits. Files elsewhere do
 not inherit that protection. Reading pages include withheld information too.
 
-Local saves are separate from GitHub backup. If you also develop this tool,
-[create a separate personal workspace](docs/workspace-maintenance.md#create-a-separate-personal-workspace).
-The installer creates neither a GitHub repository nor automatic syncing.
+Choose **Save my career to GitHub** in `make start` to prepare a separate private
+repository with a personal README, complete `CAREER.md`, sources and review history.
+[GitHub career workspaces](docs/github-workspace.md) support setup, sync and resuming
+on another machine. Preparation uploads nothing; you explicitly connect and sync.
+Local saves remain local until you sync. If you also develop this tool,
+[keep personal work separate](docs/workspace-maintenance.md#create-a-separate-personal-workspace).
 [Backup and restore](docs/workspace-maintenance.md#portable-private-backup-and-restore)
 preserves sources, pending reviews and saved packs; archives are not encrypted.
 

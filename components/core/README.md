@@ -60,6 +60,10 @@ Claude to read is processed by your configured model service. Private records
 are excluded from normal source commits and public release archives.
 Keep readable reviews, exports and backups private.
 
+Choose **Save my career to GitHub** in `make start` to prepare a private repository
+with a personal README, complete `CAREER.md`, sources and review history. You can
+connect, sync and clone it on another machine. [GitHub workspace guide](docs/github-workspace.md).
+
 [All Core guides and technical references](docs/README.md). MIT licensed; see LICENSE.
 
 Viewing the saved career record also generates a complete private Markdown copy

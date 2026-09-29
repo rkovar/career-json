@@ -26,6 +26,9 @@ def validate_candidate(record, destination):
 
 def main(argv=None, _locked=False):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'github':
+        from github_workspace import main as github_main
+        return github_main(argv[1:])
     if argv and argv[0] == 'migrate' and not _locked:
         from pack_io import workspace_lock
         with workspace_lock():
@@ -66,7 +69,7 @@ def main(argv=None, _locked=False):
     if argv and argv[0] in ('health', 'history', 'maintain', 'backup', 'restore'):
         from workspace_tools import main as workspace_main
         return workspace_main(argv)
-    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: intake, start, review, view, export-markdown, workspace, health, history, maintain, backup and restore. Use <command> --help for details.")
+    parser = argparse.ArgumentParser(description=__doc__, epilog="Also available: intake, start, review, view, export-markdown, workspace, github, health, history, maintain, backup and restore. Use <command> --help for details.")
     sub = parser.add_subparsers(dest='command', required=True)
     status = sub.add_parser('status', help='private strengths interview queue')
     status.add_argument('--pack', help='inspect a proposal before its first acceptance')

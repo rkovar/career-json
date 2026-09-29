@@ -74,6 +74,7 @@ test:
 	@python3 tests/test_career_creation.py
 	@python3 tests/test_review_server.py
 	@python3 tests/test_workspace.py
+	@python3 tests/test_github_workspace.py
 	@python3 tests/run_journeys.py
 	@python3 tests/test_releases.py
 
@@ -180,6 +181,7 @@ test-core:
 	@python3 tests/test_career_creation.py
 	@python3 tests/test_review_server.py
 	@python3 tests/test_workspace.py
+	@python3 tests/test_github_workspace.py
 	@python3 tests/run_journeys.py
 test-releases:
 	@python3 tests/test_releases.py

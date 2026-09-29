@@ -281,6 +281,14 @@ retains historical IDs; never invent replacement prose or retarget strength supp
 automatically. Backups contain private sources and decisions; restore into a new
 directory and continue the saved session.
 
+For “save my career to GitHub,” follow `docs/github-workspace.md`. Inspect the
+configured workspace first. Prepare a separate personal repository when needed,
+show its destination and file inventory, then connect and sync within the user's
+authorization. Continue work in that new workspace. Do not initialize private
+tracking in the application checkout, automatically approve pending career claims,
+or change repository visibility. Use status and clone for existing compatible
+workspaces; reconcile divergent history explicitly.
+
 Use the connected achievement/source controls and save preview during review.
 Before applying supplied decisions, run `review preview` against the exact file
 to explain dependency or source problems. Missing files are distinct from known
