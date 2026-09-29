@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from current_pack import resolve, this_year, ROOT  # noqa: E402
 from select_evidence import eligible, load_role, role_score, canonical  # noqa: E402
+from career_page import employment_chains  # noqa: E402
 
 
 def iso(value):
@@ -76,25 +77,34 @@ def export(pack, audience="named_recipient", profile=None, limit=None):
     warnings = []
 
     work = []
-    safe_employment = [r for r in pack.get('employment', []) if eligible(r)[0]]
-    for rec in sorted(safe_employment,
-                      key=lambda r: r["start"], reverse=True):
-        if rec.get("parent_employment_id"):
-            continue  # promotions collapse into the role they grew from
+    records = pack.get('employment', [])
+    by_id = {r['employment_id']: r for r in records}
+    for chain in employment_chains(records):
+        rec = next(r for r in chain if not r.get('parent_employment_id'))
+        if not eligible(rec)[0]:
+            continue
+        # A withheld ancestor also withholds its descendants. Never reconnect a
+        # safe child around a private role to manufacture a publishable tenure.
+        safe_chain = []
+        for role in chain:
+            cursor = role
+            while eligible(cursor)[0]:
+                parent = cursor.get('parent_employment_id')
+                if not parent:
+                    safe_chain.append(role)
+                    break
+                cursor = by_id[parent]
+        employment_ids = {r['employment_id'] for r in safe_chain}
         highlights = []
         for atom in pack["evidence_atoms"]:
             if atom["id"] not in kept:
                 continue
-            if atom.get("employment_id") == rec["employment_id"] or \
-               any(e.get("parent_employment_id") == rec["employment_id"] and
-                   e["employment_id"] == atom.get("employment_id")
-                   for e in safe_employment):
+            if atom.get("employment_id") in employment_ids:
                 result = (atom.get("star") or {}).get("result")
                 highlights.append(result or atom["title"])
         # A collapsed role spans the whole chain. Taking the parent's own start
         # dated a nine-year tenure from its final promotion.
-        chain_start = min([rec["start"]] + [e["start"] for e in safe_employment
-                                            if e.get("parent_employment_id") == rec["employment_id"]])
+        chain_start = min(e['start'] for e in safe_chain)
         entry = {"name": rec["employer"], "position": rec["title"],
                  "startDate": iso(chain_start),
                  "endDate": end_date(rec, warnings),

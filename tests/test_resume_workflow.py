@@ -178,6 +178,27 @@ class ResumeTests(unittest.TestCase):
             self.artifact.write_text('# Applicant\n\n- Co-designed recovery. <!-- Evidence: ' + self.aid + ' -->\n')
             self.assertFalse(validate_artifact.check(self.artifact, None, pack, application={'contact_mode': 'anonymous'})[0])
 
+    def test_anonymous_validation_rejects_identifying_profile_destinations(self):
+        import validate_artifact
+        pack = copy.deepcopy(self.pack)
+        pack['private_profile']['linkedin'] = 'https://www.linkedin.com/in/fictional-person/'
+        pack['private_profile']['personal_website'] = 'https://fictional.example/about/'
+        for contact in ('https://www.linkedin.com/in/fictional-person/',
+                        '[Profile](https://www.linkedin.com/in/fictional-person/)',
+                        '[Profile](https://LINKEDIN.com/in/%66ictional-person?trk=resume)',
+                        '[Portfolio](https://fictional.example/about?from=resume)'):
+            with self.subTest(contact=contact):
+                self.artifact.write_text('# Applicant\n\n' + contact +
+                    '\n\n- Co-designed recovery. <!-- Evidence: ' + self.aid + ' -->\n')
+                errors, _ = validate_artifact.check(self.artifact, None, pack,
+                                                    application={'contact_mode': 'anonymous'})
+                field = 'personal_website' if 'Portfolio' in contact else 'linkedin'
+                self.assertTrue(any(field + ' appears in an anonymous' in e for e in errors), errors)
+        self.artifact.write_text('# Applicant\n\n[Project](https://fictional.example/project)\n\n'
+                                 '- Co-designed recovery. <!-- Evidence: ' + self.aid + ' -->\n')
+        self.assertFalse(validate_artifact.check(self.artifact, None, pack,
+                                                application={'contact_mode': 'anonymous'})[0])
+
     def test_representation_requires_excerpt_and_support_in_same_visible_block(self):
         excerpt = 'Investigated fraud alerts.'
         self.artifact.write_text(self.md + '\n- ' + excerpt + ' <!-- Evidence: ' + self.other + ' -->\n'

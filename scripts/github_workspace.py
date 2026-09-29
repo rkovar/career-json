@@ -13,6 +13,7 @@ import sys
 import tempfile
 
 from current_pack import ROOT, resolve
+from desktop_setup import GITHUB_WORKSPACE_FILES
 from pack_io import workspace_lock
 from workspace_backup import PRIVATE, PUBLIC, ROOT_FILES, backup_workspace, restore_workspace, reference_audit
 
@@ -207,7 +208,6 @@ def prepare(destination, repo, root=ROOT):
         cfg = {'format': 'career-github-workspace', 'version': 1, 'repository': repo, 'branch': 'main',
                'components': versions, 'prepared_runtime_sha256': runtime}
         (staged / CONFIG).parent.mkdir(parents=True, exist_ok=True)
-        (staged / CONFIG).write_text(json.dumps(cfg, indent=2) + '\n')
         (staged / '.gitignore').write_text(IGNORE)
         (staged / '.gitattributes').write_text('* -text\n')
         (staged / 'README.md').write_text(readme(repo))
@@ -228,6 +228,17 @@ check:
 overview:
 	@python3 scripts/career_core.py github overview
 ''')
+        cfg['workspace_files_sha256'] = {
+            name: hashlib.sha256((staged / name).read_bytes()).hexdigest()
+            for name in sorted(GITHUB_WORKSPACE_FILES)}
+        (staged / CONFIG).write_text(json.dumps(cfg, indent=2) + '\n')
+        installation = staged / 'components/workspace/installation.json'
+        if installation.exists():
+            record = json.loads(installation.read_text())
+            for name in GITHUB_WORKSPACE_FILES:
+                record['application_files'].pop(name, None)
+            record['workspace_files_sha256'] = cfg['workspace_files_sha256']
+            installation.write_text(json.dumps(record, indent=2) + '\n')
         invoke(staged, 'overview')
         # Initialize only after all source and generated-view checks pass.
         git('init', '-b', 'main', root=staged)

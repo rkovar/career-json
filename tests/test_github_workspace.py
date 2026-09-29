@@ -12,6 +12,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'scripts'))
 import github_workspace as github
+from desktop_setup import inspect
 from workspace_setup import create
 from editorial_fixture import pack_for, personas
 
@@ -86,11 +87,14 @@ class GitHubWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.real_git('remote', root=self.workspace).stdout, '')
 
     def test_create_save_clone_resume_and_conflict(self):
+        self.assertTrue(inspect(self.source)['ready'], inspect(self.source))
         root = self.prepared(); self.network()
+        self.assertTrue(inspect(root)['ready'], inspect(root))
         github.connect(root=root)
         self.assertEqual(github.sync(root=root)['state'], 'current')
         clone = self.base / 'other-machine'
         github.clone(self.repo, clone, root=self.source)
+        self.assertTrue(inspect(clone, prepare=True)['ready'], inspect(clone))
         self.assertEqual((clone / 'data/packs/first.json').read_bytes(), (root / 'data/packs/first.json').read_bytes())
         self.assertEqual((clone / 'data/capture/notes.jsonl').read_bytes(), (root / 'data/capture/notes.jsonl').read_bytes())
         self.assertEqual(self.real_git('config', 'core.hooksPath', root=clone).stdout.strip(), github.HOOKS)
@@ -112,6 +116,35 @@ class GitHubWorkspaceTests(unittest.TestCase):
         self.assertEqual(github.status(True, root)['state'], 'diverged')
         with self.assertRaisesRegex(ValueError, 'GitHub has changes'):
             github.sync(root=root)
+
+    def test_generated_files_do_not_exempt_application_integrity(self):
+        root = self.prepared()
+        installation = json.loads((root / 'components/workspace/installation.json').read_text())
+        self.assertNotIn('README.md', installation['application_files'])
+        self.assertIn('README.md', installation['workspace_files_sha256'])
+        release = json.loads((root / 'components/core/release.json').read_text())
+        original = json.loads((self.source / 'components/core/release.json').read_text())
+        self.assertEqual(release, original)
+        script = root / 'scripts/capture.py'
+        script.write_text(script.read_text() + '\n# Unexpected modification\n')
+        self.assertIn('scripts/capture.py', ' '.join(inspect(root)['problems']))
+        cfg = json.loads((root / github.CONFIG).read_text())
+        cfg['workspace_files_sha256']['scripts/capture.py'] = '0' * 64
+        (root / github.CONFIG).write_text(json.dumps(cfg))
+        self.assertFalse(inspect(root)['ready'])
+
+    def test_generated_files_still_require_their_workspace_hashes(self):
+        root = self.prepared()
+        (root / 'Makefile').write_text('unexpected commands')
+        self.assertIn('Makefile', ' '.join(inspect(root)['problems']))
+
+    @unittest.skipUnless((ROOT / 'components/resume/component.json').is_file(), 'Resume add-on is not installed')
+    def test_prepared_desktop_workspace_with_resume_remains_ready(self):
+        source = self.base / 'with-resume'
+        create(source, with_resume=True, tool=ROOT)
+        self.assertTrue(inspect(source)['ready'], inspect(source))
+        github.prepare(self.workspace, self.repo, source)
+        self.assertTrue(inspect(self.workspace)['ready'], inspect(self.workspace))
 
     def test_no_pack_can_sync_pending_work(self):
         (self.source / 'data/packs/first.json').unlink()

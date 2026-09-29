@@ -107,7 +107,11 @@ initialize Git on `main`; a populated remote should be cloned separately before
 deliberately reconciling uncommitted restored files.
 
 Installed component versions and the initial runtime hashes are recorded in
-`components/workspace/github.json`; existing installation metadata is retained.
+`components/workspace/github.json`. The generated `README.md`, `Makefile`, and
+`.gitignore` have their own workspace hashes; original release inventories remain
+intact. Desktop checks use those generated hashes for the three workspace files
+and the original release hashes for application code, so a prepared or cloned
+workspace can still pass setup without exempting scripts from integrity checks.
 Tool upgrades are a
 separate operation: back up first, test the replacement runtime in a copy, retain
 career files and review history, and preserve `README.md`, `Makefile`, Git rules

@@ -39,6 +39,73 @@ class CoreTests(unittest.TestCase):
                               cwd=self.root, env={**os.environ, 'CAREER_WORKSPACE':str(self.root)},
                               text=True, capture_output=True)
 
+    def test_capture_serializes_every_read_modify_write(self):
+        # Probe the OS lock from an independent descriptor at the actual read,
+        # rather than relying on scheduling to expose a lost update.
+        worker = '''
+import fcntl, sys, time
+sys.path.insert(0, sys.argv[1])
+import capture
+original = capture.load
+def guarded_load():
+    with (capture.ROOT / 'reviews/.pack-write.lock').open('a') as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            pass
+        else:
+            raise AssertionError('capture read without the workspace lock')
+    notes = original()
+    time.sleep(0.02)
+    return notes
+capture.load = guarded_load
+if sys.argv[2] == 'api':
+    capture.add(sys.argv[3], [], [], None)
+else:
+    sys.exit(capture.main(['capture.py', *sys.argv[2:]]))
+'''
+        def batch(commands):
+            processes = []
+            try:
+                for command in commands:
+                    processes.append(subprocess.Popen(
+                        [sys.executable, '-c', worker, str(ROOT / 'scripts'), *command],
+                        cwd=self.root, env={**os.environ, 'CAREER_WORKSPACE': str(self.root)},
+                        text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+                for process in processes:
+                    out, err = process.communicate(timeout=30)
+                    self.assertEqual(process.returncode, 0, out + err)
+            finally:
+                for process in processes:
+                    if process.poll() is None:
+                        process.kill()
+                    process.communicate()
+        batch([['api', 'API note']] + [[f'Concurrent note {n}'] for n in range(7)])
+        path = self.root / 'data/capture/notes.jsonl'
+        notes = [json.loads(line) for line in path.read_text().splitlines()]
+        self.assertEqual({n['note_id'] for n in notes}, {f'N{n:04d}' for n in range(1, 9)})
+        self.assertEqual({n['text'] for n in notes}, {'API note'} | {f'Concurrent note {n}' for n in range(7)})
+        batch([['--edit', 'N0001', 'Corrected'], ['--delete', 'N0002'],
+               ['--promote', 'N0003', '--atom', 'E_FICTIONAL'], ['Another note']])
+        notes = {n['note_id']: n for n in map(json.loads, path.read_text().splitlines())}
+        self.assertEqual(len(notes), 8)
+        self.assertEqual(notes['N0001']['text'], 'Corrected')
+        self.assertNotIn('N0002', notes)
+        self.assertEqual(notes['N0003']['promoted_to'], 'E_FICTIONAL')
+        self.assertEqual(notes['N0009']['text'], 'Another note')
+
+    def test_capture_failed_replace_preserves_log_and_cleans_temporary_file(self):
+        from unittest.mock import patch
+        import capture
+        path = self.root / 'data/capture/notes.jsonl'
+        path.parent.mkdir(parents=True)
+        path.write_text('original note\n')
+        with patch.object(capture.os, 'replace', side_effect=OSError('injected failure')):
+            with self.assertRaisesRegex(OSError, 'injected failure'):
+                capture._write_atomically(path, 'replacement\n')
+        self.assertEqual(path.read_text(), 'original note\n')
+        self.assertEqual(list(path.parent.iterdir()), [path])
+
     def test_diverse_packs_validate_and_export_losslessly(self):
         for n, person in enumerate(personas()):
             with self.subTest(person=person['id']):
